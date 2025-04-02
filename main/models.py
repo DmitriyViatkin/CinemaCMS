@@ -12,13 +12,13 @@ class Block_SEO(models.Model):
 
 
 class Picture(models.Model):
-    id = models.AutoField(primary_key=True, unique=True)
+    id = models.AutoField(primary_key=True)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
     image_type = models.CharField(max_length=20,
                                   choices=[('main_picture', 'Главное изображение'), ('gallery', 'Галерея')])
-    image = models.ImageField()
+    image = models.ImageField(upload_to='images/')
     alter_txt = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
@@ -28,25 +28,25 @@ class Picture(models.Model):
 class Baners(models.Model):
     id = models.AutoField(primary_key=True)
     picture = GenericRelation(Picture)
-    url=models.SlugField()
+    url = models.URLField()
     text = models.CharField(max_length=100)
     scroll_speed = models.TimeField()
     type = models.CharField(max_length=100)
-    turn = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=False)
 
 
-class Paiges_cinema(models.Model):
+class PaigesCinema(models.Model):
     id = models.AutoField(primary_key=True)
     seo_block = models.OneToOneField(Block_SEO, on_delete= models.CASCADE)
     picture = GenericRelation(Picture)
     description = models.TextField()
     date = models.DateField()
-    turn = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=False)
 
 
 class Contact(models.Model):
     id = models.AutoField(primary_key=True)
-    page_id = models.ForeignKey(Paiges_cinema, on_delete= models.CASCADE)
+    page_id = models.ForeignKey(PaigesCinema, on_delete=models.CASCADE)
     title = models.CharField(max_length=100)
     address = models.CharField(max_length=250)
     latitude = models.FloatField()

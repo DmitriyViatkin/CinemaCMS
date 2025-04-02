@@ -37,6 +37,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'users',
+    'main',
+    'core',
+    'admins',
+    'authentication'
+
 ]
 
 MIDDLEWARE = [
@@ -68,7 +74,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'CineWave.wsgi.application'
-
+AUTH_USER_MODEL = 'users.Profile'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases

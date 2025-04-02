@@ -39,10 +39,9 @@ class Movies(models.Model):
 class Halls(models.Model):
     id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=255)
-    seats_id = models.ForeignKey(Seats, on_delete=models.CASCADE)
     description = models.TextField()
     picture = GenericRelation(Picture)
-    date = models.DateField()
+    date = models.DateField(auto_now_add=True)
 
 
 class Sessions(models.Model):
@@ -53,7 +52,7 @@ class Sessions(models.Model):
     title = models.CharField(max_length=255)
     time_session = models.TimeField()
     duration = models.TimeField()
-    date = models.DateField
+    date = models.DateField()
 
 class Seats(models.Model):
 
@@ -61,23 +60,23 @@ class Seats(models.Model):
     session_id = models.ForeignKey(Sessions, on_delete=models.CASCADE)
     number_row = models.IntegerField()
     seat = models.IntegerField()
-    date = models.DateField()
+    date = models.DateField(auto_now_add=True)
 
 
 class Tickets(models.Model):
 
-    STATUS_CHOISES = {
-        "S":"Куплене",
-        "F": "Вільне",
-        "N": "Не доступно"
-    }
+    STATUS_CHOICES = [
+        ("S","Куплене"),
+        ("F", "Вільне"),
+        ("N", "Не доступно")
+    ]
 
     id = models.AutoField(primary_key=True)
-    session_id = models.ForeignKey(Sessions)
-    seats_id = models.ForeignKey(Seats)
-    profile_id = models.ForeignKey(Profile)
-    status = models.CharField(max_length=12, choices=STATUS_CHOISES)
-
+    session = models.ForeignKey(Sessions, on_delete=models.CASCADE, related_name="tickets")
+    seat = models.ForeignKey(Seats, on_delete=models.CASCADE, related_name="tickets")
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="tickets")
+    status = models.CharField(max_length=12, choices=STATUS_CHOICES, default="F")
+    date = models.DateField(auto_now_add=True)
 
 class Cinemas(models.Model):
 
@@ -89,4 +88,4 @@ class Cinemas(models.Model):
     halls_id = models.ForeignKey(Halls, on_delete= models.CASCADE)
     city = models.CharField(max_length=100)
     picture = GenericRelation(Picture)
-    date = models.DateField()
+    date = models.DateField(auto_now_add=True)
