@@ -1,11 +1,7 @@
 from django.db import models
 from users.models import Profile
+
 from main.models import Block_SEO, Picture
-from django.contrib.contenttypes.fields import GenericRelation
-
-
-
-
 
 
 class Movies(models.Model):
@@ -33,14 +29,14 @@ class Movies(models.Model):
     relise_date = models.DateField()
     age_limit = models.IntegerField()
     date = models.DateField()
-    picture = GenericRelation(Picture)
+    picture = models.ForeignKey(Picture, on_delete=models.SET_NULL, null=True, blank=True)
 
 
 class Halls(models.Model):
     id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=255)
     description = models.TextField()
-    picture = GenericRelation(Picture)
+    picture = models.ForeignKey(Picture, on_delete=models.SET_NULL, null=True, blank=True)
     date = models.DateField(auto_now_add=True)
 
 
@@ -72,9 +68,9 @@ class Tickets(models.Model):
     ]
 
     id = models.AutoField(primary_key=True)
-    session = models.ForeignKey(Sessions, on_delete=models.CASCADE, related_name="tickets")
-    seat = models.ForeignKey(Seats, on_delete=models.CASCADE, related_name="tickets")
-    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="tickets")
+    session = models.ForeignKey(Sessions, on_delete=models.CASCADE, related_name="tickets", null= True)
+    seat = models.ForeignKey(Seats, on_delete=models.CASCADE, related_name="tickets",null= True)
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="tickets", null= True)
     status = models.CharField(max_length=12, choices=STATUS_CHOICES, default="F")
     date = models.DateField(auto_now_add=True)
 
@@ -87,5 +83,5 @@ class Cinemas(models.Model):
     conditions = models.TextField()
     halls_id = models.ForeignKey(Halls, on_delete= models.CASCADE)
     city = models.CharField(max_length=100)
-    picture = GenericRelation(Picture)
+    picture = models.ForeignKey(Picture, on_delete=models.SET_NULL, null=True, blank=True)
     date = models.DateField(auto_now_add=True)

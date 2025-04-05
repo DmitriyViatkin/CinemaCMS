@@ -1,3 +1,6 @@
 from django.contrib import admin
+from .models import Profile, Email_campaing, Tamplate_email
 
-# Register your models here.
+admin.site.register(Profile)
+admin.site.register(Email_campaing)
+admin.site.register(Tamplate_email)

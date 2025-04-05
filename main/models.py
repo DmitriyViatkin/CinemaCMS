@@ -1,6 +1,5 @@
 from django.db import models
-from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
-from django.contrib.contenttypes.models import ContentType
+
 
 class Block_SEO(models.Model):
     id = models.AutoField(primary_key=True)
@@ -13,9 +12,6 @@ class Block_SEO(models.Model):
 
 class Picture(models.Model):
     id = models.AutoField(primary_key=True)
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey('content_type', 'object_id')
     image_type = models.CharField(max_length=20,
                                   choices=[('main_picture', 'Главное изображение'), ('gallery', 'Галерея')])
     image = models.ImageField(upload_to='images/')
@@ -27,7 +23,7 @@ class Picture(models.Model):
 
 class Baners(models.Model):
     id = models.AutoField(primary_key=True)
-    picture = GenericRelation(Picture)
+    picture = models.ForeignKey(Picture, on_delete=models.SET_NULL, null=True, blank=True)
     url = models.URLField()
     text = models.CharField(max_length=100)
     scroll_speed = models.TimeField()
@@ -38,7 +34,7 @@ class Baners(models.Model):
 class PaigesCinema(models.Model):
     id = models.AutoField(primary_key=True)
     seo_block = models.OneToOneField(Block_SEO, on_delete= models.CASCADE)
-    picture = GenericRelation(Picture)
+    picture = models.ForeignKey(Picture, on_delete=models.SET_NULL, null=True, blank=True)
     description = models.TextField()
     date = models.DateField()
     is_active = models.BooleanField(default=False)
@@ -57,7 +53,7 @@ class Contact(models.Model):
 class Promotion(models.Model):
     id = models.AutoField(primary_key=True)
     seo_block = models.OneToOneField(Block_SEO, on_delete=models.CASCADE)
-    picture = GenericRelation(Picture)
+    picture = models.ForeignKey(Picture, on_delete=models.SET_NULL, null=True, blank=True)
     description = models.TextField()
     url_video= models.URLField()
     date_publication = models.DateField()

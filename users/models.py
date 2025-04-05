@@ -18,7 +18,7 @@ class Profile(AbstractUser):
     languages = models.CharField(max_length=3, choices=LANGUAGES_CHOICES)
     phone_number = models.CharField(max_length=15)
     gender = models.CharField(max_length=6, choices=GENDER_CHOICES)
-    date_of_birth = models.DateField()
+    date_of_birth = models.DateField(null=True, blank=True)
 
 class Email_campaing(models.Model):
     id = models.AutoField(primary_key=True)
