@@ -95,15 +95,14 @@ class Tickets(models.Model):
 class Cinemas(models.Model):
 
     id = models.AutoField(primary_key=True)
-    seo_block = models.OneToOneField(Block_SEO, on_delete= models.CASCADE)
-    seo_url = models.SlugField(unique=True, blank=True, verbose_name="SEO URL")
-    title = models.CharField(max_length = 255)
-    description = models.TextField()
-    conditions = models.TextField()
-    halls_id = models.ForeignKey(Halls, on_delete= models.CASCADE)
-    city = models.CharField(max_length=100)
-    picture = models.ForeignKey(Picture, on_delete=models.SET_NULL, null=True, blank=True)
-    date = models.DateField(auto_now_add=True)
+    seo_block = models.OneToOneField(Block_SEO, on_delete=models.CASCADE, verbose_name="SEO блок")
+    title = models.CharField(max_length = 255, verbose_name="Назва")
+    description = models.TextField(verbose_name="Опис")
+    conditions = models.TextField(verbose_name="Умови")
+    halls_id = models.ForeignKey(Halls, on_delete= models.CASCADE, verbose_name="Зал")
+    city = models.CharField(max_length=100, verbose_name="Місто")
+    picture = models.ForeignKey(Picture, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Картинки")
+    date = models.DateField(auto_now_add=True, verbose_name="Дата")
 
     def __str__(self):
         return self.title
