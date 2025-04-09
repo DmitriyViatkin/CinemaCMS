@@ -1,0 +1,23 @@
+{% extends "index.html" %}
+{% block title %}Вхід{% endblock %}
+{% block content %}
+<h1>Вхід</h1>
+{% if form.errors %}
+    <p>Ваш пароль встановлено.
+Ви можете
+    </p>
+{% else %}
+    <p>Будь ласка, використовуйте наступну форму для входу:</p>
+{% endif %}
+<div class="login-form">
+    <form action="{% url 'login' %}" method="post">
+        {{ form.as_p }}
+        {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}" />
+    <p><input type="submit" value="Log-in"></p>
+    </form>
+    <p>
+        <a href="{% url 'password_reset' %}"> Нагадати пароль </a>
+    </p>
+</div>
+{% endblock %}

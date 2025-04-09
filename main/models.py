@@ -8,6 +8,12 @@ class Block_SEO(models.Model):
     seo_text = models.TextField()
     seo_keywords = models.CharField(max_length=250)
     seo_description = models.TextField()
+    def __str__(self):
+        return self.title_seo
+
+    class Meta:
+        verbose_name = 'Блок СЕО'
+        verbose_name_plural = 'Бблоки СЕО'
 
 
 class Picture(models.Model):
@@ -18,7 +24,10 @@ class Picture(models.Model):
     alter_txt = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
-        return f"Изображение для {self.content_object} ({self.image_type})"
+        return f"{self.get_image_type_display()} ({self.image.name})"
+    class Meta:
+        verbose_name = 'Картинка'
+        verbose_name_plural = 'Картинки'
 
 
 class Baners(models.Model):
@@ -30,6 +39,13 @@ class Baners(models.Model):
     type = models.CharField(max_length=100)
     is_active = models.BooleanField(default=False)
 
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = 'Банер'
+        verbose_name_plural = 'Банери'
+
 
 class PaigesCinema(models.Model):
     id = models.AutoField(primary_key=True)
@@ -38,6 +54,13 @@ class PaigesCinema(models.Model):
     description = models.TextField()
     date = models.DateField()
     is_active = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = 'Сторінка'
+        verbose_name_plural = 'Сторінки'
 
 
 class Contact(models.Model):
@@ -48,6 +71,12 @@ class Contact(models.Model):
     latitude = models.FloatField()
     longitude= models.FloatField()
     phone_number = models.CharField(max_length=15)
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = 'Контакт'
+        verbose_name_plural = 'Контакти'
 
 
 class Promotion(models.Model):
@@ -57,3 +86,9 @@ class Promotion(models.Model):
     description = models.TextField()
     url_video= models.URLField()
     date_publication = models.DateField()
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = 'Акція'
+        verbose_name_plural = 'Акції'

@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'authentication',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -41,7 +42,7 @@ INSTALLED_APPS = [
     'main',
     'core',
     'admins',
-    'authentication'
+
 
 ]
 
@@ -60,7 +61,7 @@ ROOT_URLCONF = 'CineWave.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -75,6 +76,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'CineWave.wsgi.application'
 AUTH_USER_MODEL = 'users.Profile'
+LOGIN_REDIRECT_URL = 'dashboard'
+LOGIN_URL = 'login'
+LOGOUT_URL = 'logout'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -125,7 +129,14 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')  # Глобальная папка для статических файлов (если нужна)
 ]
-
+#EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # Замените на адрес вашего SMTP-сервера
+EMAIL_PORT = 587  # Обычно 587 для TLS или 465 для SSL
+EMAIL_USE_TLS = True  # Или EMAIL_USE_SSL = True
+EMAIL_HOST_USER = 'viatkindima@gmail.com'  # Ваш логин на SMTP-сервере
+EMAIL_HOST_PASSWORD = 'rwzv dafo luzq nnlu'  # Ваш пароль на SMTP-сервере
+DEFAULT_FROM_EMAIL = 'viatkindima@gmail.com'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type

@@ -39,6 +39,13 @@ class Halls(models.Model):
     picture = models.ForeignKey(Picture, on_delete=models.SET_NULL, null=True, blank=True)
     date = models.DateField(auto_now_add=True)
 
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = "Зал"
+        verbose_name_plural = "Залы"
+
 
 class Sessions(models.Model):
 
@@ -50,6 +57,10 @@ class Sessions(models.Model):
     duration = models.TimeField()
     date = models.DateField()
 
+    class Meta:
+        verbose_name = "Сеанс"
+        verbose_name_plural = "Сеанси"
+
 class Seats(models.Model):
 
     id = models.AutoField(primary_key=True)
@@ -57,6 +68,9 @@ class Seats(models.Model):
     number_row = models.IntegerField()
     seat = models.IntegerField()
     date = models.DateField(auto_now_add=True)
+    class Meta:
+        verbose_name = "Місце"
+        verbose_name_plural = "Місця"
 
 
 class Tickets(models.Model):
@@ -74,10 +88,15 @@ class Tickets(models.Model):
     status = models.CharField(max_length=12, choices=STATUS_CHOICES, default="F")
     date = models.DateField(auto_now_add=True)
 
+    class Meta:
+        verbose_name = "Квиток"
+        verbose_name_plural = "Квитки"
+
 class Cinemas(models.Model):
 
     id = models.AutoField(primary_key=True)
     seo_block = models.OneToOneField(Block_SEO, on_delete= models.CASCADE)
+    seo_url = models.SlugField(unique=True, blank=True, verbose_name="SEO URL")
     title = models.CharField(max_length = 255)
     description = models.TextField()
     conditions = models.TextField()
@@ -85,3 +104,10 @@ class Cinemas(models.Model):
     city = models.CharField(max_length=100)
     picture = models.ForeignKey(Picture, on_delete=models.SET_NULL, null=True, blank=True)
     date = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = 'Кинотеатр'
+        verbose_name_plural = 'Кинотеатри'

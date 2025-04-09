@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ cinema.title }}{% endblock %}
+
+{% block content %}
+    <h1>{{ cinema.title }}</h1>
+
+    {% if cinema.picture %}
+        <img src="{{ cinema.picture.image.url }}" alt="{{ cinema.picture.alter_txt }}">
+    {% endif %}
+
+    <p>Город: {{ cinema.city }}</p>
+    <p>Описание: {{ cinema.description|linebreaksbr }}</p>
+    <p>Условия: {{ cinema.conditions|linebreaksbr }}</p>
+    <p>Дата создания: {{ cinema.date }}</p>
+
+    <h2>Залы кинотеатра:</h2>
+    <ul>
+        <li>{{ cinema.halls.title }} - {{ cinema.halls.description|truncatechars:100 }}</li>
+        </ul>
+
+    <p><a href="{% url 'cinema_list' %}">Вернуться к списку кинотеатров</a></p>
+{% endblock %}
