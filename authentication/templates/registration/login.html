@@ -1,4 +1,4 @@
-{% extends "index.html" %}
+{% extends "main/index.html" %}
 {% block title %}Вхід{% endblock %}
 {% block content %}
 <h1>Вхід</h1>
@@ -18,6 +18,9 @@
     </form>
     <p>
         <a href="{% url 'password_reset' %}"> Нагадати пароль </a>
+    </p>
+    <p>
+        <a href="{% url 'register' %}"> Регистрация</a>
     </p>
 </div>
 {% endblock %}
