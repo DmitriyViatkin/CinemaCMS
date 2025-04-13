@@ -3,25 +3,25 @@ from django.db import models
 
 class Block_SEO(models.Model):
     id = models.AutoField(primary_key=True)
-    title_seo = models.CharField(max_length=250)
-    seo_url = models.SlugField()
-    seo_text = models.TextField()
-    seo_keywords = models.CharField(max_length=250)
-    seo_description = models.TextField()
+    title_seo = models.CharField(max_length=250, verbose_name= 'Заголовок')
+    seo_url = models.SlugField(verbose_name= 'URL адреса ')
+    seo_text = models.TextField(verbose_name= 'текст')
+    seo_keywords = models.CharField(max_length=250, verbose_name= 'Ключові слова')
+    seo_description = models.TextField(verbose_name= 'Опис')
     def __str__(self):
         return self.title_seo
 
     class Meta:
         verbose_name = 'Блок СЕО'
-        verbose_name_plural = 'Бблоки СЕО'
+        verbose_name_plural = 'Блоки СЕО'
 
 
 class Picture(models.Model):
     id = models.AutoField(primary_key=True)
     image_type = models.CharField(max_length=20,
-                                  choices=[('main_picture', 'Главное изображение'), ('gallery', 'Галерея')])
-    image = models.ImageField(upload_to='images/')
-    alter_txt = models.CharField(max_length=255, blank=True, null=True)
+                                  choices=[('main_picture', 'Главное изображение'), ('gallery', 'Галерея')],verbose_name= 'Тип зображення')
+    image = models.ImageField(upload_to='images/', verbose_name= 'Зображення')
+    alter_txt = models.CharField(max_length=255, blank=True, null=True, verbose_name= 'Альтернативний текст')
 
     def __str__(self):
         return f"{self.get_image_type_display()} ({self.image.name})"
@@ -32,12 +32,12 @@ class Picture(models.Model):
 
 class Baners(models.Model):
     id = models.AutoField(primary_key=True)
-    picture = models.ForeignKey(Picture, on_delete=models.SET_NULL, null=True, blank=True)
-    url = models.URLField()
-    text = models.CharField(max_length=100)
-    scroll_speed = models.TimeField()
-    type = models.CharField(max_length=100)
-    is_active = models.BooleanField(default=False)
+    picture = models.ForeignKey(Picture, on_delete=models.SET_NULL, null=True, blank=True, verbose_name= 'Картинка')
+    url = models.URLField(verbose_name= 'URL адреса ')
+    text = models.CharField(max_length=100,verbose_name= 'текст')
+    scroll_speed = models.TimeField(verbose_name= 'Швидкість прокрутки')
+    type = models.CharField(max_length=100,verbose_name= 'ТИп')
+    is_active = models.BooleanField(default=False,verbose_name= 'Показувати ')
 
     def __str__(self):
         return self.title
@@ -49,11 +49,11 @@ class Baners(models.Model):
 
 class PaigesCinema(models.Model):
     id = models.AutoField(primary_key=True)
-    seo_block = models.OneToOneField(Block_SEO, on_delete= models.CASCADE)
-    picture = models.ForeignKey(Picture, on_delete=models.SET_NULL, null=True, blank=True)
-    description = models.TextField()
+    seo_block = models.OneToOneField(Block_SEO, on_delete= models.CASCADE, verbose_name= 'Блок СЕО ')
+    picture = models.ForeignKey(Picture, on_delete=models.SET_NULL, null=True, blank=True, verbose_name= 'Зображення ')
+    description = models.TextField(verbose_name= 'Опис')
     date = models.DateField()
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=False, verbose_name= 'Показ')
 
     def __str__(self):
         return self.title
@@ -65,12 +65,12 @@ class PaigesCinema(models.Model):
 
 class Contact(models.Model):
     id = models.AutoField(primary_key=True)
-    page_id = models.ForeignKey(PaigesCinema, on_delete=models.CASCADE)
-    title = models.CharField(max_length=100)
-    address = models.CharField(max_length=250)
-    latitude = models.FloatField()
-    longitude= models.FloatField()
-    phone_number = models.CharField(max_length=15)
+    page_id = models.ForeignKey(PaigesCinema, on_delete=models.CASCADE, verbose_name= 'Сторінка ')
+    title = models.CharField(max_length=100, verbose_name= 'Опис ')
+    address = models.CharField(max_length=250, verbose_name= 'Адреса ')
+    latitude = models.FloatField(verbose_name= 'Довгота ')
+    longitude= models.FloatField(verbose_name= 'Широта ')
+    phone_number = models.CharField(max_length=15, verbose_name= 'Номер телефону')
     def __str__(self):
         return self.title
 
@@ -81,11 +81,11 @@ class Contact(models.Model):
 
 class Promotion(models.Model):
     id = models.AutoField(primary_key=True)
-    seo_block = models.OneToOneField(Block_SEO, on_delete=models.CASCADE)
-    picture = models.ForeignKey(Picture, on_delete=models.SET_NULL, null=True, blank=True)
-    description = models.TextField()
-    url_video= models.URLField()
-    date_publication = models.DateField()
+    seo_block = models.OneToOneField(Block_SEO, on_delete=models.CASCADE, verbose_name= 'Блок СЕО ')
+    picture = models.ForeignKey(Picture, on_delete=models.SET_NULL, null=True, blank=True,verbose_name= 'Зображення ')
+    description = models.TextField(verbose_name= 'Опис')
+    url_video= models.URLField(verbose_name= 'URL адреса ')
+    date_publication = models.DateField(verbose_name= 'Дата ')
     def __str__(self):
         return self.title
 

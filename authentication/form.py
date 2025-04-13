@@ -1,5 +1,5 @@
 from django import forms
-from users.models import  Profile
+from users.models import  User
 
 class LoginForm (forms.Form):
     username = forms.CharField()
@@ -9,8 +9,8 @@ class UserRegistrationForm(forms.ModelForm):
     password = forms.CharField(label="Password",
                                widget= forms.PasswordInput)
     class Meta:
-        model = Profile
-        fields = ['username','nickname','email']
+        model = User
+        fields = ['username','email']
 
         def clean_password2(self):
             cd = self.cleaned_data

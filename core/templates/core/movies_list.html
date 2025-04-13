@@ -1,0 +1,41 @@
+{% extends 'main/index.html' %}
+
+{% block title %}Список кинотеатров{% endblock %}
+
+{% block content %}
+    <h1>Список фильмов</h1>
+
+    {% if movies %}
+        <ul>
+            {% for movie in movies %}
+               {% if movie.seo_block and movie.seo_block.seo_url %}
+    <a href="{% url 'movie_detail' movie_slug=movie.seo_block.seo_url %}">{{ movie.title }}</a>
+{% else %}
+    <li>{{ movie.title }} (нет SEO URL)</li>
+{% endif %}
+            {% endfor %}
+        </ul>
+
+        {% if movies.has_other_pages %}
+            <div class="pagination">
+                <span class="step-links">
+                    {% if movies.has_previous %}
+                        <a href="?page=1">&laquo; first</a>
+                        <a href="?page={{ movies.previous_page_number }}">previous</a>
+                    {% endif %}
+
+                    <span class="current">
+                        Page {{ movies.number }} of {{ movies.paginator.num_pages }}.
+                    </span>
+
+                    {% if movies.has_next %}
+                        <a href="?page={{ movies.next_page_number }}">next</a>
+                        <a href="?page={{ movies.paginator.num_pages }}">last &raquo;</a>
+                    {% endif %}
+                </span>
+            </div>
+        {% endif %}
+    {% else %}
+        <p>Нет фильмов</p>
+    {% endif %}
+{% endblock %}

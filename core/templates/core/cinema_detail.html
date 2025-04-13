@@ -1,4 +1,4 @@
-{% extends 'index.html' %}
+{% extends 'main/index.html' %}
 
 {% block title %}{{ cinema.title }}{% endblock %}
 
@@ -9,15 +9,21 @@
         <img src="{{ cinema.picture.image.url }}" alt="{{ cinema.picture.alter_txt }}">
     {% endif %}
 
-    <p>Город: {{ cinema.city }}</p>
-    <p>Описание: {{ cinema.description|linebreaksbr }}</p>
-    <p>Условия: {{ cinema.conditions|linebreaksbr }}</p>
-    <p>Дата создания: {{ cinema.date }}</p>
+    <p>Місто: {{ cinema.city }}</p>
+    <p>Опис: {{ cinema.description|linebreaksbr }}</p>
+    <p>Умови: {{ cinema.conditions|linebreaksbr }}</p>
+    <p>Дата створення: {{ cinema.date }}</p>
 
-    <h2>Залы кинотеатра:</h2>
-    <ul>
-        <li>{{ cinema.halls.title }} - {{ cinema.halls.description|truncatechars:100 }}</li>
+    <h2>Зали кінотеатру:</h2>
+    {% if halls %}
+        <ul>
+            {% for hall in halls %}
+                <li>{{ hall.title }} - {{ hall.description|truncatechars:100 }}</li>
+            {% endfor %}
         </ul>
+    {% else %}
+        <p>У цьому кінотеатрі немає залів.</p>
+    {% endif %}
 
-    <p><a href="{% url 'cinema_list' %}">Вернуться к списку кинотеатров</a></p>
+    <p><a href="{% url 'cinema_list' %}">Повернутися до списку кінотеатрів</a></p>
 {% endblock %}

@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 
-class Profile(AbstractUser):
+class User(AbstractUser):
     LANGUAGES_CHOICES = [
         ("ru", "RU"),
         ("ua", "UA"),
@@ -12,7 +12,6 @@ class Profile(AbstractUser):
         ("man", "Man"),
         ("women","Women")
     ]
-    nickname = models.CharField(max_length=100)
     city = models.CharField(max_length=100)
     address = models.CharField(max_length=250)
     languages = models.CharField(max_length=3, choices=LANGUAGES_CHOICES)
@@ -20,9 +19,12 @@ class Profile(AbstractUser):
     gender = models.CharField(max_length=6, choices=GENDER_CHOICES)
     date_of_birth = models.DateField(null=True, blank=True)
 
+    def __str__(self):
+        return self.username
+
 class Email_campaing(models.Model):
     id = models.AutoField(primary_key=True)
-    users = models.ManyToManyField(Profile)
+    users = models.ManyToManyField(User)
     text = models.TextField()
     status= models.CharField(max_length=20, choices=[("send","Відправлено"),("not sent","Не відправлено")])
 
