@@ -5,8 +5,9 @@
   <p><strong>Имя пользователя:</strong> {{ user.username }}</p>
   <p><strong>Электронная почта:</strong> {{ user.email }}</p>
   <p><strong>Город:</strong> {{ user.city }}</p>
-  <p><strong>Никнейм:</strong> {{ user.nickname }}</p>
   <p><strong>Язык:</strong> {{ user.get_languages_display }}</p>
   <p><strong>Пол:</strong> {{ user.get_gender_display }}</p>
   <p><strong>Дата рождения:</strong> {{ user.date_of_birth }}</p>
+  <a href="{%url 'edit_profile' %}">
+  <button type="button" class="btn btn-primary">Змінити дані </button></a>
 {% endblock %}

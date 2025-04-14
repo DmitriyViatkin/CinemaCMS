@@ -1,7 +1,7 @@
 from django.db import models
 from users.models import User
 
-from main.models import Block_SEO, Picture
+from main.models import Block_SEO, Gallery, Picture
 
 
 class Movies(models.Model):
@@ -31,13 +31,22 @@ class Movies(models.Model):
     relise_date = models.DateField(verbose_name= 'Дата проката')
     age_limit = models.IntegerField(verbose_name= 'Вікова категорія')
     date = models.DateField(verbose_name= 'Дата')
-    picture = models.ForeignKey(Picture, on_delete=models.SET_NULL, null=True, blank=True, verbose_name= 'Зображення')
+
+    gallery = models.ForeignKey(
+        Gallery,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='movies',
+        verbose_name='Галерея зображень'
+    )
+
 
     def __str__(self):
         return self.title
     class Meta:
-        verbose_name = 'Стрічка'
-        verbose_name_plural = 'Стрічки'
+        verbose_name = 'Кіно стрічка'
+        verbose_name_plural = 'Кіно стрічки'
 
 class Cinemas(models.Model):
 
@@ -47,7 +56,7 @@ class Cinemas(models.Model):
     description = models.TextField(verbose_name="Опис")
     conditions = models.TextField(verbose_name="Умови")
     city = models.CharField(max_length=100, verbose_name="Місто")
-    picture = models.ForeignKey(Picture, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Картинки")
+    gallery = models.ForeignKey(Gallery, on_delete=models.SET_NULL, null=True, blank=True, verbose_name= 'Картинка')
     date = models.DateField(auto_now_add=True, verbose_name="Дата")
 
     def __str__(self):
@@ -63,7 +72,7 @@ class Halls(models.Model):
     title = models.CharField(max_length=255, verbose_name= 'Назва')
     cinema = models.ForeignKey(Cinemas, on_delete=models.CASCADE, related_name='halls', verbose_name="Кинотеатр")
     description = models.TextField(verbose_name= 'Опис')
-    picture = models.ForeignKey(Picture, on_delete=models.SET_NULL, null=True, blank=True, verbose_name= 'Зображення')
+    gallery = models.ForeignKey(Gallery, on_delete=models.SET_NULL, null=True, blank=True, verbose_name= 'Картинка')
     date = models.DateField(auto_now_add=True, verbose_name= 'Дата')
 
     def __str__(self):
@@ -124,7 +133,7 @@ class Tickets(models.Model):
     halls = models.ForeignKey(Halls, on_delete=models.CASCADE, verbose_name= 'Зал')
     def __str__(self):
         session_title = self.session.title if self.session else "Немає сеансу"
-        profile_name = self.profile.username if self.profile else "Немає глядача"
+        profile_name = self.user.username if self.profile else "Немає глядача"
         return f"{session_title} ({profile_name})"
     class Meta:
         verbose_name = "Квиток"

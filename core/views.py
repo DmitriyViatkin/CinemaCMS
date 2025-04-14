@@ -1,6 +1,8 @@
 from django.contrib.admin.templatetags.admin_list import pagination
 from django.shortcuts import render, get_object_or_404
 from .models import Cinemas, Movies
+from main.models import Block_SEO
+from main.models import Gallery, Picture
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 def cinema_list(request):
@@ -36,8 +38,18 @@ def movie_list(request):
     context = {'movies':movies}
     return render(request, 'core/movies_list.html',context)
 
-def movie_detail(request, movie_slug):
-    movie = get_object_or_404(Movies, seo_block__seo_url=movie_slug)
 
-    context = {'movie': movie}
+
+def movie_detail(request, movie_slug):
+    movies = get_object_or_404(Movies, seo_block__seo_url=movie_slug)
+
+
+    main_picture = movies.gallery.picture.filter(image_type="main_picture").first() if movies.gallery else None
+    gallery_pictures = movies.gallery.picture.filter(image_type="gallery") if movies.gallery else []
+
+    context = {
+        'movies': movies,
+        'main_picture': main_picture,
+        'gallery_pictures': gallery_pictures,
+    }
     return render(request, 'core/movie_detail.html', context)
