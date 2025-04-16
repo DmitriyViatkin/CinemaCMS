@@ -35,7 +35,14 @@ def movie_list(request):
         movies = paginator.page(1)
     except EmptyPage:
         movies  = paginator.page(paginator.num_pages)
+    for movie in movies:
+        if movie.gallery:
+            movie.main_picture = movie.gallery.picture.filter(image_type="main_picture").first()
+        else:
+            movie.main_picture = None
+
     context = {'movies':movies}
+
     return render(request, 'core/movies_list.html',context)
 
 

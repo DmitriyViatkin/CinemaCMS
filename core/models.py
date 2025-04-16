@@ -32,15 +32,8 @@ class Movies(models.Model):
     age_limit = models.IntegerField(verbose_name= 'Вікова категорія')
     date = models.DateField(verbose_name= 'Дата')
 
-    gallery = models.ForeignKey(
-        Gallery,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='movies',
-        verbose_name='Галерея зображень'
-    )
-
+    gallery = models.ForeignKey( Gallery,on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='movies', verbose_name='Галерея зображень' )
 
     def __str__(self):
         return self.title

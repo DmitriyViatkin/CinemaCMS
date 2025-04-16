@@ -19,7 +19,7 @@ class Picture(models.Model):
     id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=250, verbose_name= 'Фильм')
     image_type = models.CharField(max_length=20,
-                                  choices=[('main_picture', 'Главное изображение'), ('gallery', 'Галерея')],
+                                  choices=[('main_picture', 'Главное изображение'), ('gallery', 'Галерея'), ('baner',"Банер")],
                                   verbose_name='Тип зображення')
     image = models.ImageField(upload_to='images/', verbose_name='Зображення')
     alter_txt = models.CharField(max_length=255, blank=True, null=True, verbose_name='Альтернативний текст')
@@ -35,9 +35,6 @@ class Gallery(models.Model):
     id = models.AutoField(primary_key=True)
     picture = models.ManyToManyField(Picture, related_name='galleries', verbose_name='Зображення')
 
-
-
-
     class Meta:
         verbose_name = 'Галерея'
         verbose_name_plural = 'Галереї'
@@ -50,20 +47,66 @@ class Baners(models.Model):
     url = models.URLField(verbose_name= 'URL адреса ')
     text = models.CharField(max_length=100,verbose_name= 'текст')
     scroll_speed = models.TimeField(verbose_name= 'Швидкість прокрутки')
-    type = models.CharField(max_length=100,verbose_name= 'ТИп')
+    type = models.CharField(max_length=100,choices=[('baner_top', 'Сквозной банер'), ('news', 'новости')],
+                                 verbose_name= 'ТИп')
     is_active = models.BooleanField(default=False,verbose_name= 'Показувати ')
 
     def __str__(self):
-        return self.title
+        return self.type
 
     class Meta:
         verbose_name = 'Банер'
         verbose_name_plural = 'Банери'
 
+class Cross_banner (models.Model):
+    id = models.AutoField(primary_key=True)
+    gallery = models.ForeignKey(Gallery, on_delete=models.SET_NULL, null=True, blank=True, verbose_name= 'Картинка')
+    type = models.CharField(choices=[('photo_background','фото на фоне'),('photo','просто фото')])
+
+    def __str__(self):
+        return self.type
+
+    class Meta:
+        verbose_name = 'Сквозной Банер'
+        verbose_name_plural = 'Сквозние Банери'
+
+class PaigesNews(models.Model):
+    id = models.AutoField(primary_key=True)
+    title = models.CharField(max_length=250, verbose_name='Назва')
+    seo_block = models.OneToOneField(Block_SEO, on_delete= models.CASCADE, verbose_name= 'Блок СЕО ')
+    gallery = models.ForeignKey(Gallery, on_delete=models.SET_NULL, null=True, blank=True, verbose_name= 'Картинка')
+    description = models.TextField(verbose_name= 'Опис')
+    url = models.URLField(verbose_name='URL адреса ')
+    date = models.DateField()
+    is_active = models.BooleanField(default=False, verbose_name= 'Показ')
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = 'Сторінка Новини'
+        verbose_name_plural = 'Сторінки Новин'
+
+class MainPaiges (models.Model):
+    name_cinema = models.CharField(max_length=250, verbose_name= "Кинотеатр")
+    id = models.AutoField(primary_key=True)
+    seo_block = models.OneToOneField(Block_SEO, on_delete= models.CASCADE, verbose_name= 'Блок СЕО ')
+    gallery = models.ForeignKey(Gallery, on_delete=models.SET_NULL, null=True, blank=True, verbose_name= 'Картинка')
+    SEO_text  = models.TextField(verbose_name= 'Сео текст ')
+    phone = models.CharField(max_length=16, verbose_name= "Телефон")
+    is_active = models.BooleanField(default=False, verbose_name= 'Показ')
+
+    def __str__(self):
+        return self.name_cinema
+
+    class Meta:
+        verbose_name = 'Головна сторінка'
+        verbose_name_plural = 'Головні сторінки'
 
 class PaigesCinema(models.Model):
     id = models.AutoField(primary_key=True)
     seo_block = models.OneToOneField(Block_SEO, on_delete= models.CASCADE, verbose_name= 'Блок СЕО ')
+    title = models.CharField(max_length=250, verbose_name='Назва')
     gallery = models.ForeignKey(Gallery, on_delete=models.SET_NULL, null=True, blank=True, verbose_name= 'Картинка')
     description = models.TextField(verbose_name= 'Опис')
     date = models.DateField()
@@ -95,6 +138,7 @@ class Contact(models.Model):
 
 class Promotion(models.Model):
     id = models.AutoField(primary_key=True)
+    title = models.CharField(max_length=100, verbose_name='Опис ')
     seo_block = models.OneToOneField(Block_SEO, on_delete=models.CASCADE, verbose_name= 'Блок СЕО ')
     gallery = models.ForeignKey(Gallery, on_delete=models.SET_NULL, null=True, blank=True, verbose_name= 'Картинка')
     description = models.TextField(verbose_name= 'Опис')
