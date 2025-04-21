@@ -1,0 +1,35 @@
+{% extends 'core/soon.html' %}
+
+
+{% block content %}
+  <h1>Список фільмів</h1>
+
+  <div class="movie-list">
+    {% for movie in movies %}
+      <div class="movie-card">
+        <h2>{{ movie.title }}</h2>
+
+        {% if movie.main_picture %}
+          <img src="{{ movie.main_picture.image.url }}" alt="{{ movie.main_picture.alter_txt }}" width="300">
+        {% else %}
+          <p><em>Немає зображення</em></p>
+        {% endif %}
+
+        <p><strong>Дата показу:</strong> {{ movie.show_date|date:"d.m.Y" }}</p>
+      </div>
+      <hr>
+    {% endfor %}
+  </div>
+
+  <div class="pagination">
+    {% if movies.has_previous %}
+      <a href="?page={{ movies.previous_page_number }}">Попередня</a>
+    {% endif %}
+
+    <span>Сторінка {{ movies.number }} з {{ movies.paginator.num_pages }}</span>
+
+    {% if movies.has_next %}
+      <a href="?page={{ movies.next_page_number }}">Наступна</a>
+    {% endif %}
+  </div>
+{% endblock %}

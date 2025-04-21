@@ -1,10 +1,10 @@
 from django.contrib import admin
 
-from .models import  Cinemas, Tickets, Seats, Sessions, Movies, Halls
+from .models import  Cinemas, Tickets, Seats, Sessions, Halls
 # Register your models here.
 
 
-admin.site.register(Movies)
+
 admin.site.register(Cinemas)
 admin.site.register(Halls)
 admin.site.register(Seats)

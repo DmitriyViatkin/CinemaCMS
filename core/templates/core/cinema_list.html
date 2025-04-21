@@ -3,38 +3,52 @@
 {% block title %}Список кинотеатров{% endblock %}
 
 {% block content %}
-    <h1>Список кинотеатров</h1>
+<h1>Список кинотеатров</h1>
 
-    {% if cinemas %}
-        <ul>
-            {% for cinema in cinemas %}
-    <li>
-        <a href="{% url 'cinema_detail' cinema_slug=cinema.seo_block.seo_url %}">{{ cinema.title }}</a>
-        ({{ cinema.city }}) - SEO URL: {{ cinema.seo_url }}
-    </li>
-{% endfor %}
-        </ul>
+{% if cinemas %}
+    <ul>
+        {% for cinema in cinemas %}
+            <li>
+                <a href="{% url 'cinema_detail' cinema_slug=cinema.seo_block.seo_url %}">
+                    {{ cinema.title }}
+                </a>
+                ({{ cinema.city }}) - SEO URL: {{ cinema.seo_block.seo_url }}
 
-        {% if cinemas.has_other_pages %}
-            <div class="pagination">
-                <span class="step-links">
-                    {% if cinemas.has_previous %}
-                        <a href="?page=1">&laquo; first</a>
-                        <a href="?page={{ cinemas.previous_page_number }}">previous</a>
-                    {% endif %}
+                {% if cinema.gallery %}
+                    {% with cinema.gallery.pictures.all as pictures %}
+                        {% for picture in pictures %}
+                            {% if picture.image_type == 'main_picture' and forloop.first %}
+                                <div>
+                                    <img src="{{ picture.image.url }}" alt="{{ picture.alter_txt }}" style="max-width: 150px;">
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endwith %}
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
 
-                    <span class="current">
-                        Page {{ cinemas.number }} of {{ cinemas.paginator.num_pages }}.
-                    </span>
+    {% if cinemas.has_other_pages %}
+        <div class="pagination">
+            <span class="step-links">
+                {% if cinemas.has_previous %}
+                    <a href="?page=1">&laquo; first</a>
+                    <a href="?page={{ cinemas.previous_page_number }}">previous</a>
+                {% endif %}
 
-                    {% if cinemas.has_next %}
-                        <a href="?page={{ cinemas.next_page_number }}">next</a>
-                        <a href="?page={{ cinemas.paginator.num_pages }}">last &raquo;</a>
-                    {% endif %}
+                <span class="current">
+                    Page {{ cinemas.number }} of {{ cinemas.paginator.num_pages }}.
                 </span>
-            </div>
-        {% endif %}
-    {% else %}
-        <p>Нет доступных кинотеатров.</p>
+
+                {% if cinemas.has_next %}
+                    <a href="?page={{ cinemas.next_page_number }}">next</a>
+                    <a href="?page={{ cinemas.paginator.num_pages }}">last &raquo;</a>
+                {% endif %}
+            </span>
+        </div>
     {% endif %}
+{% else %}
+    <p>Нет доступных кинотеатров.</p>
+{% endif %}
 {% endblock %}

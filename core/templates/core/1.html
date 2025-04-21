@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    {% for movie in movies %}
+    {{movie.title}}
+    {{movie.get_genre_display}}
+    {{movie.gallery.pictures.filter(image_type="main_picture").first()}}
+    {%endfor%}
+
+</head>
+<body>
+
+</body>
+</html>

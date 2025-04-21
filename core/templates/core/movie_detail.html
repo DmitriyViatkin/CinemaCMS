@@ -54,22 +54,22 @@
 
         {# Галерея зображень #}
         <h2 class="mt-5">Галерея</h2>
-        <div class="row">
-            {% for picture in gallery_pictures %}
-                <div class="col-md-3 mb-4">
-                    <div class="card shadow-sm">
-                        <img src="{{ picture.image.url }}" alt="{{ picture.alter_txt|default:'' }}" class="card-img-top" style="height: 200px; object-fit: cover;">
-                        <div class="card-body">
-                            <p class="card-text"><small class="text-muted">{{ picture.alter_txt|default:'' }}</small></p>
-                        </div>
-                    </div>
+       {% for picture in movies.gallery.pictures.all %}
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <img src="{{ picture.image.url }}" class="card-img-top" alt="{{ picture.alter_txt|default:'Зображення галереї' }}">
+                <div class="card-body">
+                    <p class="card-text"><small class="text-muted">{{ picture.alter_txt|default:'' }}</small></p>
                 </div>
-            {% empty %}
-                <div class="col-12">
-                    <p>У галереї цього фільму немає зображень.</p>
-                </div>
-            {% endfor %}
+            </div>
         </div>
+    {% empty %}
+        <div class="col-12">
+            <p>У галереї цього фільму немає зображень.</p>
+        </div>
+    {% endfor %}
+        </div>
+        {
     </div>
 
 {% endblock %}

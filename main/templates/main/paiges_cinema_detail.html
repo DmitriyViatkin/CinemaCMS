@@ -1,0 +1,30 @@
+{% extends 'main/index.html' %}
+
+{% block title %}{{ page.title }}{% endblock %}
+
+{% block content %}
+  <div class="paiges-cinema">
+    <h1>{{ page.title }}</h1>
+
+    {% if main_picture %}
+      <div class="main-picture">
+        <img src="{{ main_picture.image.url }}" alt="{{ main_picture.alter_txt }}">
+      </div>
+    {% endif %}
+
+    <div class="description">
+      {{ page.description|linebreaks }}
+    </div>
+
+    {% if gallery_pictures %}
+      <h2>Галерея</h2>
+      <div class="gallery">
+        {% for picture in gallery_pictures %}
+          <div class="gallery-item" style="display:inline-block; margin:10px;">
+            <img src="{{ picture.image.url }}" alt="{{ picture.alter_txt }}" style="max-width:200px;">
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}
