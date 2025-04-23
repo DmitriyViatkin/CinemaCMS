@@ -1,0 +1,14 @@
+{#movie_card.html#}
+<div class="card h-100">
+  {% if movie.main_picture %}
+    <img src="{{ movie.main_picture.image.url }}" class="card-img-top" alt="{{ movie.title }}" style="height: 250px; object-fit: cover;">
+  {% else %}
+    <div class="d-flex align-items-center justify-content-center" style="height: 250px; background-color: #e9ecef;">
+      <span class="text-muted">Зображення відсутнє</span>
+    </div>
+  {% endif %}
+  <div class="card-body">
+    <h5 class="card-title">{{ movie.title }}</h5>
+    <a href="{% url 'movie_detail' movie_slug=movie.seo_block.seo_url %}" class="btn btn-primary">Детальніше</a>
+  </div>
+</div>

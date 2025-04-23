@@ -1,27 +1,34 @@
-{% extends 'main/index.html' %}
+{% extends 'main/index1.html' %}
 
 {% block title %}{{ page.title }}{% endblock %}
 
 {% block content %}
-  <div class="paiges-cinema">
-    <h1>{{ page.title }}</h1>
+
+  <div class="container py-4">
+    <h1 class="mb-4 text-center">{{ page.title }}</h1>
 
     {% if main_picture %}
-      <div class="main-picture">
-        <img src="{{ main_picture.image.url }}" alt="{{ main_picture.alter_txt }}">
+      <div class="text-center mb-4">
+        <img src="{{ main_picture.image.url }}" alt="{{ main_picture.alter_txt|default:page.title }}"
+             class="img-fluid rounded shadow-sm" style="max-height: 400px; object-fit: cover; width: 100%;">
       </div>
     {% endif %}
 
-    <div class="description">
-      {{ page.description|linebreaks }}
+    <div class="mb-5">
+      <div class="p-3 bg-light rounded shadow-sm">
+        {{ page.description|linebreaks }}
+      </div>
     </div>
 
     {% if gallery_pictures %}
-      <h2>Галерея</h2>
-      <div class="gallery">
+      <h2 class="mb-4 text-center">Галерея</h2>
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
         {% for picture in gallery_pictures %}
-          <div class="gallery-item" style="display:inline-block; margin:10px;">
-            <img src="{{ picture.image.url }}" alt="{{ picture.alter_txt }}" style="max-width:200px;">
+          <div class="col">
+            <div class="card h-100 shadow-sm">
+              <img src="{{ picture.image.url }}" alt="{{ picture.alter_txt|default:'Зображення' }}"
+                   class="card-img-top" style="height: 220px; object-fit: cover;">
+            </div>
           </div>
         {% endfor %}
       </div>

@@ -1,0 +1,64 @@
+{# navbar.html #}
+{% load static %}
+
+<!-- Навбар -->
+<nav class="navbar navbar-expand-lg bg-body-tertiary mt-4">
+  <div class="container-fluid">
+
+    <!-- Лого -->
+    <a class="navbar-brand" href="{% url 'main:home' %}">
+      <img src="{% static 'main/images/logo3.png' %}" alt="CineWave Logo" width="150" height="75" class="d-inline-block align-text-top">
+    </a>
+
+    <!-- Кнопка для мобильного меню -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
+            aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Переключить навигацию">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Меню -->
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="{% url 'movies_list' %}">Афіша</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'cinema_list' %}">Кінотеатри</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'session_list' %}">Розклад</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'movies_soon' %}">Незабаром</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'main:promotions_list' %}">Акції</a>
+        </li>
+
+        <!-- Дропдаун -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Про CineWave
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <li><a class="dropdown-item" href="{% url 'main:paiges_news_list' %}">Новини</a></li>
+            <li><a class="dropdown-item" href="{% url 'main:paiges_cinema_detail' slug='kafe-bar' %}">Кафе-Бар</a></li>
+            <li><a class="dropdown-item" href="{% url 'main:paiges_cinema_detail' slug='kafe-bar' %}">Реклама</a></li>
+            <li><a class="dropdown-item" href="#">VIP зал</a></li>
+            <li><a class="dropdown-item" href="#">Мобільні додатки</a></li>
+            <li><a class="dropdown-item" href="{% url 'main:paiges_cinema_detail' slug='chaild_room' %}">Дитяча кімната</a></li>
+            <li><a class="dropdown-item" href="#">Контакти</a></li>
+          </ul>
+        </li>
+
+      </ul>
+
+      <!-- Кнопка Кабинет справа -->
+      <div class="d-flex">
+        <a href="{% url 'profile' %}" class="btn btn-primary">Кабінет</a>
+      </div>
+    </div>
+
+  </div>
+</nav>

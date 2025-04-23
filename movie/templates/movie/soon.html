@@ -1,0 +1,25 @@
+{% extends 'core/soon.html' %}
+
+{% block content %}
+  <h1>Незабаром у прокаті</h1>
+    <div class="container mt-4">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+          {% for movie in movies %}
+              <div class="col">
+                {% include 'movie/movie_card.html' with movie=movie %}
+              </div>
+          {% endfor %}
+        </div>
+    </div>
+  <div class="pagination">
+    {% if movies.has_previous %}
+      <a href="?page={{ movies.previous_page_number }}">Попередня</a>
+    {% endif %}
+
+    <span>Сторінка {{ movies.number }} з {{ movies.paginator.num_pages }}</span>
+
+    {% if movies.has_next %}
+      <a href="?page={{ movies.next_page_number }}">Наступна</a>
+    {% endif %}
+  </div>
+{% endblock %}

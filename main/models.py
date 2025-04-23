@@ -30,7 +30,8 @@ class Gallery(models.Model):
 class Picture(models.Model):
     id = models.AutoField(primary_key=True)
     gallery = models.ForeignKey(Gallery, related_name='pictures', on_delete=models.CASCADE, verbose_name='Галерея')
-    image_type = models.CharField(max_length=20, choices=[('main_picture', 'Главное изображение'), ('gallery', 'Галерея'), ('baner', 'Банер')], verbose_name='Тип зображення')
+    image_type = models.CharField(max_length=20, choices=[('main_picture', 'Главное изображение'), ('gallery', 'Галерея'),
+                                                          ('baner', 'Банер'), ('cross_baner', 'Сквозной банер')], verbose_name='Тип зображення')
     image = models.ImageField(upload_to='images/', verbose_name='Зображення')
     alter_txt = models.CharField(max_length=255, blank=True, null=True, verbose_name='Альтернативний текст')
 

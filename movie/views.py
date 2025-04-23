@@ -1,12 +1,16 @@
 from django.shortcuts import render, get_object_or_404
 from .models import Movies
+from main.models import Picture
+from django.db.models import Prefetch
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from datetime import date, timedelta
+from django.utils.timezone import now
 
 
 # Create your views here.
 def movie_list(request):
-    movies_list = Movies.objects.all().order_by('title')
+    movies_list = Movies.objects.all().select_related('gallery').order_by('title')
+
     paginator = Paginator(movies_list, 10)
     page = request.GET.get('page')
     try:
@@ -14,7 +18,7 @@ def movie_list(request):
     except PageNotAnInteger:
         movies = paginator.page(1)
     except EmptyPage:
-        movies  = paginator.page(paginator.num_pages)
+        movies = paginator.page(paginator.num_pages)
 
     for movie in movies:
         if movie.gallery:
@@ -23,7 +27,7 @@ def movie_list(request):
             movie.main_picture = None
 
     context = {'movies': movies}
-    return render(request, 'core/movies_list.html', context)
+    return render(request, 'movie/movies_list.html', context)
 
 
 
@@ -32,33 +36,35 @@ def movie_detail(request, movie_slug):
 
     main_picture = movies.gallery.pictures.filter(image_type="main_picture").first() if hasattr(movies,
                                                                                                 'gallery') and movies.gallery else None
-    #gallery_pictures = movies.gallery.pictures.filter(image_type="gallery") if hasattr(movies,
-       #                                                                                'gallery') and movies.gallery else []
-
-
     context = {
         'movies': movies,
         'main_picture': main_picture,
         #'gallery_pictures': gallery_pictures,
     }
-    return render(request, 'core/movie_detail.html', context)
-
-def session_list(request):
-    sessions = Sessions.objects.select_related('hall_id', 'movie_id').order_by('date', 'time_session')
-    context = {
-        'sessions': sessions
-    }
-    return render(request, 'core/session_list.html', context)
-
+    return render(request, 'movie/movie_detail.html', context)
 
 def movie_soon(request):
-    today = date.today()
-    next_week = today + timedelta(days=7)
+    next_30_days = now() + timedelta(days=30)
 
-    # Отримуємо фільми з релізом протягом тижня
-    movies_list = Movies.objects.filter(relise_date__lte=next_week).order_by('relise_date')
+    coming_soon = Movies.objects.filter(
+        relise_date__gt=now(),
+        relise_date__lte=next_30_days
+    ).select_related('gallery').prefetch_related(
+        Prefetch(
+            'gallery__pictures',
+            queryset=Picture.objects.filter(image_type='main_picture'),
+            to_attr='main_picture_list'
+        )
+    ).order_by('relise_date')
 
-    paginator = Paginator(movies_list, 10)
+    # Додаємо main_picture до кожного фільму
+    for movie in coming_soon:
+        if movie.gallery and hasattr(movie.gallery, 'main_picture_list'):
+            movie.main_picture = movie.gallery.main_picture_list[0] if movie.gallery.main_picture_list else None
+        else:
+            movie.main_picture = None
+
+    paginator = Paginator(coming_soon, 10)
     page = request.GET.get('page')
 
     try:
@@ -68,12 +74,5 @@ def movie_soon(request):
     except EmptyPage:
         movies = paginator.page(paginator.num_pages)
 
-    # Додаємо головне зображення
-    for movie in movies:
-        movie.main_picture = (
-            movie.gallery.pictures.filter(image_type="main_picture").first()
-            if movie.gallery else None
-        )
-
     context = {'movies': movies}
-    return render(request, 'core/movies_list.html', context)
+    return render(request, 'movie/movies_list.html', context)

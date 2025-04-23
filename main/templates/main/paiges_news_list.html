@@ -1,0 +1,13 @@
+{% extends 'main/index1.html' %}
+
+{% block content %}
+<div class="col" style="height: 100%;">
+          <div class="card h-75" style="height: 50%; max-height: 550px;">
+              <div class="row row-cols-1 row-cols-md-2 g-4">
+                                {% for item in news %}
+                                        {% include 'main/news_card.html' with news=item %}
+                                {% endfor %}
+              </div>
+          </div>
+</div>
+{% endblock %}

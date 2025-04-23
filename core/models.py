@@ -1,6 +1,7 @@
 from django.db import models
 from users.models import User
-
+from main.models import Block_SEO, Gallery
+from movie.models import Movies
 
 
 class Cinemas(models.Model):
@@ -41,7 +42,7 @@ class Sessions(models.Model):
 
     id = models.AutoField(primary_key=True)
     hall_id = models.ForeignKey(Halls, on_delete=models.CASCADE, verbose_name= 'Зал')
-    movie_id= models.ForeignKey(Movies, on_delete=models.CASCADE, verbose_name= 'Кіно')
+    movie = models.ForeignKey(Movies, on_delete=models.SET_NULL, null=True, blank=True)
     title = models.CharField(max_length=255, verbose_name= 'Назва')
     time_session = models.TimeField(verbose_name= 'Час сеансу')
     duration = models.TimeField(verbose_name= 'Тривалість')

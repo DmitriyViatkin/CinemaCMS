@@ -38,17 +38,19 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'authentication',
-    'movie'
+    'admins',
+    'users',
+    'movie',
+    'main',
+    'core',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'users',
-    'main',
-    'core',
-    'admins',
+
+
 
 
 ]

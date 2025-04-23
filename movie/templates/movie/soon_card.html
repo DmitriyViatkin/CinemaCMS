@@ -1,0 +1,16 @@
+{#soon_card.html#}
+
+<div class="card h-100">
+  {% if movie.main_picture %}
+    <img src="{{ movie.main_picture.image.url }}" class="card-img-top" alt="{{ movie.title }}" style="height: 250px; object-fit: cover;">
+  {% else %}
+    <div class="d-flex align-items-center justify-content-center" style="height: 250px; background-color: #e9ecef;">
+      <span class="text-muted">Зображення відсутнє</span>
+    </div>
+  {% endif %}
+  <div class="card-body d-flex flex-column">
+    <h5 class="card-title">{{ movie.title }}</h5>
+    <p class="card-text">Прем'єра: {{ movie.relise_date|date:"d.m.Y" }}</p>
+    <a href="{% url 'movie_detail' movie_slug=movie.seo_block.seo_url %}" class="btn btn-outline-primary mt-auto">Детальніше</a>
+  </div>
+</div>
