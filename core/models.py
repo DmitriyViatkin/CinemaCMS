@@ -22,17 +22,27 @@ class Cinemas(models.Model):
         verbose_name = 'Кинотеатр'
         verbose_name_plural = 'Кинотеатри'
 
-class Halls(models.Model):
 
+class Halls(models.Model):
+    seo_block = models.OneToOneField(Block_SEO, on_delete=models.CASCADE, verbose_name="SEO блок")
     id = models.AutoField(primary_key=True)
-    title = models.CharField(max_length=255, verbose_name= 'Назва')
+    title = models.CharField(max_length=255, verbose_name='Назва')
     cinema = models.ForeignKey(Cinemas, on_delete=models.CASCADE, related_name='halls', verbose_name="Кинотеатр")
-    description = models.TextField(verbose_name= 'Опис')
-    gallery = models.ForeignKey(Gallery, on_delete=models.SET_NULL, null=True, blank=True, verbose_name= 'Картинка')
-    date = models.DateField(auto_now_add=True, verbose_name= 'Дата')
+    description = models.TextField(verbose_name='Опис')
+    gallery = models.ForeignKey(Gallery, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Картинка')
+    date = models.DateField(auto_now_add=True, verbose_name='Дата')
+
+    rows = models.PositiveIntegerField(verbose_name='Кількість рядів', null=True, blank=True)
+    seats_row = models.PositiveIntegerField(verbose_name='Місць у ряду', null=True, blank=True)
+
+    def total_seats(self):
+        """Общее количество мест в зале"""
+        if self.rows and self.seats_per_row:
+            return self.rows * self.seats_per_row
+        return 0
 
     def __str__(self):
-        return self.title
+        return f"{self.title} ({self.cinema})"
 
     class Meta:
         verbose_name = "Зал"
@@ -41,6 +51,7 @@ class Halls(models.Model):
 class Sessions(models.Model):
 
     id = models.AutoField(primary_key=True)
+    cinema = models.ForeignKey(Cinemas, on_delete=models.CASCADE, related_name='sessions', verbose_name="Кинотеатр")
     hall_id = models.ForeignKey(Halls, on_delete=models.CASCADE, verbose_name= 'Зал')
     movie = models.ForeignKey(Movies, on_delete=models.SET_NULL, null=True, blank=True)
     title = models.CharField(max_length=255, verbose_name= 'Назва')

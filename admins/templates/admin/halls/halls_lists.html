@@ -1,0 +1,64 @@
+{% extends 'admin/index.html' %}
+
+{% block title %}Список залів{% endblock %} {# Змінено заголовок сторінки #}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    {# Заголовок картки з кнопкою "Додати зал" справа #}
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="card-title mb-0">Список залів</h3> {# Змінено заголовок картки #}
+
+                        <div class="card-tools"> {# Використовуємо card-tools або d-flex для розміщення справа #}
+                            {# Кнопка або посилання для додавання нового залу #}
+                            {# Замініть 'add_hall_create' на ім'я вашого URL-шаблону для створення залу #}
+                            <a href="{% url 'add_halls_create' %}" class="btn btn-success btn-sm">
+                                <i class="fas fa-plus"></i> Додати зал {# Можна додати іконку Font Awesome #}
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table id="hallsTable" class="table table-bordered table-hover"> {# Змінено ID таблиці #}
+                            <thead>
+                                <tr>
+                                    <th>Назва зали</th> {# Поле title #}
+                                    <th>Кінотеатр</th>  {# Поле cinema (ForeignKey) #}
+                                    {# Поле description пропускаємо для лаконічності списку, але можна додати за потреби #}
+                                    <th>Дата додавання</th> {# Поле date #}
+                                    <th>Дії</th>        {# Колонки для кнопок Редагувати/Видалити #}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for hall in halls %} {# Цикл по об'єктах залів #}
+                                <tr>
+                                    <td>{{ hall.title }}</td>      {# Виводимо назву залу #}
+                                    <td>{{ hall.cinema }}</td>     {# Виводимо назву пов'язаного кінотеатру (через __str__ моделі Cinemas) #}
+                                    <td>{{ hall.date|date:"d.m.Y" }}</td> {# Виводимо дату додавання #}
+                                    <td>
+                                        {# Кнопка або посилання для редагування залу #}
+                                        {# Замініть 'add_hall_edit' на ім'я вашого URL-шаблону для редагування залу #}
+                                        <a href="{% url 'add_halls_edit' hall.id %}" class="btn btn-primary btn-sm">Редагувати</a>
+
+                                        {# Кнопка або посилання для видалення залу #}
+                                        {# Замініть 'delete_hall' на ім'я вашого URL-шаблону для видалення залу #}
+                                        <a href="{% url 'delete_halls' hall.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Ви впевнені, що хочете видалити зал {{ hall.title }}?');">Видалити</a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                {# Цей блок покажеться, якщо список halls порожній #}
+                                <tr>
+                                    <td colspan="4">Список залів порожній.</td> {# colspan="4" тому що у нас 4 колонки #}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends 'admin/index.html' %}
+{% load static %}
+
+{% block title %}
+    {% if cinema %}Редагувати кінотеатр{% else %}Додати кінотеатр{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<h1>{% if cinema %}Редагувати кінотеатр: {{ cinema.title }}{% else %}Додати новий кінотеатр{% endif %}</h1>
+
+<section class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-12"> {# Можливо, col-md-12, якщо все в одній колонці #}
+            <div class="card card-primary">
+              <div class="card-header">
+                         {# Заголовок картки залежить від режиму #}
+                        <h3 class="card-title">{% if cinema %}Редагувати{% else %}Додати{% endif %} кінотеатр</h3> <br>
+                    </div>
+
+
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+
+                        {% if cinema_form.non_field_errors %}<div class="alert alert-danger">{{ cinema_form.non_field_errors }}</div>{% endif %}
+                        {% if block_seo_form.non_field_errors %}<div class="alert alert-danger">{{ block_seo_form.non_field_errors }}</div>{% endif %}
+                        {% if gallery_form.non_field_errors %}<div class="alert alert-danger">{{ gallery_form.non_field_errors }}</div>{% endif %}
+                        {% if picture_formset.non_form_errors %}<div class="alert alert-danger">{{ picture_formset.non_form_errors }}</div>{% endif %}
+
+                        <div class="card-body">
+
+
+
+                             <h2>Інформація про кінотеатр</h2>
+                            {% include 'admin/card_forms/cinema_form.html' with form=cinema_form %}
+
+
+                            <h2>SEO Інформація</h2>
+                            {# Включаємо шаблон-фрагмент для полів форми SEO #}
+                            {% include 'admin/card_forms/seo_form.html' with form=block_seo_form %}
+
+
+                            <h2>Галерея</h2>
+
+                            <div class="form-group">
+                                {{ gallery_form.title.label_tag }}
+                                {{ gallery_form.title }}
+                                {% if gallery_form.title.help_text %}<small class="form-text text-muted">{{ gallery_form.title.help_text }}</small>{% endif %}
+                                {% for error in gallery_form.title.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                            </div>
+
+
+
+
+                            {{ picture_formset.management_form }}
+
+                            {# Цикл по кожній формі в формсеті картинок #}
+
+                                 {% include 'admin/card_forms/image_form.html' %}
+
+                            {# Можливо, вам знадобиться кнопка для додавання нових картинок за допомогою JavaScript #}
+                            {# <button type="button" class="btn btn-secondary add-picture-button">Додати ще картинку</button> #}
+
+
+                        </div> {# Кінець card-body #}
+
+                        <div class="card-footer">
+                             {# Текст кнопки залежить від режиму #}
+                             <button type="submit" class="btn btn-primary">
+                                 {% if cinema %}Оновити{% else %}Створити{% endif %}
+                             </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

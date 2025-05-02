@@ -1,0 +1,32 @@
+{# gallery_form.html #}
+{% load static %}
+
+<div class="gallery-image-form border p-3 mb-3">
+    {{ form.id }}
+    {% if form.non_field_errors %}...{% endif %}
+    {# Поля однієї форми картинки (з моделі Picture) #}
+    <div class="form-group">
+        {{ form.image_type.label_tag }}
+        {{ form.image_type }}
+        {% if form.image_type.help_text %}...{% endif %}
+        {% for error in form.image_type.errors %}...{% endfor %}
+    </div>
+     <div class="form-group">
+        {{ form.image.label_tag }}
+         {% if form.instance.pk and form.instance.image %}...{% endif %}
+         {{ form.image }}
+        {% if form.image.help_text %}...{% endif %}
+        {% for error in form.image.errors %}...{% endfor %}
+    </div>
+    <div class="form-group">
+        {{ form.alter_txt.label_tag }}
+        {{ form.alter_txt }}
+        {% if form.alter_txt.help_text %}...{% endif %}
+        {% for error in form.alter_txt.errors %}...{% endfor %}
+    </div>
+    {# Поле DELETE #}
+    <div class="form-group form-check">
+         {{ form.DELETE }} {{ form.DELETE.label_tag }}
+         {% for error in form.DELETE.errors %}...{% endfor %}
+    </div>
+</div>

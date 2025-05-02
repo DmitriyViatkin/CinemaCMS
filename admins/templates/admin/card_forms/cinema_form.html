@@ -1,0 +1,39 @@
+{# admin/card_forms/cinema_form.html #}
+{% load static %}
+
+
+
+<div class="card-body">
+
+<div class="form-group">
+   <br>
+    {{ form.title.label_tag }}
+    {{ form.title }}
+    {% if form.title.help_text %}<small class="form-text text-muted">{{ form.title.help_text }}</small>{% endif %}
+    {% for error in form.title.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+</div>
+    </div>
+<div class="card-body">
+<div class="form-group">
+    {{ form.description.label_tag }}
+    {{ form.description }}
+    {% if form.description.help_text %}<small class="form-text text-muted">{{ form.description.help_text }}</small>{% endif %}
+    {% for error in form.description.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+</div>
+    </div>
+<div class="card-body">
+<div class="form-group">
+    {{ form.conditions.label_tag }}
+    {{ form.conditions }}
+    {% if form.conditions.help_text %}<small class="form-text text-muted">{{ form.conditions.help_text }}</small>{% endif %}
+    {% for error in form.conditions.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+</div>
+    </div>
+<div class="card-body">
+<div class="form-group">
+    {{ form.city.label_tag }}
+    {{ form.city }}
+    {% if form.city.help_text %}<small class="form-text text-muted">{{ form.city.help_text }}</small>{% endif %}
+    {% for error in form.city.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+</div>
+    </div>

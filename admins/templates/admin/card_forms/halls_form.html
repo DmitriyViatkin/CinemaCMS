@@ -1,0 +1,45 @@
+{# admin/card_forms/hall_form.html #}
+{% load static %}
+
+{# Цей фрагмент рендерить поля з HallsForm #}
+{# Він призначений для включення всередині головної форми на сторінці додавання/редагування залу #}
+{# Припускається, що форма HallsForm передається у шаблон як змінна 'form' #}
+
+
+<div class="card-body"> {# Відповідник для поля title #}
+  <div class="form-group">
+        {{ form.title.label_tag }} {# Поле: Назва зали (title) #}
+        {{ form.title }}
+        {% if form.title.help_text %}<small class="form-text text-muted">{{ form.title.help_text }}</small>{% endif %}
+        {% for error in form.title.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+  </div>
+</div>
+
+
+
+<div class="card-body"> {# Відповідник для поля cinema #}
+  <div class="form-group">
+        {{ form.cinema.label_tag }}
+        {{ form.cinema }}
+        {% if form.cinema.help_text %}<small class="form-text text-muted">{{ form.cinema.help_text }}</small>{% endif %}
+        {% for error in form.cinema.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+  </div>
+</div>
+
+<div class="card-body"> {# Відповідник для поля description #}
+  <div class="form-group">
+        {{ form.description.label_tag }} {# Поле: Опис (description) #}
+        {{ form.description }}
+        {% if form.description.help_text %}<small class="form-text text-muted">{{ form.description.help_text }}</small>{% endif %}
+        {% for error in form.description.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+  </div>
+</div>
+
+<div class="card-body"> {# Відповідник для поля gallery #}
+  <div class="form-group">
+        {{ form.gallery.label_tag }} {# Поле: Галерея/Картинка (gallery - ForeignKey) #}
+        {{ form.gallery }}
+        {% if form.gallery.help_text %}<small class="form-text text-muted">{{ form.gallery.help_text }}</small>{% endif %}
+        {% for error in form.gallery.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+  </div>
+</div>

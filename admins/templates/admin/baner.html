@@ -1,0 +1,62 @@
+{% extends 'admin/index.html' %}
+
+{% block content %}
+{# Перевіряємо, чи редагуємо фільм (movie існує), чи створюємо новий #}
+<h2>{% if movie %}Редагувати фільм{% else %}Додати фільм{% endif %}</h2>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %} {# Обов'язково для POST запитів #}
+
+    {# Вивід загальних помилок основної форми, якщо вони є #}
+    {% if form.errors %}
+        <div style="color: red;">
+            Будь ласка, виправте помилки нижче.
+            {{ form.errors }} {# Вивід всіх помилок форми #}
+        </div>
+    {% endif %}
+
+    {# Основна форма фільму #}
+    <h3>Інформація про фільм</h3>
+    {{ form.as_p }} {# Виводимо всі поля основної форми в параграфах #}
+
+    <hr>
+
+    {# Формсет для зображень #}
+    <h3>Зображення</h3>
+    {{ picture_formset.management_form }} {# Обов'язково для формсетів #}
+    {% for form in picture_formset %}
+        <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;"> {# Проста рамка для візуального розділення форм формсета #}
+            {{ form.as_p }} {# Виводимо поля форми зображення #}
+        </div>
+    {% endfor %}
+
+    <hr>
+
+    {# Інший формсет (MoviesInLineFormset) #}
+    <h3>Додаткова інформація про фільм</h3>
+    {{ movie_formset.management_form }} {# Обов'язково для формсетів #}
+    {% for form in movie_formset %}
+        <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;"> {# Проста рамка для візуального розділення форм формсета #}
+            {{ form.as_p }} {# Виводимо поля форми з MoviesInLineFormset #}
+        </div>
+    {% endfor %}
+
+    <hr>
+
+    {# Форма для Block SEO #}
+    <h3>Налаштування SEO</h3>
+    {# Вивід загальних помилок форми Block SEO, якщо вони є #}
+     {% if block_seo_form.errors %}
+        <div style="color: red;">
+            Помилки в налаштуваннях SEO:
+            {{ block_seo_form.errors }} {# Вивід всіх помилок Block SEO форми #}
+        </div>
+    {% endif %}
+    {{ block_seo_form.as_p }} {# Виводимо поля форми Block SEO #}
+
+
+    <button type="submit" class="btn btn-primary">Зберегти</button>
+
+</form>
+
+{% endblock %}

@@ -1,0 +1,18 @@
+{# image_form.html #}
+{% load static %}
+
+
+                        <h3>Картинки галереї</h3>
+
+                        {{ picture_formset.management_form }}
+
+                        {% for form in picture_formset %} {# Цикл по формах КАРТИНОК #}
+                             {# Включаємо шаблон-фрагмент для ОДНІЄЇ форми картинки #}
+                            {% include 'admin/card_forms/gallery_form.html' with form=form %} {# Ваш template для картинки #}
+                        {% endfor %}
+
+                    </div> {# Кінець card-body #}
+
+                    <div class="card-footer">
+
+                    </div>

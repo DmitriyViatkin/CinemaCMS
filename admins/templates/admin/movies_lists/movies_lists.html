@@ -1,0 +1,82 @@
+{% extends 'admin/index.html' %}
+
+{% block title %}Список сеансів{% endblock %} {# Змінено заголовок #}
+
+{% block content %}
+<section class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+    <h3 class="card-title mb-0">Список сеансів</h3> {# Змінено заголовок картки #}
+
+    <div> {# Контейнер для кнопок #}
+        {# Кнопка для додавання нового сеансу #}
+        {# Використовуємо URL-ім'я, яке викликало NoReverseMatch, тепер воно має бути визначене в urls.py #}
+        <a href="{% url 'add_sessions_create' %}" class="btn btn-success btn-sm">
+             <i class="fas fa-plus"></i> Додати сеанс {# Змінено текст кнопки #}
+        </a>
+        {# ... інші кнопки, якщо є ... #}
+    </div>
+</div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <table id="example2" class="table table-bordered table-hover">
+                 <thead>
+    <tr>
+      <th>Назва Сеансу</th> {# Заголовок для title #}
+      <th>Кінотеатр</th> {# Заголовок для cinema (ForeignKey) #}
+      <th>Зал</th> {# Заголовок для hall_id (ForeignKey) #}
+      <th>Фільм</th> {# Заголовок для movie (ForeignKey) #}
+      <th>Час сеансу</th> {# Заголовок для time_session #}
+      <th>Тривалість</th> {# Заголовок для duration #}
+      <th>Дата</th> {# Заголовок для date #}
+      <th>Дії</th> {# Колонка для кнопок дій #}
+    </tr>
+  </thead>
+  <tbody>
+    {# Перебір об'єктів сеансів #}
+    {% for session in sessions %} {# Змінено змінну циклу #}
+      <tr>
+        <td>{{ session.title }}</td> {# Відображення назви сеансу #}
+        <td>{{ session.cinema.title }}</td> {# Відображення назви кінотеатру (припускаючи, що у моделі Cinemas є поле title) #}
+        <td>{{ session.hall_id.title }}</td> {# Відображення назви залу (припускаючи, що у моделі Halls є поле title) #}
+        <td>{% if session.movie %}{{ session.movie.title }}{% else %}Не вказано{% endif %}</td> {# Відображення назви фільму (перевірка на None, якщо поле nullable) #}
+        <td>{{ session.time_session|time:"H:i" }}</td> {# Відображення часу сеансу (форматування опціональне) #}
+        <td>{{ session.duration|time:"H:i" }}</td> {# Відображення тривалості (форматування опціональне) #}
+        <td>{{ session.date|date:"d.m.Y" }}</td> {# Відображення дати (форматування опціональне) #}
+        <td>
+          {# Кнопка або посилання для редагування сеансу #}
+          {# Вам потрібно буде визначити URL-адресу для редагування сеансу в urls.py #}
+          {# та передати ідентифікатор сеансу (session.id або session.pk) #}
+          {# Припускаємо URL-ім'я 'edit_session' #}
+          <a href="{% url 'edit_session' session.pk %}" class="edit-button">Редактировать</a>
+          {# Кнопка Видалити сеанс #}
+          {# Припускаємо URL-ім'я 'delete_session' #}
+          <a href="{% url 'delete_session' session.pk %}" class="btn btn-danger btn-sm" onclick="return confirm('Ви впевнені, що хочете видалити сеанс {{ session.title }}?');">Видалити</a>
+        </td>
+      </tr>
+    {% empty %}
+      {# Цей блок покажеться, якщо список sessions порожній #}
+      <tr>
+        <td colspan="8">Список сеансів порожній.</td> {# colspan="8" тому що у нас 8 колонок #}
+      </tr>
+    {% endfor %}
+  </tbody>
+                </table>
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+
+
+            <!-- /.card -->
+          </div>
+          <!-- /.col -->
+        </div>
+        <!-- /.row -->
+      </div>
+      <!-- /.container-fluid -->
+    </section>
+{% endblock %}
