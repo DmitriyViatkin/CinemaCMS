@@ -1,0 +1,66 @@
+{# admin/card_forms/SeatsForm.html #}
+{% load static %}
+
+
+
+<div class="card-body">
+    <div class="form-group">
+       <br> {# Перенос строки, как в исходном шаблоне #}
+        {{ form.number_row.label_tag }} {# 'Номер ряду' #}
+        {{ form.number_row }}
+        {% if form.number_row.help_text %}<small class="form-text text-muted">{{ form.number_row.help_text }}</small>{% endif %}
+        {% for error in form.number_row.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+    </div>
+    <div class="form-group">
+        {{ form.seat.label_tag }} {# 'Номер місця' #}
+        {{ form.seat }}
+        {% if form.seat.help_text %}<small class="form-text text-muted">{{ form.seat.help_text }}</small>{% endif %}
+        {% for error in form.seat.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+    </div>
+</div>
+
+{# Блок для поля статуса #}
+<div class="card-body">
+    <div class="form-group">
+        {{ form.status.label_tag }} {# 'Статус місця' #}
+        {{ form.status }} {# Это будет выпадающий список (SELECT) #}
+        {% if form.status.help_text %}<small class="form-text text-muted">{{ form.status.help_text }}</small>{% endif %}
+        {% for error in form.status.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+    </div>
+</div>
+
+{# Блок для поля Зал (ForeignKey) #}
+<div class="card-body">
+    <div class="form-group">
+        {{ form.halls.label_tag }} {# 'Зал' #}
+        {{ form.halls }} {# Это будет выпадающий список (SELECT) связанных Залов #}
+        {% if form.halls.help_text %}<small class="form-text text-muted">{{ form.halls.help_text }}</small>{% endif %}
+        {% for error in form.halls.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+    </div>
+</div>
+
+{# Блок для поля VIP и цены #}
+<div class="card-body">
+
+    <div class="form-group">
+        {{ form.price.label_tag }} {# 'Ціна' #}
+        {{ form.price }}
+        {% if form.price.help_text %}<small class="form-text text-muted">{{ form.price.help_text }}</small>{% endif %}
+        {% for error in form.price.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+    </div>
+</div>
+<div class="form-group">
+        <div class="form-check"> {# Адаптация дляBooleanField (чекбокс) #}
+            {{ form.is_vip }} {# Сам чекбокс #}
+            {{ form.is_vip.label_tag }} {# Метка рядом с чекбоксом 'VIP' #}
+            {% if form.is_vip.help_text %}<small class="form-text text-muted">{{ form.is_vip.help_text }}</small>{% endif %}
+            {% for error in form.is_vip.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+        </div>
+    </div>
+{# Дополнительный блок с примечаниями для пользователя #}
+<div class="card-body">
+<p><small class="form-text text-info">
+    Примечание: Поле 'Дата' (date) устанавливается автоматически при создании места и обычно не редактируется.
+    Поле 'Сеанс' (session_id) также обычно связано с местом при его создании для конкретного сеанса и может не отображаться в этой форме редактирования отдельного места.
+</small></p>
+</div>

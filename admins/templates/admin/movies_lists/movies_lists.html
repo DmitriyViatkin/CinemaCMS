@@ -1,82 +1,102 @@
 {% extends 'admin/index.html' %}
 
-{% block title %}Список сеансів{% endblock %} {# Змінено заголовок #}
+
+{% block title %}Список фільмів{% endblock %}
 
 {% block content %}
 <section class="content">
-      <div class="container-fluid">
-        <div class="row">
-          <div class="col-12">
-            <div class="card">
-              <div class="card-header d-flex justify-content-between align-items-center">
-    <h3 class="card-title mb-0">Список сеансів</h3> {# Змінено заголовок картки #}
-
-    <div> {# Контейнер для кнопок #}
-        {# Кнопка для додавання нового сеансу #}
-        {# Використовуємо URL-ім'я, яке викликало NoReverseMatch, тепер воно має бути визначене в urls.py #}
-        <a href="{% url 'add_sessions_create' %}" class="btn btn-success btn-sm">
-             <i class="fas fa-plus"></i> Додати сеанс {# Змінено текст кнопки #}
-        </a>
-        {# ... інші кнопки, якщо є ... #}
-    </div>
-</div>
-              <!-- /.card-header -->
-              <div class="card-body">
-                <table id="example2" class="table table-bordered table-hover">
-                 <thead>
-    <tr>
-      <th>Назва Сеансу</th> {# Заголовок для title #}
-      <th>Кінотеатр</th> {# Заголовок для cinema (ForeignKey) #}
-      <th>Зал</th> {# Заголовок для hall_id (ForeignKey) #}
-      <th>Фільм</th> {# Заголовок для movie (ForeignKey) #}
-      <th>Час сеансу</th> {# Заголовок для time_session #}
-      <th>Тривалість</th> {# Заголовок для duration #}
-      <th>Дата</th> {# Заголовок для date #}
-      <th>Дії</th> {# Колонка для кнопок дій #}
-    </tr>
-  </thead>
-  <tbody>
-    {# Перебір об'єктів сеансів #}
-    {% for session in sessions %} {# Змінено змінну циклу #}
-      <tr>
-        <td>{{ session.title }}</td> {# Відображення назви сеансу #}
-        <td>{{ session.cinema.title }}</td> {# Відображення назви кінотеатру (припускаючи, що у моделі Cinemas є поле title) #}
-        <td>{{ session.hall_id.title }}</td> {# Відображення назви залу (припускаючи, що у моделі Halls є поле title) #}
-        <td>{% if session.movie %}{{ session.movie.title }}{% else %}Не вказано{% endif %}</td> {# Відображення назви фільму (перевірка на None, якщо поле nullable) #}
-        <td>{{ session.time_session|time:"H:i" }}</td> {# Відображення часу сеансу (форматування опціональне) #}
-        <td>{{ session.duration|time:"H:i" }}</td> {# Відображення тривалості (форматування опціональне) #}
-        <td>{{ session.date|date:"d.m.Y" }}</td> {# Відображення дати (форматування опціональне) #}
-        <td>
-          {# Кнопка або посилання для редагування сеансу #}
-          {# Вам потрібно буде визначити URL-адресу для редагування сеансу в urls.py #}
-          {# та передати ідентифікатор сеансу (session.id або session.pk) #}
-          {# Припускаємо URL-ім'я 'edit_session' #}
-          <a href="{% url 'edit_session' session.pk %}" class="edit-button">Редактировать</a>
-          {# Кнопка Видалити сеанс #}
-          {# Припускаємо URL-ім'я 'delete_session' #}
-          <a href="{% url 'delete_session' session.pk %}" class="btn btn-danger btn-sm" onclick="return confirm('Ви впевнені, що хочете видалити сеанс {{ session.title }}?');">Видалити</a>
-        </td>
-      </tr>
-    {% empty %}
-      {# Цей блок покажеться, якщо список sessions порожній #}
-      <tr>
-        <td colspan="8">Список сеансів порожній.</td> {# colspan="8" тому що у нас 8 колонок #}
-      </tr>
-    {% endfor %}
-  </tbody>
-                </table>
-              </div>
-              <!-- /.card-body -->
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="card-title mb-0">Список фільмів</h3>
+            <div>
+              <a href="{% url 'add_movie_create' %}" class="btn btn-success btn-sm">
+                <i class="fas fa-plus"></i> Додати фільм
+              </a>
             </div>
-            <!-- /.card -->
-
-
-            <!-- /.card -->
           </div>
-          <!-- /.col -->
+          <div class="card-body">
+            <table class="table table-bordered table-hover">
+              <thead>
+                <tr>
+                  <th>Назва</th>
+                  <th>Жанр</th>
+                  <th>Тип відео</th>
+                  <th>Трейлер</th>
+                  <th>Дата прокату</th>
+                  <th>Вік</th>
+                  <th>Дата</th>
+                  <th>Дії</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for movie in movies %}
+                  <tr>
+                    <td>{{ movie.title }}</td>
+                    <td>{{ movie.get_genre_display }}</td>
+                    <td>{{ movie.get_video_type_display }}</td>
+                    <td>
+                      <a href="{{ movie.url_trailer }}" target="_blank">Переглянути</a>
+                    </td>
+                    <td>{{ movie.relise_date|date:"d.m.Y" }}</td>
+                    <td>{{ movie.age_limit }}+</td>
+                    <td>{{ movie.date|date:"d.m.Y" }}</td>
+                    <td>
+                      <a href="{% url 'add_movie_edit' movie.id %}" class="btn btn-primary btn-sm">Редагувати</a>
+                      <a href="{% url 'delete_movie' movie.id %}" class="btn btn-danger btn-sm"
+                         onclick="return confirm('Ви впевнені, що хочете видалити фільм {{ movie.title }}?');">
+                        Видалити
+                      </a>
+                    </td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="8">Список фільмів порожній.</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+
+            <!-- Пагінація -->
+            {% if movies.has_other_pages %}
+              <nav class="mt-3">
+                <ul class="pagination justify-content-center">
+                  {% if movies.has_previous %}
+                    <li class="page-item">
+                      <a class="page-link" href="?page={{ movies.previous_page_number }}">&laquo;</a>
+                    </li>
+                  {% else %}
+                    <li class="page-item disabled">
+                      <span class="page-link">&laquo;</span>
+                    </li>
+                  {% endif %}
+
+                  {% for num in movies.paginator.page_range %}
+                    {% if movies.number == num %}
+                      <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% elif num > movies.number|add:-3 and num < movies.number|add:3 %}
+                      <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                    {% endif %}
+                  {% endfor %}
+
+                  {% if movies.has_next %}
+                    <li class="page-item">
+                      <a class="page-link" href="?page={{ movies.next_page_number }}">&raquo;</a>
+                    </li>
+                  {% else %}
+                    <li class="page-item disabled">
+                      <span class="page-link">&raquo;</span>
+                    </li>
+                  {% endif %}
+                </ul>
+              </nav>
+            {% endif %}
+          </div>
         </div>
-        <!-- /.row -->
       </div>
-      <!-- /.container-fluid -->
-    </section>
+    </div>
+  </div>
+</section>
 {% endblock %}

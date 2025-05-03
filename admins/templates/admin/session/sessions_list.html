@@ -22,7 +22,7 @@
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Назва</th>
+
                   <th>Кінотеатр</th>
                   <th>Зал</th>
                   <th>Фільм</th>
@@ -36,7 +36,7 @@
                 {% for session in sessions %}
                   <tr>
                     <td>{{ session.id }}</td>
-                    <td>{{ session.title }}</td>
+
                     <td>{{ session.cinema.title }}</td>
                     <td>{{ session.hall_id.title }}</td>
                     <td>{% if session.movie %}{{ session.movie.title }}{% else %}—{% endif %}</td>

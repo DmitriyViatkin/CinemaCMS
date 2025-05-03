@@ -23,8 +23,18 @@ urlpatterns = [
 
     path('sessions_lists/',views.session_list, name='sessions_list'),
     path('add_sessions/add_sessions', views.add_edit_session, name='add_sessions'),
-    path('add_sessions/<int:sessions_id>/', views.add_edit_session,name='add_sessions_edit'),
+    path('add_sessions/<int:session_id>/', views.add_edit_session,name='add_sessions_edit'),
     path('sessions_lists/<int:pk>/delete/', views.delete_sessions, name='delete_sessions'),
+
+    path('seats_list/', views.seats_list, name='seats_list'),
+    path('seats_list/add_seats/', views.add_edit_seat, name='add_seats'),
+    path('seats_list/<int:session_id>/', views.add_edit_seat, name='edit_seats'),
+    path('seats_lists/<int:pk>/delete/', views.delete_seats, name='delete_seats'),
+
+    path('ticket/tickets_lists/', views.tickets_list, name='tickets_lists'),
+    path('ticket/tickets_lists/add_ticket/', views.add_edit_ticket, name='add_ticket'),
+    path('ticket/edit/<int:ticket_id>/', views.add_edit_ticket, name='edit_ticket'),
+    path('ticket/tickets_lists/<int:pk>/delete/', views.delete_tickets, name='delete'),
     #path('gallery/edit/<int:gallery_id>/', views.manage_gallery, name='manage_gallery'),
 
 ]

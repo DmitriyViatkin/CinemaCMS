@@ -3,9 +3,10 @@ from django.urls import reverse
 from django.utils import timezone
 from movie.models import Movies
 from main.models import Gallery
-from core.models import Cinemas, Halls, Sessions
+from core.models import Cinemas, Halls, Sessions, Seats, Tickets
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from .forms import BlockSEOForm, MovieForm, PictureFormSet, GalleryForm, CinemaForm, HallsForm, SessionsForm
+from .forms import (BlockSEOForm, MovieForm, PictureFormSet, GalleryForm, CinemaForm, HallsForm, SessionsForm,
+                    TicketForm,SeatForm)
 
 
 def index(request):
@@ -180,6 +181,7 @@ def add_cinema_create(request, cinema_id=None):
         'cinema': cinema_instance,
         'form': cinema_form,  # Якщо потрібно для заголовка сторінки
     })
+
 def delete_cinema(request, pk):
     cinema = get_object_or_404(Cinemas, pk=pk)
 
@@ -300,10 +302,104 @@ def add_edit_session(request, session_id=None): # Змінено ім'я фун�
 
     return render(request, 'admin/session/add_sessions.html', {'form': form, 'session': session_instance})
 
-
 def delete_sessions(request, pk):
         sessions = get_object_or_404(Sessions, pk=pk)
 
         sessions.delete()
 
         return redirect('sessions_list')
+
+def seats_list(request):
+    # Отримуємо всі місця для всіх залів
+    seats_list = Seats.objects.select_related('halls').all()
+
+    # Пагінація
+    paginator = Paginator(seats_list, 10)  # 10 місць на сторінці
+    page = request.GET.get('page')
+    try:
+        seats = paginator.page(page)
+    except PageNotAnInteger:
+        seats = paginator.page(1)
+    except EmptyPage:
+        seats = paginator.page(paginator.num_pages)
+
+    context = {
+        'seats': seats,  # Передаємо пагіновані місця
+    }
+    return render(request, 'admin/seats_list/seats_list.html', context)
+
+def add_edit_seat(request):
+    seat_id = request.GET.get('seat_id') or request.POST.get('seat_id')
+    if seat_id:
+        seat_instance = get_object_or_404(Seats, id=seat_id)
+        form = SeatForm(request.POST or None, instance=seat_instance)
+    else:
+        form = SeatForm(request.POST or None)
+
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        return redirect('seats_list')
+
+    seats = Seats.objects.all().order_by('number_row', 'seat')
+    return render(request, 'admin/seats_list/add_seats.html', {
+        'form': form,
+        'seats': seats,
+    })
+
+def delete_seats(request, pk):
+        seat = get_object_or_404(Seats, pk=pk)
+
+        seat.delete()
+
+        return redirect('seats_list')
+
+def tickets_list(request):
+
+    tickets_list = Tickets.objects.all()
+
+    # Пагінація
+    paginator = Paginator(tickets_list, 10)  # 10 місць на сторінці
+    page = request.GET.get('page')
+    try:
+        tickets = paginator.page(page)
+    except PageNotAnInteger:
+        tickets = paginator.page(1)
+    except EmptyPage:
+        tickets = paginator.page(paginator.num_pages)
+
+    context = {
+        'tickets': tickets,  # Передаємо пагіновані місця
+    }
+    return render(request, 'admin/tickets/tickets_list.html', context)
+
+def add_edit_ticket(request, ticket_id=None):
+    ticket_instance = None
+    if ticket_id:
+        ticket_instance = get_object_or_404(Tickets, id=ticket_id) # Або pk=ticket_id
+    if request.method == 'POST':
+        form = TicketForm(request.POST, instance=ticket_instance)
+        if form.is_valid():
+            saved_ticket = form.save()
+            seat_to_update = saved_ticket.seat
+            if seat_to_update:
+                seat_to_update.status = 'S'
+                seat_to_update.save()
+            return redirect('tickets_lists')
+
+    else:
+        form = TicketForm(instance=ticket_instance)
+    context = {
+        'form': form,
+        'ticket_id': ticket_id,
+                }
+
+
+    return render(request, 'admin/tickets/add_tickets.html', context)
+
+def delete_tickets (request, pk):
+        tickets = get_object_or_404(Tickets, pk=pk)
+        if request.method == 'POST':
+            tickets.delete()
+            return redirect('tickets_lists')
+        tickets.delete()
+        return redirect('tickets_lists')

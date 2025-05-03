@@ -1,0 +1,50 @@
+{% extends 'admin/index.html' %}
+{% load static %}
+
+{% block title %}
+    {% if cinema %}Редагувати кінотеатр{% else %}Додати кінотеатр{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<h1>{% if cinema %}Редагувати залл: {{ cinema.title }}{% else %}Додати новий заллр{% endif %}</h1>
+
+<section class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="card card-primary">
+              <div class="card-header">
+
+                        <h3 class="card-title">{% if cinema %}Редагувати{% else %}Додати{% endif %} Залл</h3> <br>
+                    </div>
+
+
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+
+                        {% if hall_form.non_field_errors %}<div class="alert alert-danger">{{ hall_form.non_field_errors }}</div>{% endif %}
+                        {% if block_seo_form.non_field_errors %}<div class="alert alert-danger">{{ block_seo_form.non_field_errors }}</div>{% endif %}
+                        {% if gallery_form.non_field_errors %}<div class="alert alert-danger">{{ gallery_form.non_field_errors }}</div>{% endif %}
+                        {% if picture_formset.non_form_errors %}<div class="alert alert-danger">{{ picture_formset.non_form_errors }}</div>{% endif %}
+
+                        <div class="card-body">
+                             <h2>Інформація про зал</h2>
+                            {% include 'admin/card_forms/SeatsForm.html'%}
+
+                                <div class="card-footer">
+                                     {# Текст кнопки залежить від режиму #}
+                                     <button type="submit" class="btn btn-primary">
+                                         {% if cinema %}Оновити{% else %}Створити{% endif %}
+                                     </button>
+                                </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

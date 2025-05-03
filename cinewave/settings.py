@@ -37,8 +37,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'admins.apps.AdminsConfig',
     'authentication',
-    'admins',
     'users',
     'movie',
     'main',
