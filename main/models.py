@@ -36,7 +36,7 @@ class Picture(models.Model):
     image_type = models.CharField(max_length=20, choices=[('main_picture', 'Главное изображение'), ('gallery', 'Галерея'),
                                                           ('baner', 'Банер'), ('cross_baner', 'Сквозной банер')], verbose_name='Тип зображення')
     image = models.ImageField(upload_to='images/', verbose_name='Зображення')
-    alter_txt = models.CharField(max_length=255, blank=True, null=True, verbose_name='Альтернативний текст')
+
 
     def __str__(self):
         return self.image_type
@@ -46,14 +46,14 @@ class Picture(models.Model):
         verbose_name_plural = 'Картинки'
 
 
-class Baners(models.Model):
+class Banners(models.Model):
     id = models.AutoField(primary_key=True)
-    gallery = models.ForeignKey(Gallery, on_delete=models.SET_NULL, null=True, blank=True, verbose_name= 'Картинка')
+    gallery = models.ForeignKey(Gallery, related_name='banners', on_delete=models.SET_NULL, null=True, blank=True, verbose_name= 'Картинка')
     url = models.URLField(verbose_name= 'URL адреса ')
     text = models.CharField(max_length=100,verbose_name= 'текст')
     scroll_speed = models.DurationField(verbose_name='Швидкість прокрутки (сек.)')
     type = models.CharField(max_length=100,choices=[('baner_top', 'Сквозной банер'), ('news', 'новости')],
-                                 verbose_name= 'ТИп')
+                                 verbose_name= 'Тbп')
     is_active = models.BooleanField(default=False,verbose_name= 'Показувати ')
 
     def __str__(self):

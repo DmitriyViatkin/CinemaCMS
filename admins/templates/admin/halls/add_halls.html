@@ -1,10 +1,11 @@
+
 {% extends 'admin/index.html' %}
 {% load static %}
 
 {% block title %}
     {% if cinema %}Редагувати кінотеатр{% else %}Додати кінотеатр{% endif %}
 {% endblock %}
-
+<script src="{% static 'admins/js/add_btn.js' %}"></script>
 {% block content %}
 
 <h1>{% if cinema %}Редагувати залл: {{ cinema.title }}{% else %}Додати новий заллр{% endif %}</h1>
@@ -42,32 +43,31 @@
                             {% include 'admin/card_forms/seo_form.html' with form=block_seo_form %}
 
 
-                            <h2>Галерея</h2>
+                             <h3>Картинки галереї</h3>
 
-                            <div class="form-group">
-                                {{ gallery_form.title.label_tag }}
-                                {{ gallery_form.title }}
-                                {% if gallery_form.title.help_text %}<small class="form-text text-muted">{{ gallery_form.title.help_text }}</small>{% endif %}
-                                {% for error in gallery_form.title.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-                            </div>
-
-
-
-
+                       <div id="gallery-formset">
+                           <input type="hidden" name="form-TOTAL_FORMS" value="1" id="id_form-TOTAL_FORMS">
+                            <input type="hidden" name="form-INITIAL_FORMS" value="0" id="id_form-INITIAL_FORMS">
+                            <input type="hidden" name="form-MIN_NUM_FORMS" value="0" id="id_form-MIN_NUM_FORMS">
+                            <input type="hidden" name="form-MAX_NUM_FORMS" value="1000" id="id_form-MAX_NUM_FORMS">
                             {{ picture_formset.management_form }}
+                            {% for form in picture_formset %}
+                                {% include 'admin/card_forms/gallery_form.html' with form=form %}
+                            {% endfor %}
+                        </div>
 
-                            {# Цикл по кожній формі в формсеті картинок #}
+                        <button id="add-picture-form" type="button" class="btn btn-success mt-2">Додати ще одне зображення</button>
 
-                                 {% include 'admin/card_forms/image_form.html' %}
+                        <template id="empty-picture-form">
+                            {% include 'admin/card_forms/gallery_form.html' with form=picture_formset.empty_form %}
+                        </template>
 
-                            {# Можливо, вам знадобиться кнопка для додавання нових картинок за допомогою JavaScript #}
-                            {# <button type="button" class="btn btn-secondary add-picture-button">Додати ще картинку</button> #}
-
+                    </div> {# Кінець card-body #}
 
                         </div> {# Кінець card-body #}
 
                         <div class="card-footer">
-                             {# Текст кнопки залежить від режиму #}
+
                              <button type="submit" class="btn btn-primary">
                                  {% if cinema %}Оновити{% else %}Створити{% endif %}
                              </button>
@@ -79,4 +79,5 @@
         </div>
     </div>
 </section>
+<script src="{% static 'js/add_btn.js' %}"></script>
 {% endblock %}

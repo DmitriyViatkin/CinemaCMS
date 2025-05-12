@@ -1,0 +1,148 @@
+{% extends 'main/index1.html' %}
+{% block content %}
+  <div class="container mt-4">
+        <h1>Купівля квитка</h1>
+
+        {# Можна відобразити інформацію про сеанс, якщо це потрібно #}
+        {% if session %}
+            <p>Ви купуєте квиток на сеанс:</p>
+            <ul>
+                {# Припускаємо, що Session.__str__ або поля accessible #}
+                <li>Фільм: {{ session.movie.title|default:"Невідомо" }}</li>
+                <li>Кінотеатр: {{ session.cinema.title|default:"Невідомо" }}</li>
+                <li>Зал: {{ session.hall_id.title|default:"Невідомо" }}</li>
+                <li>Дата: {{ session.date|date:"d.m.Y" }}</li>
+                <li>Час: {{ session.time_session|time:"H:i" }}</li>
+            </ul>
+        {% endif %}
+
+        {# Форма для покупки/створення квитка #}
+        {# Ця форма відображає поля з TicketForm #}
+        <form method="post">
+            {% csrf_token %} {# Обов'язковий тег #}
+
+            {# Необов'язково: Відображення загальних помилок форми #}
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger" role="alert">
+                    {% for error in form.non_field_errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {# Використовуємо структуру card-body для групування полів #}
+            <div class="card-body">
+                {# Поле Сеанс #}
+                <div class="mb-3"> {# Клас Bootstrap для відступу знизу #}
+                    {{ form.session.label_tag }} {# Мітка поля #}
+                    {# Ручне відображення Select з класом form-control #}
+                    {# Використовуємо атрибути з об'єкта поля форми #}
+                    <select name="{{ form.session.name }}" id="{{ form.session.id_for_label }}" class="form-control">
+                         {% for value, text in form.session.field.choices %}
+                             <option value="{{ value|stringformat:'s' }}"{% if form.session.value|stringformat:'s' == value|stringformat:'s' %} selected{% endif %}>{{ text }}</option>
+                         {% endfor %}
+                    </select>
+                    {% if form.session.help_text %}
+                        <small class="form-text text-muted">{{ form.session.help_text }}</small> {# Текст підказки #}
+                    {% endif %}
+                    {% for error in form.session.errors %}
+                        <div class="alert alert-danger mt-1">{{ error }}</div> {# Відображення помилок для поля #}
+                    {% endfor %}
+                </div>
+
+                {# Поле Фільм #}
+                <div class="mb-3">
+                    {{ form.movie.label_tag }}
+                     <select name="{{ form.movie.name }}" id="{{ form.movie.id_for_label }}" class="form-control">
+                         {% for value, text in form.movie.field.choices %}
+                              {% if value is None or value == '' %}
+                                 <option value="">---------</option>
+                              {% else %}
+                                 <option value="{{ value|stringformat:'s' }}"{% if form.movie.value|stringformat:'s' == value|stringformat:'s' %} selected{% endif %}>{{ text }}</option>
+                              {% endif %}
+                         {% endfor %}
+                    </select>
+                    {% if form.movie.help_text %}
+                        <small class="form-text text-muted">{{ form.movie.help_text }}</small>
+                    {% endif %}
+                    {% for error in form.movie.errors %}
+                        <div class="alert alert-danger mt-1">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                {# Поле Місце #}
+                {# В типовій формі покупки тут була б схема залу з вибором місця #}
+                <div class="mb-3">
+                    {{ form.seat.label_tag }}
+                     <select name="{{ form.seat.name }}" id="{{ form.seat.id_for_label }}" class="form-control">
+                         {% for value, text in form.seat.field.choices %}
+                             <option value="{{ value|stringformat:'s' }}"{% if form.seat.value|stringformat:'s' == value|stringformat:'s' %} selected{% endif %}>{{ text }}</option>
+                         {% endfor %}
+                    </select>
+                    {% if form.seat.help_text %}
+                        <small class="form-text text-muted">{{ form.seat.help_text }}</small>
+                    {% endif %}
+                    {% for error in form.seat.errors %}
+                        <div class="alert alert-danger mt-1">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                {# Поле Глядач (Profile) #}
+                {# Зазвичай при покупці користувачем це поле не вибирається, а береться з request.user #}
+                <div class="mb-3">
+                    {{ form.profile.label_tag }}
+                     <select name="{{ form.profile.name }}" id="{{ form.profile.id_for_label }}" class="form-control">
+                         {% for value, text in form.profile.field.choices %}
+                             {% if value is None or value == '' %}
+                                 <option value="">---------</option>
+                              {% else %}
+                                 <option value="{{ value|stringformat:'s' }}"{% if form.profile.value|stringformat:'s' == value|stringformat:'s' %} selected{% endif %}>{{ text }}</option>
+                              {% endif %}
+                         {% endfor %}
+                    </select>
+                    {% if form.profile.help_text %}
+                        <small class="form-text text-muted">{{ form.profile.help_text }}</small>
+                    {% endif %}
+                    {% for error in form.profile.errors %}
+                        <div class="alert alert-danger mt-1">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                 {# Поле Зал (Halls) #}
+                 {# Зазвичай при покупці користувачем це поле не вибирається явно, воно пов'язане з сеансом #}
+                <div class="mb-3">
+                    {{ form.halls.label_tag }}
+                     <select name="{{ form.halls.name }}" id="{{ form.halls.id_for_label }}" class="form-control">
+                         {% for value, text in form.halls.field.choices %}
+                             {% if value is None or value == '' %}
+                                 <option value="">---------</option>
+                              {% else %}
+                                 <option value="{{ value|stringformat:'s' }}"{% if form.halls.value|stringformat:'s' == value|stringformat:'s' %} selected{% endif %}>{{ text }}</option>
+                              {% endif %}
+                         {% endfor %}
+                    </select>
+                    {% if form.halls.help_text %}
+                        <small class="form-text text-muted">{{ form.halls.help_text }}</small>
+                    {% endif %}
+                    {% for error in form.halls.errors %}
+                        <div class="alert alert-danger mt-1">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+            </div> {# Кінець card-body #}
+
+            {# Кнопка відправки форми #}
+            <div class="card-body">
+                 <button type="submit" class="btn btn-primary">Купити квиток</button>
+            </div>
+        </form>
+
+        <hr> {# Розділювач #}
+
+        {# ### ВАЖЛИВО: ЦЕЙ ШАБЛОН НЕ РЕАЛІЗУЄ СТАНДАРТНИЙ ВИБІР МІСЦЬ ### #}
+        {# Стандартна сторінка покупки квитка показує схему залу з вільними/зайнятими місцями. #}
+        {# Користувач клікає на місця, щоб їх вибрати. #}
+        {# Якщо ваша мета - стандартний інтерфейс вибору місць, поверніться до обговорення purchase_ticket_view та його шаблону. #}
+
+    </div> {# Кінець container #}
+{% endblock %}

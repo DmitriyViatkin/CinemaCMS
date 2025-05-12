@@ -43,9 +43,9 @@
                     <td>{{ seat.is_vip|yesno:"Так,Ні" }}</td>
                     <td>{{ seat.price }} ₴</td>
                     <td>
-                      <!-- Редагування місця -->
+
                       <a href="{% url 'add_seats' %}?seat_id={{ seat.id }}" class="btn btn-primary btn-sm">Редагувати</a>
-                      <!-- Видалення місця -->
+
                       <a href="{% url 'delete_seats'  seat.id %}" class="btn btn-danger btn-sm"
                          onclick="return confirm('Ви впевнені, що хочете видалити це місце?');">
                         Видалити

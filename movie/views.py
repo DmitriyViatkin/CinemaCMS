@@ -32,14 +32,22 @@ def movie_list(request):
 
 
 def movie_detail(request, movie_slug):
-    movies = get_object_or_404(Movies, seo_block__seo_url=movie_slug)
+    movie = get_object_or_404(
+        Movies.objects.select_related('seo_block', 'gallery')
+              .prefetch_related(
+                  Prefetch('gallery__pictures'),
+                  'movie_sessions'
+              ),
+        seo_block__seo_url=movie_slug
+    )
 
-    main_picture = movies.gallery.pictures.filter(image_type="main_picture").first() if hasattr(movies,
-                                                                                                'gallery') and movies.gallery else None
+    main_picture = movie.gallery.pictures.filter(image_type="main_picture").first() if movie.gallery else None
+
     context = {
-        'movies': movies,
+        'movie': movie,
         'main_picture': main_picture,
-        #'gallery_pictures': gallery_pictures,
+        'gallery_pictures': movie.gallery.pictures.all() if movie.gallery else [],
+        'sessions': movie.movie_sessions.all()
     }
     return render(request, 'movie/movie_detail.html', context)
 

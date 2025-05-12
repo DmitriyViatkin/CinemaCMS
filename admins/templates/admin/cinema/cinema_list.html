@@ -8,34 +8,32 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    {# Заголовок картки з кнопкою "Додати кінотеатр" справа #}
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h3 class="card-title mb-0">Список кінотеатрів</h3> {# Змінено заголовок картки #}
 
-                        <div class="card-tools"> {# Використовуємо card-tools для розміщення справа #}
-                            {# Кнопка або посилання для додавання нового кінотеатру #}
-                            {# Замініть 'add_cinema_create' на ім'я вашого URL-шаблону для створення кінотеатру #}
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="card-title mb-0">Список кінотеатрів</h3>
+
+                        <div class="card-tools">
                             <a href="{% url 'add_cinema_create' %}" class="btn btn-success btn-sm">
-                                <i class="fas fa-plus"></i> Додати кінотеатр {# Можна додати іконку Font Awesome #}
+                                <i class="fas fa-plus"></i> Додати кінотеатр
                             </a>
                         </div>
                     </div>
                     <div class="card-body">
-                        <table id="cinemasTable" class="table table-bordered table-hover"> {# Змінено ID таблиці #}
+                        <table id="cinemasTable" class="table table-bordered table-hover">
                             <thead>
                                 <tr>
-                                    <th>Назва</th>      {# Поле title #}
-                                    <th>Місто</th>      {# Поле city #}
-                                    <th>Дата додавання</th> {# Поле date #}
-                                    <th>Дії</th>        {# Колонки для кнопок Редагувати/Видалити #}
+                                    <th>Назва</th>
+                                    <th>Місто</th>
+                                    <th>Дата додавання</th>
+                                    <th>Дії</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for cinema in cinemas %} {# Цикл по об'єктах кінотеатрів #}
                                 <tr>
-                                    <td>{{ cinema.title }}</td>      {# Виводимо назву кінотеатру #}
-                                    <td>{{ cinema.city }}</td>       {# Виводимо місто #}
-                                    <td>{{ cinema.date|date:"d.m.Y" }}</td> {# Виводимо дату додавання #}
+                                    <td>{{ cinema.title }}</td>
+                                    <td>{{ cinema.city }}</td>
+                                    <td>{{ cinema.date|date:"d.m.Y" }}</td>
                                     <td>
                                         {# Кнопка або посилання для редагування кінотеатру #}
                                         {# Замініть 'add_cinema_edit' на ім'я вашого URL-шаблону для редагування кінотеатру #}

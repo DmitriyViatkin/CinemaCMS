@@ -1,6 +1,5 @@
 {% extends 'admin/index.html' %}
 
-{# Заголовок сторінки: Додати або Редагувати Сеанс #}
 {% block title %}
     {% if session %}Редагувати Сеанс{% else %}Додати новий Сеанс{% endif %}
 {% endblock %}
@@ -11,106 +10,122 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    {# Заголовок картки: Додати або Редагувати Сеанс #}
+
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h3 class="card-title mb-0">
                             {% if session %}Редагувати Сеанс: {{ session.title }}{% else %}Додати новий Сеанс{% endif %}
                         </h3>
                         <div>
-                            {# Кнопка "До списку сеансів" #}
-                            {# Переконайтеся, що у вас є URL з іменем 'sessions_list' #}
                             <a href="{% url 'sessions_list' %}" class="btn btn-secondary btn-sm">
                                 <i class="fas fa-arrow-left"></i> До списку сеансів
                             </a>
                         </div>
                     </div>
+
                     <div class="card-body">
-                        {# ПОЧАТОК ФОРМИ #}
-                        {# Метод POST і enctype="multipart/form-data" (якщо завантажуєте файли) #}
-                        <form method="post" enctype="multipart/form-data">
-                            {% csrf_token %} {# CSRF токен #}
+                        <form method="post">
+                            {% csrf_token %}
 
-                            {# Відображення загальних помилок форми (не пов'язаних з конкретним полем) #}
-                            {% if form.non_field_errors %}
-                                <div class="alert alert-danger">
-                                    {{ form.non_field_errors }}
+                           <div id="session-formset">
+    {{ session_formset.management_form }}
+
+    {% for form in session_formset %}
+        <div class="form-group session-form border p-3 mb-3">
+
+            {# Приховані службові поля #}
+            {{ form.id }}
+            {% if form.DELETE %}
+                <div class="form-check">
+                    {{ form.DELETE }} {{ form.DELETE.label_tag }}
+                </div>
+            {% endif %}
+
+            {# Кінотеатр #}
+            <div class="form-group">
+                {{ form.cinema.label_tag }}
+                {{ form.cinema }}
+                {% for error in form.cinema.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            {# Зал #}
+            <div class="form-group">
+                {{ form.hall_id.label_tag }}
+                {{ form.hall_id }}
+                {% for error in form.hall_id.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            {# Фільм #}
+            <div class="form-group">
+                {{ form.movie.label_tag }}
+                {{ form.movie }}
+                {% for error in form.movie.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            {# Час сеансу #}
+            <div class="form-group">
+                {{ form.time_session.label_tag }}
+                {{ form.time_session }}
+                {% for error in form.time_session.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            {# Тривалість #}
+            <div class="form-group">
+                {{ form.duration.label_tag }}
+                {{ form.duration }}
+                {% for error in form.duration.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            {# Дата #}
+            <div class="form-group">
+                {{ form.date.label_tag }}
+                {{ form.date }}
+                {% for error in form.date.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+        </div>
+    {% endfor %}
+</div>
+
+                            <template id="empty-session-form">
+                                <div class="form-group session-form">
+                                    {{ session_formset.empty_form.as_p|safe }}
                                 </div>
-                            {% endif %}
+                            </template>
 
-                            {# Ручний рендеринг кожного поля SessionsForm #}
-
-                            {# Поле title #}
-                            <div class="form-group">
-                                {{ form.title.label_tag }} {# Рендерить <label> для поля #}
-                                {{ form.title }} {# Рендерить сам HTML-елемент поля (input, select, textarea тощо) #}
-                                {% if form.title.help_text %}
-                                    <small class="form-text text-muted">{{ form.title.help_text|safe }}</small> {# Текст-підказка #}
-                                {% endif %}
-                                {# Відображення помилок для цього поля #}
-                                {% for error in form.title.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-                            </div>
-
-                            {# Поле cinema #}
-                            <div class="form-group">
-                                {{ form.cinema.label_tag }}
-                                {{ form.cinema }}
-                                {% if form.cinema.help_text %}<small class="form-text text-muted">{{ form.cinema.help_text|safe }}</small>{% endif %}
-                                {% for error in form.cinema.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-                            </div>
-
-                            {# Поле hall_id (припускаємо, що це ForeignKey до Halls) #}
-                            <div class="form-group">
-                                {{ form.hall_id.label_tag }}
-                                {{ form.hall_id }}
-                                {% if form.hall_id.help_text %}<small class="form-text text-muted">{{ form.hall_id.help_text|safe }}</small>{% endif %}
-                                {% for error in form.hall_id.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-                            </div>
-
-                            {# Поле movie #}
-                            <div class="form-group">
-                                {{ form.movie.label_tag }}
-                                {{ form.movie }}
-                                {% if form.movie.help_text %}<small class="form-text text-muted">{{ form.movie.help_text|safe }}</small>{% endif %}
-                                {% for error in form.movie.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-                            </div>
-
-                            {# Поле time_session #}
-                            <div class="form-group">
-                                {{ form.time_session.label_tag }}
-                                {{ form.time_session }}
-                                {% if form.time_session.help_text %}<small class="form-text text-muted">{{ form.time_session.help_text|safe }}</small>{% endif %}
-                                {% for error in form.time_session.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-                            </div>
-
-                            {# Поле duration #}
-                            <div class="form-group">
-                                {{ form.duration.label_tag }}
-                                {{ form.duration }}
-                                {% if form.duration.help_text %}<small class="form-text text-muted">{{ form.duration.help_text|safe }}</small>{% endif %}
-                                {% for error in form.duration.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-                            </div>
-
-                             {# Поле date (з моделі Sessions, якщо потрібно включити у форму) #}
-                             {# Якщо поле date є частиною вашої SessionsForm fields #}
-                             {% if form.date %} {# Перевірка, чи поле 'date' існує у формі #}
-                                 <div class="form-group">
-                                     {{ form.date.label_tag }}
-                                     {{ form.date }}
-                                     {% if form.date.help_text %}<small class="form-text text-muted">{{ form.date.help_text|safe }}</small>{% endif %}
-                                     {% for error in form.date.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-                                 </div>
-                             {% endif %}
-
-
-                            {# Кнопка відправки форми #}
-                            <button type="submit" class="btn btn-primary">Зберегти Сеанс</button>
-
+                            <button type="button" id="add-session-form" class="btn btn-success mt-2">Додати ще один сеанс</button>
+                            <button type="submit" class="btn btn-primary mt-2">Зберегти Сеанс</button>
                         </form>
-                        {# КІНЕЦЬ ФОРМИ #}
                     </div>
+
                 </div>
             </div>
         </div>
     </div>
 </section>
+
+{# Підключення jQuery, якщо ще не підключений #}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('#add-session-form').click(function() {
+            let formCount = $('#id_form-TOTAL_FORMS').val();
+            let emptyFormHtml = $('#empty-session-form').html().replace(/__prefix__/g, formCount);
+            $('#session-formset').append(emptyFormHtml);
+            $('#id_form-TOTAL_FORMS').val(++formCount);
+        });
+    });
+</script>
 {% endblock %}

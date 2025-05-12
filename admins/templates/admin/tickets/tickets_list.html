@@ -25,28 +25,25 @@
                   <th>Глядач</th>
                   <th>Дата</th>
                   <th>Статус</th>
-                  <th>Дії</th> {# Доданий стовпець для кнопок дій #}
+                  <th>Дії</th>
                 </tr>
               </thead>
               <tbody>
                 {% for ticket in tickets %}
                   <tr>
-                    {# Припускаємо, що session.title працює коректно після виправлення Sessions.__str__ #}
+
                     <td>{{ ticket.session.title|default:"-" }}</td>
-                    {# Виводимо назву залу. Доступ може бути через ticket.halls.name #}
-                    {# Або через сеанс: ticket.session.hall_id.title #}
-                    {# Використовуємо .name, припускаючи, що у моделі Hall є поле name, або .title #}
-                    {# Додано |default:"-" на випадок, якщо halls може бути null #}
-                    <td>{{ ticket.halls.title|default:"-" }}</td> {# Припустимо, що Hall має поле title #}
+
+                    <td>{{ ticket.halls.title|default:"-" }}</td>
                     <td>{{ ticket.seat.number_row }}</td>
                     <td>{{ ticket.seat.seat }}</td>
                     <td>{{ ticket.seat.is_vip|yesno:"Так,Ні" }}</td>
                     <td>{{ ticket.seat.price }} ₴</td>
-                    {# Доступ до username через profile, який пов'язаний з моделлю User #}
+
                     <td>{{ ticket.profile.username|default:"Немає глядача" }}</td>
                     <td>{{ ticket.date }}</td>
                     <td>
-                      {# Перевіряємо статус місця #}
+
                       {% if ticket.seat.status == 'F' %}Вільне
                       {% elif ticket.seat.status == 'S' %}Куплене
                       {% elif ticket.seat.status == 'N' %}Не доступно
@@ -54,11 +51,7 @@
                       {% endif %}
                     </td>
                     <td>
-
                       <a href="{% url 'edit_ticket' ticket.id %}" class="btn btn-sm btn-info mr-1">Редагувати</a>
-
-
-
                       <a href="{% url 'delete' ticket.id %}"
                          class="btn btn-sm btn-danger"
                          onclick="return confirm('Ви впевнені, що хочете видалити цей квиток?');">
@@ -68,7 +61,7 @@
                   </tr>
                 {% empty %}
                   <tr>
-                    <td colspan="10">Квитків не знайдено.</td> {# Змінено кількість стовпців #}
+                    <td colspan="10">Квитків не знайдено.</td>
                   </tr>
                 {% endfor %}
               </tbody>
@@ -87,20 +80,17 @@
                     </li>
                   {% endif %}
 
-                  {# Логіка відображення номерів сторінок #}
+
                   {% for num in tickets.paginator.page_range %}
                     {% if tickets.number == num %}
                       <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                    {# Відображаємо сторінки навколо поточної (наприклад, +/- 2) #}
+
                     {% elif num > tickets.number|add:-3 and num < tickets.number|add:3 %}
                       <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
-                    {# Можна додати відображення першої та останньої сторінки, якщо вони не потрапляють у діапазон навколо поточної #}
+
                     {% elif num == 1 or num == tickets.paginator.num_pages %}
                          <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
-                    {# Якщо є великий пропуск між сторінками, можна відобразити "..." #}
                     {% elif num == tickets.number|add:-3 or num == tickets.number|add:3 %}
-                         {# Це спрощена логіка для "...", може відобразити декілька "..." #}
-                         {# Біль складна логіка потрібна для коректних "..." #}
                          <li class="page-item disabled"><span class="page-link">...</span></li>
                     {% endif %}
                   {% endfor %}

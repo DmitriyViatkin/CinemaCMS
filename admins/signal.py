@@ -1,12 +1,8 @@
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from core.models import Sessions, Seats, Halls
-from datetime import date
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from datetime import date
-from core.models import Halls, Seats  # заміни шлях на актуальний
+from core.models import Halls, Seats
 
 @receiver(post_save, sender=Halls)
 def create_seats_for_hall(sender, instance, created, **kwargs):

@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from .models import PaigesCinema, Baners, Cross_banner,PaigesNews, Picture, Promotion
+from .models import PaigesCinema, Banners, Cross_banner,PaigesNews, Picture, Promotion
 from django.utils.timezone import now
 from datetime import timedelta
 from movie.models import Movies
@@ -7,53 +7,74 @@ from django.db.models import Prefetch
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 def index(request):
-    # Банери
-    baners = Baners.objects.all().select_related('gallery').prefetch_related(
-        Prefetch('gallery__pictures', queryset=Picture.objects.filter(image_type='baner'))
-    )
-    for baner in baners:
-        if baner.gallery:
-            baner.pictures = baner.gallery.pictures.all()
-        else:
-            baner.pictures = []
 
-    # Фільми, що вже в прокаті (за останні 30 днів)
+    banners = Banners.objects.select_related('gallery').prefetch_related(
+        Prefetch(
+            'gallery__pictures',
+            queryset=Picture.objects.filter(image_type='baner'),
+            to_attr='banner_pictures'
+        )
+    )
+
+
+    print(f"Загальна кількість банерів: {len(banners)}")
+
+    for banner in banners:
+        if banner.gallery:
+            banner.pictures = banner.gallery.banner_pictures
+            print(f"Для банера {banner.id} знайдено {len(banner.pictures)} зображень.")
+        else:
+            banner.pictures = []
+            print(f"Банер {banner.id} не має галереї.")
+
+    # Фільми, що вже в прокаті
     movies = Movies.objects.filter(
         relise_date__lte=now()
     ).select_related('gallery').prefetch_related(
-        Prefetch('gallery__pictures', queryset=Picture.objects.filter(image_type='main_picture'))
+        Prefetch(
+            'gallery__pictures',
+            queryset=Picture.objects.filter(image_type='main_picture'),
+            to_attr='main_pictures'
+        )
     ).order_by('title')
 
     for movie in movies:
-        movie.main_picture = movie.gallery.pictures.first() if movie.gallery else None
+        movie.main_picture = movie.gallery.main_pictures[0] if movie.gallery and movie.gallery.main_pictures else None
 
-    # ---- Фільми, що скоро вийдуть ----
+    # Фільми, що скоро вийдуть
     coming_soon = Movies.objects.filter(
         relise_date__gt=now(),
         relise_date__lte=now() + timedelta(days=30)
     ).select_related('gallery').prefetch_related(
-        Prefetch('gallery__pictures', queryset=Picture.objects.filter(image_type='main_picture'))
+        Prefetch(
+            'gallery__pictures',
+            queryset=Picture.objects.filter(image_type='main_picture'),
+            to_attr='main_pictures'
+        )
     ).order_by('relise_date')
 
     for movie in coming_soon:
-        movie.main_picture = movie.gallery.pictures.first() if movie.gallery else None
+        movie.main_picture = movie.gallery.main_pictures[0] if movie.gallery and movie.gallery.main_pictures else None
 
-    # ---- Новини (тільки активні, останні 5) ----
+    # Новини
     news = PaigesNews.objects.filter(is_active=True).select_related('gallery').prefetch_related(
-        Prefetch('gallery__pictures', queryset=Picture.objects.filter(image_type='main_picture'))
+        Prefetch(
+            'gallery__pictures',
+            queryset=Picture.objects.filter(image_type='main_picture'),
+            to_attr='main_pictures'
+        )
     ).order_by('-date')[:5]
 
     for item in news:
-        item.main_picture = item.gallery.pictures.first() if item.gallery else None
+        item.main_picture = item.gallery.main_pictures[0] if item.gallery and item.gallery.main_pictures else None
 
     return render(request, 'main/index1.html', {
-        'baners': baners,
+        'banners': banners,
         'movies': movies,
         'coming_soon': coming_soon,
         'scroll_interval': 5000,
         'news': news
     })
-
 
 
 def paiges_cinema_detail(request, slug):

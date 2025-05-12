@@ -2,12 +2,12 @@
 {% load static %}
 
 {% block title %}
-    {% if cinema %}Редагувати кінотеатр{% else %}Додати кінотеатр{% endif %}
+    {% if seats %}Редагувати місце{% else %}Додати  кінотеатр{% endif %}
 {% endblock %}
 
 {% block content %}
 
-<h1>{% if cinema %}Редагувати залл: {{ cinema.title }}{% else %}Додати новий заллр{% endif %}</h1>
+<h1>{% if seats %}Редагувати місце: {{ seats.title }}{% else %}Додати нове місце{% endif %}</h1>
 
 <section class="content">
       <div class="container-fluid">
@@ -16,7 +16,7 @@
             <div class="card card-primary">
               <div class="card-header">
 
-                        <h3 class="card-title">{% if cinema %}Редагувати{% else %}Додати{% endif %} Залл</h3> <br>
+                        <h3 class="card-title">{% if cinema %}Редагувати{% else %}Додати{% endif %} Зал</h3> <br>
                     </div>
 
 
@@ -30,13 +30,13 @@
                         {% if picture_formset.non_form_errors %}<div class="alert alert-danger">{{ picture_formset.non_form_errors }}</div>{% endif %}
 
                         <div class="card-body">
-                             <h2>Інформація про зал</h2>
+                             <h2>Інформація про місце </h2>
                             {% include 'admin/card_forms/SeatsForm.html'%}
 
                                 <div class="card-footer">
-                                     {# Текст кнопки залежить від режиму #}
+
                                      <button type="submit" class="btn btn-primary">
-                                         {% if cinema %}Оновити{% else %}Створити{% endif %}
+                                         {% if seats  %}Оновити{% else %}Створити{% endif %}
                                      </button>
                                 </div>
                         </div>

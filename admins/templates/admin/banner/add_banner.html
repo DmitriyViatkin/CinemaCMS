@@ -1,0 +1,131 @@
+{% extends 'admin/index.html' %}
+
+{% block title %}
+    Додати галерею
+{% endblock %}
+
+{% block content %}
+<h1>Додати нову галерею</h1>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="card card-primary">
+            <div class="card-header"><h3 class="card-title">Додати банери з картинками</h3></div>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div id="banner-container">
+                    <div class="banner-form-unit">
+                        <h2>Банер</h2>
+                        <div class="form-group">
+                            {{ banner_formset.empty_form.url.label_tag }}{{ banner_formset.empty_form.url }}
+                            {% for error in banner_formset.empty_form.url.errors %}
+                                <div class="alert alert-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        <div class="form-group">
+                            {{ banner_formset.empty_form.text.label_tag }}{{ banner_formset.empty_form.text }}
+                        </div>
+                        <div class="form-group">
+                            {{ banner_formset.empty_form.scroll_speed.label_tag }}{{ banner_formset.empty_form.scroll_speed }}
+                        </div>
+                        <div class="form-group">
+                            {{ banner_formset.empty_form.type.label_tag }}{{ banner_formset.empty_form.type }}
+                        </div>
+                        <div class="form-group">
+                            {{ banner_formset.empty_form.is_active }} {{ banner_formset.empty_form.is_active.label_tag }}
+                        </div>
+
+                        <h3>Картинка для банера</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                {{ picture_formset.empty_form.image_type.label_tag }}{{ picture_formset.empty_form.image_type }}
+                            </div>
+                            <div class="form-group">
+                                {{ picture_formset.empty_form.image.label_tag }}{{ picture_formset.empty_form.image }}
+                            </div>
+                        </div>
+                        <hr>
+                    </div>
+                </div>
+
+                {{ banner_formset.management_form }}
+                {{ picture_formset.management_form }}
+
+
+
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary">Створити</button>
+                    <button type="button" id="add-banner-form" class="btn btn-primary">Додати ще один банер </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const addBannerButton = document.getElementById("add-banner-form");
+        const bannerContainer = document.getElementById("banner-container");
+        const bannerTotalForms = document.getElementById("id_banners-TOTAL_FORMS");
+        const pictureTotalForms = document.getElementById("id_pictures-TOTAL_FORMS");
+
+        addBannerButton.addEventListener("click", function () {
+            const bannerFormCount = parseInt(bannerTotalForms.value);
+            const pictureFormCount = parseInt(pictureTotalForms.value);
+
+            const newBannerUnit = document.createElement('div');
+            newBannerUnit.classList.add('banner-form-unit');
+            newBannerUnit.innerHTML = `
+                <h2>Банер</h2>
+                <div class="form-group">
+                    <label for="id_banners-${bannerFormCount}-url">URL адреса:</label>
+                    <input type="url" name="banners-${bannerFormCount}-url" class="form-control" id="id_banners-${bannerFormCount}-url">
+                </div>
+                <div class="form-group">
+                    <label for="id_banners-${bannerFormCount}-text">Текст:</label>
+                    <input type="text" name="banners-${bannerFormCount}-text" class="form-control" id="id_banners-${bannerFormCount}-text">
+                </div>
+                <div class="form-group">
+                    <label for="id_banners-${bannerFormCount}-scroll_speed">Швидкість прокрутки (сек.):</label>
+                    <input type="number" name="banners-${bannerFormCount}-scroll_speed" class="form-control" id="id_banners-${bannerFormCount}-scroll_speed">
+                </div>
+                <div class="form-group">
+                    <label for="id_banners-${bannerFormCount}-type">Тип:</label>
+                    <select name="banners-${bannerFormCount}-type" class="form-control" id="id_banners-${bannerFormCount}-type">
+                        <option value="baner_top">Сквозной банер</option>
+                        <option value="news">новини</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <input type="checkbox" name="banners-${bannerFormCount}-is_active" class="form-check-input" id="id_banners-${bannerFormCount}-is_active">
+                    <label class="form-check-label" for="id_banners-${bannerFormCount}-is_active">Показувати</label>
+                </div>
+
+                <h3>Картинка для банера</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_pictures-${pictureFormCount}-image_type">Тип зображення:</label>
+                        <select name="pictures-${pictureFormCount}-image_type" class="form-control" id="id_pictures-${pictureFormCount}-image_type">
+                            <option value="main_picture">Главное изображение</option>
+                            <option value="gallery">Галерея</option>
+                            <option value="baner">Банер</option>
+                            <option value="cross_baner">Сквозной банер</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_pictures-${pictureFormCount}-image">Зображення:</label>
+                        <input type="file" name="pictures-${pictureFormCount}-image" class="form-control-file" id="id_pictures-${pictureFormCount}-image">
+                    </div>
+                </div>
+                <hr>
+            `;
+
+            bannerContainer.appendChild(newBannerUnit);
+            bannerTotalForms.value = bannerFormCount + 1;
+            pictureTotalForms.value = pictureFormCount + 1;
+        });
+    });
+</script>
+{% endblock %}

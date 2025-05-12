@@ -24,15 +24,15 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        {# ПОЧАТОК ФОРМИ #}
-                        {# Метод POST і enctype="multipart/form-data" (якщо завантажуєте файли) #}
+
+
                         <form method="post" enctype="multipart/form-data">
                             {% csrf_token %} {# CSRF токен #}
 
                             {% include 'admin/card_forms/tickets_form.html'  %}
 
                         </form>
-                        {# КІНЕЦЬ ФОРМИ #}
+
                     </div>
                 </div>
             </div>

@@ -1,18 +1,7 @@
  {# sidebar.html #}
 {% load static %}
     <div class="sidebar">
-      <!-- Sidebar user panel (optional) -->
-      <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-        <div class="image">
-          <img src="{% static 'admins/dist/img/user2-160x160.jpg'%}" class="img-circle elevation-2" alt="User Image">
-        </div>
-        <div class="info">
-          <a href="#" class="d-block">Alexander Pierce</a>
-        </div>
-      </div>
-
-
-      <!-- Sidebar Menu -->
+     <!-- Sidebar Menu -->
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
           <!-- Add icons to the links using the .nav-icon class
@@ -20,22 +9,19 @@
 
 
           <li class="nav-item">
-
-
           <li class="nav-item">
-            <a href="pages/calendar.html" class="nav-link">
-              <i class="nav-icon far fa-calendar-alt"></i>
-              <p>
-                Calendar
-                <span class="badge badge-info right">2</span>
-              </p>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="pages/gallery.html" class="nav-link">
+            <a href="{% url 'users' %}" class="nav-link">
               <i class="nav-icon far fa-image"></i>
               <p>
-                Gallery
+                Пользователи
+              </p>
+            </a>
+
+          <li class="nav-item">
+            <a href="{% url 'gallery' %}" class="nav-link">
+              <i class="nav-icon far fa-image"></i>
+              <p>
+                Галерея
               </p>
             </a>
           </li>
@@ -57,7 +43,7 @@
             </a>
           </li>
           <li class="nav-item">
-            <a href="pages/gallery.html" class="nav-link">
+            <a href="{% url 'banners' %}" class="nav-link">
               <i class="nav-icon far fa-image"></i>
               <p>
                 Banners
@@ -68,7 +54,7 @@
             <a href="{% url 'tickets_lists' %}" class="nav-link">
               <i class="nav-icon far fa-image"></i>
               <p>
-                Banners
+                Квитки
               </p>
             </a>
           </li>

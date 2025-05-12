@@ -1,45 +1,59 @@
-{# navbar.html #}
 {% load static %}
 
-{% if baners and baners.0.pictures %}
-  {% with background_image=baners.0.pictures.0.image.url %}
+{% if banners and banners.0.pictures.all %}
+  {% with background_image=banners.0.pictures.first.image.url %}
     <body data-bs-theme="light" class="has-bg" style="background-image: url('{{ background_image }}'); background-size: cover;">
   {% endwith %}
 {% else %}
   <body data-bs-theme="light">
 {% endif %}
+
+<!-- Виведення відладкового тексту для банерів -->
+<div class="container mt-4">
+  <h4>Відладка банерів:</h4>
+  <ul>
+    {% for banner in banners %}
+      <li>Банер ID: {{ banner.id }} — Зображень: {{ banner.pictures|length }}</li>
+    {% empty %}
+      <li>Банерів не знайдено.</li>
+    {% endfor %}
+  </ul>
+</div>
+
 <div id="carouselExampleCaptions" class="carousel slide" data-bs-ride="carousel" data-bs-interval="{{ scroll_interval|default:5000 }}" data-bs-wrap="true">
 
-  <!-- Индикаторы -->
+  <!-- Індикатори -->
   <div class="carousel-indicators">
-    {% for baner in baners %}
-      {% for picture in baner.pictures %}
+    {% for banner in banners %}
+      {% for picture in banner.pictures.all %}
+        {% with index=forloop.parentloop.counter0|add:forloop.counter0 %}
         <button type="button"
                 data-bs-target="#carouselExampleCaptions"
-                data-bs-slide-to="{{ forloop.parentloop.counter0|add:forloop.counter0 }}"
+                data-bs-slide-to="{{ index }}"
                 {% if forloop.parentloop.first and forloop.first %}class="active" aria-current="true"{% endif %}
-                aria-label="Slide {{ forloop.parentloop.counter }}-{{ forloop.counter }}">
+                aria-label="Слайд {{ forloop.parentloop.counter }}-{{ forloop.counter }}">
         </button>
+        {% endwith %}
       {% endfor %}
     {% endfor %}
   </div>
 
-  <!-- Слайды -->
+  <!-- Слайди -->
   <div class="carousel-inner">
-    {% for baner in baners %}
-      {% for picture in baner.pictures %}
+    {% for banner in banners %}
+      {% for picture in banner.pictures.all %}
         <div class="carousel-item {% if forloop.parentloop.first and forloop.first %}active{% endif %}">
           <img src="{{ picture.image.url }}" class="d-block w-100" alt="{{ picture.alter_txt }}" style="max-height: 250px; object-fit: cover;">
           <div class="carousel-caption d-none d-md-block">
-            <h5>{{ baner.text }}</h5>
-            <p>{{ baner.type }}</p>
+            <h5>{{ banner.text }}</h5>
+            <p>{{ banner.type }}</p>
           </div>
         </div>
       {% endfor %}
     {% endfor %}
   </div>
 
-  <!-- Кнопки управления каруселью -->
+  <!-- Кнопки керування -->
   <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
     <span class="carousel-control-prev-icon" aria-hidden="true"></span>
     <span class="visually-hidden">Назад</span>

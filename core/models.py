@@ -53,7 +53,7 @@ class Sessions(models.Model):
     id = models.AutoField(primary_key=True)
     cinema = models.ForeignKey(Cinemas, on_delete=models.CASCADE, related_name='sessions', verbose_name="Кинотеатр")
     hall_id = models.ForeignKey(Halls, on_delete=models.CASCADE, verbose_name= 'Зал')
-    movie = models.ForeignKey(Movies, on_delete=models.SET_NULL, null=True, blank=True)
+    movie = models.ForeignKey(Movies, on_delete=models.SET_NULL, related_name='movie_sessions',null=True, blank=True)
 
     time_session = models.TimeField(verbose_name= 'Час сеансу')
     duration = models.TimeField(verbose_name= 'Тривалість')
@@ -98,7 +98,7 @@ class Tickets(models.Model):
     movie = models.ForeignKey(Movies, on_delete=models.SET_NULL, null=True, blank=True)
     seat = models.ForeignKey(Seats, on_delete=models.CASCADE, related_name="tickets",null= True, verbose_name= 'місце')
     profile = models.ForeignKey(User, on_delete=models.CASCADE, related_name="tickets", null= True, verbose_name= 'Глядач')
-    date = models.DateField(auto_now_add=True)
+    date = models.DateTimeField(auto_now_add=True, verbose_name='Дата та час покупки')
     halls = models.ForeignKey(Halls, on_delete=models.CASCADE, verbose_name= 'Зал')
     def __str__(self):
         session_title = self.session.title if self.session else "Немає сеансу"

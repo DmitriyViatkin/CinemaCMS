@@ -1,27 +1,77 @@
 from django import forms
 from main.models import Block_SEO, Gallery, Picture
 from  movie.models import Movies
+from  users.models import User
 from core.models import Cinemas, Halls, Sessions,Seats, Tickets
-from django.forms import inlineformset_factory
+from main.models import Banners
+from django.forms import inlineformset_factory, formset_factory, modelformset_factory
+
+
+class UserForm(forms.ModelForm):
+    class Meta:
+        model = User
+
+        fields = '__all__'
+        exclude = ['last_login', 'date_joined', 'groups', 'user_permissions', 'password']
+
+class PictureForm(forms.ModelForm):
+    class Meta:
+        model = Picture
+
+        fields = ['image_type', 'image',]
+        widgets = {
+
+            'image_type': forms.Select(attrs={'class': 'form-control'}),
+
+
+        }
+        labels = {
+
+            'image_type': 'Тип зображення',
+            'image': 'Зображення',
+
+
+        }
+class GalleryForm(forms.ModelForm):
+    class Meta:
+        model = Gallery
+        fields = ['title']
+
+class BannerForm(forms.ModelForm):
+    class Meta:
+        model = Banners
+        exclude = ['gallery']
+        fields=['url', 'text', 'scroll_speed', 'type', 'is_active']
+        widgets = {
+            'type': forms.Select(attrs={'class': 'form-control'}),
+
+                    }
+        labels = {
+            'URL': 'URL',
+            'text': 'Текст',
+            'scroll_speed': 'Скорость прокрутки',
+            'type': 'Тип',
+            'is_active': 'Показувати', }
 
 class TicketForm(forms.ModelForm):
     class Meta:
         model = Tickets
-        # Включаємо поле 'movie' у список полів форми
+
         fields = ['session', 'movie', 'seat', 'profile', 'halls']
         widgets = {
             'session': forms.Select(attrs={'class': 'form-control'}),
-            'movie': forms.Select(attrs={'class': 'form-control'}), # Це поле тепер включено у fields
+            'movie': forms.Select(attrs={'class': 'form-control'}),
             'seat': forms.Select(attrs={'class': 'form-control'}),
             'profile': forms.Select(attrs={'class': 'form-control'}),
-            'halls': forms.Select(attrs={'class': 'form-control'}), # Примітка: це поле може бути надлишковим
+            'halls': forms.Select(attrs={'class': 'form-control'}),
         }
         labels = {
             'session': 'Сеанс',
-            'movie': 'Фільм', # Виправлено друкарську помилку
+            'movie': 'Фільм',
             'seat': 'Місце',
             'profile': 'Глядач',
             'halls': 'Зал',}
+
 
 class SeatForm(forms.ModelForm):
     class Meta:
@@ -32,18 +82,24 @@ class SeatForm(forms.ModelForm):
 class SessionsForm(forms.ModelForm):
     class Meta:
         model = Sessions
+        fields = '__all__'
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'}),
+            'time_session': forms.TimeInput(attrs={'type': 'time'}),
+            'duration': forms.TimeInput(attrs={'type': 'time'}),
+        }
 
-        fields = ['cinema', 'hall_id', 'movie', 'time_session','duration','date' ]
-
+SessionFormSet = modelformset_factory(Sessions, form=SessionsForm, fields='__all__', extra=1)
 
 
 class HallsForm(forms.ModelForm):
     class Meta:
         model = Halls
-        # Исключаем только поля, которые не должны редактироваться вручную
+
         exclude = ['seo_block','date', 'gallery']
-        # Указываем все редактируемые поля
+
         fields = [ 'title', 'cinema', 'description', 'rows', 'seats_row']
+
 
 class CinemaForm(forms.ModelForm):
 
@@ -51,7 +107,6 @@ class CinemaForm(forms.ModelForm):
         model = Cinemas
 
         fields = ['title', 'description' , 'conditions', 'city',]
-
 
 
 class BlockSEOForm(forms.ModelForm):
@@ -63,6 +118,7 @@ class BlockSEOForm(forms.ModelForm):
             'seo_text': forms.Textarea(attrs={'rows': 4}),
             'seo_description': forms.Textarea(attrs={'rows': 4}),
         }
+
 
 class MovieForm(forms.ModelForm):
 
@@ -79,17 +135,19 @@ class MovieForm(forms.ModelForm):
 
 
 PictureFormSet = inlineformset_factory(
-    Gallery,       # Батьківська модель
-    Picture,       # Дочірня модель
-    fields=('image_type', 'image', 'alter_txt'), # Користувач обирає тип для кожної картинки
-    extra=4,
+    Gallery,
+    Picture,
+    fields=('image_type', 'image',),
+    extra=1,
     max_num=10,
     can_delete=True
 )
-class GalleryForm(forms.ModelForm):
-    class Meta:
-        model = Gallery
-        fields = ['title'] # Включаємо поле 'title'
 
-# Ваш PictureFormSet залишається таким, як є:
-from django.forms import inlineformset_factory
+
+BannersFormSet = inlineformset_factory(
+    Gallery, Banners, form=BannerForm,
+    extra=1, can_delete=True
+)
+
+
+

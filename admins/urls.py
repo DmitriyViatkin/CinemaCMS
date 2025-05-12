@@ -5,6 +5,7 @@ from .views import cinema_list
 urlpatterns = [
 
     path('', views.index, name='admins'),
+
     path('add_movie/create/', views.add_movie, name='add_movie_create'),
     path('movies_list/list/', views.movie_list, name='movie_list'),
     path('add_movie/<int:movie_id>/', views.add_movie, name='add_movie_edit'),
@@ -33,8 +34,21 @@ urlpatterns = [
 
     path('ticket/tickets_lists/', views.tickets_list, name='tickets_lists'),
     path('ticket/tickets_lists/add_ticket/', views.add_edit_ticket, name='add_ticket'),
-    path('ticket/edit/<int:ticket_id>/', views.add_edit_ticket, name='edit_ticket'),
+    path('ticket/tickets_lists/add_ticket/<int:session_id>/', views.add_edit_ticket, name='edit_ticket'),
     path('ticket/tickets_lists/<int:pk>/delete/', views.delete_tickets, name='delete'),
-    #path('gallery/edit/<int:gallery_id>/', views.manage_gallery, name='manage_gallery'),
 
+    path('banners/', views.banners_list, name='banners'),
+    path('banners/add_banners', views.add_banners, name='add_banners'),
+    path('banners/<int:banners_id>/', views.add_banners, name='edit_banners'),
+    path('banners/<int:banners_id>/delete_banners/', views.delete_banners, name='delete_banners'),
+
+    path('gallery/', views.gallery_list, name='gallery'),
+    path('gallery/add_banners', views.add_gallery, name='add_gallery'),
+    path('gallery/<int:gallery_id>/', views.add_gallery, name='edit_gallery'),
+    path('gallery/<int:gallery_id>/delete_gallery/', views.delete_gallery, name='delete_gallery'),
+
+    path('user/', views.user_list, name='users'),
+    path('user/add_user', views.add_user, name='add_users'),
+    path('user/<int:user_id>/edit/', views.add_user, name='edit_users'),
+    path('user/<int:user_id>/delete_user/', views.delete_user, name='delete_user')
 ]
