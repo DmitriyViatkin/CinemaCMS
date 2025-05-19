@@ -1,131 +1,489 @@
 {% extends 'admin/index.html' %}
 
 {% block title %}
-    Додати галерею
+    Додати банери
 {% endblock %}
 
 {% block content %}
-<h1>Додати нову галерею</h1>
-
-<section class="content">
+<section class="content-header">
     <div class="container-fluid">
-        <div class="card card-primary">
-            <div class="card-header"><h3 class="card-title">Додати банери з картинками</h3></div>
-
-            <form method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-
-                <div id="banner-container">
-                    <div class="banner-form-unit">
-                        <h2>Банер</h2>
-                        <div class="form-group">
-                            {{ banner_formset.empty_form.url.label_tag }}{{ banner_formset.empty_form.url }}
-                            {% for error in banner_formset.empty_form.url.errors %}
-                                <div class="alert alert-danger">{{ error }}</div>
-                            {% endfor %}
-                        </div>
-                        <div class="form-group">
-                            {{ banner_formset.empty_form.text.label_tag }}{{ banner_formset.empty_form.text }}
-                        </div>
-                        <div class="form-group">
-                            {{ banner_formset.empty_form.scroll_speed.label_tag }}{{ banner_formset.empty_form.scroll_speed }}
-                        </div>
-                        <div class="form-group">
-                            {{ banner_formset.empty_form.type.label_tag }}{{ banner_formset.empty_form.type }}
-                        </div>
-                        <div class="form-group">
-                            {{ banner_formset.empty_form.is_active }} {{ banner_formset.empty_form.is_active.label_tag }}
-                        </div>
-
-                        <h3>Картинка для банера</h3>
-                        <div class="form-row">
-                            <div class="form-group">
-                                {{ picture_formset.empty_form.image_type.label_tag }}{{ picture_formset.empty_form.image_type }}
-                            </div>
-                            <div class="form-group">
-                                {{ picture_formset.empty_form.image.label_tag }}{{ picture_formset.empty_form.image }}
-                            </div>
-                        </div>
-                        <hr>
-                    </div>
-                </div>
-
-                {{ banner_formset.management_form }}
-                {{ picture_formset.management_form }}
-
-
-
-                <div class="card-footer">
-                    <button type="submit" class="btn btn-primary">Створити</button>
-                    <button type="button" id="add-banner-form" class="btn btn-primary">Додати ще один банер </button>
-                </div>
-            </form>
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>Банери</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Головна</a></li>
+                    <li class="breadcrumb-item active">Додати банери</li>
+                </ol>
+            </div>
         </div>
     </div>
 </section>
 
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-primary">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="card-title">Додати банери</h3>
+                        <div class="card-tools">
+                            <div class="form-group mb-0">
+                                <div class="custom-control custom-switch custom-switch-off-danger custom-switch-on-success">
+                                    <input type="checkbox" class="custom-control-input" id="banner-switch-all">
+                                    <label class="custom-control-label" for="banner-switch-all">Показувати всі</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        {% if messages %}
+                            <ul class="messages">
+                                {% for message in messages %}
+                                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        <p>Розмір зображення: 1000x190 пікселів</p>
+
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <input type="hidden" name="which_form_is_it" value="main_banners_form">
+
+                            {{ form.scroll_speed.as_hidden }}
+                            {{ picture_formset.management_form }}
+                            {{ banner_formset.management_form }}
+
+                                 <div id="banner-container" class="mb-3 d-flex flex-wrap gap-3">
+    {% for picture_form in picture_formset %}
+        {% with banner_form=banner_formset.forms.forloop.counter0 %}
+            <div class="banner-unit card card-default shadow-sm" style="width: 350px;">
+                <div class="card-body">
+                    <div class="preview-container mb-2" style="height:190px; background:#f0f0f0; display:flex; justify-content:center; align-items:center; overflow:hidden;">
+                        {% if picture_form.instance.image %}
+                            <img id="imagePreview_{{ forloop.counter0 }}" src="{{ picture_form.instance.image.url }}" alt="Попередній перегляд" style="max-width: 100%; max-height: 100%; display: block;">
+                        {% else %}
+                            <img id="imagePreview_{{ forloop.counter0 }}" src="#" alt="Попередній перегляд" style="display: none; max-width: 100%; max-height: 100%;">
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ picture_form.image.id_for_label }}" class="btn btn-default btn-sm add-image-btn">
+                            <i class="fas fa-upload"></i> Додати зображення
+                        </label>
+                        {{ picture_form.image }}
+                        <input type="file" name="{{ picture_form.image.html_name }}" id="{{ picture_form.image.id_for_label }}" style="display: none;">
+                        {% if picture_form.image.errors %}
+                            <div class="errorlist">{{ picture_form.image.errors }}</div>
+                        {% endif %}
+                        {{ picture_form.id }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ banner_form.url.label_tag }}
+                        {{ banner_form.url }}
+                        {% if banner_form.url.errors %}
+                            <div class="errorlist">{{ banner_form.url.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        {{ banner_form.text.label_tag }}
+                        {{ banner_form.text }}
+                        {% if banner_form.text.errors %}
+                            <div class="errorlist">{{ banner_form.text.errors }}</div>
+                        {% endif %}
+                    </div>
+
+
+                </div>
+            </div>
+        {% endwith %}
+    {% empty %}
+        <p>Формсет picture_formset порожній.</p>
+    {% endfor %}
+</div>
+
+                            <div class="form-group mt-4">
+                                <label for="scroll-speed-global"><strong>Швидкість прокрутки для всіх банерів (сек.):</strong></label>
+                                <input type="number" id="scroll-speed-global" class="form-control" value="{{ form.scroll_speed.value|default:'3' }}" min="1" step="0.1" style="width: 150px;">
+                            </div>
+
+                            <button type="button" id="add-banner-form" class="btn btn-info mt-2">
+                                <i class="fas fa-plus"></i> Додати фото
+                            </button>
+
+                            <button type="submit" class="btn btn-primary mt-3">
+                                <i class="fas fa-save"></i> Зберегти
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card card-primary">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title">Сквозной банер на заднем фоне</h3>
+                </div>
+                <div class="card-body">
+                    <div class="banner-wrapper">
+                        <div class="banner-size">Размер: 2000x3000</div>
+
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <input type="hidden" name="which_form_is_it" value="cross_banner_form">
+
+                            <div class="banner-options">
+                                <div class="banner-photo-option">
+                                    <label>
+                                        <input type="radio" name="{{ cross_banner_form.type.html_name }}" value="photo"
+                                               {% if cross_banner_form.type.value == 'photo' or not cross_banner_form.type.value %}checked{% endif %}>
+                                        Фото на фоне
+                                    </label>
+
+                                    <label>
+                                        <input type="radio" name="{{ cross_banner_form.type.html_name }}" value="color"
+                                               {% if cross_banner_form.type.value == 'color' %}checked{% endif %}>
+                                        Просто фон
+                                    </label>
+
+                                    <div class="image-placeholder mt-2">
+                                        {% if cross_banner_form.instance.cross_banner_image %}
+                                            <img id="crossBannerPreview" src="{{ cross_banner_form.instance.cross_banner_image.url }}"
+                                                 alt="Поточне зображення"
+                                                 style="max-width: 100px; max-height: 60px; border: 1px solid #ccc;">
+                                        {% else %}
+                                            <img id="crossBannerPreview"
+                                                 src="#"
+                                                 alt="Попередній перегляд"
+                                                 style="max-width: 100px; max-height: 60px; border: 1px solid #ccc; display: none;">
+                                        {% endif %}
+
+
+                                        <input type="file" name="cross_banner_image" id="cross_banner_image" style="display: none;">
+                                        {% if cross_banner_form.errors.cross_banner_image %}
+                                            <div class="errorlist">{{ cross_banner_form.errors.cross_banner_image }}</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="banner-actions">
+                                        <button type="button" id="cross-banner-add" class="btn btn-primary mt-3">Додати</button>
+                                        <button type="button" class="btn btn-primary mt-3">Видалити</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary mt-3">Зберегти сквозний банер</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+
+
+
 <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const addButton = document.getElementById('cross-banner-add');
+                const fileInput = document.getElementById('cross_banner_image');
+                const imagePreview = documentgetElementById('crossBannerPreview');
+
+                if (addButton && fileInput) {
+                    addButton.addEventListener('click', function () {
+                        fileInput.click();
+                    });
+
+                    fileInput.addEventListener('change', function () {
+                        if (this.files && this.files[0]) {
+                            const reader = new FileReader();
+                            reader.onload = function (e) {
+                                if (imagePreview) {
+                                    imagePreview.src = e.target.result;
+                                    imagePreview.style.display = 'block';
+                                }
+                            };
+                            reader.readAsDataURL(this.files[0]);
+                        }
+                    });
+                }
+            });
+
+    function readURL(input, previewId) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const img = document.getElementById(previewId);
+                if (img) {
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                }
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
         const addBannerButton = document.getElementById("add-banner-form");
         const bannerContainer = document.getElementById("banner-container");
-        const bannerTotalForms = document.getElementById("id_banners-TOTAL_FORMS");
-        const pictureTotalForms = document.getElementById("id_pictures-TOTAL_FORMS");
+        const bannerSwitchAll = document.getElementById("banner-switch-all");
+        const scrollSpeedGlobal = document.getElementById("scroll-speed-global");
+        const galleryScrollSpeedInput = document.getElementById("id_scroll_speed");
 
-        addBannerButton.addEventListener("click", function () {
-            const bannerFormCount = parseInt(bannerTotalForms.value);
-            const pictureFormCount = parseInt(pictureTotalForms.value);
+        const bannerTotalForms = document.querySelector('[name="banners-TOTAL_FORMS"]');
+        const pictureTotalForms = document.querySelector('[name="pictures-TOTAL_FORMS"]');
+
+        let bannerFormCounter = parseInt(bannerTotalForms.value);
+        let pictureFormCounter = parseInt(pictureTotalForms.value);
+
+        // Синхронізація чекбоксів is_active за глобальним перемикачем
+        bannerSwitchAll.addEventListener('change', function () {
+            const isChecked = this.checked;
+            const checkboxes = bannerContainer.querySelectorAll('input[name$="-is_active"]');
+            checkboxes.forEach(function (checkbox) {
+                checkbox.checked = isChecked;
+            });
+        });
+
+        // Функція синхронізації швидкості прокрутки в усіх прихованих полях
+        function syncScrollSpeedToAll(value) {
+            const scrollInputs = bannerContainer.querySelectorAll('input[type="hidden"][name$="-scroll_speed"]');
+            scrollInputs.forEach(function(input) {
+                input.value = value;
+            });
+
+            // Оновлюємо hidden поле scroll_speed у GalleryForm
+            if (galleryScrollSpeedInput) {
+                galleryScrollSpeedInput.value = value;
+            }
+        }
+
+        // Початкова синхронізація з існуючими значеннями (якщо є)
+        syncScrollSpeedToAll(scrollSpeedGlobal.value);
+
+        // Обробка зміни загальної швидкості прокрутки
+        scrollSpeedGlobal.addEventListener('input', function () {
+            syncScrollSpeedToAll(this.value);
+        });
+
+        // Обробка додавання нового банера
+        addBannerButton.addEventListener("click", function (event) {
+            event.preventDefault();
 
             const newBannerUnit = document.createElement('div');
-            newBannerUnit.classList.add('banner-form-unit');
-            newBannerUnit.innerHTML = `
-                <h2>Банер</h2>
-                <div class="form-group">
-                    <label for="id_banners-${bannerFormCount}-url">URL адреса:</label>
-                    <input type="url" name="banners-${bannerFormCount}-url" class="form-control" id="id_banners-${bannerFormCount}-url">
-                </div>
-                <div class="form-group">
-                    <label for="id_banners-${bannerFormCount}-text">Текст:</label>
-                    <input type="text" name="banners-${bannerFormCount}-text" class="form-control" id="id_banners-${bannerFormCount}-text">
-                </div>
-                <div class="form-group">
-                    <label for="id_banners-${bannerFormCount}-scroll_speed">Швидкість прокрутки (сек.):</label>
-                    <input type="number" name="banners-${bannerFormCount}-scroll_speed" class="form-control" id="id_banners-${bannerFormCount}-scroll_speed">
-                </div>
-                <div class="form-group">
-                    <label for="id_banners-${bannerFormCount}-type">Тип:</label>
-                    <select name="banners-${bannerFormCount}-type" class="form-control" id="id_banners-${bannerFormCount}-type">
-                        <option value="baner_top">Сквозной банер</option>
-                        <option value="news">новини</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <input type="checkbox" name="banners-${bannerFormCount}-is_active" class="form-check-input" id="id_banners-${bannerFormCount}-is_active">
-                    <label class="form-check-label" for="id_banners-${bannerFormCount}-is_active">Показувати</label>
-                </div>
+            newBannerUnit.classList.add('banner-unit', 'card', 'card-default', 'shadow-sm');
+            newBannerUnit.style.width = '350px';
 
-                <h3>Картинка для банера</h3>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="id_pictures-${pictureFormCount}-image_type">Тип зображення:</label>
-                        <select name="pictures-${pictureFormCount}-image_type" class="form-control" id="id_pictures-${pictureFormCount}-image_type">
-                            <option value="main_picture">Главное изображение</option>
-                            <option value="gallery">Галерея</option>
-                            <option value="baner">Банер</option>
-                            <option value="cross_baner">Сквозной банер</option>
-                        </select>
+            // Формуємо індекси для нових форм
+            const bIndex = bannerFormCounter;
+            const pIndex = pictureFormCounter;
+
+            newBannerUnit.innerHTML = `
+                <div class="card-body">
+                    <div class="preview-container mb-2" style="height:190px; background:#f0f0f0; display:flex; justify-content:center; align-items:center; overflow:hidden;">
+                        <img id="imagePreview_${pIndex}" src="#" alt="Попередній перегляд" style="display: none; max-width: 100%; max-height: 100%;">
                     </div>
                     <div class="form-group">
-                        <label for="id_pictures-${pictureFormCount}-image">Зображення:</label>
-                        <input type="file" name="pictures-${pictureFormCount}-image" class="form-control-file" id="id_pictures-${pictureFormCount}-image">
+                        <label for="id_pictures-${pIndex}-image" class="btn btn-default btn-sm add-image-btn">
+                            <i class="fas fa-upload"></i> Додати зображення
+                        </label>
+                        <input type="file" name="pictures-${pIndex}-image" id="id_pictures-${pIndex}-image" style="display: none;">
                     </div>
+                    <div class="form-group">
+                        <label for="id_banners-${bIndex}-url">URL адреса:</label>
+                        <input type="url" name="banners-${bIndex}-url" class="form-control" id="id_banners-${bIndex}-url">
+                    </div>
+                    <div class="form-group">
+                        <label for="id_banners-${bIndex}-text">Текст:</label>
+                        <input type="text" name="banners-${bIndex}-text" class="form-control" id="id_banners-${bIndex}-text">
+                    </div>
+                    <input type="hidden" name="banners-${bIndex}-scroll_speed" id="id_banners-${bIndex}-scroll_speed" value="${scrollSpeedGlobal.value}">
+                    <input type="checkbox" name="banners-${bIndex}-is_active" class="d-none" id="id_banners-${bIndex}-is_active">
+                    <input type="hidden" name="banners-${bIndex}-type" value="baner_top">
+                    <button type="button" class="btn btn-tool remove-banner-btn float-right">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
-                <hr>
             `;
 
             bannerContainer.appendChild(newBannerUnit);
-            bannerTotalForms.value = bannerFormCount + 1;
-            pictureTotalForms.value = pictureFormCount + 1;
+
+            // Додаємо обробник для preview зображення
+            const newFileInput = newBannerUnit.querySelector(`input[type="file"]`);
+            const previewImgId = `imagePreview_${pIndex}`;
+            newFileInput.addEventListener("change", function () {
+                readURL(this, previewImgId);
+            });
+
+            // Додаємо обробник видалення
+            const removeBtn = newBannerUnit.querySelector(".remove-banner-btn");
+            removeBtn.addEventListener("click", function () {
+                newBannerUnit.remove();
+            });
+
+            // Збільшуємо лічильники форм і оновлюємо management_form
+            bannerFormCounter++;
+            pictureFormCounter++;
+
+            bannerTotalForms.value = bannerFormCounter;
+            pictureTotalForms.value = pictureFormCounter;
+        });
+
+        // Ініціалізація попереднього перегляду для існуючих полів завантаження зображень
+        const fileInputs = bannerContainer.querySelectorAll('input[type="file"]');
+        fileInputs.forEach(function (input, index) {
+            const previewId = `imagePreview_${index}`;
+            input.addEventListener("change", function () {
+                readURL(this, previewId);
+            });
+        });
+
+        // Обробка видалення для існуючих банерів
+        bannerContainer.querySelectorAll(".remove-banner-btn").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                const bannerUnit = this.closest(".banner-unit");
+                if (bannerUnit) {
+                    bannerUnit.remove();
+                }
+            });
         });
     });
 </script>
+
+<style>
+    .banner-wrapper {
+        border: 2px solid black;
+        border-radius: 10px;
+        padding: 20px;
+        width: fit-content;
+        font-family: sans-serif;
+    }
+
+    .banner-title {
+        text-align: center;
+        font-weight: bold;
+        margin-bottom: 15px;
+        font-size: 1.2em;
+    }
+
+    .banner-options {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .banner-image {
+        width: 120px;
+        height: 80px;
+        background-color: #eee;
+
+        background-repeat: no-repeat;
+        background-size: cover;
+        border: 1px solid #aaa;
+    }
+
+    .banner-radio {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .banner-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .banner-button {
+        padding: 5px 10px;
+        font-size: 0.9em;
+    }
+
+    .banner-size {
+        font-size: 0.9em;
+        margin-bottom: 10px;
+    }
+    #banner-container {
+        gap: 10px;
+    }
+    .banner-unit {
+        width: 350px;
+        margin-bottom: 10px;
+    }
+    .preview-container img {
+        max-width: 100%;
+        max-height: 100%;
+        display: block;
+    }
+    .add-image-btn {
+        cursor: pointer;
+        display: inline-block;
+    }
+    .form-group label {
+        font-weight: bold;
+    }
+    .banner-options {
+        display: flex;
+        flex-direction: column; /* Розташовуємо опції вертикально */
+        gap: 15px;
+    }
+
+    .banner-photo-option {
+        display: flex;
+        align-items: center;
+        gap: 20px; /* Відстань між елементами в опції "Фото" */
+    }
+
+    .banner-photo-option label {
+        /* Стилі для радіокнопки та тексту "Фото на фоне" */
+    }
+
+    .image-placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Центруємо вміст placeholder */
+        gap: 5px;
+    }
+
+    .add-image-btn {
+        display: inline-block;
+        padding: 5px 10px;
+        font-size: 0.9em;
+        border: 1px solid #ccc;
+        background-color: #f9f9f9;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+
+    .add-image-btn:hover {
+        background-color: #eee;
+    }
+
+    .banner-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .banner-actions button {
+        padding: 8px 15px;
+        font-size: 0.9em;
+    }
+
+    .banner-color-option {
+        /* Стилі для опції "Просто фон" */
+    }
+</style>
+
 {% endblock %}
+
+
+

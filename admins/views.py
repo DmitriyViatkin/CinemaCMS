@@ -7,8 +7,13 @@ from main.models import Gallery, Banners
 from core.models import Cinemas, Halls, Sessions, Seats, Tickets
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .forms import (BlockSEOForm, MovieForm, PictureFormSet, GalleryForm, CinemaForm, HallsForm, SessionsForm,
-                    TicketForm,SeatForm, BannersFormSet, UserForm, SessionFormSet)
+                    TicketForm,SeatForm, BannersFormSet, UserForm, SessionFormSet , Picture, CrossBannerForm, PictureForm )
 from django.contrib.admin.views.decorators import staff_member_required
+from django.http import HttpRequest, HttpResponse
+from django.template.loader import render_to_string
+from django.contrib import messages
+from .table import MovieListDate
+from django.forms import inlineformset_factory
 
 
 @staff_member_required
@@ -53,17 +58,9 @@ def index(request):
 
 @staff_member_required
 def movie_list(request):
-    movies_list = Movies.objects.all()
-    paginator = Paginator(movies_list, 10)
-    page = request.GET.get('page')
-    try:
-        movies = paginator.page(page)
-    except PageNotAnInteger:
-        movies = paginator.page(1)
-    except EmptyPage:
-        movies = paginator.page(paginator.num_pages)
-    context = {'movies': movies}
-    return render(request, 'admin/movies_lists/movies_lists.html', context)
+
+
+    return render(request, 'admin/movies_lists/movies_lists2.html', )
 
 @staff_member_required
 def add_movie(request,movie_id=None):
@@ -336,24 +333,29 @@ def delete_sessions(request, pk):
         return redirect('sessions_list')
 
 @staff_member_required
-def seats_list(request):
-
-    seats_list = Seats.objects.select_related('halls').all()
 
 
-    paginator = Paginator(seats_list, 10)  # 10 місць на сторінці
-    page = request.GET.get('page')
+
+
+def seats_list(request: HttpRequest) -> HttpResponse:
+    seats_list = Seats.objects.select_related('halls').order_by('number_row', 'seat')
+    paginator = Paginator(seats_list, 10)
+    page_number = request.GET.get('page')
+
     try:
-        seats = paginator.page(page)
+        seats = paginator.page(page_number)
     except PageNotAnInteger:
         seats = paginator.page(1)
     except EmptyPage:
         seats = paginator.page(paginator.num_pages)
 
-    context = {
-        'seats': seats,
-    }
-    return render(request, 'admin/seats_list/seats_list.html', context)
+    context = {'seats': seats}
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        html = render_to_string('admin/seats_list/seats_table_partial.html', context, request=request)
+        return HttpResponse(html)
+    else:
+        return render(request, 'admin/seats_list/seats_list.html', context)
 
 @staff_member_required
 def add_edit_seat(request):
@@ -444,6 +446,71 @@ def delete_tickets (request, pk):
         return redirect('tickets_lists')
 
 @staff_member_required
+
+
+def add_banners(request: HttpRequest):
+    gallery_instance, _ = Gallery.objects.get_or_create(id=1)
+
+    gallery_form = GalleryForm(request.POST or None, instance=gallery_instance)
+    banner_formset = BannersFormSet(
+        request.POST or None, request.FILES or None,
+        prefix='banners', instance=gallery_instance
+    )
+    picture_formset = PictureFormSet(
+        request.POST or None, request.FILES or None,
+        prefix='pictures', instance=gallery_instance
+    )
+    cross_banner_form = CrossBannerForm(
+        request.POST or None, request.FILES or None,
+        prefix='cross_banner'
+    )
+
+    if request.method == 'POST':
+        which_form_is_submitting = request.POST.get("which_form_is_it")
+
+        if which_form_is_submitting == "main_banners_form":
+            if gallery_form.is_valid() and banner_formset.is_valid() and picture_formset.is_valid():
+                gallery_instance = gallery_form.save()
+
+                for banner in banner_formset.save(commit=False):
+                    banner.gallery = gallery_instance
+                    banner.type = 'baner_top'
+                    banner.save()
+                for form in banner_formset.deleted_forms:
+                    if form.instance.pk:
+                        form.instance.delete()
+
+                for picture in picture_formset.save(commit=False):
+                    picture.gallery = gallery_instance
+                    picture.save()
+                for form in picture_formset.deleted_forms:
+                    if form.instance.pk:
+                        form.instance.delete()
+
+                messages.success(request, 'Банери та зображення успішно збережено!')
+                return redirect('banners')
+            else:
+                messages.error(request, 'Будь ласка, виправте помилки у формах.')
+
+        elif which_form_is_submitting == "cross_banner_form":
+            if cross_banner_form.is_valid():
+                cross_banner_form.save()
+                messages.success(request, 'Сквозний банер успішно збережено!')
+                return redirect('banners')
+            else:
+                messages.error(request, 'Будь ласка, перевірте сквозний банер.')
+
+    context = {
+        'form': gallery_form,
+        'banner_formset': banner_formset,
+        'picture_formset': picture_formset,
+        'cross_banner_form': cross_banner_form,
+    }
+    return render(request, 'admin/banner/add_banner.html', context)
+
+
+
+@staff_member_required
 def banners_list(request):
     banners_list = Banners.objects.select_related('gallery').all().order_by('id')
 
@@ -457,104 +524,18 @@ def banners_list(request):
         banners = paginator.page(paginator.num_pages)
 
     context = {'banners': banners}
+    print("Рендеринг шаблону 'admin/banner/banner.html' з контекстом:", context)
     return render(request, 'admin/banner/banner.html', context)
 
 @staff_member_required
-def add_banners(request, banners_id=None):
-    if request.method=='POST':
-        form = GalleryForm(request.POST)
-        picture_formset = PictureFormSet(request.POST, request.FILES, prefix='pictures')
-        banner_formset = BannersFormSet(request.POST, prefix='banners')
-        if form.is_valid() and picture_formset.is_valid() and banner_formset.is_valid():
-            gallery = form.save()
-            picture_formset.instance = gallery
-            banner_formset.instance = gallery
-            picture_formset.save()
-            banner_formset.save()
-            return redirect('banners')  # або будь-який інший URL
-    else:
-        form = GalleryForm()
-        picture_formset = PictureFormSet(prefix='pictures')
-        banner_formset = BannersFormSet(prefix='banners')
-    return render(request, 'admin/banner/add_banner.html', {
-        'form': form,
-        'picture_formset': picture_formset,
-        'banner_formset': banner_formset,
-    })
-
-@staff_member_required
-def delete_banners(request, pk):
-        banners = get_object_or_404(Banners, pk=pk)
-        if request.method == 'POST':
-            banners.delete()
-            return redirect('banners_list')
-        banners.delete()
-        return redirect('banners_list')
-
-@staff_member_required
-def gallery_list(request,):
-    gallery_list = Gallery.objects.annotate(picture_count=Count('pictures'))
-
-    paginator = Paginator(gallery_list, 10)
-    page = request.GET.get('page')
-    try:
-        gallery = paginator.page(page)
-    except PageNotAnInteger:
-        gallery = paginator.page(1)
-    except EmptyPage:
-        gallery = paginator.page(paginator.num_pages)
-
-    context = {'galleries': gallery}
-    return render(request, 'admin/gallery/gallery.html', context)
-
-@staff_member_required
-def add_gallery(request, gallery_id=None):
-    gallery_instance = None
-    is_edit = False
-
-
-    if gallery_id:
-        gallery_instance = get_object_or_404(Gallery, id=gallery_id)
-        is_edit = True
-
-
+def delete_banners(request, banners_id):
+    banner = get_object_or_404(Banners, pk=banners_id)
     if request.method == 'POST':
-        form = GalleryForm(request.POST, instance=gallery_instance)
-        formset = PicturebannerFormSet(request.POST, request.FILES, instance=gallery_instance)
-    else:
-        form = GalleryForm(instance=gallery_instance)
-        formset = PicturebannerFormSet(instance=gallery_instance)
+        banner.delete()
+        print(f"Банер з ID {banners_id} видалено.")
+        return redirect('banners')
 
-
-    if request.method == 'POST' and form.is_valid() and formset.is_valid():
-        gallery = form.save()
-        formset.instance = gallery
-        formset.save()
-
-
-        return redirect('gallery')
-
-
-
-    return render(request, 'admin/gallery/add_gallery.html', {
-        'form': form,
-        'formset': formset,
-        'gallery_instance': gallery_instance,
-        'is_edit': is_edit,
-    })
-
-@staff_member_required
-def delete_gallery(request, gallery_id):
-    gallery = get_object_or_404(Gallery, pk=gallery_id)
-
-    if request.method == 'POST':
-
-        gallery.delete()
-        print(f"Gallery з ID {gallery_id} видалено.")
-        return redirect('gallery')
-
-
-    return redirect('gallery')
+""" """
 
 @staff_member_required
 def user_list(request):

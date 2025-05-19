@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
-from .views import cinema_list
+
+from .table import MovieListDate
 
 urlpatterns = [
 
@@ -8,6 +9,8 @@ urlpatterns = [
 
     path('add_movie/create/', views.add_movie, name='add_movie_create'),
     path('movies_list/list/', views.movie_list, name='movie_list'),
+
+    path('movies_list/list/data/', MovieListDate.as_view(), name='movie_list_data'),
     path('add_movie/<int:movie_id>/', views.add_movie, name='add_movie_edit'),
     path('movies/<int:pk>/delete/', views.delete_movie, name='delete_movie'),
 
@@ -42,10 +45,6 @@ urlpatterns = [
     path('banners/<int:banners_id>/', views.add_banners, name='edit_banners'),
     path('banners/<int:banners_id>/delete_banners/', views.delete_banners, name='delete_banners'),
 
-    path('gallery/', views.gallery_list, name='gallery'),
-    path('gallery/add_banners', views.add_gallery, name='add_gallery'),
-    path('gallery/<int:gallery_id>/', views.add_gallery, name='edit_gallery'),
-    path('gallery/<int:gallery_id>/delete_gallery/', views.delete_gallery, name='delete_gallery'),
 
     path('user/', views.user_list, name='users'),
     path('user/add_user', views.add_user, name='add_users'),

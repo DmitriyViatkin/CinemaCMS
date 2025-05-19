@@ -3,8 +3,21 @@ from main.models import Block_SEO, Gallery, Picture
 from  movie.models import Movies
 from  users.models import User
 from core.models import Cinemas, Halls, Sessions,Seats, Tickets
-from main.models import Banners
+from main.models import Banners, Cross_Banner
 from django.forms import inlineformset_factory, formset_factory, modelformset_factory
+
+
+class CrossBannerForm(forms.ModelForm):
+    class Meta:
+        model = Cross_Banner
+
+        fields = ['type']
+        exclude=['gallery','id']
+        widgets = {
+            'type':forms.CheckboxInput(attrs={'class': 'form-control'})
+        }
+
+
 
 
 class UserForm(forms.ModelForm):
@@ -17,41 +30,48 @@ class UserForm(forms.ModelForm):
 class PictureForm(forms.ModelForm):
     class Meta:
         model = Picture
-
-        fields = ['image_type', 'image',]
+        fields = ['image']
         widgets = {
-
-            'image_type': forms.Select(attrs={'class': 'form-control'}),
-
-
+            'image': forms.FileInput(),
         }
         labels = {
-
-            'image_type': 'Тип зображення',
             'image': 'Зображення',
-
-
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if 'image_type' in self.initial:
+            self.instance.image_type = self.initial['image_type']
+
+
 class GalleryForm(forms.ModelForm):
+
     class Meta:
         model = Gallery
-        fields = ['title']
+        fields = '__all__'
+        widgets = {
+            'scroll_speed': forms.NumberInput(attrs={'min': '1', 'step': '1'}),
+        }
+
 
 class BannerForm(forms.ModelForm):
     class Meta:
         model = Banners
-        exclude = ['gallery']
-        fields=['url', 'text', 'scroll_speed', 'type', 'is_active']
+        exclude = ['gallery', 'type']  # <-- удалили 'type' отсюда
+        fields = ['url', 'text', 'scroll_speed', 'is_active']
         widgets = {
-            'type': forms.Select(attrs={'class': 'form-control'}),
-
-                    }
+            'url': forms.URLInput(attrs={'class': 'form-control'}),
+            'text': forms.TextInput(attrs={'class': 'form-control'}),
+            'scroll_speed': forms.NumberInput(attrs={'class': 'form-control'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-control'}),
+        }
         labels = {
-            'URL': 'URL',
+            'url': 'URL',
             'text': 'Текст',
-            'scroll_speed': 'Скорость прокрутки',
-            'type': 'Тип',
-            'is_active': 'Показувати', }
+            'scroll_speed': 'Швидкість прокрутки (сек.)',
+            'is_active': 'Показувати',
+        }
 
 class TicketForm(forms.ModelForm):
     class Meta:
@@ -134,15 +154,25 @@ class MovieForm(forms.ModelForm):
         }
 
 
+PictureFormSet1 = inlineformset_factory(
+    Gallery,
+    Picture,
+    form=PictureForm,
+    fields=('image_type', 'image',),
+    extra=0,
+    max_num=10,
+    can_delete=True )
+
+PICTURE_TYPE_DEFAULT = 'gallery'  # Замініть на потрібне значення за замовчуванням
+
 PictureFormSet = inlineformset_factory(
     Gallery,
     Picture,
-    fields=('image_type', 'image',),
-    extra=1,
+    form=PictureForm,
+    fields=('image',),  # Тепер включаємо лише 'image'
+    extra=0,
     max_num=10,
-    can_delete=True
-)
-
+    can_delete=True,)
 
 BannersFormSet = inlineformset_factory(
     Gallery, Banners, form=BannerForm,

@@ -17,88 +17,44 @@
               </a>
             </div>
           </div>
-          <div class="card-body">
-            <table class="table table-bordered table-hover">
-              <thead>
-                <tr>
-                  <th>Ряд</th>
-                  <th>Місце</th>
-                  <th>Статус</th>
-                  <th>VIP</th>
-                  <th>Ціна</th>
-                  <th>Дії</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for seat in seats %}
-                  <tr>
-                    <td>{{ seat.number_row }}</td>
-                    <td>{{ seat.seat }}</td>
-                    <td>
-                      {% if seat.status == 'F' %}Вільне
-                      {% elif seat.status == 'S' %}Куплене
-                      {% elif seat.status == 'N' %}Не доступно
-                      {% endif %}
-                    </td>
-                    <td>{{ seat.is_vip|yesno:"Так,Ні" }}</td>
-                    <td>{{ seat.price }} ₴</td>
-                    <td>
-
-                      <a href="{% url 'add_seats' %}?seat_id={{ seat.id }}" class="btn btn-primary btn-sm">Редагувати</a>
-
-                      <a href="{% url 'delete_seats'  seat.id %}" class="btn btn-danger btn-sm"
-                         onclick="return confirm('Ви впевнені, що хочете видалити це місце?');">
-                        Видалити
-                      </a>
-                    </td>
-                  </tr>
-                {% empty %}
-                  <tr>
-                    <td colspan="6">Місця не знайдені.</td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-
-            {% if seats.has_other_pages %}
-              <nav class="mt-3">
-                <ul class="pagination justify-content-center">
-                  {% if seats.has_previous %}
-                    <li class="page-item">
-                      <a class="page-link" href="?page={{ seats.previous_page_number }}">&laquo;</a>
-                    </li>
-                  {% else %}
-                    <li class="page-item disabled">
-                      <span class="page-link">&laquo;</span>
-                    </li>
-                  {% endif %}
-
-                  {% for num in seats.paginator.page_range %}
-                    {% if seats.number == num %}
-                      <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                    {% elif num > seats.number|add:-3 and num < seats.number|add:3 %}
-                      <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
-                    {% elif num == seats.number|add:-3 or num == seats.number|add:3 %}
-                      <li class="page-item disabled"><span class="page-link">...</span></li>
-                    {% endif %}
-                  {% endfor %}
-
-                  {% if seats.has_next %}
-                    <li class="page-item">
-                      <a class="page-link" href="?page={{ seats.next_page_number }}">&raquo;</a>
-                    </li>
-                  {% else %}
-                    <li class="page-item disabled">
-                      <span class="page-link">&raquo;</span>
-                    </li>
-                  {% endif %}
-                </ul>
-              </nav>
-            {% endif %}
+          <div id="seats-table-container">
+                  {% include 'admin/seats_list/seats_table_partial.html' %}
           </div>
         </div>
       </div>
     </div>
   </div>
 </section>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#pagination a.page-link').on('click', function(e) {
+            e.preventDefault();
+            var page_url = $(this).attr('href');
+            loadSeats(page_url);
+        });
+    });
+
+    function loadSeats(url) {
+        $.ajax({
+            url: url,
+            type: 'GET',
+            success: function(data) {
+                $('#seats-table-container').html(data);
+
+                $('#pagination a.page-link').on('click', function(e) {
+                    e.preventDefault();
+                    var new_page_url = $(this).attr('href');
+                    loadSeats(new_page_url);
+                });
+            },
+            error: function(xhr, status, error) {
+                console.error("Помилка завантаження місць:", error);
+            }
+        });
+    }
+</script>
+
 {% endblock %}

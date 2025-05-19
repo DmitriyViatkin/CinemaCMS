@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'movie',
     'main',
     'core',
+    'ajax_datatable',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

@@ -1,0 +1,84 @@
+{% extends 'admin/index.html' %}
+{% load static %}
+
+{% block title %}Список фільмів{% endblock %}
+
+
+{% block extrastyle %}
+
+
+
+
+{% endblock extrastyle %}
+
+
+{% block content %}
+<section class="content">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="card-title mb-0">Список фільмів</h3>
+            <div>
+              <a href="{% url 'add_movie_create' %}" class="btn btn-success btn-sm">
+                <i class="fas fa-plus"></i> Додати фільм
+              </a>
+            </div>
+          </div>
+          <div class="card-body">
+
+            <table id="movie-list" class="table table-bordered ajax-datatable">
+              <thead>
+                   <tr>
+                    <th>Дії</th>
+                    <th>ID</th>
+                    <th>Назва</th>
+                    <th>Жанр</th>
+                    <th>URL трейлера</th>
+                    <th>Тип відео</th>
+                    <th>Дата прокату</th>
+                    <th>Вікове обмеження</th>
+                  </tr>
+              </thead>
+              <tbody>
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block extra_js %}
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script type="text/javascript" src="{% static 'ajax_datatable/js/utils.js' %}"></script>
+    <script src="//cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+
+
+<script type="text/javascript">
+    console.log("Script extra_js started.");
+
+    $(document).ready(function () {
+        console.log("DOM is ready. Initializing DataTable...");
+
+        try {
+            AjaxDatatableViewUtils.initialize_table(
+                $('#movie-list'),
+                "{% url 'movie_list_data' %}",
+                {},
+                {
+
+                }
+            );
+            console.log("AjaxDatatableViewUtils.initialize_table called.");
+        } catch (e) {
+            console.error("Error during DataTable initialization:", e);
+        }
+    });
+
+    console.log("Script extra_js finished.");
+</script>
+{% endblock extra_js %}

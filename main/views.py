@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from .models import PaigesCinema, Banners, Cross_banner,PaigesNews, Picture, Promotion
+from .models import PaigesCinema, Banners, Cross_Banner,PaigesNews, Picture, Promotion
 from django.utils.timezone import now
 from datetime import timedelta
 from movie.models import Movies
@@ -11,7 +11,7 @@ def index(request):
     banners = Banners.objects.select_related('gallery').prefetch_related(
         Prefetch(
             'gallery__pictures',
-            queryset=Picture.objects.filter(image_type='baner'),
+            queryset=Picture.objects.filter(image_type='gallery'),
             to_attr='banner_pictures'
         )
     )

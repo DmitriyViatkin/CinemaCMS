@@ -20,7 +20,7 @@ class Block_SEO(models.Model):
 
 class Gallery(models.Model):
     id = models.AutoField(primary_key=True)
-    title = models.CharField(max_length=255, verbose_name="Назва галереї", blank=True)
+
 
     class Meta:
         verbose_name = 'Галерея'
@@ -33,8 +33,8 @@ class Gallery(models.Model):
 class Picture(models.Model):
     id = models.AutoField(primary_key=True)
     gallery = models.ForeignKey(Gallery, related_name='pictures', on_delete=models.CASCADE, verbose_name='Галерея')
-    image_type = models.CharField(max_length=20, choices=[('main_picture', 'Главное изображение'), ('gallery', 'Галерея'),
-                                                          ('baner', 'Банер'), ('cross_baner', 'Сквозной банер')], verbose_name='Тип зображення')
+    image_type = models.CharField(max_length=20, choices=[('main_picture', 'Главное изображение'), ('gallery', 'Галерея')],
+        verbose_name='Тип зображення')
     image = models.ImageField(upload_to='images/', verbose_name='Зображення')
 
 
@@ -48,13 +48,24 @@ class Picture(models.Model):
 
 class Banners(models.Model):
     id = models.AutoField(primary_key=True)
-    gallery = models.ForeignKey(Gallery, related_name='banners', on_delete=models.SET_NULL, null=True, blank=True, verbose_name= 'Картинка')
-    url = models.URLField(verbose_name= 'URL адреса ')
-    text = models.CharField(max_length=100,verbose_name= 'текст')
+    gallery = models.ForeignKey(
+        Gallery,
+        related_name='banners',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name='Картинка'
+    )
+    url = models.URLField(verbose_name='URL адреса')
+    text = models.CharField(max_length=100, verbose_name='текст')
     scroll_speed = models.DurationField(verbose_name='Швидкість прокрутки (сек.)')
-    type = models.CharField(max_length=100,choices=[('baner_top', 'Сквозной банер'), ('news', 'новости')],
-                                 verbose_name= 'Тbп')
-    is_active = models.BooleanField(default=False,verbose_name= 'Показувати ')
+    type = models.CharField(
+        max_length=100,
+        choices=[('baner_top', 'Сквозной банер'), ('news', 'новости')],
+        default='baner_top',  # <-- вот здесь значение по умолчанию
+        verbose_name='Тип'
+    )
+    is_active = models.BooleanField(default=False, verbose_name='Показувати')
 
     def __str__(self):
         return self.type
@@ -63,7 +74,7 @@ class Banners(models.Model):
         verbose_name = 'Банер'
         verbose_name_plural = 'Банери'
 
-class Cross_banner (models.Model):
+class Cross_Banner (models.Model):
     id = models.AutoField(primary_key=True)
     gallery = models.ForeignKey(Gallery, on_delete=models.SET_NULL, null=True, blank=True, verbose_name= 'Картинка')
     type = models.CharField(choices=[('photo_background','фото на фоне'),('photo','просто фото')])
