@@ -204,21 +204,26 @@ BannerFormSet = modelformset_factory(
     exclude=['gallery', 'type']
 )
 
+
 class CombinedBannerPictureForm(forms.Form):
-    # Поля из BannerForm
+    id = forms.IntegerField(widget=forms.HiddenInput(), required=False)  # ⬅️ обов'язково
     url = forms.URLField(label='URL', widget=forms.URLInput(attrs={'class': 'form-control'}), required=False)
     text = forms.CharField(label='Текст', widget=forms.TextInput(attrs={'class': 'form-control'}), required=False)
-    scroll_speed = forms.IntegerField(label='Скорость прокрутки (сек.)', widget=forms.NumberInput(attrs={'class': 'form-control'}), required=False)
-    is_active = forms.BooleanField(label='Показывать', widget=forms.CheckboxInput(attrs={'class': 'form-control'}), required=False)
+    scroll_speed = forms.IntegerField(label='Скорость прокрутки (сек.)', widget=forms.NumberInput(attrs={
+        'class': 'form-control'}), required=False)
+    is_active = forms.BooleanField(label='Показывать', widget=forms.CheckboxInput(attrs={
+        'class': 'form-control'}), required=False)
+
     banner_type = forms.ChoiceField(
         label='Тип баннера',
         choices=Banners.objects.none().model.type.field.choices,
         widget=forms.Select(attrs={'class': 'form-control'}),
         required=False
     )
-    exclude = ['gallery', 'image_type', 'banner_type']
-    # Поля из PictureForm
-    image = forms.ImageField(label='Изображение', widget=forms.FileInput(attrs={'class': 'form-control-file'}), required=False)
+
+    image = forms.ImageField(label='Изображение', widget=forms.FileInput(attrs={
+        'class': 'form-control-file'}), required=False)
+
     image_type = forms.ChoiceField(
         label='Тип изображения',
         choices=Picture.objects.none().model.image_type.field.choices,
@@ -230,6 +235,4 @@ class CombinedBannerPictureForm(forms.Form):
         super().__init__(*args, **kwargs)
         if 'image_type' in self.initial:
             self.fields['image_type'].initial = self.initial['image_type']
-
-CombinedBannerPictureFormSet = formset_factory(CombinedBannerPictureForm, extra=1)
 
