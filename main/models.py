@@ -9,7 +9,7 @@ class Block_SEO(models.Model):
     seo_keywords = models.CharField(max_length=250, verbose_name= 'Ключові слова', blank=True) # <--- ЗРОБЛЕНО НЕОБОВ'ЯЗКОВИМ
     seo_description = models.TextField(verbose_name= 'Опис', blank=True) # <--- ЗРОБЛЕНО НЕОБОВ'ЯЗКОВИМ
 
-    # ... інші поля ...
+
 
     def __str__(self):
         return self.seo_url # Або title_seo
@@ -26,8 +26,7 @@ class Gallery(models.Model):
         verbose_name = 'Галерея'
         verbose_name_plural = 'Галереї'
 
-    def __str__(self):
-        return self.title or f'Gallery {self.id}'
+
 
 
 class Picture(models.Model):
@@ -51,18 +50,18 @@ class Banners(models.Model):
     gallery = models.ForeignKey(
         Gallery,
         related_name='banners',
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         null=True,
         blank=True,
         verbose_name='Картинка'
     )
     url = models.URLField(verbose_name='URL адреса')
     text = models.CharField(max_length=100, verbose_name='текст')
-    scroll_speed = models.DurationField(verbose_name='Швидкість прокрутки (сек.)')
+    scroll_speed = models.DurationField(verbose_name='Швидкість прокрутки (сек.)', null=True, blank=True)
     type = models.CharField(
         max_length=100,
         choices=[('baner_top', 'Сквозной банер'), ('news', 'новости')],
-        default='baner_top',  # <-- вот здесь значение по умолчанию
+        default='baner_top',
         verbose_name='Тип'
     )
     is_active = models.BooleanField(default=False, verbose_name='Показувати')
@@ -76,8 +75,13 @@ class Banners(models.Model):
 
 class Cross_Banner (models.Model):
     id = models.AutoField(primary_key=True)
-    gallery = models.ForeignKey(Gallery, on_delete=models.SET_NULL, null=True, blank=True, verbose_name= 'Картинка')
+    gallery = models.ForeignKey(Gallery, on_delete=models.CASCADE, null=True, blank=True, verbose_name= 'Картинка')
     type = models.CharField(choices=[('photo_background','фото на фоне'),('photo','просто фото')])
+    TYPE_CHOICES = [
+        ('photo_background', 'Фото на фоне'),
+        ('photo', 'Просто фото'),
+        # Додай сюди інші свої варіанти
+    ]
 
     def __str__(self):
         return self.type

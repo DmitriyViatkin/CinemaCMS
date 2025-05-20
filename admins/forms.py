@@ -8,16 +8,39 @@ from django.forms import inlineformset_factory, formset_factory, modelformset_fa
 
 
 class CrossBannerForm(forms.ModelForm):
+    image = forms.ImageField(required=False, label='Зображення для банера')
+    image_type = forms.CharField(widget=forms.HiddenInput(), initial='gallery')
+    banner_type_choice = forms.ChoiceField(
+        choices=Cross_Banner.TYPE_CHOICES,
+        widget=forms.RadioSelect(),
+        label='Тип банера'
+    )
+    gallery = forms.ModelChoiceField(queryset=Gallery.objects.all(), widget=forms.HiddenInput(), required=False)
+    type = forms.CharField(widget=forms.HiddenInput(), required=False)
+
     class Meta:
         model = Cross_Banner
+        fields = ['gallery', 'type']
 
-        fields = ['type']
-        exclude=['gallery','id']
-        widgets = {
-            'type':forms.CheckboxInput(attrs={'class': 'form-control'})
-        }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.instance.pk:
+            last_id = Gallery.objects.order_by('-id').first()
+            self.initial['gallery'] = (last_id.id + 1) if last_id else 1
 
+    def save(self, commit=True):
+        self.instance.gallery = Gallery.objects.create()
+        self.instance.type = self.cleaned_data['banner_type_choice']
+        cross_banner = super().save(commit)
 
+        image = self.cleaned_data.get('image')
+        if image:
+            Picture.objects.create(
+                gallery=self.instance.gallery,
+                image=image,
+                image_type=self.cleaned_data['image_type']
+            )
+        return cross_banner
 
 
 class UserForm(forms.ModelForm):
@@ -58,7 +81,7 @@ class GalleryForm(forms.ModelForm):
 class BannerForm(forms.ModelForm):
     class Meta:
         model = Banners
-        exclude = ['gallery', 'type']  # <-- удалили 'type' отсюда
+        exclude = ['gallery', 'type']
         fields = ['url', 'text', 'scroll_speed', 'is_active']
         widgets = {
             'url': forms.URLInput(attrs={'class': 'form-control'}),
@@ -174,10 +197,39 @@ PictureFormSet = inlineformset_factory(
     max_num=10,
     can_delete=True,)
 
-BannersFormSet = inlineformset_factory(
-    Gallery, Banners, form=BannerForm,
-    extra=1, can_delete=True
+BannerFormSet = modelformset_factory(
+    Banners,
+    form=BannerForm,
+    extra=1,  # Кількість порожніх форм для відображення
+    exclude=['gallery', 'type']
 )
 
+class CombinedBannerPictureForm(forms.Form):
+    # Поля из BannerForm
+    url = forms.URLField(label='URL', widget=forms.URLInput(attrs={'class': 'form-control'}), required=False)
+    text = forms.CharField(label='Текст', widget=forms.TextInput(attrs={'class': 'form-control'}), required=False)
+    scroll_speed = forms.IntegerField(label='Скорость прокрутки (сек.)', widget=forms.NumberInput(attrs={'class': 'form-control'}), required=False)
+    is_active = forms.BooleanField(label='Показывать', widget=forms.CheckboxInput(attrs={'class': 'form-control'}), required=False)
+    banner_type = forms.ChoiceField(
+        label='Тип баннера',
+        choices=Banners.objects.none().model.type.field.choices,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        required=False
+    )
+    exclude = ['gallery', 'image_type', 'banner_type']
+    # Поля из PictureForm
+    image = forms.ImageField(label='Изображение', widget=forms.FileInput(attrs={'class': 'form-control-file'}), required=False)
+    image_type = forms.ChoiceField(
+        label='Тип изображения',
+        choices=Picture.objects.none().model.image_type.field.choices,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        required=False
+    )
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'image_type' in self.initial:
+            self.fields['image_type'].initial = self.initial['image_type']
+
+CombinedBannerPictureFormSet = formset_factory(CombinedBannerPictureForm, extra=1)
 

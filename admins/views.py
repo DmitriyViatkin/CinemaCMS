@@ -3,18 +3,20 @@ from django.db.models import Count
 from django.utils import timezone
 from movie.models import Movies
 from users.models import User
-from main.models import Gallery, Banners
+
+from django.forms import formset_factory
+from main.models import Gallery, Banners, Cross_Banner
 from core.models import Cinemas, Halls, Sessions, Seats, Tickets
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .forms import (BlockSEOForm, MovieForm, PictureFormSet, GalleryForm, CinemaForm, HallsForm, SessionsForm,
-                    TicketForm,SeatForm, BannersFormSet, UserForm, SessionFormSet , Picture, CrossBannerForm, PictureForm )
+                    TicketForm,SeatForm,    CombinedBannerPictureForm, UserForm, SessionFormSet , Picture,  CrossBannerForm )
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpRequest, HttpResponse
 from django.template.loader import render_to_string
 from django.contrib import messages
 from .table import MovieListDate
 from django.forms import inlineformset_factory
-
+from datetime import timedelta
 
 @staff_member_required
 def index(request):
@@ -446,69 +448,112 @@ def delete_tickets (request, pk):
         return redirect('tickets_lists')
 
 @staff_member_required
-
-
-def add_banners(request: HttpRequest):
-    gallery_instance, _ = Gallery.objects.get_or_create(id=1)
-
-    gallery_form = GalleryForm(request.POST or None, instance=gallery_instance)
-    banner_formset = BannersFormSet(
-        request.POST or None, request.FILES or None,
-        prefix='banners', instance=gallery_instance
-    )
-    picture_formset = PictureFormSet(
-        request.POST or None, request.FILES or None,
-        prefix='pictures', instance=gallery_instance
-    )
-    cross_banner_form = CrossBannerForm(
-        request.POST or None, request.FILES or None,
-        prefix='cross_banner'
-    )
+def add_banners(request):
+    CombinedBannerPictureFormSetFactory = formset_factory(CombinedBannerPictureForm, extra=1)
 
     if request.method == 'POST':
-        which_form_is_submitting = request.POST.get("which_form_is_it")
+        which_form_is_submitting = request.POST.get('which_form_is_it')
 
-        if which_form_is_submitting == "main_banners_form":
-            if gallery_form.is_valid() and banner_formset.is_valid() and picture_formset.is_valid():
-                gallery_instance = gallery_form.save()
+        if which_form_is_submitting == 'top_banners_form':
+            formset = CombinedBannerPictureFormSetFactory(request.POST, request.FILES, prefix='top')
+            if formset.is_valid():
+                for form in formset:
+                    if form.has_changed():
+                        banner_id = form.cleaned_data.get('id')
+                        url = form.cleaned_data.get('url')
+                        text = form.cleaned_data.get('text')
+                        scroll_speed = form.cleaned_data.get('scroll_speed')
+                        is_active = form.cleaned_data.get('is_active')
+                        image = form.cleaned_data.get('image')
+                        delete = form.cleaned_data.get('DELETE')
 
-                for banner in banner_formset.save(commit=False):
-                    banner.gallery = gallery_instance
-                    banner.type = 'baner_top'
-                    banner.save()
-                for form in banner_formset.deleted_forms:
-                    if form.instance.pk:
-                        form.instance.delete()
+                        if delete and banner_id:
+                            try:
+                                Banners.objects.get(id=banner_id).delete()
+                            except Banners.DoesNotExist:
+                                pass
+                            continue
 
-                for picture in picture_formset.save(commit=False):
-                    picture.gallery = gallery_instance
-                    picture.save()
-                for form in picture_formset.deleted_forms:
-                    if form.instance.pk:
-                        form.instance.delete()
-
-                messages.success(request, 'Банери та зображення успішно збережено!')
+                        if any([url, text, scroll_speed, image]) or is_active is not None or banner_id:
+                            if banner_id:
+                                try:
+                                    banner = Banners.objects.get(id=banner_id)
+                                    banner.url = url
+                                    banner.text = text
+                                    banner.scroll_speed = timedelta(seconds=scroll_speed) if scroll_speed else None
+                                    banner.is_active = is_active
+                                    banner.save()
+                                    gallery = banner.gallery
+                                    if image:
+                                        try:
+                                            picture = Picture.objects.get(gallery=gallery, image_type='gallery')
+                                            picture.image = image
+                                            picture.save()
+                                        except Picture.DoesNotExist:
+                                            Picture.objects.create(gallery=gallery, image_type='gallery', image=image)
+                                except Banners.DoesNotExist:
+                                    pass
+                            else:
+                                # Створення нової галереї для нового банера
+                                gallery = Gallery.objects.create()
+                                banner = Banners.objects.create(
+                                    gallery=gallery,
+                                    url=url,
+                                    text=text,
+                                    scroll_speed=timedelta(seconds=scroll_speed) if scroll_speed else None,
+                                    type='top_banner',
+                                    is_active=is_active
+                                )
+                                if image:
+                                    Picture.objects.create(gallery=gallery, image_type='gallery', image=image)
                 return redirect('banners')
             else:
-                messages.error(request, 'Будь ласка, виправте помилки у формах.')
+                print("Помилки у формісеті:", formset.errors)
 
-        elif which_form_is_submitting == "cross_banner_form":
-            if cross_banner_form.is_valid():
-                cross_banner_form.save()
-                messages.success(request, 'Сквозний банер успішно збережено!')
-                return redirect('banners')
-            else:
-                messages.error(request, 'Будь ласка, перевірте сквозний банер.')
+        else:
+            formset = CombinedBannerPictureFormSetFactory(request.POST, request.FILES, prefix='top')
+
+        cross_banner_form = CrossBannerForm(request.POST, request.FILES, prefix='cross')
+        if cross_banner_form.is_valid():
+            cross_banner = cross_banner_form.save()
+            return redirect('banners')
+        else:
+            print("Помилки у CrossBannerForm:", cross_banner_form.errors)
+
+    else:
+        top_banners = Banners.objects.filter(type='top_banner') \
+            .select_related('gallery') \
+            .prefetch_related('gallery__pictures') \
+            .order_by('id')
+        initial_data = []
+        for banner in top_banners:
+            picture = banner.gallery.pictures.first()
+            initial_data.append({
+                'id': banner.id,
+                'url': banner.url,
+                'text': banner.text,
+                'scroll_speed': banner.scroll_speed.total_seconds() if banner.scroll_speed else None,
+                'is_active': banner.is_active,
+                'image': picture.image if picture else None,
+                'banner_type': banner.type,
+                'DELETE': False,
+            })
+        formset = CombinedBannerPictureFormSetFactory(prefix='top', initial=initial_data)
+
+        try:
+            cross_banner = Cross_Banner.objects.select_related('gallery').first()
+            if not cross_banner:
+                gallery = Gallery.objects.create()
+                cross_banner = Cross_Banner.objects.create(gallery=gallery)
+            cross_banner_form = CrossBannerForm(prefix='cross', instance=cross_banner)
+        except:
+            cross_banner_form = CrossBannerForm(prefix='cross')
 
     context = {
-        'form': gallery_form,
-        'banner_formset': banner_formset,
-        'picture_formset': picture_formset,
+        'formset': formset,
         'cross_banner_form': cross_banner_form,
     }
     return render(request, 'admin/banner/add_banner.html', context)
-
-
 
 @staff_member_required
 def banners_list(request):
@@ -529,13 +574,13 @@ def banners_list(request):
 
 @staff_member_required
 def delete_banners(request, banners_id):
-    banner = get_object_or_404(Banners, pk=banners_id)
-    if request.method == 'POST':
-        banner.delete()
-        print(f"Банер з ID {banners_id} видалено.")
-        return redirect('banners')
+     banner = get_object_or_404(Banners, pk=banners_id)
+     if request.method == 'POST':
+         banner.delete()
+         print(f"Банер з ID {banners_id} видалено.")
+         return redirect('banners')
 
-""" """
+
 
 @staff_member_required
 def user_list(request):
