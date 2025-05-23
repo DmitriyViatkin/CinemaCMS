@@ -58,12 +58,28 @@ class Banners(models.Model):
     url = models.URLField(verbose_name='URL адреса')
     text = models.CharField(max_length=100, verbose_name='текст')
     scroll_speed = models.DurationField(verbose_name='Швидкість прокрутки (сек.)', null=True, blank=True)
-    type = models.CharField(
-        max_length=100,
-        choices=[('baner_top', 'Сквозной банер'), ('news', 'новости')],
-        default='baner_top',
-        verbose_name='Тип'
+
+    is_active = models.BooleanField(default=False, verbose_name='Показувати')
+
+
+
+    class Meta:
+        verbose_name = 'Банер'
+        verbose_name_plural = 'Банери'
+
+class News (models.Model):
+    id = models.AutoField(primary_key=True)
+    gallery = models.ForeignKey(
+        Gallery,
+        related_name='news',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        verbose_name='Картинка'
     )
+    url = models.URLField(verbose_name='URL адреса')
+    scroll_speed = models.DurationField(verbose_name='Швидкість прокрутки (сек.)', null=True, blank=True)
+
     is_active = models.BooleanField(default=False, verbose_name='Показувати')
 
     def __str__(self):
@@ -72,6 +88,8 @@ class Banners(models.Model):
     class Meta:
         verbose_name = 'Банер'
         verbose_name_plural = 'Банери'
+
+
 
 class Cross_Banner (models.Model):
     id = models.AutoField(primary_key=True)

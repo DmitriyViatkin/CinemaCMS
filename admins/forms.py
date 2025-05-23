@@ -10,11 +10,7 @@ from django.forms import inlineformset_factory, formset_factory, modelformset_fa
 class CrossBannerForm(forms.ModelForm):
     image = forms.ImageField(required=False, label='Зображення для банера')
     image_type = forms.CharField(widget=forms.HiddenInput(), initial='gallery')
-    banner_type_choice = forms.ChoiceField(
-        choices=Cross_Banner.TYPE_CHOICES,
-        widget=forms.RadioSelect(),
-        label='Тип банера'
-    )
+
     gallery = forms.ModelChoiceField(queryset=Gallery.objects.all(), widget=forms.HiddenInput(), required=False)
     type = forms.CharField(widget=forms.HiddenInput(), required=False)
 
@@ -206,24 +202,15 @@ BannerFormSet = modelformset_factory(
 
 
 class CombinedBannerPictureForm(forms.Form):
-    id = forms.IntegerField(widget=forms.HiddenInput(), required=False)  # ⬅️ обов'язково
+    id = forms.IntegerField(widget=forms.HiddenInput(), required=False)
     url = forms.URLField(label='URL', widget=forms.URLInput(attrs={'class': 'form-control'}), required=False)
     text = forms.CharField(label='Текст', widget=forms.TextInput(attrs={'class': 'form-control'}), required=False)
     scroll_speed = forms.IntegerField(label='Скорость прокрутки (сек.)', widget=forms.NumberInput(attrs={
         'class': 'form-control'}), required=False)
     is_active = forms.BooleanField(label='Показывать', widget=forms.CheckboxInput(attrs={
         'class': 'form-control'}), required=False)
-
-    banner_type = forms.ChoiceField(
-        label='Тип баннера',
-        choices=Banners.objects.none().model.type.field.choices,
-        widget=forms.Select(attrs={'class': 'form-control'}),
-        required=False
-    )
-
     image = forms.ImageField(label='Изображение', widget=forms.FileInput(attrs={
         'class': 'form-control-file'}), required=False)
-
     image_type = forms.ChoiceField(
         label='Тип изображения',
         choices=Picture.objects.none().model.image_type.field.choices,
@@ -236,3 +223,24 @@ class CombinedBannerPictureForm(forms.Form):
         if 'image_type' in self.initial:
             self.fields['image_type'].initial = self.initial['image_type']
 
+class CombinedNewsPictureForm(forms.Form):
+    id = forms.IntegerField(widget=forms.HiddenInput(), required=False)
+    url = forms.URLField(label='URL', widget=forms.URLInput(attrs={'class': 'form-control'}), required=False)
+    text = forms.CharField(label='Текст', widget=forms.TextInput(attrs={'class': 'form-control'}), required=False)
+    scroll_speed = forms.IntegerField(label='Скорость прокрутки (сек.)', widget=forms.NumberInput(attrs={
+        'class': 'form-control'}), required=False)
+    is_active = forms.BooleanField(label='Показывать', widget=forms.CheckboxInput(attrs={
+        'class': 'form-control'}), required=False)
+    image = forms.ImageField(label='Изображение', widget=forms.FileInput(attrs={
+        'class': 'form-control-file'}), required=False)
+    image_type = forms.ChoiceField(
+        label='Тип изображения',
+        choices=Picture.objects.none().model.image_type.field.choices,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        required=False
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'image_type' in self.initial:
+            self.fields['image_type'].initial = self.initial['image_type']
