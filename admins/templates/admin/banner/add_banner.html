@@ -40,255 +40,311 @@
                 {%include 'admin/banner/news_banner.html'%}
             </div>
         </div>
-
-
 </section>
 
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
 <script>
-   document.addEventListener('DOMContentLoaded', function () {
-        // --- Cross Banner Image Preview ---
-        const crossBannerFileInput = document.getElementById('{{ cross_banner_form.image.id_for_label }}');
-        const crossBannerPreview = document.getElementById('crossBannerPreview');
+$(document).ready(function() {
+    // === ТОП БАНЕРИ ===
+    function initializeTopBannerUnit($bannerUnit) {
+        console.log("Initializing Top Banner Unit:", $bannerUnit[0]);
 
-        if (crossBannerFileInput && crossBannerPreview) {
-            crossBannerFileInput.addEventListener('change', function () {
-                readURL(this, 'crossBannerPreview');
-            });
-        }
+        const $imageInput = $bannerUnit.find('input[type="file"]');
+        const $imagePreview = $bannerUnit.find('img[id^="imagePreview_"]');
+        const $addImageBtnLabel = $bannerUnit.find('.add-image-btn');
 
-        // --- Generic Image Preview Function ---
-       function readURL(input, previewId) {
-            console.log("readURL викликано", input, previewId);
-            if (input && input.files) {
-                console.log("input.files:", input.files);
-                if (input.files.length > 0) {
+        if ($imageInput.length && $imagePreview.length && $addImageBtnLabel.length) {
+            const inputId = $imageInput.attr('id');
+            if (inputId) $addImageBtnLabel.attr('for', inputId);
+
+            $imageInput.off('change').on('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
                     const reader = new FileReader();
-                    reader.onload = function (e) {
-                        const img = document.getElementById(previewId);
-                        if (img) {
-                            img.src = e.target.result;
-                            img.style.display = 'block';
-                        }
+                    reader.onload = function(e) {
+                        $imagePreview.attr('src', e.target.result).css('display', 'block');
+                        $addImageBtnLabel.html('<i class="fas fa-upload"></i> Змінити зображення');
                     };
-                    reader.readAsDataURL(input.files[0]);
+                    reader.readAsDataURL(file);
                 } else {
-                    const img = document.getElementById(previewId);
-                    if (img) {
-                        img.src = '#';
-                        img.style.display = 'none';
-                    }
+                    $imagePreview.attr('src', '#').hide();
+                    $addImageBtnLabel.html('<i class="fas fa-upload"></i> Додати зображення');
                 }
+            });
+
+            $addImageBtnLabel.off('click').on('click', function(e) {
+                e.preventDefault();
+                $imageInput.trigger('click');
+            });
+        }
+
+        const $removeBannerBtn = $bannerUnit.find('.remove-banner-btn');
+        if ($removeBannerBtn.length) {
+            $removeBannerBtn.off('click').on('click', function() {
+                $bannerUnit.find(`input[type="hidden"][name^="top-"][name$="-DELETE"]`).val('on');
+                $bannerUnit.hide();
+            });
+        }
+    }
+
+    $('.banner-unit').not('#empty-form-template').each(function() {
+        initializeTopBannerUnit($(this));
+    });
+
+    const $emptyFormTemplate = $('#empty-form-template');
+    const $bannerContainer = $('#banner-container');
+    const $totalFormsInput = $('#id_top-TOTAL_FORMS');
+
+    $('#add-banner-form').on('click', function() {
+        let currentForms = parseInt($totalFormsInput.val());
+        const $newForm = $emptyFormTemplate.clone(true);
+
+        $newForm.find('[id]').each(function() {
+            const newId = $(this).attr('id').replace(/__prefix__/g, currentForms);
+            $(this).attr('id', newId);
+        });
+
+        $newForm.find('[name]').each(function() {
+            const newName = $(this).attr('name').replace(/__prefix__/g, currentForms);
+            $(this).attr('name', newName);
+        });
+
+        $newForm.find('.add-image-btn').each(function() {
+            const $label = $(this);
+            const oldFor = $label.attr('for');
+            if (oldFor) {
+                const newFor = oldFor.replace(/__prefix__/g, currentForms);
+                $label.attr('for', newFor);
+            }
+        });
+
+        $newForm.find('input:not([type="hidden"]), textarea').val('');
+        $newForm.find('input[type="checkbox"]').prop('checked', false);
+        $newForm.find(`input[type="hidden"][name$="-DELETE"]`).val('');
+        $newForm.find('img[id^="imagePreview_"]').attr('src', '#').hide();
+        $newForm.find('input[type="hidden"][name$="-scroll_speed"]').val('3.0');
+        $newForm.find('input[type="checkbox"][name$="-is_active"]').prop('checked', true);
+        $newForm.find('.remove-banner-btn').attr('data-form-index', currentForms);
+
+        $newForm.removeAttr('id').show();
+        $bannerContainer.append($newForm);
+
+        initializeTopBannerUnit($newForm);
+        $totalFormsInput.val(currentForms + 1);
+    });
+
+    $('#scroll-speed-global').on('input', function() {
+        const speed = $(this).val();
+        $('input[name^="top-"][name$="-scroll_speed"]').val(speed);
+    });
+
+    $('#banner-switch-all').on('change', function() {
+        const isChecked = $(this).is(':checked');
+        $('.banner-unit').not('#empty-form-template').each(function() {
+            const $unit = $(this);
+            const $deleteInput = $unit.find('input[type="hidden"][name$="-DELETE"]');
+            if (isChecked || $deleteInput.val() !== 'on') {
+                $unit.show();
             } else {
-                console.log("input або input.files є undefined");
-                const img = document.getElementById(previewId);
-                if (img) {
-                    img.src = '#';
-                    img.style.display = 'none';
-                }
-            }
-        }
-
-        // --- Top Banners Formset Logic ---
-        const addBannerButton = document.getElementById("add-banner-form");
-        const bannerContainer = document.getElementById("banner-container");
-        const bannerSwitchAll = document.getElementById("banner-switch-all");
-        const scrollSpeedGlobal = document.getElementById("scroll-speed-global");
-        const totalFormsInput = document.querySelector('[name="top-TOTAL_FORMS"]');
-
-        let formCounter = parseInt(totalFormsInput.value);
-
-        bannerSwitchAll.addEventListener('change', function () {
-            const isChecked = this.checked;
-            bannerContainer.querySelectorAll('.banner-unit').forEach(function (bannerUnit) {
-                const isActiveInput = bannerUnit.querySelector('input[name$="-is_active"]');
-                const isActiveCheckbox = bannerUnit.querySelector('input[type="checkbox"][name$="-is_active"]'); // Знаходимо саме чекбокс
-
-                if (isActiveInput) {
-                    isActiveInput.value = isChecked ? 'True' : 'False';
-                }
-                if (isActiveCheckbox) {
-                    isActiveCheckbox.checked = isChecked; // Оновлюємо стан чекбокса
-                }
-            });
-        });
-
-        function syncScrollSpeedToAll(value) {
-            bannerContainer.querySelectorAll('input[name$="-scroll_speed"]').forEach(function(input) {
-                input.value = value;
-            });
-        }
-
-        syncScrollSpeedToAll(scrollSpeedGlobal.value);
-
-        scrollSpeedGlobal.addEventListener('input', function () {
-            syncScrollSpeedToAll(this.value);
-        });
-
-        addBannerButton.addEventListener("click", function (event) {
-            event.preventDefault();
-
-            const newBannerUnit = document.createElement('div');
-            newBannerUnit.classList.add('banner-unit', 'card', 'card-default', 'shadow-sm');
-            newBannerUnit.style.width = '350px';
-
-            const newFormIndex = formCounter;
-
-            newBannerUnit.innerHTML = `
-                <div class="card-body">
-                    <div class="preview-container mb-2" style="height:190px; background:#f0f0f0; display:flex; justify-content:center; align-items:center; overflow:hidden;">
-                        <img id="imagePreview_${newFormIndex}" src="#" alt="Попередній перегляд" style="display: none; max-width: 100%; max-height: 100%;">
-                    </div>
-                    <div class="form-group">
-                        <label for="id_top-${newFormIndex}-image" class="btn btn-default btn-sm add-image-btn">
-                            <i class="fas fa-upload"></i> Додати зображення
-                        </label>
-                        <input type="file" name="top-${newFormIndex}-image" id="id_top-${newFormIndex}-image" style="display: none;">
-                    </div>
-                    <div class="form-group">
-                        <label for="id_top-${newFormIndex}-url">URL:</label>
-                        <input type="url" name="top-${newFormIndex}-url" class="form-control" id="id_top-${newFormIndex}-url">
-                    </div>
-                    <div class="form-group">
-                        <label for="id_top-${newFormIndex}-text">Текст:</label>
-                        <input type="text" name="top-${newFormIndex}-text" class="form-control" id="id_top-${newFormIndex}-text">
-                    </div>
-                    <input type="hidden" name="top-${newFormIndex}-scroll_speed" id="id_top-${newFormIndex}-scroll_speed" value="${scrollSpeedGlobal.value}">
-                    <input type="hidden" name="top-${newFormIndex}-is_active" id="id_top-${newFormIndex}-is_active" value="${bannerSwitchAll.checked ? 'True' : 'False'}">
-                    <input type="hidden" name="top-${newFormIndex}-id" id="id_top-${newFormIndex}-id">
-                    <button type="button" class="btn btn-tool remove-banner-btn float-right" data-form-index="${newFormIndex}">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            `;
-
-            bannerContainer.appendChild(newBannerUnit);
-
-            const newFileInput = newBannerUnit.querySelector(`input[type="file"]`);
-            newFileInput.addEventListener("change", function () {
-                readURL(this, `imagePreview_${newFormIndex}`);
-            });
-
-            const removeBtn = newBannerUnit.querySelector(".remove-banner-btn");
-            removeBtn.addEventListener("click", function () {
-                removeForm(this.dataset.formIndex);
-            });
-
-            formCounter++;
-            totalFormsInput.value = formCounter; // Оновлюємо значення TOTAL_FORMS
-        });
-
-        function removeForm(index) {
-            const formToDelete = document.querySelector(`.banner-unit .remove-banner-btn[data-form-index="${index}"]`).closest('.banner-unit');
-            const deleteCheckbox = formToDelete.querySelector(`input[name="top-${index}-DELETE"]`);
-
-            if (deleteCheckbox) {
-                deleteCheckbox.checked = true;
-                formToDelete.classList.add('d-none');
-            } else {
-                formToDelete.remove();
-                formCounter--;
-                totalFormsInput.value = formCounter; // Оновлюємо значення TOTAL_FORMS
-            }
-        }
-
-        bannerContainer.querySelectorAll('.banner-unit').forEach(function (bannerUnit, index) {
-            const fileInput = bannerUnit.querySelector(`input[type="file"]`);
-            const previewId = `imagePreview_${index}`;
-
-            if (fileInput) {
-                fileInput.addEventListener("change", function () {
-                    readURL(this, previewId);
-                });
-            }
-
-            const removeBtn = bannerUnit.querySelector(".remove-banner-btn");
-            if (removeBtn) {
-                removeBtn.addEventListener("click", function () {
-                    const formIndex = this.dataset.formIndex;
-                    removeForm(formIndex);
-                });
-            }
-
-            const isActiveInput = bannerUnit.querySelector(`input[name$="-is_active"]`);
-            if (isActiveInput) {
-                isActiveInput.value = bannerSwitchAll.checked ? 'True' : 'False';
+                $unit.hide();
             }
         });
     });
+
+    // === НОВИНИ ===
+    function initializeNewsUnit($newsUnit) {
+        console.log("Initializing News Unit:", $newsUnit[0]);
+
+        const $imageInput = $newsUnit.find('input[type="file"]');
+        const $imagePreview = $newsUnit.find('img[id^="newsImagePreview_"]');
+        const $addImageBtnLabel = $newsUnit.find('.news-add-image-btn');
+
+        if ($imageInput.length && $imagePreview.length && $addImageBtnLabel.length) {
+            const inputId = $imageInput.attr('id');
+            if (inputId) $addImageBtnLabel.attr('for', inputId);
+
+            $imageInput.off('change').on('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        $imagePreview.attr('src', e.target.result).css('display', 'block');
+                        $addImageBtnLabel.html('<i class="fas fa-upload"></i> Змінити зображення');
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    $imagePreview.attr('src', '#').hide();
+                    $addImageBtnLabel.html('<i class="fas fa-upload"></i> Додати зображення');
+                }
+            });
+
+            $addImageBtnLabel.off('click').on('click', function(e) {
+                e.preventDefault();
+                $imageInput.trigger('click');
+            });
+        }
+
+        const $removeBannerBtn = $newsUnit.find('.news-remove-banner-btn');
+        if ($removeBannerBtn.length) {
+            $removeBannerBtn.off('click').on('click', function() {
+                $newsUnit.find(`input[type="hidden"][name^="news-"][name$="-DELETE"]`).val('on');
+                $newsUnit.hide();
+            });
+        }
+    }
+
+    $('.news-unit').not('#news-empty-form-template').each(function() {
+        initializeNewsUnit($(this));
+    });
+
+    const $newsEmptyFormTemplate = $('#news-empty-form-template');
+    const $newsContainer = $('#news-container');
+    const $newsTotalFormsInput = $('#id_news-TOTAL_FORMS');
+
+    $('#add-news-form').on('click', function() {
+        let currentForms = parseInt($newsTotalFormsInput.val());
+        const $newForm = $newsEmptyFormTemplate.clone(true);
+
+        $newForm.find('[id]').each(function() {
+            const newId = $(this).attr('id').replace(/__prefix__/g, currentForms);
+            $(this).attr('id', newId);
+        });
+
+        $newForm.find('[name]').each(function() {
+            const newName = $(this).attr('name').replace(/__prefix__/g, currentForms);
+            $(this).attr('name', newName);
+        });
+
+        $newForm.find('.news-add-image-btn').each(function() {
+            const $label = $(this);
+            const oldFor = $label.attr('for');
+            if (oldFor) {
+                const newFor = oldFor.replace(/__prefix__/g, currentForms);
+                $label.attr('for', newFor);
+            }
+        });
+
+        $newForm.find('input:not([type="hidden"]), textarea').val('');
+        $newForm.find('input[type="checkbox"]').prop('checked', false);
+        $newForm.find(`input[type="hidden"][name$="-DELETE"]`).val('');
+        $newForm.find('img[id^="newsImagePreview_"]').attr('src', '#').hide();
+        $newForm.find('.news-remove-banner-btn').attr('data-form-index', currentForms);
+
+        $newForm.removeAttr('id').show();
+        $newsContainer.append($newForm);
+
+        initializeNewsUnit($newForm);
+        $newsTotalFormsInput.val(currentForms + 1);
+    });
+});
 </script>
 
+
 <style>
-    .banner-wrapper {
-        border: 2px solid black;
-        border-radius: 10px;
-        padding: 20px;
-        width: fit-content;
-        font-family: sans-serif;
-    }
+    .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    border: 0;
+    padding: 0;
+    white-space: nowrap;
+    clip-path: inset(100%);
+    clip: rect(0 0 0 0);
+    overflow: hidden;
+}
+   .banner-wrapper {
+    border: 2px solid black;
+    border-radius: 10px;
+    padding: 20px;
+    width: fit-content;
+    font-family: sans-serif;
+}
 
-    .banner-title {
-        text-align: center;
-        font-weight: bold;
-        margin-bottom: 15px;
-        font-size: 1.2em;
-    }
+.banner-title {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+}
 
-    .banner-options {
-        display: flex;
-        align-items: center;
-        gap: 20px;
-    }
+.banner-options {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
 
-    .banner-image {
-        width: 120px;
-        height: 80px;
-        background-color: #eee;
-        background-repeat: no-repeat;
-        background-size: cover;
-        border: 1px solid #aaa;
-    }
+.banner-image {
+    width: 120px;
+    height: 80px;
+    background-color: #eee;
+    background-repeat: no-repeat;
+    background-size: cover;
+    border: 1px solid #aaa;
+}
 
-    .banner-radio {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
+.banner-radio {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
 
-    .banner-controls {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
+.banner-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
 
-    .banner-button {
-        padding: 5px 10px;
-        font-size: 0.9em;
-    }
+.banner-button {
+    padding: 5px 10px;
+    font-size: 0.9em;
+}
 
-    .banner-size {
-        font-size: 0.9em;
-        margin-bottom: 10px;
-    }
-    #banner-container {
-        gap: 10px;
-    }
-    .banner-unit {
-        width: 350px;
-        margin-bottom: 10px;
-    }
-    .preview-container img {
-        max-width: 100%;
-        max-height: 100%;
-        display: block;
-    }
-    .cross-banner-item {
-        margin-bottom: 15px;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        display: flex;
-        align-items: center;
-        gap: 15px;
-    }
+.banner-size {
+    font-size: 0.9em;
+    margin-bottom: 10px;
+}
+
+#banner-container {
+    gap: 10px;
+}
+
+.banner-unit {
+    width: 350px;
+    margin-bottom: 10px;
+}
+
+.preview-container img {
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+}
+
+.cross-banner-item {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* --- НОВІ СТИЛІ ДЛЯ ПРИХОВУВАННЯ INPUT TYPE="FILE" --- */
+input[type="file"][id^="id_top-"],   /* Для топ банерів */
+input[type="file"][id^="id_news-"]   /* Для новин */
+{
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
 </style>
 {%endblock%}

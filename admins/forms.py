@@ -3,26 +3,30 @@ from main.models import Block_SEO, Gallery, Picture
 from  movie.models import Movies
 from  users.models import User
 from core.models import Cinemas, Halls, Sessions,Seats, Tickets
-from main.models import Banners, Cross_Banner
+from main.models import Banners, Cross_Banner, News
 from django.forms import inlineformset_factory, formset_factory, modelformset_factory
 
 
 class CrossBannerForm(forms.ModelForm):
-    image = forms.ImageField(required=False, label='Зображення для банера')
-    image_type = forms.CharField(widget=forms.HiddenInput(), initial='gallery')
 
-    gallery = forms.ModelChoiceField(queryset=Gallery.objects.all(), widget=forms.HiddenInput(), required=False)
-    type = forms.CharField(widget=forms.HiddenInput(), required=False)
+    image = forms.ImageField(required=False, label='Зображення для банера')
+
+
+    type = forms.CharField(widget=forms.HiddenInput(), required=False, initial='photo_background')
 
     class Meta:
         model = Cross_Banner
-        fields = ['gallery', 'type']
+
+        fields = []
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if not self.instance.pk:
-            last_id = Gallery.objects.order_by('-id').first()
-            self.initial['gallery'] = (last_id.id + 1) if last_id else 1
+
+        if self.instance and self.instance.pk and self.instance.gallery:
+            picture = self.instance.gallery.pictures.first()
+            if picture and picture.image:
+                self.fields['image'].initial = picture.image
+
 
     def save(self, commit=True):
         self.instance.gallery = Gallery.objects.create()
@@ -201,46 +205,24 @@ BannerFormSet = modelformset_factory(
 )
 
 
-class CombinedBannerPictureForm(forms.Form):
-    id = forms.IntegerField(widget=forms.HiddenInput(), required=False)
-    url = forms.URLField(label='URL', widget=forms.URLInput(attrs={'class': 'form-control'}), required=False)
-    text = forms.CharField(label='Текст', widget=forms.TextInput(attrs={'class': 'form-control'}), required=False)
-    scroll_speed = forms.IntegerField(label='Скорость прокрутки (сек.)', widget=forms.NumberInput(attrs={
-        'class': 'form-control'}), required=False)
-    is_active = forms.BooleanField(label='Показывать', widget=forms.CheckboxInput(attrs={
-        'class': 'form-control'}), required=False)
-    image = forms.ImageField(label='Изображение', widget=forms.FileInput(attrs={
-        'class': 'form-control-file'}), required=False)
-    image_type = forms.ChoiceField(
-        label='Тип изображения',
-        choices=Picture.objects.none().model.image_type.field.choices,
-        widget=forms.Select(attrs={'class': 'form-control'}),
+class TopBannerForm(forms.ModelForm):
+    uploaded_image = forms.ImageField(label='Зображення', widget=forms.FileInput(
+        attrs={'class': 'form-control-file'}),
         required=False
     )
+    class Meta:
+        model = Banners
+        fields = ['url', 'text', 'scroll_speed', 'is_active']
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if 'image_type' in self.initial:
-            self.fields['image_type'].initial = self.initial['image_type']
-
-class CombinedNewsPictureForm(forms.Form):
-    id = forms.IntegerField(widget=forms.HiddenInput(), required=False)
-    url = forms.URLField(label='URL', widget=forms.URLInput(attrs={'class': 'form-control'}), required=False)
-    text = forms.CharField(label='Текст', widget=forms.TextInput(attrs={'class': 'form-control'}), required=False)
-    scroll_speed = forms.IntegerField(label='Скорость прокрутки (сек.)', widget=forms.NumberInput(attrs={
-        'class': 'form-control'}), required=False)
-    is_active = forms.BooleanField(label='Показывать', widget=forms.CheckboxInput(attrs={
-        'class': 'form-control'}), required=False)
-    image = forms.ImageField(label='Изображение', widget=forms.FileInput(attrs={
-        'class': 'form-control-file'}), required=False)
-    image_type = forms.ChoiceField(
-        label='Тип изображения',
-        choices=Picture.objects.none().model.image_type.field.choices,
-        widget=forms.Select(attrs={'class': 'form-control'}),
+class NewsForm(forms.ModelForm):
+    uploaded_image = forms.ImageField(label='Зображення', widget=forms.FileInput(
+        attrs={'class': 'form-control-file'}),
         required=False
     )
+    class Meta:
+        model = News
+        fields = ['url', 'scroll_speed', 'is_active']
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if 'image_type' in self.initial:
-            self.fields['image_type'].initial = self.initial['image_type']
+# Factory definitions залишаються без змін
+TopBannerModelFormSet = modelformset_factory(Banners, form=TopBannerForm, extra=0, can_delete=True)
+NewsModelFormSet = modelformset_factory(News, form=NewsForm, extra=0, can_delete=True)

@@ -49,25 +49,38 @@ class Banners(models.Model):
     id = models.AutoField(primary_key=True)
     gallery = models.ForeignKey(
         Gallery,
-        related_name='banners',
+        related_name='banners', # Вже було
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        verbose_name='Картинка'
+        verbose_name='Картинка' # Можливо, краще "Галерея зображень"
     )
-    url = models.URLField(verbose_name='URL адреса')
-    text = models.CharField(max_length=100, verbose_name='текст')
+    url = models.URLField(verbose_name='URL адреса', null=True, blank=True) # Додав null=True, blank=True
+    text = models.CharField(max_length=100, verbose_name='текст', null=True, blank=True) # Додав null=True, blank=True
     scroll_speed = models.DurationField(verbose_name='Швидкість прокрутки (сек.)', null=True, blank=True)
-
     is_active = models.BooleanField(default=False, verbose_name='Показувати')
 
+    @property
+    def image(self):
+        """
+        Повертає перше зображення з пов'язаної галереї, якщо воно існує.
+        """
+        if self.gallery:
+            # Використовуємо related_name='pictures' з моделі Picture
+            # Можливо, потрібно фільтрувати за image_type, якщо банери мають свій тип
+            first_picture = self.gallery.pictures.first() # Або .filter(image_type='banner_type').first()
+            if first_picture:
+                return first_picture.image
+        return None
 
+    def __str__(self):
+        return f"Банер {self.id}" + (f": {self.text[:50]}..." if self.text else "")
 
     class Meta:
         verbose_name = 'Банер'
         verbose_name_plural = 'Банери'
 
-class News (models.Model):
+class News(models.Model):
     id = models.AutoField(primary_key=True)
     gallery = models.ForeignKey(
         Gallery,
@@ -75,34 +88,58 @@ class News (models.Model):
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        verbose_name='Картинка'
+        verbose_name='Картинка' # Можливо, краще "Галерея зображень" або "Пов'язана галерея"
     )
-    url = models.URLField(verbose_name='URL адреса')
-    scroll_speed = models.DurationField(verbose_name='Швидкість прокрутки (сек.)', null=True, blank=True)
+    url = models.URLField(verbose_name='URL адреса', null=True, blank=True) # Додав null=True, blank=True, якщо може бути порожнім
 
+    scroll_speed = models.DurationField(verbose_name='Швидкість прокрутки (сек.)', null=True, blank=True)
     is_active = models.BooleanField(default=False, verbose_name='Показувати')
 
+    @property
+    def image(self):
+        """
+        Повертає перше зображення з пов'язаної галереї, якщо воно існує.
+        """
+        if self.gallery:
+            # Використовуємо related_name='pictures' з моделі Picture
+            first_picture = self.gallery.pictures.filter(image_type='gallery').first()
+            if first_picture:
+                return first_picture.image
+        return None # Повертаємо None, якщо немає галереї або зображень
+
     def __str__(self):
-        return self.type
+        # Додай щось більш інформативне для відображення в адмінці
+        return f"Новина {self.id}"
+
 
     class Meta:
-        verbose_name = 'Банер'
-        verbose_name_plural = 'Банери'
+        verbose_name = 'Новина' # Змінив на "Новина" для кращої семантики
+        verbose_name_plural = 'Новини' # Змінив на "Новини"
 
 
-
-class Cross_Banner (models.Model):
+class Cross_Banner(models.Model):
     id = models.AutoField(primary_key=True)
-    gallery = models.ForeignKey(Gallery, on_delete=models.CASCADE, null=True, blank=True, verbose_name= 'Картинка')
-    type = models.CharField(choices=[('photo_background','фото на фоне'),('photo','просто фото')])
+    gallery = models.ForeignKey('Gallery', on_delete=models.CASCADE, null=True, blank=True, verbose_name='Картинка')
+
+    # Правильне визначення списку вибору
     TYPE_CHOICES = [
         ('photo_background', 'Фото на фоне'),
         ('photo', 'Просто фото'),
-        # Додай сюди інші свої варіанти
     ]
 
+    # Правильне визначення поля 'type'
+    type = models.CharField(
+        max_length=50, # Обов'язково для CharField
+        choices=TYPE_CHOICES, # Використовуємо визначений список
+        default='photo_background', # Рекомендується встановити значення за замовчуванням
+        verbose_name='Тип банера'
+    )
+
     def __str__(self):
-        return self.type
+        # Переконайтеся, що ви повертаєте читабельне значення.
+        # Можна повернути значення з choices
+        return dict(self.TYPE_CHOICES).get(self.type, self.type)
+
 
     class Meta:
         verbose_name = 'Сквозной Банер'

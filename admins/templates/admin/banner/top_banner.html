@@ -1,107 +1,144 @@
+<div class="card card-primary">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="card-title">Топ банери та зображення</h3>
+        <div class="card-tools">
+            <div class="form-group mb-0">
+                <div class="custom-control custom-switch custom-switch-off-danger custom-switch-on-success">
+                    <input type="checkbox" class="custom-control-input" id="banner-switch-all">
+                    <label class="custom-control-label" for="banner-switch-all">Показувати всі</label>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <div class="card-body">
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li {% if message.tags %} class="{{ message.tags }}"{% endif %} >  {{ message }} </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        <p>Розмір зображення: 1000x190 пікселів</p>
 
-    <div class="card card-primary">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h3 class="card-title">Топ банери та зображення</h3>
-                        <div class="card-tools">
-                            <div class="form-group mb-0">
-                                <div class="custom-control custom-switch custom-switch-off-danger custom-switch-on-success">
-                                    <input type="checkbox" class="custom-control-input" id="banner-switch-all">
-                                    <label class="custom-control-label" for="banner-switch-all">Показувати всі</label>
-                                </div>
+        <form method="post" enctype="multipart/form-data" id="top-banners-form">
+            {% csrf_token %}
+            {# ВИДАЛЕНО: <input type="hidden" name="which_form_is_it" value="top_banners_form"> #}
+
+            {{ top_formset.management_form }}
+
+            <div id="banner-container" class="mb-3 d-flex flex-wrap gap-3">
+                {% for form in top_formset %}
+                    <div class="banner-unit card card-default shadow-sm {% if form.DELETE.value == 'on' %}d-none{% endif %}">
+                        <div class="card-body">
+                            {{ form.id }}
+                            <input type="hidden" name="{{ form.prefix }}-id" id="id_{{ form.prefix }}-id" value="{{ form.instance.pk|default:'' }}">
+                            <div class="preview-container mb-2" style="height:190px; background:#f0f0f0; display:flex; justify-content:center; align-items:center; overflow:hidden;">
+                                {% if form.instance.image %}
+                                    <img id="imagePreview_{{ forloop.counter0 }}" src="{{ form.instance.image.url }}" alt="Попередній перегляд" style="max-width: 100%; max-height: 100%; display: block;">
+                                {% else %}
+                                    <img id="imagePreview_{{ forloop.counter0 }}" src="#" alt="Попередній перегляд" style="display: none; max-width: 100%; max-height: 100%;">
+                                {% endif %}
                             </div>
+
+                            <div class="form-group">
+                                {# Зміни тут: приховуємо оригінальний input Django, але створюємо новий, невидимий input[type="file"] #}
+                                {% if form.instance.image %}
+                                    <input type="hidden" name="{{ form.image.name }}" id="{{ form.image.id_for_label }}_current" value="{{ form.instance.image.name }}">
+                                {% endif %}
+                                <input type="file" name="{{ form.image.name }}" id="{{ form.image.id_for_label }}" style="display: none;">
+
+                                <label for="{{ form.image.id_for_label }}" class="btn btn-default btn-sm add-image-btn">
+                                    <i class="fas fa-upload"></i> {% if form.instance.image %}Змінити зображення{% else %}Додати зображення{% endif %}
+                                </label>
+                                {% if form.image.errors %}
+                                    <div class="errorlist">{{ form.image.errors }}</div>
+                                {% endif %}
+                                {% if form.DELETE %}
+                                    <div class="form-check mt-2" style="display: none;">
+                                        {{ form.DELETE }}
+                                        <label class="form-check-label" for="{{ form.DELETE.id_for_label }}">Видалити</label>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="{{ form.url.id_for_label }}">URL:</label>
+                                {{ form.url }}
+                                {% if form.url.errors %}
+                                    <div class="errorlist">{{ form.url.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="{{ form.text.id_for_label }}">Текст:</label>
+                                {{ form.text }}
+                                {% if form.text.errors %}
+                                    <div class="errorlist">{{ form.text.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-group" style="display: none;">
+                                {{ form.scroll_speed }}
+                                {{ form.is_active }}
+                            </div>
+                             <button type="button" class="btn btn-tool remove-banner-btn float-right" data-form-index="{{ forloop.counter0 }}">
+                                <i class="fas fa-times"></i>
+                            </button>
                         </div>
                     </div>
+                {% endfor %}
+            </div>
 
-                    <div class="card-body">
-                        {% if messages %}
-                            <ul class="messages">
-                                {% for message in messages %}
-                                    <li {% if message.tags %} class="{{ message.tags }}"{% endif %} >  {{ message }} </li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-                        <p>Розмір зображення: 1000x190 пікселів</p>
-
-                        <form method="post" enctype="multipart/form-data">
-                            {% csrf_token %}
-                            <input type="hidden" name="which_form_is_it" value="top_banners_form">
-
-                            {{ top_formset.management_form }}
-
-                          <div id="banner-container" class="mb-3 d-flex flex-wrap gap-3">
-                                {% for form in top_formset %}
-                                    <div class="banner-unit card card-default shadow-sm {% if form.instance.DELETE %}d-none{% endif %}">
-                                        <div class="card-body">
-                                            {{ form.id }}
-                                            <input type="hidden" name="top-{{ forloop.counter0 }}-id" id="id_top-{{ forloop.counter0 }}-id" value="{{ form.initial.id|default:'' }}">
-                                            <div class="preview-container mb-2" style="height:190px; background:#f0f0f0; display:flex; justify-content:center; align-items:center; overflow:hidden;">
-                                                {% if form.initial.image %}
-                                                    <img id="imagePreview_{{ forloop.counter0 }}" src="{{ form.initial.image.url }}" alt="Попередній перегляд" style="max-width: 100%; max-height: 100%; display: block;">
-                                                {% else %}
-                                                    <img id="imagePreview_{{ forloop.counter0 }}" src="#" alt="Попередній перегляд" style="display: none; max-width: 100%; max-height: 100%;">
-                                                {% endif %}
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label for="{{ form.image.id_for_label }}" class="btn btn-default btn-sm add-image-btn">
-                                                    <i class="fas fa-upload"></i> {% if form.initial.image %}Змінити зображення{% else %}Додати зображення{% endif %}
-                                                </label>
-                                                <input type="file" name="{{ form.image.html_name }}" id="{{ form.image.id_for_label }}" style="display: none;">
-                                                {% if form.image.errors %}
-                                                    <div class="errorlist">{{ form.image.errors }}</div>
-                                                {% endif %}
-                                                {% if form.DELETE %}
-                                                    <div class="form-check mt-2">
-                                                        {{ form.DELETE }}
-                                                        <label class="form-check-label" for="{{ form.DELETE.id_for_label }}">Видалити</label>
-                                                    </div>
-                                                {% endif %}
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label for="{{ form.url.id_for_label }}">URL:</label>
-                                                {{ form.url }}
-                                                {% if form.url.errors %}
-                                                    <div class="errorlist">{{ form.url.errors }}</div>
-                                                {% endif %}
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label for="{{ form.text.id_for_label }}">Текст:</label>
-                                                {{ form.text }}
-                                                {% if form.text.errors %}
-                                                    <div class="errorlist">{{ form.text.errors }}</div>
-                                                {% endif %}
-                                            </div>
-
-                                            <div class="form-group" style="display: none;">
-                                                {{ form.scroll_speed }}
-                                                {{ form.is_active }}
-
-                                            </div>
-                                             <button type="button" class="btn btn-tool remove-banner-btn float-right" data-form-index="{{ forloop.counter0 }}">
-                                                <i class="fas fa-times"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                {% empty %}
-                                    <p>Немає доступних банерів.</p>
-                                {% endfor %}
-                            </div>
-
-                            <div class="form-group mt-4">
-                                <label for="scroll-speed-global"><strong>Швидкість прокрутки для всіх банерів (сек.):</strong></label>
-                                <input type="number" id="scroll-speed-global" class="form-control" value="3" min="1" step="0.1" style="width: 150px;">
-                            </div>
-
-                            <button type="button" id="add-banner-form" class="btn btn-info mt-2">
-                                <i class="fas fa-plus"></i> Додати фото
-                            </button>
-
-                            <button type="submit" class="btn btn-primary mt-3">
-                                <i class="fas fa-save"></i> Зберегти топ банери
-                            </button>
-                        </form>
+            {# ПОРОЖНІЙ ШАБЛОН ДЛЯ КЛОНУВАННЯ #}
+            <div id="empty-form-template" class="banner-unit card card-default shadow-sm" style="display: none;">
+                <div class="card-body">
+                    <input type="hidden" name="top-__prefix__-id" id="id_top-__prefix__-id" value="">
+                    <div class="preview-container mb-2" style="height:190px; background:#f0f0f0; display:flex; justify-content:center; align-items:center; overflow:hidden;">
+                        <img id="imagePreview___prefix__" src="#" alt="Попередній перегляд" style="display: none; max-width: 100%; max-height: 100%;">
                     </div>
+
+                    <div class="form-group">
+                        {# Тут також вручну вказуємо input перед label, і він прихований #}
+                        <input type="file" name="top-__prefix__-image" id="id_top-__prefix__-image" style="display: none;">
+                        <label for="id_top-__prefix__-image" class="btn btn-default btn-sm add-image-btn">
+                            <i class="fas fa-upload"></i> Додати зображення
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_top-__prefix__-url">URL:</label>
+                        <input type="url" name="top-__prefix__-url" id="id_top-__prefix__-url" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_top-__prefix__-text">Текст:</label>
+                        <input type="text" name="top-__prefix__-text" id="id_top-__prefix__-text" class="form-control">
+                    </div>
+
+                    <div class="form-group" style="display: none;">
+                        <input type="hidden" name="top-__prefix__-scroll_speed" id="id_top-__prefix__-scroll_speed" value="3.0">
+                        <input type="checkbox" name="top-__prefix__-is_active" id="id_top-__prefix__-is_active" checked>
+                        <input type="hidden" name="top-__prefix__-DELETE" id="id_top-__prefix__-DELETE" value="off">
+                    </div>
+                    <button type="button" class="btn btn-tool remove-banner-btn float-right" data-form-index="__prefix__">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-group mt-4">
+                <label for="scroll-speed-global"><strong>Швидкість прокрутки для всіх банерів (сек.):</strong></label>
+                <input type="number" id="scroll-speed-global" class="form-control" value="3" min="1" step="0.1" style="width: 150px;">
+            </div>
+
+            <button type="button" id="add-banner-form" class="btn btn-info mt-2">
+                <i class="fas fa-plus"></i> Додати фото
+            </button>
+
+            <button type="submit" name="submit_top_banners_form" class="btn btn-primary mt-3">
+                <i class="fas fa-save"></i> Зберегти топ банери
+            </button>
+        </form>
     </div>
+</div>
