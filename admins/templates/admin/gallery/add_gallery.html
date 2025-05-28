@@ -1,0 +1,121 @@
+{% extends 'admin/index.html' %}
+{% load static %}
+
+{% block title %}
+    {% if is_edit %}Редагувати Галерею {% else %}Додати Галерею {% endif %}
+{% endblock %}
+
+{% block content %}
+<section class="content">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card card-primary">
+          <div class="card-header">
+            <h3 class="card-title">{% if is_edit %}Редагувати Галерею{% else %}Додати Галерею{% endif %}</h3>
+          </div>
+
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+              <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            {% if formset and formset.non_form_errors %}
+              <div class="alert alert-danger">Помилки формсета: {{ formset.non_form_errors }}</div>
+            {% endif %}
+
+            <div class="card-body">
+              <h2>Інформація про Галерею</h2>
+
+              <div class="form-group">
+                {{ form.title.label_tag }}
+                {{ form.title }}
+                {% for error in form.title.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                {% if form.title.help_text %}
+                  <small class="form-text text-muted">{{ form.title.help_text|safe }}</small>
+                {% endif %}
+              </div>
+
+              <h2 class="mt-4">Картинки</h2>
+
+              {% if formset %}
+                {{ formset.management_form }}
+
+                <div id="picture-formset-container">
+                  {% for picture_form in formset %}
+                    {% if picture_form.errors %}
+                      <div class="alert alert-danger">
+                        Помилки в формі зображення {{ forloop.counter }}:
+                        <ul>
+                          {% for field, errors in picture_form.errors.items %}
+                            <li>{{ field }}: {{ errors|join:", " }}</li>
+                          {% endfor %}
+                        </ul>
+                      </div>
+                    {% endif %}
+                    <div class="picture-form-wrapper form-group">
+                      {% include 'admin/card_forms/gallery_form.html' with form=picture_form %}
+                    </div>
+                  {% endfor %}
+                </div>
+
+                <button type="button" class="btn btn-secondary" id="add-more-picture" >Додати ще картинку</button>
+              {% else %}
+                <p>Формсет картинок недоступний або не переданий з view.</p>
+              {% endif %}
+            </div>
+
+            <div class="card-footer">
+              <button type="submit" class="btn btn-primary">
+                {% if is_edit %}Оновити{% else %}Створити{% endif %}
+              </button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const addPictureFormBtn = document.getElementById('add-picture-form');
+    const galleryFormsetContainer = document.getElementById('gallery-formset');
+    const emptyFormTemplate = document.getElementById('empty-picture-form');
+    const totalForms = document.getElementById('id_form-TOTAL_FORMS');
+
+    function addPictureForm() {
+        const newForm = emptyFormTemplate.content.cloneNode(true);
+        const formRegex = RegExp(`__prefix__`, 'g');
+        const formIndex = parseInt(totalForms.value);
+
+        newForm.querySelectorAll('label').forEach(label => {
+            const forAttr = label.getAttribute('for');
+            if (forAttr) {
+                label.setAttribute('for', forAttr.replace(formRegex, `form-${formIndex}`));
+            }
+        });
+
+        newForm.querySelectorAll('input, select, textarea').forEach(input => {
+            const nameAttr = input.getAttribute('name');
+            if (nameAttr) {
+                input.setAttribute('name', nameAttr.replace(formRegex, `form-${formIndex}`));
+                const idAttr = input.getAttribute('id');
+                if (idAttr) {
+                    input.setAttribute('id', idAttr.replace(formRegex, `id_form-${formIndex}`));
+                }
+            }
+        });
+
+        galleryFormsetContainer.appendChild(newForm);
+        totalForms.value = formIndex + 1;
+    }
+
+    addPictureFormBtn.addEventListener('click', addPictureForm);
+});
+</script>
+{% endblock %}
+
+

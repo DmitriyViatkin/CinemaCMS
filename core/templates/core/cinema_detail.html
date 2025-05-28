@@ -1,29 +1,43 @@
-{% extends 'main/index.html' %}
+{% extends 'main/index1.html' %}
 
 {% block title %}{{ cinema.title }}{% endblock %}
 
 {% block content %}
     <h1>{{ cinema.title }}</h1>
 
-    {% if cinema.picture %}
-        <img src="{{ cinema.picture.image.url }}" alt="{{ cinema.picture.alter_txt }}">
+    {% if main_picture %}
+        <div>
+            <img src="{{ main_picture.image.url }}" alt="{{ main_picture.alter_txt }}" style="max-width: 300px;">
+        </div>
     {% endif %}
 
-    <p>Місто: {{ cinema.city }}</p>
-    <p>Опис: {{ cinema.description|linebreaksbr }}</p>
-    <p>Умови: {{ cinema.conditions|linebreaksbr }}</p>
-    <p>Дата створення: {{ cinema.date }}</p>
+    <p><strong>Місто:</strong> {{ cinema.city }}</p>
+    <p><strong>Опис:</strong> {{ cinema.description }}</p>
+    <p><strong>Умови:</strong> {{ cinema.conditions }}</p>
 
-    <h2>Зали кінотеатру:</h2>
+    <h2>Галерея</h2>
+    {% if cinema.gallery %}
+        {% with cinema.gallery.pictures.all as pictures %}
+            {% for picture in pictures %}
+                {% if picture.image_type == 'gallery' %}
+                    <div style="display: inline-block; margin: 10px;">
+                        <img src="{{ picture.image.url }}" alt="{{ picture.alter_txt }}" style="max-width: 200px;">
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endwith %}
+    {% else %}
+        <p>Галерея відсутня.</p>
+    {% endif %}
+
+    <h2>Зали</h2>
     {% if halls %}
         <ul>
             {% for hall in halls %}
-                <li>{{ hall.title }} - {{ hall.description|truncatechars:100 }}</li>
+                <li>{{ hall.name }}</li>
             {% endfor %}
         </ul>
     {% else %}
-        <p>У цьому кінотеатрі немає залів.</p>
+        <p>Немає залів для цього кінотеатру.</p>
     {% endif %}
-
-    <p><a href="{% url 'cinema_list' %}">Повернутися до списку кінотеатрів</a></p>
 {% endblock %}

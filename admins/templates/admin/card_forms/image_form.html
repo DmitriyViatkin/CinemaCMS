@@ -1,0 +1,61 @@
+<h3>Картинка галереї</h3>
+ {{ picture_formset.management_form }}
+<div class="ingredient-form">
+<div id='form-group1' class="form-group">
+    {{ picture_form.image_type.label_tag }}
+    {{ picture_form.image_type }}
+    {% for error in picture_form.image_type.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+    {% endfor %}
+</div>
+
+<div   id='form-group1' class="form-group" >
+    {{ picture_form.image.label_tag }}
+    {{ picture_form.image }}
+    {% for error in picture_form.image.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+    {% endfor %}
+</div>
+
+<div   id='form-group1' class="form-group">
+    {{ picture_form.alter_txt.label_tag }}
+    {{ picture_form.alter_txt }}
+    {% for error in picture_form.alter_txt.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+    {% endfor %}
+</div>
+    </div>
+<button id="add-form" type="submit" class="btn btn-primary">
+                                Додати зображення
+                             </button>
+
+
+<script>
+
+    const AddMoreBtn = document.getElementById('add-form');
+    AddMoreBtn.addEventListener('click', add_new_form);
+
+    function add_new_form(event){
+        if (event){
+            event.preventDefault();
+        }
+        const pictureFormEl = document.querySelector('.ingredient-form').cloneNode(true);
+
+        // Очищаємо значення полів у новій формі (за бажанням)
+        pictureFormEl.querySelectorAll('input').forEach(input => input.value = '');
+        pictureFormEl.querySelectorAll('select').forEach(select => select.value = '');
+
+        const parentElement = document.querySelector('.ingredient-form').parentNode;
+        if (parentElement) {
+            parentElement.insertBefore(pictureFormEl, document.querySelector('.ingredient-form').nextSibling);
+
+            // Оновлюємо значення TOTAL_FORMS у management_form
+            const totalFormsInput = document.querySelector('#id_form-TOTAL_FORMS');
+            if (totalFormsInput) {
+                totalFormsInput.value = parseInt(totalFormsInput.value) + 1;
+            }
+        } else {
+            console.error("Не знайдено батьківський елемент для додавання нової форми.");
+        }
+    }
+</script>

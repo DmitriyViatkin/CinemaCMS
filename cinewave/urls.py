@@ -21,10 +21,12 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('admins/', include('admins.urls')),
     path('', include('main.urls')),
     path('account/', include('authentication.urls')),
     path('user/', include('users.urls')),
     path('cinemas/', include('core.urls')),
+    path('movies/', include('movie.urls')),
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

@@ -1,0 +1,46 @@
+{#users/user_ticket.html#}
+
+
+{% if user_tickets %}
+    <div class="table-responsive">
+      <table class="table table-striped table-hover">
+        <thead>
+          <tr>
+
+            <th>Фільм</th>
+            <th>Дата сеансу</th>
+            <th>Час сеансу</th>
+            <th>Кінотеатр</th>
+            <th>Зал</th>
+            <th>Ряд</th>
+            <th>Місце</th>
+            <th>Ціна</th>
+            <th>Дата покупки</th>
+
+          </tr>
+        </thead>
+        <tbody>
+          {% for ticket in user_tickets %}
+            <tr>
+              {# Прибрано комірку для "Сеанс" #}
+              <td>{{ ticket.session.movie.title|default:"-" }}</td> {# Доступ до назви фільму через сеанс #}
+              <td>{{ ticket.session.date|date:"d.m.Y"|default:"-" }}</td> {# Дата сеансу #}
+              <td>{{ ticket.session.time_session|time:"H:i"|default:"-" }}</td> {# Час сеансу #}
+              <td>{{ ticket.session.cinema.title|default:"-" }}</td> {# Назва кінотеатру через сеанс #}
+              <td>{{ ticket.session.hall_id.title|default:"-" }}</td> {# Назва залу через сеанс #}
+              <td>{{ ticket.seat.number_row|default:"-" }}</td> {# Ряд місця #}
+              <td>{{ ticket.seat.seat|default:"-" }}</td> {# Номер місця #}
+              <td>{{ ticket.seat.price|default:"-" }} ₴</td> {# Ціна місця #}
+              {# Переконайтеся, що ticket.date є DateTimeField або використовуйте тільки дату #}
+              <td>{{ ticket.date|date:"d.m.Y H:i"|default:"-" }}</td> {# Дата та час покупки (якщо поле DateTimeField) #}
+              {# <td>{{ ticket.date|date:"d.m.Y"|default:"-" }}</td> {# Або тільки дата покупки (якщо поле DateField) #}
+              {# <td>{{ ticket.seat.is_vip|yesno:"Так,Ні" }}</td> #}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+
+    <p>У вас ще немає куплених квитків.</p>
+    {% endif %}

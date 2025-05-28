@@ -1,0 +1,106 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ua">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CinoWave</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Ваш файл стилів -->
+  <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+
+{% if banners and banners.0.pictures %}
+  {% with background_image=banners.0.pictures.0.image.url %}
+    <body data-bs-theme="light" class="has-bg" style="background-image: url('{{ background_image }}'); background-size: cover;">
+  {% endwith %}
+{% else %}
+  <body data-bs-theme="light">
+{% endif %}
+
+  <!-- Банер (карусель) -->
+  <div id="carouselExampleCaptions" class="carousel slide" data-bs-ride="carousel" data-bs-interval="{{ scroll_interval|default:5000 }}" data-bs-wrap="true">
+    <!-- Індикатори -->
+    <div class="carousel-indicators">
+      {% for banner in banners %}
+        {% for picture in banner.pictures %}
+          {% with index=forloop.parentloop.counter0|add:forloop.counter0 %}
+            <button type="button"
+                    data-bs-target="#carouselExampleCaptions"
+                    data-bs-slide-to="{{ index }}"
+                    {% if forloop.parentloop.first and forloop.first %}class="active" aria-current="true"{% endif %}
+                    aria-label="Слайд {{ forloop.parentloop.counter }}-{{ forloop.counter }}">
+            </button>
+          {% endwith %}
+        {% endfor %}
+      {% endfor %}
+    </div>
+
+    <!-- Слайди -->
+    <div class="carousel-inner">
+      {% for banner in banners %}
+        {% for picture in banner.pictures %}
+          <div class="carousel-item {% if forloop.parentloop.first and forloop.first %}active{% endif %}">
+            <img src="{{ picture.image.url }}" class="d-block w-100" alt="{{ picture.alter_txt }}" style="max-height: 250px; object-fit: cover;">
+            <div class="carousel-caption d-none d-md-block">
+              <h5>{{ banner.text }}</h5>
+              <p>{{ banner.type }}</p>
+            </div>
+          </div>
+        {% endfor %}
+      {% endfor %}
+    </div>
+
+    <!-- Кнопки керування -->
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Назад</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Вперед</span>
+    </button>
+  </div>
+
+  {% include 'main/navbar.html' %}
+
+  {% block content %}
+    <div class="container mt-5">
+      <!-- У прокаті -->
+      <h2 class="mb-4">У прокаті</h2>
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+        {% for movie in movies %}
+          <div class="col">
+            {% include 'movie/movie_card.html' with movie=movie %}
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Незабаром -->
+      <h2 class="mb-4">Скоро в кіно</h2>
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4 mb-5">
+        {% for movie in coming_soon %}
+          {% include 'movie/soon_card.html' with movie=movie %}
+        {% empty %}
+          <p>Жодного фільму незабаром не очікується.</p>
+        {% endfor %}
+      </div>
+
+      <!-- Новини -->
+      <h2 class="mb-4">Останні новини</h2>
+      <div class="row row-cols-1 row-cols-md-2 g-4">
+        {% for item in news %}
+          {% include 'main/news_card.html' with news=item %}
+        {% endfor %}
+      </div>
+    </div>
+  {% endblock %}
+
+  <!-- Bootstrap Bundle JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+</body>
+</html>

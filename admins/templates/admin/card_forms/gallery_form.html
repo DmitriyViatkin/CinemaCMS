@@ -1,0 +1,36 @@
+{# gallery_form.html #}
+
+
+<div id="gallery-formset">
+                            <input type="hidden" name="form-TOTAL_FORMS" value="1" id="id_form-TOTAL_FORMS">
+                            <input type="hidden" name="form-INITIAL_FORMS" value="0" id="id_form-INITIAL_FORMS">
+                            <input type="hidden" name="form-MIN_NUM_FORMS" value="0" id="id_form-MIN_NUM_FORMS">
+                            <input type="hidden" name="form-MAX_NUM_FORMS" value="1000" id="id_form-MAX_NUM_FORMS">
+                            {{ picture_formset.management_form }}
+                            {% for form in picture_formset %}
+                                <div class="gallery-image-form border p-3 mb-3">
+                                {{ form.id }}
+                                {% if form.non_field_errors %}...{% endif %}
+
+                                <div class="form-group">
+                                    {{ form.image_type.label_tag }}
+                                    {{ form.image_type }}
+                                    {% if form.image_type.help_text %}...{% endif %}
+                                    {% for error in form.image_type.errors %}...{% endfor %}
+                                </div>
+                                 <div class="form-group">
+                                    {{ form.image.label_tag }}
+                                     {% if form.instance.pk and form.instance.image %}...{% endif %}
+                                     {{ form.image }}
+                                    {% if form.image.help_text %}...{% endif %}
+                                    {% for error in form.image.errors %}...{% endfor %}
+                                </div>
+
+                                {# Поле DELETE #}
+                                <div class="form-group form-check">
+                                     {{ form.DELETE }} {{ form.DELETE.label_tag }}
+                                     {% for error in form.DELETE.errors %}...{% endfor %}
+                                </div>
+                            </div>
+                           {% endfor %}
+                        </div>

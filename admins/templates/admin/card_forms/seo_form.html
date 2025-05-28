@@ -1,0 +1,52 @@
+{# seo_form.html #}
+{% load static %}
+
+
+      <div class="card-body">
+                  <div class="form-group">
+                        {{ block_seo_form.title_seo.label_tag }}
+                        {{ block_seo_form.title_seo }}
+                        {% if block_seo_form.title_seo.help_text %}<small class="form-text text-muted">{{ block_seo_form.title_seo.help_text }}</small>{% endif %}
+                        {% for error in block_seo_form.title_seo.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                  </div>
+                </div>
+
+                <div class="card-body">
+                  <div class="form-group">
+                        {{ block_seo_form.seo_url.label_tag }}
+                        {{ block_seo_form.seo_url }}
+                        {% if block_seo_form.seo_url.help_text %}<small class="form-text text-muted">{{ block_seo_form.seo_url.help_text }}</small>{% endif %}
+                        {% for error in block_seo_form.seo_url.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                  </div>
+                </div>
+
+                <div class="card-body">
+                  <div class="form-group">
+                        {{ block_seo_form.seo_text.label_tag }}
+                        {{ block_seo_form.seo_text }}
+                        {% if block_seo_form.seo_text.help_text %}<small class="form-text text-muted">{{ block_seo_form.seo_text.help_text }}</small>{% endif %}
+                        {% for error in block_seo_form.seo_text.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                  </div>
+                </div>
+
+                <div class="card-body">
+                  <div class="form-group">
+                         {{ block_seo_form.seo_keywords.label_tag }}
+                         {{ block_seo_form.seo_keywords }}
+                         {% if block_seo_form.seo_keywords.help_text %}<small class="form-text text-muted">{{ block_seo_form.seo_keywords.help_text }}</small>{% endif %}
+                         {% for error in block_seo_form.seo_keywords.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                  </div>
+                </div>
+
+                <div class="card-body">
+                  <div class="form-group">
+                        {{ block_seo_form.seo_description.label_tag }}
+                        {{ block_seo_form.seo_description }}
+                        {% if block_seo_form.seo_description.help_text %}<small class="form-text text-muted">{{ block_seo_form.seo_description.help_text }}</small>{% endif %}
+                        {% for error in block_seo_form.seo_description.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                    </div>
+                  </div>
+
+
+
+

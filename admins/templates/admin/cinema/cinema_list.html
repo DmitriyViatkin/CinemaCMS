@@ -1,0 +1,61 @@
+{% extends 'admin/index.html' %}
+
+{% block title %}Список кінотеатрів{% endblock %} {# Змінено заголовок сторінки #}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="card-title mb-0">Список кінотеатрів</h3>
+
+                        <div class="card-tools">
+                            <a href="{% url 'add_cinema_create' %}" class="btn btn-success btn-sm">
+                                <i class="fas fa-plus"></i> Додати кінотеатр
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table id="cinemasTable" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Назва</th>
+                                    <th>Місто</th>
+                                    <th>Дата додавання</th>
+                                    <th>Дії</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cinema in cinemas %} {# Цикл по об'єктах кінотеатрів #}
+                                <tr>
+                                    <td>{{ cinema.title }}</td>
+                                    <td>{{ cinema.city }}</td>
+                                    <td>{{ cinema.date|date:"d.m.Y" }}</td>
+                                    <td>
+                                        {# Кнопка або посилання для редагування кінотеатру #}
+                                        {# Замініть 'add_cinema_edit' на ім'я вашого URL-шаблону для редагування кінотеатру #}
+                                        <a href="{% url 'add_cinema_edit' cinema.pk %}" class="btn btn-primary btn-sm">Редагувати</a>
+
+                                        {# Кнопка або посилання для видалення кінотеатру #}
+                                        {# Замініть 'delete_cinema' на ім'я вашого URL-шаблону для видалення кінотеатру #}
+                                        <a href="{% url 'delete_cinema' cinema.pk %}" class="btn btn-danger btn-sm" onclick="return confirm('Ви впевнені, що хочете видалити кінотеатр {{ cinema.title }}?');">Видалити</a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                {# Цей блок покажеться, якщо список cinemas порожній #}
+                                <tr>
+                                    <td colspan="4">Список кінотеатрів порожній.</td> {# colspan="4" тому що у нас 4 колонки #}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

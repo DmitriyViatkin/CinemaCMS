@@ -1,0 +1,78 @@
+
+
+<div id="banner-container" class="banners-container" style="display: flex; flex-wrap: wrap; gap: 10px;">
+    <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <fieldset  >
+
+
+        <p><strong>Размер:</strong> 2000×3000</p>
+
+        <div style="display: flex; gap: 20px; align-items: flex-start;">
+
+            <!-- Левая колонка: радиокнопки -->
+            <div style="min-width: 150px;">
+                <label>
+                    <input type="radio" name="background_type" value="photo" checked>
+                    Фото на фоне
+                </label><br>
+                <label>
+                    <input type="radio" name="background_type" value="plain">
+                    Просто фон
+                </label>
+            </div>
+
+            <!-- Правая часть: превью и кнопки в ряд -->
+            <div style="display: flex; gap: 20px; align-items: flex-start;">
+
+                <!-- Превью изображения -->
+                <div id="image-preview">
+                    {% if banner.image %}
+                        <img id="preview-img" src="{{ banner.image.url }}" alt="Превью" style="width: 120px; height: auto; border: 1px solid #ccc;" />
+                    {% else %}
+                        <div id="preview-placeholder" style="width: 120px; height: 80px; background: #eee; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center;">
+                            <span style="color: #aaa;">🖼</span>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Кнопки в ряд -->
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button type="button" onclick="document.getElementById('image-input').click();">Добавить</button>
+                    <button type="submit" name="action" value="delete">Удалить</button>
+                    <button type="submit" name="action" value="save">Сохранить</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Скрытое поле выбора файла -->
+        <input type="file" name="image" id="image-input" accept="image/*" style="display: none;" />
+    </fieldset>
+</form>
+</div>
+
+<script>
+    const imageInput = document.getElementById('image-input');
+    const previewImg = document.getElementById('preview-img');
+    const previewPlaceholder = document.getElementById('preview-placeholder');
+
+    imageInput.addEventListener('change', function () {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                if (previewImg) {
+                    previewImg.src = e.target.result;
+                } else {
+                    const img = document.createElement('img');
+                    img.id = 'preview-img';
+                    img.src = e.target.result;
+                    img.style.width = '120px';
+                    img.style.border = '1px solid #ccc';
+                    previewPlaceholder.replaceWith(img);
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+</script>

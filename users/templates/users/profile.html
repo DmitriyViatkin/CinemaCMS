@@ -1,23 +1,49 @@
-{% extends "main/index.html" %}
+{% extends "main/index1.html" %}
 
 {% block content %}
-  <h2>Профіль користувача</h2>
- {% if request.user.is_authenticated %}
-  Привіт, {{ request.user.first_name|default:request.user.username }},
- {% else %}
-  <a href="{% url "login" %}">Увійти</a>
- {% endif %}
-  <p><strong>Ім'я користувача:</strong> {{ user.username }}</p>
-  <p><strong>Електронна пошта:</strong> {{ user.email }}</p>
-  <p><strong>Місто:</strong> {{ user.city }}</p>
-  <p><strong>Мова:</strong> {{ user.get_languages_display }}</p>
-  <p><strong>Стать:</strong> {{ user.get_gender_display }}</p>
-  <p><strong>Дата народження:</strong> {{ user.date_of_birth }}</p>
+  <h2>Профіль користувача</h2> {# Головний заголовок сторінки #}
 
-  <a href="{% url 'edit_profile' %}"><button type="button" class="btn btn-primary">Змінити дані</button></a>
+  <div class="row"> {# Розпочинаємо рядок Bootstrap #}
 
-  <form action="{% url 'logout' %}" method="post" style="display: inline;">
-    {% csrf_token %}
-    <button type="submit" class="btn btn-secondary">Вийти</button>
-  </form>
+
+    <div class="col-md-4">
+
+
+      {% if request.user.is_authenticated %}
+       Привіт, {{ request.user.first_name|default:request.user.username }},
+      {% else %}
+       <a href="{% url "login" %}">Увійти</a>
+      {% endif %}
+      <p><strong>Ім'я користувача:</strong> {{ user.username }}</p>
+      <p><strong>Електронна пошта:</strong> {{ user.email }}</p>
+      {# Припускаємо, що у моделі користувача є ці поля і вони передаються у контекст #}
+      <p><strong>Місто:</strong> {{ user.city|default:"Не вказано" }}</p> {# Використовуємо default фільтр #}
+      <p><strong>Мова:</strong> {{ user.get_languages_display|default:"Не вказано" }}</p> {# Використовуємо get_FOO_display для полів з choices #}
+      <p><strong>Стать:</strong> {{ user.get_gender_display|default:"Не вказано" }}</p> {# Використовуємо get_FOO_display #}
+      <p><strong>Дата народження:</strong> {{ user.date_of_birth|date:"d.m.Y"|default:"Не вказано" }}</p> {# Форматуємо дату та додаємо default #}
+
+
+      <div class="mt-3"> {# Додаємо відступ зверху #}
+        <a href="{% url 'edit_profile' %}"><button type="button" class="btn btn-primary">Змінити дані</button></a>
+
+        <form action="{% url 'logout' %}" method="post" style="display: inline;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-secondary">Вийти</button>
+        </form>
+      </div>
+
+    </div>
+
+
+    <div class="col-md-8">
+
+      <h3>Мої квитки</h3>
+
+
+      {% include 'users/user_ticket.html' %}
+
+    </div>
+
+  </div>
+
 {% endblock %}

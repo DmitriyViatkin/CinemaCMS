@@ -1,0 +1,29 @@
+{% extends 'main/index1.html' %}
+
+{% block title %}Список кинотеатров{% endblock %}
+
+{% block content %}
+  <h1 class="mb-4">Список фільмів</h1>
+
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+    {% for movie in movies %}
+          {% include 'movie/movie_card.html' with movie=movie %}
+    {% endfor %}
+  <div class="pagination mt-4 text-center">
+    <span class="step-links">
+      {% if movies.has_previous %}
+        <a class="btn btn-outline-secondary btn-sm" href="?page=1">&laquo; перша</a>
+        <a class="btn btn-outline-secondary btn-sm" href="?page={{ movies.previous_page_number }}">назад</a>
+      {% endif %}
+
+      <span class="mx-2">
+        Сторінка {{ movies.number }} з {{ movies.paginator.num_pages }}
+      </span>
+
+      {% if movies.has_next %}
+        <a class="btn btn-outline-secondary btn-sm" href="?page={{ movies.next_page_number }}">далі</a>
+        <a class="btn btn-outline-secondary btn-sm" href="?page={{ movies.paginator.num_pages }}">остання &raquo;</a>
+      {% endif %}
+    </span>
+  </div>
+{% endblock %}

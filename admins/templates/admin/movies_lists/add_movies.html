@@ -1,0 +1,84 @@
+{% extends 'admin/index.html' %}
+{% load static %}
+{% block title %}Додати фільм{% endblock %}
+
+{% block content %}
+<h1>Додати новий фільм</h1>
+
+<section class="content">
+
+
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-12"> {# Можливо, col-md-12, якщо все в одній колонці #}
+            <div class="card card-primary">
+              <div class="card-header">
+                <h3 class="card-title">Додати фільм</h3>
+              </div>
+              <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+
+                    {% if movie_form.non_field_errors %} <div class="alert alert-danger">{{ movie_form.non_field_errors }}</div> {% endif %}
+                    {% if block_seo_form.non_field_errors %} <div class="alert alert-danger">{{ block_seo_form.non_field_errors }}</div> {% endif %}
+                    {% if gallery_form.non_field_errors %} <div class="alert alert-danger">{{ gallery_form.non_field_errors }}</div> {% endif %}
+                    {% if picture_formset.non_form_errors %} <div class="alert alert-danger">{{ picture_formset.non_form_errors }}</div> {% endif %}
+
+                    <div class="card-body">
+
+
+                        <h2>Інформація про фільм</h2>
+                        {% include 'admin/card_forms/movie_form.html' with form=movie_form %}
+
+
+                        <h2>SEO Інформація</h2>
+                        {% include 'admin/card_forms/seo_form.html' with form=block_seo_form %}
+
+
+                        <h2>Галерея  </h2>
+                        <div class="form-group">
+                            {{ gallery_form.title.label_tag }}
+                            {{ gallery_form.title }}
+                            {% if gallery_form.title.help_text %}<small class="form-text text-muted">{{ gallery_form.title.help_text }}</small>{% endif %}
+                            {% for error in gallery_form.title.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                        </div>
+
+
+
+
+                       <h3>Картинки галереї</h3>
+
+                       <div id="gallery-formset">
+
+                            {{ picture_formset.management_form }}
+                            {% for form in picture_formset %}
+                                {% include 'admin/card_forms/gallery_form.html' with form=form %}
+                            {% endfor %}
+                        </div>
+
+
+
+                        <template id="empty-picture-form">
+                            {% include 'admin/card_forms/gallery_form.html' with form=picture_formset.empty_form %}
+                        </template>
+                        <button id="add-picture-form" type="button" class="btn btn-success mt-2">Додати ще одне зображення</button>
+                    </div> {# Кінець card-body #}
+
+
+
+                    <div class="card-footer">
+                         <button type="submit" class="btn btn-primary">Створити</button>
+                    </div>
+
+              </form>
+              </div>
+            </div>
+
+        </div>
+</section>
+
+
+
+<script src="{% static 'js/add_btn.js' %}"></script>
+
+{% endblock %}

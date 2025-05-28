@@ -1,0 +1,150 @@
+ {# sidebar.html #}
+{% load static %}
+    <div class="sidebar">
+     <!-- Sidebar Menu -->
+      <nav class="mt-2">
+        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+          <!-- Add icons to the links using the .nav-icon class
+               with font-awesome or any other icon font library -->
+
+
+          <li class="nav-item">
+          <li class="nav-item">
+            <a href="{% url 'users' %}" class="nav-link">
+              <i class="nav-icon far fa-image"></i>
+              <p>
+                Пользователи
+              </p>
+            </a>
+
+
+           <li class="nav-item">
+            <a href="{% url 'sessions_list' %}" class="nav-link">
+              <i class="nav-icon far fa-image"></i>
+              <p>
+                Сеанси
+              </p>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a href="{% url 'movie_list' %}" class="nav-link">
+              <i class="nav-icon far fa-image"></i>
+              <p>
+                Фільми
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{% url 'banners' %}" class="nav-link">
+              <i class="nav-icon far fa-image"></i>
+              <p>
+                Banners
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{% url 'tickets_lists' %}" class="nav-link">
+              <i class="nav-icon far fa-image"></i>
+              <p>
+                Квитки
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="nav-icon far fa-envelope"></i>
+              <p>
+                Mailbox
+                <i class="fas fa-angle-left right"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="pages/mailbox/mailbox.html" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Inbox</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="pages/mailbox/compose.html" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Compose</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="pages/mailbox/read-mail.html" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Read</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+           <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-book"></i>
+              <p>
+                Кинотеатр
+                <i class="fas fa-angle-left right"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="{% url 'cinema_lists' %}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Кінотеатр</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'halls_lists' %}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Зали</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'seats_list' %}" class="nav-link">
+                    <i class="far fa-circle nav-icon"></i>
+                    <p>Місця</p>
+                </a>
+
+              </li>
+
+
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-book"></i>
+              <p>
+                Pages
+                <i class="fas fa-angle-left right"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="pages/examples/invoice.html" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Invoice</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="pages/examples/profile.html" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Profile</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="pages/examples/e-commerce.html" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>E-commerce</p>
+                </a>
+              </li>
+              </ul>
+          </li>
+
+        </ul>
+      </nav>
+      <!-- /.sidebar-menu -->
+    </div>
+    <!-- /.sidebar -->
+  </aside>

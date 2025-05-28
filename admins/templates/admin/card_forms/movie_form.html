@@ -1,0 +1,74 @@
+{# movie_form.html #}
+{% load static %}
+
+
+                <div class="card-body">
+                  <div class="form-group">
+                        {{ movie_form.title.label_tag }}
+                        {{ movie_form.title }}
+                        {% if movie_form.title.help_text %}<small class="form-text text-muted">{{ movie_form.title.help_text }}</small>{% endif %}
+                        {% for error in movie_form.title.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                  </div>
+                </div>
+
+                <div class="card-body">
+                  <div class="form-group">
+                        {{ movie_form.genre.label_tag }}
+                        {{ movie_form.genre }}
+                        {% if movie_form.genre.help_text %}<small class="form-text text-muted">{{ movie_form.genre.help_text }}</small>{% endif %}
+                        {% for error in movie_form.genre.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                  </div>
+                </div>
+
+                <div class="card-body">
+                  <div class="form-group">
+                        {{ movie_form.url_trailer.label_tag }}
+                        {{ movie_form.url_trailer }}
+                        {% if movie_form.url_trailer.help_text %}<small class="form-text text-muted">{{ movie_form.url_trailer.help_text }}</small>{% endif %}
+                        {% for error in movie_form.url_trailer.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                  </div>
+                </div>
+
+                <div class="card-body">
+                  <div class="form-group">
+                        {{ movie_form.description.label_tag }}
+                        {{ movie_form.description }}
+                        {% if movie_form.description.help_text %}<small class="form-text text-muted">{{ movie_form.description.help_text }}</small>{% endif %}
+                        {% for error in movie_form.description.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                  </div>
+                </div>
+
+                <div class="card-body">
+                  <div class="form-group">
+                        {{ movie_form.video_type.label_tag }}
+                        {{ movie_form.video_type }}
+                        {% if movie_form.video_type.help_text %}<small class="form-text text-muted">{{ movie_form.video_type.help_text }}</small>{% endif %}
+                        {% for error in movie_form.video_type.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                    </div>
+                  </div>
+
+                <div class="card-body">
+                  <div class="form-group">
+                            {{ movie_form.relise_date.label_tag }}
+                            {{ movie_form.relise_date }}
+                            {% if movie_form.relise_date.help_text %}<small class="form-text text-muted">{{ movie_form.relise_date.help_text }}</small>{% endif %}
+                            {% for error in movie_form.relise_date.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div class="form-group">
+                            {{ movie_form.age_limit.label_tag }}
+                            {{ movie_form.age_limit }}
+                            {% if movie_form.age_limit.help_text %}<small class="form-text text-muted">{{ movie_form.age_limit.help_text }}</small>{% endif %}
+                            {% for error in movie_form.age_limit.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div class="form-group">
+                        {{ movie_form.gallery.label_tag }}
+                        {{ movie_form.gallery }}
+                        {% if movie_form.gallery.help_text %}<small class="form-text text-muted">{{ movie_form.gallery.help_text }}</small>{% endif %}
+                        {% for error in movie_form.gallery.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                  </div>
+                </div>
+

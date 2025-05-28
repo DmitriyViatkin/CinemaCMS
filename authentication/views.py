@@ -26,6 +26,7 @@ def register(request):
                   'authentication/register.html',
                   {'user_form': user_form}
                   )
+
 def user_login(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
@@ -46,10 +47,11 @@ def user_login(request):
                 return HttpResponse('Invalid login')
         else:
             form = LoginForm()
-        return render(request,
+    return render(request,
                       'authentication/login.html',
                       {'form':form}
                       )
+
 @login_required
 def dashboard(request):
     return render(request,

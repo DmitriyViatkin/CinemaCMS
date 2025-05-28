@@ -1,0 +1,60 @@
+{% extends 'admin/index.html' %}
+
+{% block title %}Список залів{% endblock %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="card-title mb-0">Список залів</h3>
+
+                        <div class="card-tools">
+
+                            <a href="{% url 'add_halls_create' %}" class="btn btn-success btn-sm">
+                                <i class="fas fa-plus"></i> Додати зал
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table id="hallsTable" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Назва зали</th>
+                                    <th>Кінотеатр</th>
+
+                                    <th>Дата додавання</th>
+                                    <th>Дії</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for hall in halls %} {# Цикл по об'єктах залів #}
+                                <tr>
+                                    <td>{{ hall.title }}</td>
+                                    <td>{{ hall.cinema }}</td>
+                                    <td>{{ hall.date|date:"d.m.Y" }}</td>
+                                    <td>
+
+                                        <a href="{% url 'add_halls_edit' hall.id %}" class="btn btn-primary btn-sm">Редагувати</a>
+
+
+                                        <a href="{% url 'delete_halls' hall.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Ви впевнені, що хочете видалити зал {{ hall.title }}?');">Видалити</a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+
+                                <tr>
+                                    <td colspan="4">Список залів порожній.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends 'admin/index.html' %}
+
+{# Заголовок сторінки: Додати або Редагувати Сеанс #}
+{% block title %}
+    {% if session %}Редагувати Сеанс{% else %}Додати новий Сеанс{% endif %}
+{% endblock %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="card-title mb-0">
+                            {% if session %}Редагувати Сеанс: {{ session.title }}{% else %}Додати новий Сеанс{% endif %}
+                        </h3>
+                        <div>
+
+                            <a href="{% url 'sessions_list' %}" class="btn btn-secondary btn-sm">
+                                <i class="fas fa-arrow-left"></i> До списку квитків
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+
+
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %} {# CSRF токен #}
+
+                            {% include 'admin/card_forms/tickets_form.html'  %}
+
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

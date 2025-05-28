@@ -1,0 +1,112 @@
+{# admin/card_forms/tickets_form.html #}
+{% load static %}
+
+<div class="card-body">
+    {# Поле Сеанс #}
+    <div class="form-group mb-3"> {# Класи Bootstrap #}
+        {{ form.session.label_tag }} {# Мітка поля #}
+
+        <select name="{{ form.session.name }}" id="{{ form.session.id_for_label }}" class="form-control">
+            {% for value, text in form.session.field.choices %}
+                <option value="{{ value|stringformat:'s' }}"{% if form.session.value|stringformat:'s' == value|stringformat:'s' %} selected{% endif %}>{{ text }}</option>
+            {% endfor %}
+        </select>
+        {% if form.session.help_text %}
+            <small class="form-text text-muted">{{ form.session.help_text }}</small>
+        {% endif %}
+        {% for error in form.session.errors %}
+            <div class="alert alert-danger mt-1">{{ error }}</div> {# Класи для відображення помилок #}
+        {% endfor %}
+    </div>
+
+    {# Поле Фільм #}
+    <div class="form-group mb-3">
+        {{ form.movie.label_tag }} {# Мітка поля #}
+
+        <select name="{{ form.movie.name }}" id="{{ form.movie.id_for_label }}" class="form-control">
+            {% for value, text in form.movie.field.choices %}
+                 {# Handle case where movie is None for null=True field #}
+                 {% if value is None or value == '' %}
+                     <option value="">---------</option> {# Display the empty option if allowed by the form field #}
+                 {% else %}
+                     <option value="{{ value|stringformat:'s' }}"{% if form.movie.value|stringformat:'s' == value|stringformat:'s' %} selected{% endif %}>{{ text }}</option>
+                 {% endif %}
+            {% endfor %}
+        </select>
+        {% if form.movie.help_text %}
+            <small class="form-text text-muted">{{ form.movie.help_text }}</small>
+        {% endif %}
+        {% for error in form.movie.errors %}
+            <div class="alert alert-danger mt-1">{{ error }}</div>
+        {% endfor %}
+    </div>
+
+    {# Поле Місце #}
+    <div class="form-group mb-3">
+        {{ form.seat.label_tag }} {# Мітка поля #}
+
+        <select name="{{ form.seat.name }}" id="{{ form.seat.id_for_label }}" class="form-control">
+            {% for value, text in form.seat.field.choices %}
+                <option value="{{ value|stringformat:'s' }}"{% if form.seat.value|stringformat:'s' == value|stringformat:'s' %} selected{% endif %}>{{ text }}</option>
+            {% endfor %}
+        </select>
+        {% if form.seat.help_text %}
+            <small class="form-text text-muted">{{ form.seat.help_text }}</small>
+        {% endif %}
+        {% for error in form.seat.errors %}
+            <div class="alert alert-danger mt-1">{{ error }}</div>
+        {% endfor %}
+    </div>
+
+    {# Поле Глядач (Profile) #}
+    <div class="form-group mb-3">
+        {{ form.profile.label_tag }} {# Мітка поля #}
+        {# Ручне відображення поля Select з класом form-control #}
+        <select name="{{ form.profile.name }}" id="{{ form.profile.id_for_label }}" class="form-control">
+            {% for value, text in form.profile.field.choices %}
+                {# Assuming profile is OneToOneField and allows null #}
+                 {% if value is None or value == '' %}
+                     <option value="">---------</option> {# Display the empty option if allowed by the form field #}
+                 {% else %}
+                    <option value="{{ value|stringformat:'s' }}"{% if form.profile.value|stringformat:'s' == value|stringformat:'s' %} selected{% endif %}>{{ text }}</option>
+                 {% endif %}
+            {% endfor %}
+        </select>
+        {% if form.profile.help_text %}
+            <small class="form-text text-muted">{{ form.profile.help_text }}</small>
+        {% endif %}
+        {% for error in form.profile.errors %}
+            <div class="alert alert-danger mt-1">{{ error }}</div>
+        {% endfor %}
+    </div>
+
+    {# Поле Зал (Halls) #}
+
+    <div class="form-group mb-3">
+        {{ form.halls.label_tag }} {# Мітка поля #}
+
+        <select name="{{ form.halls.name }}" id="{{ form.halls.id_for_label }}" class="form-control">
+             {% for value, text in form.halls.field.choices %}
+
+                 {% if value is None or value == '' %}
+                     <option value="">---------</option>
+                 {% else %}
+                    <option value="{{ value|stringformat:'s' }}"{% if form.halls.value|stringformat:'s' == value|stringformat:'s' %} selected{% endif %}>{{ text }}</option>
+                 {% endif %}
+             {% endfor %}
+        </select>
+        {% if form.halls.help_text %}
+            <small class="form-text text-muted">{{ form.halls.help_text }}</small>
+        {% endif %}
+        {% for error in form.halls.errors %}
+            <div class="alert alert-danger mt-1">{{ error }}</div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="card-body">
+    <p><small class="form-text text-info">
+        Примітка: Поле "Дата" заповнюється автоматично при створенні квитка.
+    </small></p>
+    <button type="submit" class="btn btn-primary">Зберегти</button>
+</div>

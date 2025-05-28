@@ -1,0 +1,39 @@
+{% extends 'main/index1.html' %}
+
+{% block content %}
+<h1>Список сеансів</h1>
+
+<table class="table table-success table-striped">
+    <thead>
+        <tr>
+            <th>Назва фільму</th>
+            <th>Зал</th>
+            <th>Час</th>
+            <th>Тривалість</th>
+            <th>Дата</th>
+        </tr>
+    </thead>
+    <tbody>
+       {% for session in sessions %}
+<tr>
+    <td>
+      {% if session.movie %}
+        {{ session.movie.title }}
+      {% else %}
+        <span class="text-muted">Фільм відсутній</span>
+      {% endif %}
+    </td>
+    <td>{{ session.hall_id.name }}</td>
+    <td>{{ session.time_session }}</td>
+    <td>{{ session.duration }}</td>
+    <td>{{ session.date }}</td>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="5">Жодного сеансу не знайдено.</td>
+</tr>
+{% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
