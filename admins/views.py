@@ -9,7 +9,7 @@ from main.models import Gallery, Banners, Cross_Banner, News
 from core.models import Cinemas, Halls, Sessions, Seats, Tickets
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .forms import (BlockSEOForm, MovieForm, PictureFormSet, GalleryForm, CinemaForm, HallsForm, SessionsForm,
-                    TicketForm,SeatForm,   BannersFormSet,  NewsFormSet,   UserForm, SessionFormSet , Picture,  CrossBannerForm , modelformset_factory)
+                    TicketForm,SeatForm,   BannersFormSet,  NewsFormSet,  PictureForm, UserForm, SessionFormSet , Picture,  CrossBannerForm , modelformset_factory)
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpRequest, HttpResponse
 from django.template.loader import render_to_string
@@ -59,67 +59,124 @@ def index(request):
 
 @staff_member_required
 def movie_list(request):
+    movies_list = Movies.objects.all().select_related('gallery').order_by('title')
+    paginator = Paginator(movies_list, 10)  # Показывать 10 фильмов на странице
+
+    page = request.GET.get('page')
+    try:
+        movies = paginator.page(page)
+    except PageNotAnInteger:
+        # Если page не целое число, показать первую страницу
+        movies = paginator.page(1)
+    except EmptyPage:
+        # Если page вне диапазона (например, 9999), показать последнюю страницу
+        movies = paginator.page(paginator.num_pages)
+    for movie in movies:
+        if movie.gallery:
+            movie.main_picture = movie.gallery.pictures.filter(image_type="main_picture").first()
+        else:
+            movie.main_picture = None
+
+    context = {'movies': movies}
+    return render(request, 'admin/movies_lists/movies_lists.html', context)
 
 
-    return render(request, 'admin/movies_lists/movies_lists2.html', )
+
+
+
 
 @staff_member_required
-def add_movie(request,movie_id=None):
+def add_movie(request, movie_id=None):
     movie_instance = None
     block_seo_instance = None
     gallery_instance = None
+    main_picture_form = None
+
     if movie_id is not None:
         movie_instance = get_object_or_404(Movies, pk=movie_id)
         block_seo_instance = movie_instance.seo_block
         gallery_instance = movie_instance.gallery
         if gallery_instance is None:
             gallery_instance = Gallery.objects.create()
-    if request.method == 'POST':
 
+    if request.method=='POST':
         block_seo_form = BlockSEOForm(request.POST, instance=block_seo_instance)
         movie_form = MovieForm(request.POST, instance=movie_instance)
-        gallery_form = GalleryForm(request.POST,
-                                   instance=gallery_instance)
-        picture_formset = PictureFormSet(request.POST, request.FILES, instance=gallery_instance)
-        if block_seo_form.is_valid() and movie_form.is_valid() and gallery_form.is_valid() and picture_formset.is_valid():
+        gallery_form = GalleryForm(request.POST, instance=gallery_instance)
+        picture_formset = PictureFormSet(
+            request.POST,
+            request.FILES,
+            instance=gallery_instance,
+            prefix='pictures'
+        )
+        main_picture_form = PictureForm(request.POST, request.FILES, prefix='main_picture_form', initial={
+            'image_type': 'main_picture', 'gallery': gallery_instance})
+
+        if block_seo_form.is_valid() and movie_form.is_valid() and gallery_form.is_valid() and picture_formset.is_valid() and main_picture_form.is_valid():
             block_seo_instance = block_seo_form.save()
             gallery_instance = gallery_form.save()
             movie_instance = movie_form.save(commit=False)
             movie_instance.seo_block = block_seo_instance
             movie_instance.gallery = gallery_instance
-            if movie_id is None and not movie_instance.date:
-                movie_instance.date = timezone.now().date()
 
             movie_instance.save()
 
+            # Сохранение главной картинки через отдельную форму
+            if main_picture_form.cleaned_data.get('image'):
+                main_picture = main_picture_form.save(commit=False)
+                main_picture.gallery = gallery_instance
+                main_picture.image_type = 'main_picture'
+                main_picture.save()
+                movie_instance.main_picture = main_picture.image
+                movie_instance.save()
 
-            picture_formset.instance = gallery_instance
-            picture_formset.save()
+            for picture_form in picture_formset:
+                if picture_form.cleaned_data and not picture_form.cleaned_data.get('DELETE', False) and picture_form.cleaned_data.get('image'):
+                    picture = picture_form.save(commit=False)
+                    picture.gallery = gallery_instance
+                    picture.save()
+                elif picture_form.cleaned_data.get('DELETE', False) and picture_form.instance.pk:
+                    picture_form.instance.delete()
 
-
-            if movie_id is None:
-
-                return redirect('movie_list')
-            else:
-                return redirect('movie_list')
+            return redirect('movie_list')
         else:
+            print("Form validation failed")
+            print("block_seo_form.errors:", block_seo_form.errors)
+            print("movie_form.errors:", movie_form.errors)
+            print("gallery_form.errors:", gallery_form.errors)
+            print("picture_formset.errors:", picture_formset.errors)
+            print("main_picture_form.errors:", main_picture_form.errors)
+            return render(request, 'admin/movies_lists/add_movies.html', {
+                'block_seo_form': block_seo_form,
+                'movie_form': movie_form,
+                'gallery_form': gallery_form,
+                'picture_formset': picture_formset,
+                'main_picture_form': main_picture_form,
+                'movie': movie_instance,
+            })
 
-            pass
     else:
-
         block_seo_form = BlockSEOForm(instance=block_seo_instance)
         movie_form = MovieForm(instance=movie_instance)
         gallery_form = GalleryForm(instance=gallery_instance)
-        picture_formset = PictureFormSet(instance=gallery_instance)
-
+        picture_formset = PictureFormSet(
+            instance=gallery_instance,
+            prefix='pictures'
+        )
+        main_picture_form = PictureForm(prefix='main_picture_form', initial={'image_type': 'main_picture',
+                                                                             'gallery': gallery_instance})
 
     return render(request, 'admin/movies_lists/add_movies.html', {
         'block_seo_form': block_seo_form,
         'movie_form': movie_form,
         'gallery_form': gallery_form,
         'picture_formset': picture_formset,
+        'main_picture_form': main_picture_form,
         'movie': movie_instance,
     })
+
+
+
 
 @staff_member_required
 def delete_movie(request, pk):

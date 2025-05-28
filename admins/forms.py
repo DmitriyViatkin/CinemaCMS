@@ -41,21 +41,25 @@ class UserForm(forms.ModelForm):
         exclude = ['last_login', 'date_joined', 'groups', 'user_permissions', 'password']
 
 class PictureForm(forms.ModelForm):
+    image = forms.ImageField(widget=forms.FileInput(), label='Зображення')
+    gallery = forms.ModelChoiceField(queryset=Gallery.objects.all(), widget=forms.HiddenInput(), required=False)
+
     class Meta:
         model = Picture
-        fields = ['image']
-        widgets = {
-            'image': forms.FileInput(),
-        }
-        labels = {
-            'image': 'Зображення',
-        }
+        fields = ['image', 'gallery', 'image_type']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
         if 'image_type' in self.initial:
             self.instance.image_type = self.initial['image_type']
+
+PictureFormSet = modelformset_factory(
+    model=Picture,
+    form=PictureForm,
+    fields=['image', 'gallery', 'image_type'],  # <-- додано image_type
+    extra=3,
+    can_delete=True,
+)
 
 
 class GalleryForm(forms.ModelForm):
@@ -220,13 +224,13 @@ PictureFormSet1 = inlineformset_factory(
     max_num=10,
     can_delete=True )
 
-PICTURE_TYPE_DEFAULT = 'gallery'  # Замініть на потрібне значення за замовчуванням
+PICTURE_TYPE_DEFAULT = 'gallery'
 
 PictureFormSet = inlineformset_factory(
     Gallery,
     Picture,
     form=PictureForm,
-    fields=('image',),  # Тепер включаємо лише 'image'
+    fields=('image',),
     extra=0,
     max_num=10,
     can_delete=True,)
@@ -263,12 +267,6 @@ class TopBannerForm(forms.Form):
         return self.banner_form.as_p() + self.picture_form.as_p()
 
 
-PictureFormSet = modelformset_factory(
-    model=Picture,
-    form=PictureForm,
-    fields='__all__',  # або вкажи конкретні поля: ['image', 'image_type', 'gallery']
-    extra=1,
-    can_delete=True)
 
 
 
