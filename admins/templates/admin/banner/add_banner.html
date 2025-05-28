@@ -1,350 +1,625 @@
 {% extends 'admin/index.html' %}
-
-{% block title %}
-    Додати банери
-{% endblock %}
-
 {% block content %}
-<section class="content-header">
-    <div class="container-fluid">
-        <div class="row mb-2">
-            <div class="col-sm-6">
-                <h1>Банери</h1>
+<div class="card card-primary">
+    <form method="post" enctype="multipart/form-data" class="banner-form">
+        {% csrf_token %}
+        <h2 style="text-align: center;">На головній верх</h2>
+        <div class="banner-wrapper" style="width: 80%;">
+            <div class="banner-header">
+                <span>Розмір: 1000x190</span>
+                <label class="switch">
+                    <input type="checkbox" id="global-is-active">
+                    <span class="slider round"></span>
+                </label>
             </div>
-            <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a href="#">Головна</a></li>
-                    <li class="breadcrumb-item active">{% if gallery %}Редагувати банери{% else %}Додати банери{% endif %}</li>
-                </ol>
+
+            {{ formset.management_form }}
+
+            <template id="empty-form-template">
+                <div class="banner-unit" style="display: none;">
+                    {{ formset.empty_form.id }} {{ formset.empty_form.DELETE }}
+                    <div class="image-block">
+                        <img class="preview" src="#" alt="preview" style="display: none;" />
+                        <label class="upload-btn">
+                            {{ formset.empty_form.main_picture }}
+                            <span>Добавить</span>
+                        </label>
+                        <button type="button" class="remove-banner-btn">✖</button>
+                    </div>
+                    <div class="input-group">
+                        <label>URL:</label>
+                        {{ formset.empty_form.url }}
+                    </div>
+                    <div class="input-group">
+                        <label>Текст:</label>
+                        {{ formset.empty_form.text }}
+                    </div>
+                    <div class="input-group" style="display: none;">
+                        {{ formset.empty_form.scroll_speed }}
+                        {{ formset.empty_form.is_active }}
+                    </div>
+                </div>
+            </template>
+
+            <div id="banner-container" class="banners-container">
+                {% for item in form_data %}
+                    <div class="banner-unit">
+                        {{ item.form.id }} {{ item.form.DELETE }}
+                        <div class="image-block">
+                            {% if item.image_url %}
+                                <img class="preview" src="{{ item.image_url }}" alt="preview" />
+                            {% else %}
+                                <img class="preview" src="#" alt="preview" style="display: none;" />
+                            {% endif %}
+                            <label class="upload-btn">
+                                {{ item.form.main_picture }}
+                                <span>Добавить</span>
+                            </label>
+                            <button type="button" class="remove-banner-btn">✖</button>
+                        </div>
+                        <div class="input-group">
+                            <label>URL:</label>
+                            {{ item.form.url }}
+                        </div>
+                        <div class="input-group">
+                            <label>Текст:</label>
+                            {{ item.form.text }}
+                        </div>
+                        <div class="input-group" style="display: none;">
+                            {{ item.form.scroll_speed }}
+                            {{ item.form.is_active }}
+                        </div>
+                    </div>
+                {% endfor %}
             </div>
+
+            <div class="global-controls">
+                <div style="display: flex; align-items: center;">
+                    <label for="global-scroll-speed">Швидкість вращения:</label>
+                    <select id="global-scroll-speed" class="form-control">
+                        <option value="5">5c</option>
+                        <option value="10">10c</option>
+                        <option value="15">15c</option>
+                    </select>
+                </div>
+                <button type="submit" class="save-btn btn btn-primary">Сохранить</button>
+            </div>
+
+            <button type="button" id="add-banner-form" class="btn btn-secondary">Добавить фото</button>
         </div>
+    </form>
+</div>
+
+<div class="card card-primary" style="margin-top: 20px;">
+     <div class="banner-wrapper" style="width: 80%;">
+        <form method="post" enctype="multipart/form-data" class="cross-banner-form">
+            {% csrf_token %}
+            <h3 style="text-align: center;">Сквозной банер на заднем фоне</h3>
+            <div style="padding: 15px;">
+                <p>Розмір: 2000x3000</p>
+                {% if cross_banner_form.errors %}
+                    <div class="alert alert-danger">
+                        {{ cross_banner_form.errors }}
+                    </div>
+                {% endif %}
+
+                <div class="form-check">
+                    {{ cross_banner_form.type.0 }}
+                    {{ cross_banner_form.type.choice_label_0 }}
+                </div>
+
+
+                <div id="banner-container1" class="banners-container">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <fieldset>
+
+
+                            <p><strong>Размер:</strong> 2000×3000</p>
+
+                            <div style="display: flex; gap: 20px; align-items: flex-start;">
+
+                                <div style="min-width: 150px;">
+                                    <label>
+                                        <input type="radio" name="background_type" value="photo" checked>
+                                        Фото на фоне
+                                    </label><br>
+                                    <label>
+                                        <input type="radio" name="background_type" value="plain">
+                                        Просто фон
+                                    </label>
+                                </div>
+
+                                <div style="display: flex; gap: 20px; align-items: flex-start;">
+
+                                    <div id="image-preview">
+                                        {% if cross_banner_form.instance.gallery and cross_banner_form.instance.gallery.pictures.first and cross_banner_form.instance.gallery.pictures.first.image %}
+                                            <img id="preview-img" src="{{ cross_banner_form.instance.gallery.pictures.first.image.url }}" alt="Превью" />
+                                        {% else %}
+                                            <div id="preview-placeholder">
+                                                <span>🖼</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div style="display: flex; gap: 10px; align-items: center;">
+                                        <label class="upload-btn-cross">
+                                            <span>Добавить</span>
+                                            {{ cross_banner_form.image }}
+                                        </label>
+                                        {% if cross_banner_form.instance.gallery and cross_banner_form.instance.gallery.pictures.first %}
+                                            <button type="button" class="btn btn-outline-danger btn-sm">Удалить</button>
+                                        {% endif %}
+                                        <button type="submit" name="save_cross_banner" class="btn btn-primary">Сохранить фон</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <input type="file" name="image" id="image-input" accept="image/*" style="display: none;" />
+                        </fieldset>
+                    </form>
+                </div>
+
+
+            </div>
+        </form>
     </div>
-</section>
+</div>
+<div class="card card-primary" style="margin-top: 20px;">
+    <form method="post" enctype="multipart/form-data" class="news-form">
+        {% csrf_token %}
+        {{ news_formset.management_form }}
 
-<section class="content">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12">
-                {% include 'admin/banner/top_banner.html' %}
+        <h2 style="text-align: center;"> Новости </h2>
+         <div class="banner-wrapper" style="width: 80%;">
+            <div class="banner-header">
+                <span>Размер: 1000x190</span>
+                <label class="switch">
+                    <input type="checkbox" id="global-is-active-news">
+                    <span class="slider round"></span>
+                </label>
             </div>
-        </div>
-    </div>
 
-    <div class="row">
-        <div class="col-md-12">
-            {% include 'admin/banner/cross_banner.html'%}
-        </div>
-    </div>
-    <div class="row">
-            <div class="col-md-12">
-                {%include 'admin/banner/news_banner.html'%}
+            <template id="empty-form-template-news">
+                <div class="banner-unit" style="display: none;">
+                    {{ news_formset.empty_form.id }} {{ news_formset.empty_form.DELETE }}
+                    <div class="image-block">
+                        <img class="preview" src="#" alt="preview" style="display: none;" />
+                        <label class="upload-btn">
+                            {{ news_formset.empty_form.main_picture }}
+                            <span>Добавить</span>
+                        </label>
+                        <button type="button" class="remove-banner-btn">✖</button>
+                    </div>
+                    <div class="input-group">
+                        <label>URL:</label>
+                        {{ news_formset.empty_form.url }}
+                    </div>
+                    <div class="input-group">
+                        <label>Текст:</label>
+                        {{ news_formset.empty_form.text }}
+                    </div>
+                    <div class="input-group" style="display: none;">
+                        {{ news_formset.empty_form.scroll_speed }}
+                        {{ news_formset.empty_form.is_active }}
+                    </div>
+                </div>
+            </template>
+
+            <div id="banner-container-news" class="banners-container">
+                {% for item in news_form_data %}
+                    <div class="banner-unit">
+                        {{ item.form.id }} {{ item.form.DELETE }}
+                        <div class="image-block">
+                            {% if item.image_url %}
+                                <img class="preview" src="{{ item.image_url }}" alt="preview" />
+                            {% else %}
+                                <img class="preview" src="#" alt="preview" style="display: none;" />
+                            {% endif %}
+                            <label class="upload-btn">
+                                {{ item.form.main_picture }}
+                                <span>Добавить</span>
+                            </label>
+                            <button type="button" class="remove-banner-btn">✖</button>
+                        </div>
+                        <div class="input-group">
+                            <label>URL:</label>
+                            {{ item.form.url }}
+                        </div>
+                        <div class="input-group">
+                            <label>Текст:</label>
+                            {{ item.form.text }}
+                        </div>
+                        <div class="input-group" style="display: none;">
+                            {{ item.form.scroll_speed }}
+                            {{ item.form.is_active }}
+                        </div>
+                    </div>
+                {% endfor %}
             </div>
+
+            <div class="global-controls">
+                <div style="display: flex; align-items: center;">
+                    <label for="global-scroll-speed-news">Скорость вращения:</label>
+                    <select id="global-scroll-speed-news" class="form-control">
+                        <option value="5">5c</option>
+                        <option value="10">10c</option>
+                        <option value="15">15c</option>
+                    </select>
+                </div>
+                <button type="submit" class="save-btn btn btn-primary" name="save_news_banners">Сохранить новости</button>
+            </div>
+
+            <button type="button" id="add-banner-form-news" class="btn btn-secondary">Добавить фото</button>
         </div>
-</section>
+    </form>
+</div>
 
 
+            </div>
+    </div>
+</div>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
-$(document).ready(function() {
-    // === ТОП БАНЕРИ ===
-    function initializeTopBannerUnit($bannerUnit) {
-        console.log("Initializing Top Banner Unit:", $bannerUnit[0]);
+(function($) {
+    $(function() {
+        // Змінні для попереднього перегляду окремого зображення
+        const imageInput = document.getElementById('image-input');
+        const previewImg = document.getElementById('preview-img');
+        const previewPlaceholder = document.getElementById('preview-placeholder');
 
-        const $imageInput = $bannerUnit.find('input[type="file"]');
-        const $imagePreview = $bannerUnit.find('img[id^="imagePreview_"]');
-        const $addImageBtnLabel = $bannerUnit.find('.add-image-btn');
-
-        if ($imageInput.length && $imagePreview.length && $addImageBtnLabel.length) {
-            const inputId = $imageInput.attr('id');
-            if (inputId) $addImageBtnLabel.attr('for', inputId);
-
-            $imageInput.off('change').on('change', function(event) {
-                const file = event.target.files[0];
+        if (imageInput) {
+            imageInput.addEventListener('change', function () {
+                const file = this.files[0];
                 if (file) {
                     const reader = new FileReader();
-                    reader.onload = function(e) {
-                        $imagePreview.attr('src', e.target.result).css('display', 'block');
-                        $addImageBtnLabel.html('<i class="fas fa-upload"></i> Змінити зображення');
+                    reader.onload = function (e) {
+                        if (previewImg) {
+                            previewImg.src = e.target.result;
+                        } else if (previewPlaceholder) {
+                            const img = document.createElement('img');
+                            img.id = 'preview-img';
+                            img.src = e.target.result;
+                            img.style.width = '120px';
+                            img.style.border = '1px solid #ccc';
+                            previewPlaceholder.replaceWith(img);
+                        }
                     };
                     reader.readAsDataURL(file);
-                } else {
-                    $imagePreview.attr('src', '#').hide();
-                    $addImageBtnLabel.html('<i class="fas fa-upload"></i> Додати зображення');
                 }
             });
-
-            $addImageBtnLabel.off('click').on('click', function(e) {
-                e.preventDefault();
-                $imageInput.trigger('click');
-            });
         }
 
-        const $removeBannerBtn = $bannerUnit.find('.remove-banner-btn');
-        if ($removeBannerBtn.length) {
-            $removeBannerBtn.off('click').on('click', function() {
-                $bannerUnit.find(`input[type="hidden"][name^="top-"][name$="-DELETE"]`).val('on');
-                $bannerUnit.hide();
-            });
-        }
-    }
-
-    $('.banner-unit').not('#empty-form-template').each(function() {
-        initializeTopBannerUnit($(this));
-    });
-
-    const $emptyFormTemplate = $('#empty-form-template');
-    const $bannerContainer = $('#banner-container');
-    const $totalFormsInput = $('#id_top-TOTAL_FORMS');
-
-    $('#add-banner-form').on('click', function() {
-        let currentForms = parseInt($totalFormsInput.val());
-        const $newForm = $emptyFormTemplate.clone(true);
-
-        $newForm.find('[id]').each(function() {
-            const newId = $(this).attr('id').replace(/__prefix__/g, currentForms);
-            $(this).attr('id', newId);
-        });
-
-        $newForm.find('[name]').each(function() {
-            const newName = $(this).attr('name').replace(/__prefix__/g, currentForms);
-            $(this).attr('name', newName);
-        });
-
-        $newForm.find('.add-image-btn').each(function() {
-            const $label = $(this);
-            const oldFor = $label.attr('for');
-            if (oldFor) {
-                const newFor = oldFor.replace(/__prefix__/g, currentForms);
-                $label.attr('for', newFor);
-            }
-        });
-
-        $newForm.find('input:not([type="hidden"]), textarea').val('');
-        $newForm.find('input[type="checkbox"]').prop('checked', false);
-        $newForm.find(`input[type="hidden"][name$="-DELETE"]`).val('');
-        $newForm.find('img[id^="imagePreview_"]').attr('src', '#').hide();
-        $newForm.find('input[type="hidden"][name$="-scroll_speed"]').val('3.0');
-        $newForm.find('input[type="checkbox"][name$="-is_active"]').prop('checked', true);
-        $newForm.find('.remove-banner-btn').attr('data-form-index', currentForms);
-
-        $newForm.removeAttr('id').show();
-        $bannerContainer.append($newForm);
-
-        initializeTopBannerUnit($newForm);
-        $totalFormsInput.val(currentForms + 1);
-    });
-
-    $('#scroll-speed-global').on('input', function() {
-        const speed = $(this).val();
-        $('input[name^="top-"][name$="-scroll_speed"]').val(speed);
-    });
-
-    $('#banner-switch-all').on('change', function() {
-        const isChecked = $(this).is(':checked');
-        $('.banner-unit').not('#empty-form-template').each(function() {
-            const $unit = $(this);
-            const $deleteInput = $unit.find('input[type="hidden"][name$="-DELETE"]');
-            if (isChecked || $deleteInput.val() !== 'on') {
-                $unit.show();
+        function updateImagePreview(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                const preview = $(input).closest('.banner-unit').find('.preview');
+                reader.onload = e => {
+                    preview.attr('src', e.target.result).show();
+                };
+                reader.readAsDataURL(file);
             } else {
-                $unit.hide();
+                $(input).closest('.banner-unit').find('.preview').attr('src', '#').hide();
             }
+        }
+
+        $(document).on('change', '[id$="-main_picture"]', function() {
+            updateImagePreview(this);
         });
-    });
 
-    // === НОВИНИ ===
-    function initializeNewsUnit($newsUnit) {
-        console.log("Initializing News Unit:", $newsUnit[0]);
+        $('#add-banner-form').on('click', function () {
+            const template = $('#empty-form-template').html();
+            const container = $('#banner-container');
+            const totalForms = $('#id_form-TOTAL_FORMS');
 
-        const $imageInput = $newsUnit.find('input[type="file"]');
-        const $imagePreview = $newsUnit.find('img[id^="newsImagePreview_"]');
-        const $addImageBtnLabel = $newsUnit.find('.news-add-image-btn');
+            if (!totalForms.length) {
+                console.error('TOTAL_FORMS для верхніх банерів не знайдено!');
+                return;
+            }
 
-        if ($imageInput.length && $imagePreview.length && $addImageBtnLabel.length) {
-            const inputId = $imageInput.attr('id');
-            if (inputId) $addImageBtnLabel.attr('for', inputId);
+            const formCount = parseInt(totalForms.val(), 10);
+            const newFormHtml = template.replace(/__prefix__/g, formCount);
 
-            $imageInput.off('change').on('change', function(event) {
-                const file = event.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        $imagePreview.attr('src', e.target.result).css('display', 'block');
-                        $addImageBtnLabel.html('<i class="fas fa-upload"></i> Змінити зображення');
-                    };
-                    reader.readAsDataURL(file);
-                } else {
-                    $imagePreview.attr('src', '#').hide();
-                    $addImageBtnLabel.html('<i class="fas fa-upload"></i> Додати зображення');
-                }
+            const $newForm = $(newFormHtml).removeAttr('style');
+
+            $newForm.find(':input').each(function() {
+                const name = $(this).attr('name')?.replace('__prefix__', formCount);
+                const id = $(this).attr('id')?.replace('__prefix__', formCount);
+                if (name) $(this).attr('name', name);
+                if (id) $(this).attr('id', id);
+                if (this.type !== 'checkbox') $(this).val('');
+                if (this.type === 'file') $(this).val(null);
+                $(this).closest('.banner-unit').find('.preview').attr('src', '#').hide();
             });
 
-            $addImageBtnLabel.off('click').on('click', function(e) {
-                e.preventDefault();
-                $imageInput.trigger('click');
+            $newForm.find('label').each(function() {
+                const newFor = $(this).attr('for')?.replace('__prefix__', formCount);
+                if (newFor) $(this).attr('for', newFor);
             });
-        }
 
-        const $removeBannerBtn = $newsUnit.find('.news-remove-banner-btn');
-        if ($removeBannerBtn.length) {
-            $removeBannerBtn.off('click').on('click', function() {
-                $newsUnit.find(`input[type="hidden"][name^="news-"][name$="-DELETE"]`).val('on');
-                $newsUnit.hide();
-            });
-        }
+            container.append($newForm);
+            totalForms.val(formCount + 1);
+
+            updateGlobalControls();
+        });
+
+       $('#add-banner-form-news').on('click', function () {
+    const template = document.getElementById('empty-form-template-news');
+    const clone = template.content.cloneNode(true);
+    const $newForm = $(clone).find('.banner-unit').removeAttr('style');
+
+    const container = $('#banner-container-news');
+    const totalForms = container.closest('form').find('input[name="news-TOTAL_FORMS"]');
+
+    if (!totalForms.length) {
+        console.error('TOTAL_FORMS для новин не знайдено!');
+        return;
     }
 
-    $('.news-unit').not('#news-empty-form-template').each(function() {
-        initializeNewsUnit($(this));
+    const formCount = parseInt(totalForms.val(), 10);
+
+    $newForm.find(':input').each(function() {
+        const name = $(this).attr('name')?.replace('__prefix__', formCount);
+        const id = $(this).attr('id')?.replace('__prefix__', formCount);
+        if (name) $(this).attr('name', name);
+        if (id) $(this).attr('id', id);
+        if (this.type !== 'checkbox') $(this).val('');
+        if (this.type === 'file') $(this).val(null);
+        $(this).closest('.banner-unit').find('.preview').attr('src', '#').hide();
     });
 
-    const $newsEmptyFormTemplate = $('#news-empty-form-template');
-    const $newsContainer = $('#news-container');
-    const $newsTotalFormsInput = $('#id_news-TOTAL_FORMS');
+    $newForm.find('label').each(function() {
+        const newFor = $(this).attr('for')?.replace('__prefix__', formCount);
+        if (newFor) $(this).attr('for', newFor);
+    });
 
-    $('#add-news-form').on('click', function() {
-        let currentForms = parseInt($newsTotalFormsInput.val());
-        const $newForm = $newsEmptyFormTemplate.clone(true);
+    container.append($newForm);
+    totalForms.val(formCount + 1);
 
-        $newForm.find('[id]').each(function() {
-            const newId = $(this).attr('id').replace(/__prefix__/g, currentForms);
-            $(this).attr('id', newId);
-        });
+    updateGlobalNewsControls();
+});
 
-        $newForm.find('[name]').each(function() {
-            const newName = $(this).attr('name').replace(/__prefix__/g, currentForms);
-            $(this).attr('name', newName);
-        });
 
-        $newForm.find('.news-add-image-btn').each(function() {
-            const $label = $(this);
-            const oldFor = $label.attr('for');
-            if (oldFor) {
-                const newFor = oldFor.replace(/__prefix__/g, currentForms);
-                $label.attr('for', newFor);
+        $(document).on('click', '.remove-banner-btn', function() {
+            const form = $(this).closest('.banner-unit');
+            const deleteInput = form.find('[name$="-DELETE"]');
+            const idInput = form.find('[name$="-id"]');
+
+            if (idInput.val()) {
+                deleteInput.prop('checked', true);
+                form.hide();
+            } else {
+                form.remove();
             }
         });
 
-        $newForm.find('input:not([type="hidden"]), textarea').val('');
-        $newForm.find('input[type="checkbox"]').prop('checked', false);
-        $newForm.find(`input[type="hidden"][name$="-DELETE"]`).val('');
-        $newForm.find('img[id^="newsImagePreview_"]').attr('src', '#').hide();
-        $newForm.find('.news-remove-banner-btn').attr('data-form-index', currentForms);
+        // Глобальне керування станом "Показувати" для банерів
+        $('#global-is-active').on('change', function() {
+            const globalIsActive = $(this).prop('checked');
+            $('[id$="-is_active"]').prop('checked', globalIsActive);
+        });
 
-        $newForm.removeAttr('id').show();
-        $newsContainer.append($newForm);
+        // Глобальне оновлення швидкості прокрутки для банерів
+        $('#global-scroll-speed').on('change', function() {
+            const globalSpeed = $(this).val();
+            $('[id$="-scroll_speed"]').val(globalSpeed);
+        });
 
-        initializeNewsUnit($newForm);
-        $newsTotalFormsInput.val(currentForms + 1);
+        // Автосинхронізація стану чекбоксів для банерів
+        function updateGlobalControls() {
+            const total = $('[id$="-is_active"]').length;
+            const checked = $('[id$="-is_active"]:checked').length;
+            const allActive = total > 0 && total === checked;
+            $('#global-is-active').prop('checked', allActive);
+
+            const firstSpeed = $('[id$="-scroll_speed"]').first().val();
+            const allSame = $('[id$="-scroll_speed"]').toArray().every(input => $(input).val() === firstSpeed);
+            if (allSame) {
+                $('#global-scroll-speed').val(firstSpeed);
+            }
+        }
+
+        // Глобальне керування станом "Показувати" для новин
+        $('#global-is-active-news').on('change', function() {
+            const globalIsActiveNews = $(this).prop('checked');
+            $('[id^="id_news-"][id$="-is_active"]').prop('checked', globalIsActiveNews);
+        });
+
+        // Глобальне оновлення швидкості прокрутки для новин
+        $('#global-scroll-speed-news').on('change', function() {
+            const globalSpeedNews = $(this).val();
+            $('[id^="id_news-"][id$="-scroll_speed"]').val(globalSpeedNews);
+        });
+
+        // Автосинхронізація стану чекбоксів для новин
+        function updateGlobalNewsControls() {
+            const totalNews = $('[id^="id_news-"][id$="-is_active"]').length;
+            const checkedNews = $('[id^="id_news-"][id$="-is_active"]:checked').length;
+            const allActiveNews = totalNews > 0 && totalNews === checkedNews;
+            $('#global-is-active-news').prop('checked', allActiveNews);
+
+            const firstSpeedNews = $('[id^="id_news-"][id$="-scroll_speed"]').first().val();
+            const allSameNews = $('[id^="id_news-"][id$="-scroll_speed"]').toArray().every(input => $(input).val() === firstSpeedNews);
+            if (allSameNews) {
+                $('#global-scroll-speed-news').val(firstSpeedNews);
+            }
+        }
+
+        // Відображення існуючих зображень при завантаженні
+        $('.banner-unit').each(function() {
+            const preview = $(this).find('.preview');
+            const imageUrl = preview.attr('src');
+            if (imageUrl && imageUrl !== '#') {
+                preview.show();
+            }
+        });
+
+        // ініціалізація при завантаженні
+        updateGlobalControls();
+        updateGlobalNewsControls();
     });
-});
+})(jQuery);
 </script>
-
-
 <style>
-    .visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    border: 0;
-    padding: 0;
-    white-space: nowrap;
-    clip-path: inset(100%);
-    clip: rect(0 0 0 0);
-    overflow: hidden;
-}
-   .banner-wrapper {
-    border: 2px solid black;
+.upload-btn input[type="file"] {
+        display: none;
+    }
+.banner-wrapper {
+    border: 1px solid #ccc;
     border-radius: 10px;
     padding: 20px;
-    width: fit-content;
-    font-family: sans-serif;
+    margin: auto;
 }
 
-.banner-title {
-    text-align: center;
-    font-weight: bold;
-    margin-bottom: 15px;
-    font-size: 1.2em;
-}
-
-.banner-options {
+.banner-header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 20px;
-}
-
-.banner-image {
-    width: 120px;
-    height: 80px;
-    background-color: #eee;
-    background-repeat: no-repeat;
-    background-size: cover;
-    border: 1px solid #aaa;
-}
-
-.banner-radio {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.banner-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.banner-button {
-    padding: 5px 10px;
-    font-size: 0.9em;
-}
-
-.banner-size {
-    font-size: 0.9em;
     margin-bottom: 10px;
 }
 
-#banner-container {
+.banners-container {
+    display: flex;
+    flex-wrap: wrap;
     gap: 10px;
+    margin-top: 10px;
 }
 
 .banner-unit {
-    width: 350px;
-    margin-bottom: 10px;
-}
-
-.preview-container img {
-    max-width: 100%;
-    max-height: 100%;
-    display: block;
-}
-
-.cross-banner-item {
-    margin-bottom: 15px;
+    width: 180px;
+    border: 1px solid #ddd;
     padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
+    text-align: center;
+    position: relative;
 }
 
-/* --- НОВІ СТИЛІ ДЛЯ ПРИХОВУВАННЯ INPUT TYPE="FILE" --- */
-input[type="file"][id^="id_top-"],   /* Для топ банерів */
-input[type="file"][id^="id_news-"]   /* Для новин */
-{
+.image-block {
+    position: relative;
+    margin-bottom: 5px;
+}
+
+.preview {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    border: 1px dashed #ccc;
+}
+
+.upload-btn input[type="file"] {
+    display: none;
+}
+
+.upload-btn span {
+    display: inline-block;
+    background-color: #eee;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+.remove-banner-btn {
     position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    border: 0;
+    top: -10px;
+    right: -10px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.8em;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.input-group {
+    margin-bottom: 5px;
+}
+
+.input-group label {
+    display: block;
+    font-size: 0.9em;
+}
+
+.add-photo-btn {
+    margin-top: 10px;
+}
+
+.global-controls {
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+}
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  background-color: #ccc;
+  transition: .4s;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 20px;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+input:checked + .slider {
+  background-color: #2196F3;
+}
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+input:checked + .slider:before {
+  -webkit-transform: translateX(20px);
+  -ms-transform: translateX(20px);
+  transform: translateX(20px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 20px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+.save-btn {
+    padding: 8px 15px;
+    font-size: 1em;
+}
+    .banner-unit .input-group input[type="text"],
+.banner-unit .input-group input[type="url"] {
+    width: 100%; /* Займають всю доступну ширину батьківського блоку */
+    box-sizing: border-box; /* Враховувати padding та border у загальній ширині */
+    overflow: hidden; /* Приховувати вміст, що виходить за межі */
+    white-space: nowrap; /* Заборонити перенесення на новий рядок */
+    text-overflow: ellipsis; /* Відображати багатокрапку для обрізаного тексту */
 }
 </style>
-{%endblock%}
+{% endblock %}

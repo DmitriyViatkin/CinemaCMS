@@ -5,42 +5,32 @@ from  users.models import User
 from core.models import Cinemas, Halls, Sessions,Seats, Tickets
 from main.models import Banners, Cross_Banner, News
 from django.forms import inlineformset_factory, formset_factory, modelformset_factory
+from datetime import timedelta
 
+from django.forms import BaseModelFormSet
 
 class CrossBannerForm(forms.ModelForm):
-
     image = forms.ImageField(required=False, label='Зображення для банера')
-
-
     type = forms.CharField(widget=forms.HiddenInput(), required=False, initial='photo_background')
 
     class Meta:
         model = Cross_Banner
-
-        fields = []
+        fields = ['type']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
         if self.instance and self.instance.pk and self.instance.gallery:
             picture = self.instance.gallery.pictures.first()
             if picture and picture.image:
                 self.fields['image'].initial = picture.image
 
-
     def save(self, commit=True):
-        self.instance.gallery = Gallery.objects.create()
-        self.instance.type = self.cleaned_data['banner_type_choice']
-        cross_banner = super().save(commit)
 
-        image = self.cleaned_data.get('image')
-        if image:
-            Picture.objects.create(
-                gallery=self.instance.gallery,
-                image=image,
-                image_type=self.cleaned_data['image_type']
-            )
-        return cross_banner
+        instance = super().save(commit=False)
+
+        if commit:
+            instance.save()
+        return instance
 
 
 class UserForm(forms.ModelForm):
@@ -79,22 +69,66 @@ class GalleryForm(forms.ModelForm):
 
 
 class BannerForm(forms.ModelForm):
+        main_picture = forms.ImageField(required=False, label='Головне зображення')
+
+        class Meta:
+            model = Banners
+            fields = ['url', 'text', 'scroll_speed', 'is_active']
+
+        def save(self, commit=True):
+            banner = super().save(commit=False)
+            # Якщо у банера немає галереї — створимо
+            if not banner.gallery:
+                gallery = Gallery.objects.create()
+                banner.gallery = gallery
+            if commit:
+                banner.save()
+
+                # Обробляємо зображення
+                main_picture_file = self.cleaned_data.get('main_picture')
+                if main_picture_file:
+                    # Спробуємо знайти картинку з типом 'main_picture'
+                    picture = banner.gallery.pictures.filter(image_type='main_picture').first()
+                    if not picture:
+                        picture = Picture(gallery=banner.gallery, image_type='main_picture')
+                    picture.image = main_picture_file
+                    picture.save()
+
+            return banner
+
+BannersFormSet = modelformset_factory(Banners, form=BannerForm, extra=0, can_delete=True)
+
+class NewsForm(forms.ModelForm):
+    main_picture = forms.ImageField(required=False, label='Головне зображення')
+
     class Meta:
-        model = Banners
-        exclude = ['gallery', 'type']
-        fields = ['url', 'text', 'scroll_speed', 'is_active']
-        widgets = {
-            'url': forms.URLInput(attrs={'class': 'form-control'}),
-            'text': forms.TextInput(attrs={'class': 'form-control'}),
-            'scroll_speed': forms.NumberInput(attrs={'class': 'form-control'}),
-            'is_active': forms.CheckboxInput(attrs={'class': 'form-control'}),
-        }
-        labels = {
-            'url': 'URL',
-            'text': 'Текст',
-            'scroll_speed': 'Швидкість прокрутки (сек.)',
-            'is_active': 'Показувати',
-        }
+        model = News
+        fields = ['url', 'scroll_speed', 'is_active']
+
+    def save(self, commit=True):
+        news = super().save(commit=False)
+
+        # Створити галерею, якщо її нема
+        if not news.gallery:
+            gallery = Gallery.objects.create()
+            news.gallery = gallery
+
+        if commit:
+            news.save()
+
+            # Зберігаємо зображення
+            main_picture_file = self.cleaned_data.get('main_picture')
+            if main_picture_file:
+                picture = news.gallery.pictures.filter(image_type='main_picture').first()
+                if not picture:
+                    picture = Picture(gallery=news.gallery, image_type='main_picture')
+                picture.image = main_picture_file
+                picture.save()
+
+        return news
+
+NewsFormSet = modelformset_factory(News, form=NewsForm, extra=0, can_delete=True)
+
 
 class TicketForm(forms.ModelForm):
     class Meta:
@@ -197,32 +231,60 @@ PictureFormSet = inlineformset_factory(
     max_num=10,
     can_delete=True,)
 
-BannerFormSet = modelformset_factory(
-    Banners,
-    form=BannerForm,
-    extra=1,  # Кількість порожніх форм для відображення
-    exclude=['gallery', 'type']
-)
+class TopBannerForm(forms.Form):
+
+    def __init__(self, data=None, files=None, prefix=None, instance=None, **kwargs):
+        super().__init__(data=data, files=files, prefix=prefix, **kwargs)
+
+        self.prefix = prefix
+        self.gallery_instance = instance.get('gallery') if instance else None
+        self.banner_instance = instance.get('banner') if instance else None
+        self.picture_inctance = instance.get('picture') if instance else None
+
+        self.banner_form = BannerForm(data=data, prefix=f'{prefix}-banner', instance=self.banner_instance)
+        self.picture_form = PictureForm(data = data, prefix = f'{prefix}-picture', instance=self.picture_inctance)
+
+    def is_valid(self):
+        return self.banner_form.is_valid() and self.picture_form.is_valid()
+
+    def save(self):
+        gallery = Gallery.objects.create()
+
+        banner = self.banner_form.save(commit=False)
+        banner.gallery = gallery
+        banner.save()
+
+        picture = self.picture_form.save(commit=False)
+        picture.gallery = gallery
+        picture.image_type = 'gallery'
+        picture.save()
+
+    def as_p(self):
+        return self.banner_form.as_p() + self.picture_form.as_p()
 
 
-class TopBannerForm(forms.ModelForm):
-    uploaded_image = forms.ImageField(label='Зображення', widget=forms.FileInput(
-        attrs={'class': 'form-control-file'}),
-        required=False
-    )
-    class Meta:
-        model = Banners
-        fields = ['url', 'text', 'scroll_speed', 'is_active']
+PictureFormSet = modelformset_factory(
+    model=Picture,
+    form=PictureForm,
+    fields='__all__',  # або вкажи конкретні поля: ['image', 'image_type', 'gallery']
+    extra=1,
+    can_delete=True)
 
-class NewsForm(forms.ModelForm):
-    uploaded_image = forms.ImageField(label='Зображення', widget=forms.FileInput(
-        attrs={'class': 'form-control-file'}),
-        required=False
-    )
-    class Meta:
-        model = News
-        fields = ['url', 'scroll_speed', 'is_active']
 
-# Factory definitions залишаються без змін
-TopBannerModelFormSet = modelformset_factory(Banners, form=TopBannerForm, extra=0, can_delete=True)
-NewsModelFormSet = modelformset_factory(News, form=NewsForm, extra=0, can_delete=True)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

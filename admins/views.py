@@ -9,8 +9,7 @@ from main.models import Gallery, Banners, Cross_Banner, News
 from core.models import Cinemas, Halls, Sessions, Seats, Tickets
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .forms import (BlockSEOForm, MovieForm, PictureFormSet, GalleryForm, CinemaForm, HallsForm, SessionsForm,
-                    TicketForm, SeatForm, NewsModelFormSet, TopBannerForm, TopBannerModelFormSet, UserForm,
-                    SessionFormSet, Picture, CrossBannerForm)
+                    TicketForm,SeatForm,   BannersFormSet,  NewsFormSet,   UserForm, SessionFormSet , Picture,  CrossBannerForm , modelformset_factory)
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpRequest, HttpResponse
 from django.template.loader import render_to_string
@@ -450,270 +449,93 @@ def delete_tickets (request, pk):
 
 @staff_member_required
 def add_banners(request):
-    # Ініціалізуємо формсети для GET-запиту
-    # Важливо: queryset=Banners.objects.all() буде брати всі банери.
-    # Якщо ти хочеш тільки "топ" банери, переконайся, що твоя модель Banners
-    # або її менеджер фільтрує їх правильно, або додай .filter() сюди.
-    top_formset = TopBannerModelFormSet(queryset=Banners.objects.all(), prefix='top')
-    news_formset = NewsModelFormSet(queryset=News.objects.all(), prefix='news')
+    banner_formset = BannersFormSet(request.POST or None, request.FILES or None, queryset=Banners.objects.all())
+    cross_banner_instance = Cross_Banner.objects.first()
+    cross_banner_form = CrossBannerForm(request.POST or None, request.FILES or None, instance=cross_banner_instance)
+    news_formset = NewsFormSet(request.POST or None, request.FILES or None, queryset=News.objects.all(), prefix='news')
 
-    cross_banner_instance = Cross_Banner.objects.select_related('gallery').first()
-    cross_banner_form = CrossBannerForm(prefix='cross', instance=cross_banner_instance)
+    if request.method=='POST':
+        if 'save_banners' in request.POST and banner_formset.is_valid():
+            instances = banner_formset.save()
+            for i, form in enumerate(banner_formset.forms):
+                main_picture_file = form.cleaned_data.get('main_picture')
+                banner = instances[i]
+                if main_picture_file and banner:
+                    if not banner.gallery:
+                        banner.gallery = Gallery.objects.create()
+                        banner.save()
+                    picture = banner.gallery.pictures.filter(image_type='main_picture').first()
+                    if not picture:
+                        picture = Picture(gallery=banner.gallery, image_type='main_picture')
+                    picture.image = main_picture_file
+                    picture.save()
 
-    if request.method == "POST":
-        print(f"\n--- Отримано POST запит ---")
-        # Перевіряємо, яка кнопка була натиснута
-        is_top_form_submitted = 'submit_top_banners_form' in request.POST
-        is_news_form_submitted = 'submit_news_banners_form' in request.POST
-        is_cross_form_submitted = 'submit_cross_banner_form' in request.POST
+            banner_formset.save_m2m()
 
-        print(f"Кнопка 'Зберегти топ банери' натиснута: {is_top_form_submitted}")
-        print(f"Кнопка 'Зберегти новини' натиснута: {is_news_form_submitted}")
-        print(f"Кнопка 'Зберегти сквозний банер' натиснута: {is_cross_form_submitted}")
-
-        # === TOP BANNERS ===
-        if is_top_form_submitted:
-            print(f"Обробка форми Top Banners...")
-            # Ініціалізуємо формсет даними POST-запиту
-            top_formset = TopBannerModelFormSet(request.POST, request.FILES, prefix='top')
-
-            if top_formset.is_valid():
-                print("Top Banners FormSet валідний.")
-
-                # Обробка видалених форм
-                if top_formset.deleted_forms:
-                    print(f"Кількість форм для видалення (Top): {len(top_formset.deleted_forms)}")
-                    for form in top_formset.deleted_forms:
-                        if form.instance.pk:
-                            try:
-                                print(f"  [Видалення] Видалення Top Banner з ID: {form.instance.pk}")
-                                if form.instance.gallery:
-                                    Picture.objects.filter(gallery=form.instance.gallery).delete()
-                                    form.instance.gallery.delete()
-                                form.instance.delete()
-                                print(f"  [Видалення] Top Banner '{form.instance.pk}' та пов'язані дані видалено успішно.")
-                            except Exception as e:
-                                print(f"  [Видалення] Помилка при видаленні Top Banner '{form.instance.pk}': {e}")
-                                continue
-                        else:
-                            print(f"  [Видалення] Спроба видалити новий (без PK) Top Banner. Пропускаємо.")
-                else:
-                    print("Кількість форм для видалення (Top): 0. Немає форм, позначених для видалення.")
-
-
-                # Обробка нових та змінених форм
-                saved_count = 0
-                for form_index, form in enumerate(top_formset.forms):
-                    # Якщо форма позначена для видалення, пропускаємо її.
-                    # Вона вже була оброблена в циклі `deleted_forms` вище.
-                    if form.cleaned_data.get('DELETE'):
-                        print(f"  [Пропуск] Форма #{form_index} (ID: {form.instance.pk if form.instance.pk else 'новий'}) Top Banner позначена для видалення. Пропускаємо обробку збереження тут.")
-                        continue
-
-                    # Пропускаємо абсолютно порожні нові форми, якщо вони не були змінені і не мають зображення.
-                    # is_empty_formset_form - допоміжна функція FormSet, щоб визначити, чи це "порожня" форма
-                    # (якщо всі її поля Meta.fields порожні).
-                    # is_empty_formset_form не є публічним методом, тому краще перевіряти вручну.
-                    if form.instance.pk is None and not form.has_changed() and not form.cleaned_data.get('uploaded_image'):
-                        print(f"  [Пропуск] Форма #{form_index} Top Banner є новою та порожньою (без змін і без зображення). Пропускаємо.")
-                        continue
-
-                    # Зберігаємо екземпляр банера (без зображення)
-                    banner_instance = form.save(commit=False) # Це збереже url, text, scroll_speed, is_active
-
-                    if banner_instance.pk is None:
-                        # Це нова форма - створюємо нову галерею
-                        banner_instance.gallery = Gallery.objects.create()
-                        print(f"  [Збереження] Створення нового Top Banner (індекс: {form_index}). Створено нову галерею з ID: {banner_instance.gallery.pk}.")
-                    else:
-                        # Це існуюча форма
-                        print(f"  [Збереження] Оновлення Top Banner з ID: {banner_instance.pk} (індекс: {form_index}).")
-
-                    banner_instance.save() # Зберігаємо екземпляр банера
-                    print(f"  [Збереження] Top Banner '{banner_instance.pk}' успішно збережено/оновлено.")
-                    saved_count += 1
-
-                    # ОБРОБКА ЗОБРАЖЕННЯ (для 'uploaded_image')
-                    uploaded_image_file = form.cleaned_data.get('uploaded_image')
-                    # Перевіряємо, чи було завантажено нове зображення
-                    if uploaded_image_file:
-                        print(f"  [Зображення] Знайдено завантажене зображення для Top Banner '{banner_instance.pk}'.")
-                        try:
-                            # Шукаємо існуючу Picture або створюємо нову
-                            picture, created = Picture.objects.get_or_create(
-                                gallery=banner_instance.gallery,
-                                image_type='gallery' # Переконайся, що 'gallery' - це коректний image_type
-                            )
-                            picture.image = uploaded_image_file
-                            picture.save()
-                            print(f"  [Зображення] Зображення для Top Banner '{banner_instance.pk}' {'створено' if created else 'оновлено'}.")
-                        except Exception as e:
-                            print(f"  [Зображення] Помилка при збереженні зображення Top Banner '{banner_instance.pk}': {e}")
-                    # Перевіряємо, чи користувач очистив існуюче зображення (поле було змінено, але тепер порожнє)
-                    elif 'uploaded_image' in form.changed_data and not uploaded_image_file:
-                        print(f"  [Зображення] Поле 'uploaded_image' для Top Banner '{banner_instance.pk}' було очищено користувачем.")
-                        try:
-                            # Видаляємо пов'язане зображення
-                            Picture.objects.filter(gallery=banner_instance.gallery, image_type='gallery').delete()
-                            print(f"  [Зображення] Зображення для Top Banner '{banner_instance.pk}' видалено (було очищено користувачем).")
-                        except Exception as e:
-                            print(f"  [Зображення] Помилка при видаленні зображення Top Banner '{banner_instance.pk}' після очищення: {e}")
-                    else:
-                        print(f"  [Зображення] Зображення для Top Banner '{banner_instance.pk}' не змінилося або не було завантажено.")
-
-                print(f"Top Banners FormSet збережено успішно. Кількість збережених/оновлених: {saved_count}")
-                return redirect('banners') # Заміни на правильну назву URL, якщо 'banners' не працює
-            else:
-                print(f"Помилки валідації форми TOP BANNERS:")
-                for i, form in enumerate(top_formset):
-                    if form.errors:
-                        print(f"  Форма #{i}: {form.errors}")
-                        for field, errors in form.errors.items():
-                            print(f"    Поле '{field}': {', '.join(errors)}")
-                print(f"Дані, що були відправлені для Top Banners (тільки для відладки): {request.POST}, FILES: {request.FILES}")
-
-
-        # === NEWS BANNERS ===
-        elif is_news_form_submitted:
-            print(f"Обробка форми News Banners...")
-            news_formset = NewsModelFormSet(request.POST, request.FILES, prefix='news')
-
-            if news_formset.is_valid():
-                print("News Banners FormSet валідний.")
-                if news_formset.deleted_forms:
-                    print(f"Кількість форм для видалення (News): {len(news_formset.deleted_forms)}")
-                    for form in news_formset.deleted_forms:
-                        if form.instance.pk:
-                            try:
-                                print(f"  [Видалення] Видалення News Banner з ID: {form.instance.pk}")
-                                if form.instance.gallery:
-                                    Picture.objects.filter(gallery=form.instance.gallery).delete()
-                                    form.instance.gallery.delete()
-                                form.instance.delete()
-                                print(f"  [Видалення] News Banner '{form.instance.pk}' та пов'язані дані видалено успішно.")
-                            except Exception as e:
-                                print(f"  [Видалення] Помилка при видаленні News Banner '{form.instance.pk}': {e}")
-                                continue
-                        else:
-                            print(f"  [Видалення] Спроба видалити новий (без PK) News Banner. Пропускаємо.")
-                else:
-                    print("Кількість форм для видалення (News): 0. Немає форм, позначених для видалення.")
-
-
-                saved_count = 0
-                for form_index, form in enumerate(news_formset.forms):
-                    if form.cleaned_data.get('DELETE'):
-                        print(f"  [Пропуск] Форма #{form_index} (ID: {form.instance.pk if form.instance.pk else 'новий'}) News Banner позначена для видалення. Пропускаємо обробку збереження тут.")
-                        continue
-
-                    if form.instance.pk is None and not form.has_changed() and not form.cleaned_data.get('uploaded_image'):
-                        print(f"  [Пропуск] Форма #{form_index} News Banner є новою та порожньою (без змін і без зображення). Пропускаємо.")
-                        continue
-
-                    news_instance = form.save(commit=False)
-
-                    if news_instance.pk is None:
-                        news_instance.gallery = Gallery.objects.create()
-                        print(f"  [Збереження] Створення нової News Banner (індекс: {form_index}). Створено нову галерею з ID: {news_instance.gallery.pk}.")
-                    else:
-                        print(f"  [Збереження] Оновлення News Banner з ID: {news_instance.pk} (індекс: {form_index}).")
-
-                    news_instance.save()
-                    print(f"  [Збереження] News Banner '{news_instance.pk}' успішно збережено/оновлено.")
-                    saved_count += 1
-
-                    uploaded_image_file = form.cleaned_data.get('uploaded_image')
-                    if uploaded_image_file:
-                        print(f"  [Зображення] Знайдено завантажене зображення для News Banner '{news_instance.pk}'.")
-                        try:
-                            picture, created = Picture.objects.get_or_create(
-                                gallery=news_instance.gallery,
-                                image_type='gallery'
-                            )
-                            picture.image = uploaded_image_file
-                            picture.save()
-                            print(f"  [Зображення] Зображення для News Banner '{news_instance.pk}' {'створено' if created else 'оновлено'}.")
-                        except Exception as e:
-                            print(f"  [Зображення] Помилка при збереженні зображення News Banner '{news_instance.pk}': {e}")
-                    elif 'uploaded_image' in form.changed_data and not uploaded_image_file:
-                        print(f"  [Зображення] Поле 'uploaded_image' для News Banner '{news_instance.pk}' було очищено.")
-                        try:
-                            Picture.objects.filter(gallery=news_instance.gallery, image_type='gallery').delete()
-                            print(f"  [Зображення] Зображення для News Banner '{news_instance.pk}' видалено (було очищено користувачем).")
-                        except Exception as e:
-                            print(f"  [Зображення] Помилка при видаленні зображення News Banner '{news_instance.pk}' після очищення: {e}")
-                    else:
-                        print(f"  [Зображення] Зображення для News Banner '{news_instance.pk}' не змінилося або не було завантажено.")
-
-                print(f"News Banners FormSet збережено успішно. Кількість збережених/оновлених: {saved_count}")
-                return redirect('banners')
-            else:
-                print(f"Помилки валідації форми NEWS BANNERS:")
-                for i, form in enumerate(news_formset):
-                    if form.errors:
-                        print(f"  Форма #{i}: {form.errors}")
-                        for field, errors in form.errors.items():
-                            print(f"    Поле '{field}': {', '.join(errors)}")
-                print(f"Дані, що були відправлені для News Banners (тільки для відладки): {request.POST}, FILES: {request.FILES}")
-
-        # === CROSS BANNER ===
-        elif is_cross_form_submitted:
-            print(f"Обробка форми Cross Banner...")
-            cross_banner_form = CrossBannerForm(request.POST, request.FILES, prefix='cross', instance=cross_banner_instance)
-
-            if cross_banner_form.is_valid():
-                cross_banner_obj = cross_banner_form.save(commit=False)
-
-                if cross_banner_obj.pk is None:
-                    cross_banner_obj.gallery = Gallery.objects.create()
-                    print(f"  [Збереження] Створення нового Cross Banner. Створено нову галерею з ID: {cross_banner_obj.gallery.pk}.")
-                else:
-                    print(f"  [Збереження] Оновлення Cross Banner з ID: {cross_banner_obj.pk}.")
-
-                cross_banner_obj.save()
-                print(f"  [Збереження] Cross Banner '{cross_banner_obj.pk}' збережено.")
-
-                # ОБРОБКА ЗОБРАЖЕННЯ ДЛЯ CROSS BANNER
-                # Переконайся, що у CrossBannerForm поле для файлу називається 'uploaded_image'.
-                # Якщо ні, заміни на коректну назву (наприклад, 'image').
-                uploaded_image_file = cross_banner_form.cleaned_data.get('uploaded_image')
-                if uploaded_image_file:
-                    print(f"  [Зображення] Знайдено завантажене зображення для Cross Banner '{cross_banner_obj.pk}'.")
-                    try:
-                        picture, created = Picture.objects.get_or_create(
-                            gallery=cross_banner_obj.gallery,
-                            image_type='gallery'
-                        )
-                        picture.image = uploaded_image_file
+        if 'save_cross_banner' in request.POST and cross_banner_form.is_valid():
+            cross_banner = cross_banner_form.save()
+            image_file = request.FILES.get('image')
+            if cross_banner:
+                if not cross_banner.gallery_id:
+                    cross_banner.gallery = Gallery.objects.create()
+                    cross_banner.save()
+                if cross_banner.gallery:
+                    picture = cross_banner.gallery.pictures.first()
+                    if not picture:
+                        picture = Picture(gallery=cross_banner.gallery)
+                    if image_file:
+                        picture.image = image_file
                         picture.save()
-                        print(f"  [Зображення] Зображення для Cross Banner '{cross_banner_obj.pk}' {'створено' if created else 'оновлено'}.")
-                    except Exception as e:
-                        print(f"  [Зображення] Помилка при збереженні зображення Cross Banner '{cross_banner_obj.pk}': {e}")
-                elif 'uploaded_image' in cross_banner_form.changed_data and not uploaded_image_file:
-                    print(f"  [Зображення] Поле 'uploaded_image' для Cross Banner '{cross_banner_obj.pk}' було очищено.")
-                    try:
-                        Picture.objects.filter(gallery=cross_banner_obj.gallery, image_type='gallery').delete()
-                        print(f"  [Зображення] Зображення для Cross Banner '{cross_banner_obj.pk}' видалено (було очищено користувачем).")
-                    except Exception as e:
-                        print(f"  [Зображення] Помилка при видаленні зображення Cross Banner '{cross_banner_obj.pk}' після очищення: {e}")
-                else:
-                    print(f"  [Зображення] Зображення для Cross Banner '{cross_banner_obj.pk}' не змінилося або не було завантажено.")
 
-                print("Cross Banner збережено успішно.")
-                return redirect('banners')
-            else:
-                print(f"Помилки форми сквозного банера:")
-                for field, errors in cross_banner_form.errors.items():
-                    print(f"  Поле '{field}': {', '.join(errors)}")
-                print(f"Дані, що були відправлені для Cross Banner (тільки для відладки): {request.POST}, FILES: {request.FILES}")
+        if 'save_news_banners' in request.POST and news_formset.is_valid():
+            news_formset.save()  # зберігаємо об'єкти
+            for form in news_formset.forms:
+                if not form.cleaned_data:  # пропускаємо порожні форми
+                    continue
 
-    context = {
-        'top_formset': top_formset,
-        'news_formset': news_formset,
+                main_picture_file = form.cleaned_data.get('main_picture')
+                news = form.instance  # використовуємо екземпляр напряму
+
+                if main_picture_file and news:
+                    if not news.gallery:
+                        news.gallery = Gallery.objects.create()
+                        news.save()
+
+                    picture = news.gallery.pictures.filter(image_type='main_picture').first()
+                    if not picture:
+                        picture = Picture(gallery=news.gallery, image_type='main_picture')
+
+                    picture.image = main_picture_file
+                    picture.save()
+
+            return redirect('banners')
+
+    # Для рендеру — попередній перегляд зображень
+    form_data = []
+    for form in banner_formset.forms:
+        image_url = None
+        if form.instance.gallery:
+            picture = form.instance.gallery.pictures.filter(image_type='main_picture').first()
+            if picture and picture.image:
+                image_url = picture.image.url
+        form_data.append({'form': form, 'image_url': image_url})
+
+    news_form_data = []
+    for form in news_formset.forms:
+        image_url = None
+        if form.instance.gallery:
+            picture = form.instance.gallery.pictures.filter(image_type='main_picture').first()
+            if picture and picture.image:
+                image_url = picture.image.url
+        news_form_data.append({'form': form, 'image_url': image_url})
+
+    return render(request, 'admin/banner/add_banner.html', {
+        'formset': banner_formset,
+        'form_data': form_data,
         'cross_banner_form': cross_banner_form,
-    }
-    return render(request, 'admin/banner/add_banner.html', context)
-
+        'news_formset': news_formset,
+        'news_form_data': news_form_data,
+    })
 
 @staff_member_required
 def banners_list(request):
