@@ -8,7 +8,7 @@ from django.forms import inlineformset_factory, formset_factory, modelformset_fa
 
 
 class CrossBannerForm(forms.ModelForm):
-    image = forms.ImageField(required=False, label='Зображення для банера')
+    image = forms.ImageField(required=False, label='Зображення для банера', widget=forms.FileInput() )
     type = forms.CharField(widget=forms.HiddenInput(), required=False, initial='photo_background')
 
     class Meta:

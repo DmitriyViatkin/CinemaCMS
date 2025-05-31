@@ -511,19 +511,16 @@ def add_banners(request):
     cross_banner_form = CrossBannerForm(request.POST or None, request.FILES or None, instance=cross_banner_instance, prefix='cross_banner')
     news_formset = NewsFormSet(request.POST or None, request.FILES or None, queryset=News.objects.all(), prefix='news')
 
-    print("HTTP Method:", request.method)
+
     if request.method=='POST':
-        print("Отримані дані POST:", request.POST)
+
         if "which_form_is_it" in request.POST:
             which_form_is_submiting = request.POST["which_form_is_it"]
-            print(f"Визначено, що відправлено форму: {which_form_is_submiting}")
-
-
 
             if str(which_form_is_submiting) == "this_is_form_banner":
-                print("Валідація форми верхніх банерів...")
+
                 if banner_formset.is_valid():
-                    print("Форма верхніх банерів валідна. Збереження...")
+
                     banner_formset.save()
 
                     for form in banner_formset.forms:
@@ -552,38 +549,42 @@ def add_banners(request):
                             picture.save()
 
                     banner_formset.save()
-                    print("Форму верхніх банерів збережено.  Перенаправлення...")
+
                     return redirect('add_banners')
                 else:
-                    print("Форма верхніх банерів не валідна. Помилки:", banner_formset.errors)
+                    pass
 
-            elif str(which_form_is_submiting)=="this_is_form_cross_banner":
-                print("Валідація форми крос-банера...")
+
+            elif str(which_form_is_submiting) == "this_is_form_cross_banner":
+
                 if cross_banner_form.is_valid():
-                    print("Форма крос-банера валідна. Збереження...")
                     cross_banner = cross_banner_form.save()
-                    image_file = request.FILES.get('image')
+                    image_file = request.FILES.get('cross_banner-image')
+
                     if cross_banner:
                         if not cross_banner.gallery_id:
                             cross_banner.gallery = Gallery.objects.create()
                             cross_banner.save()
+
                         if cross_banner.gallery:
                             picture = cross_banner.gallery.pictures.first()
+
                             if not picture:
                                 picture = Picture(gallery=cross_banner.gallery)
+
                             if image_file:
                                 picture.image = image_file
                                 picture.save()
-
-                    print("Форму крос-банера збережено.")
+                            else:
+                                pass
                     return redirect('add_banners')
-                else:
-                    print("Форма крос-банера не валідна. Помилки:", cross_banner_form.errors)
 
+                else:
+                    pass
             elif str(which_form_is_submiting)=="this_is_form_news":
-                print("Валідація форми новин...")
+
                 if news_formset.is_valid():
-                    print("Форма новин валідна. Збереження...")
+
                     news_formset.save()
                     for form in news_formset.forms:
                         if not form.cleaned_data:
@@ -609,12 +610,12 @@ def add_banners(request):
                                 picture.image = main_picture_file
 
                             picture.save()
-                    print("Форму новин збережено. Перенаправлення...")
+
                     return redirect('add_banners')
                 else:
-                    print("Форма новин не валідна. Помилки:", news_formset.errors)
+                    pass
         else:
-            print("Ключ 'which_form_is_it' відсутній у POST-запиті.")
+                pass
 
     form_data = []
     for form in banner_formset.forms:
@@ -641,6 +642,7 @@ def add_banners(request):
         'news_formset': news_formset,
         'news_form_data': news_form_data,
     })
+
 @staff_member_required
 def banners_list(request):
     banners_list = Banners.objects.select_related('gallery').all().order_by('id')

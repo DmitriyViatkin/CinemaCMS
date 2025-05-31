@@ -35,7 +35,7 @@
                                     <img id="preview-img" src="{{ cross_banner_form.instance.gallery.pictures.first.image.url }}" alt="Превью" />
                                 {% else %}
                                     <div id="preview-placeholder">
-                                        <span>🖼</span>
+
                                     </div>
                                 {% endif %}
                             </div>
@@ -43,8 +43,9 @@
                             <div style="display: flex; gap: 10px; align-items: center;">
                                 <label class="upload-btn-cross">
                                     <span>Добавить</span>
-                                    {{ cross_banner_form.image }}
+                                    {{ cross_banner_form.image.as_widget }}
                                 </label>
+                                
 
                                 {% if cross_banner_form.instance.gallery and cross_banner_form.instance.gallery.pictures.first %}
                                     <button type="submit" name="delete_cross_banner" class="btn btn-outline-danger btn-sm">Удалить</button>

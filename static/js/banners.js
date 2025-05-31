@@ -26,7 +26,29 @@
                 }
             });
         }
+// Обробник для завантаження зображення крос-банера
+        // Обробник для завантаження зображення крос-банера
+        $('#id_cross_banner-image').on('change', function() {
+            const file = this.files[0];
+            const previewImage = $('#preview-img'); // Знаходимо існуючий елемент preview-img
+            const previewPlaceholder = $('#preview-placeholder');
 
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.attr('src', e.target.result); // Оновлюємо src існуючого елемента
+                    if (previewPlaceholder.length) {
+                        previewPlaceholder.hide(); // Приховуємо заглушку, якщо є
+                    }
+                }
+                reader.readAsDataURL(file);
+            } else {
+                previewImage.attr('src', '#'); // Очищаємо src, якщо файл не вибрано
+                if (previewPlaceholder.length) {
+                    previewPlaceholder.show(); // Показуємо заглушку, якщо файл видалено
+                }
+            }
+        });
         function updateImagePreview(input) {
             const file = input.files[0];
             if (file) {
