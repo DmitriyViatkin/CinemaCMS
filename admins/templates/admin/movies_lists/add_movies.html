@@ -40,7 +40,7 @@
                             {% include 'admin/card_forms/seo_form.html' with form=block_seo_form %}
 
                             <h2>Галерея</h2>
-                            {% include 'admin/card_forms/gallery_form.html' with form=gallery_form %}
+
 
                             <h3>Головна картинка</h3>
                             <div class="main-picture-form border p-3 mb-3">
@@ -56,8 +56,8 @@
                                         </div>
                                     {% endif %}
                                 {% endfor %}
-                                {{ main_picture_form.image_type }}
-                                {{ main_picture_form.gallery }}
+                                <div style="display: none;">{{ main_picture_form.image_type.label_tag }} {{ main_picture_form.image_type }}</div>
+                                <div style="display: none;">{{ main_picture_form.gallery.label_tag }} {{ main_picture_form.gallery }}</div>
                             </div>
 
                             <h3>Картинки галереї</h3>
@@ -65,7 +65,7 @@
                             <div id="pictures-formset">
                                 {% for form in picture_formset %}
                                     <div class="gallery-image-form border p-3 mb-3">
-                                        {{ form.id }}
+                                        <div style="display: none;">{{ form.id }}</div>
                                         {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
                                         <div class="form-group">
                                             {{ form.image.label_tag }}
@@ -81,13 +81,17 @@
                                             {{ form.DELETE.label_tag }}
                                             {% for error in form.DELETE.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
                                         </div>
-                                        {{ form.image_type }}
+                                        <div style="display: none;">{{ form.image_type.label_tag }} {{ form.image_type }}</div>
+                                        <div class="form-group" style="display: none;">
+                                            <label for="{{ form.prefix }}-gallery">Gallery:</label>
+                                            {{ form.gallery }}
+                                        </div>
                                     </div>
                                 {% endfor %}
                                 {{ picture_formset.empty_form }}
                             </div>
                             <button id="add-picture-form" type="button" class="btn btn-success mt-2">Додати ще одне зображення</button>
-                        </div> {# Кінець card-body #}
+                        </div>
 
                         <div class="card-footer">
                             <button type="submit" class="btn btn-primary">Створити</button>
@@ -183,6 +187,32 @@
                 picturesFormsetContainer.appendChild(newForm);
                 formCount++;
                 totalForms.value = formCount;
+
+                // Скрываем поля id и image_type в новой форме
+                const newIdField = newForm.querySelector('[id$="-id"]');
+                if (newIdField) {
+                    newIdField.closest('.form-group').style.display = 'none';
+                }
+                const newImageTypeField = newForm.querySelector('[id$="-image_type"]');
+                if (newImageTypeField) {
+                    newImageTypeField.closest('.form-group').style.display = 'none';
+                }
+
+                // Скрываем label поля image_type в новой форме
+                const newImageTypeLabel = newForm.querySelector('label[for$="-image_type"]');
+                if (newImageTypeLabel) {
+                    newImageTypeLabel.style.display = 'none';
+                }
+
+                // Скрываем label и поле Gallery в новой форме
+                const newGalleryLabel = newForm.querySelector('label[for$="-gallery"]');
+                const newGalleryField = newForm.querySelector('[id$="-gallery"]');
+                if (newGalleryLabel) {
+                    newGalleryLabel.style.display = 'none';
+                }
+                if (newGalleryField) {
+                    newGalleryField.closest('.form-group').style.display = 'none';
+                }
             });
 
             picturesFormsetContainer.addEventListener('click', function(event) {
@@ -199,7 +229,32 @@
 
             function updateFormIndicesOnDelete() {
                 const forms = picturesFormsetContainer.querySelectorAll('.gallery-image-form');
-                forms.forEach((form, index) => updateFormIndices(form, index));
+                forms.forEach((form, index) => {
+                    updateFormIndices(form, index);
+                    // Скрываем поля id и image_type после обновления индексов
+                    const idField = form.querySelector('[id$="-id"]');
+                    if (idField) {
+                        idField.closest('.form-group').style.display = 'none';
+                    }
+                    const imageTypeField = form.querySelector('[id$="-image_type"]');
+                    if (imageTypeField) {
+                        imageTypeField.closest('.form-group').style.display = 'none';
+                    }
+                    // Скрываем label поля image_type после обновления индексов
+                    const imageTypeLabel = form.querySelector('label[for$="-image_type"]');
+                    if (imageTypeLabel) {
+                        imageTypeLabel.style.display = 'none';
+                    }
+                    // Скрываем label и поле Gallery после обновления индексов
+                    const galleryLabel = form.querySelector('label[for$="-gallery"]');
+                    const galleryField = form.querySelector('[id$="-gallery"]');
+                    if (galleryLabel) {
+                        galleryLabel.style.display = 'none';
+                    }
+                    if (galleryField) {
+                        galleryField.closest('.form-group').style.display = 'none';
+                    }
+                });
             }
 
             picturesFormsetContainer.querySelectorAll('.gallery-image-form').forEach((form, index) => {
@@ -211,7 +266,67 @@
                         previewImage(this, previewContainer, 100, 100);
                     });
                 }
+                // Скрываем поля id и image_type при загрузке страницы
+                const initialIdField = form.querySelector('[id$="-id"]');
+                if (initialIdField) {
+                    initialIdField.closest('.form-group').style.display = 'none';
+                }
+                const initialImageTypeField = form.querySelector('[id$="-image_type"]');
+                if (initialImageTypeField) {
+                    initialImageTypeField.closest('.form-group').style.display = 'none';
+                }
+                // Скрываем label поля image_type при загрузке страницы
+                const initialImageTypeLabel = form.querySelector('label[for$="-image_type"]');
+                if (initialImageTypeLabel) {
+                    initialImageTypeLabel.style.display = 'none';
+                }
+                // Скрываем label и поле Gallery при загрузке страницы
+                const initialGalleryLabel = form.querySelector('label[for$="-gallery"]');
+                const initialGalleryField = form.querySelector('[id$="-gallery"]');
+                if (initialGalleryLabel) {
+                    initialGalleryLabel.style.display = 'none';
+                }
+                if (initialGalleryField) {
+                    initialGalleryField.closest('.form-group').style.display = 'none';
+                }
             });
+
+            // Скрываем поля id и image_type в пустой форме
+            const emptyFormDiv = document.querySelector('#empty-form .gallery-image-form');
+            if (emptyFormDiv) {
+                const idFieldEmpty = emptyFormDiv.querySelector('[id$="__prefix__-id"]');
+                if (idFieldEmpty) {
+                    idFieldEmpty.closest('.form-group').style.display = 'none';
+                }
+                const imageTypeFieldEmpty = emptyFormDiv.querySelector('[id$="__prefix__-image_type"]');
+                if (imageTypeFieldEmpty) {
+                    imageTypeFieldEmpty.closest('.form-group').style.display = 'none';
+                }
+                // Скрываем label поля image_type в пустой форме
+                const imageTypeLabelEmpty = emptyFormDiv.querySelector('label[for$="__prefix__-image_type"]');
+                if (imageTypeLabelEmpty) {
+                    imageTypeLabelEmpty.style.display = 'none';
+                }
+                // Скрываем label и поле Gallery в пустой форме
+                const galleryLabelEmpty = emptyFormDiv.querySelector('label[for$="__prefix__-gallery"]');
+                const galleryFieldEmpty = emptyFormDiv.querySelector('[id$="__prefix__-gallery"]');
+                if (galleryLabelEmpty) {
+                    galleryLabelEmpty.style.display = 'none';
+                }
+                if (galleryFieldEmpty) {
+                    galleryFieldEmpty.closest('.form-group').style.display = 'none';
+                }
+            }
+
+            // Скрываем label главной картинки "Тип зображення" и "Галерея"
+            const mainImageTypeLabel = document.querySelector('.main-picture-form label[for$="-image_type"]');
+            if (mainImageTypeLabel) {
+                mainImageTypeLabel.style.display = 'none';
+            }
+            const mainGalleryLabel = document.querySelector('.main-picture-form label[for$="-gallery"]');
+            if (mainGalleryLabel) {
+                mainGalleryLabel.style.display = 'none';
+            }
         });
     </script>
 
@@ -231,5 +346,6 @@
             </div>
         </div>
     </div>
+
 
 {% endblock %}

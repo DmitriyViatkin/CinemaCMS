@@ -1,9 +1,9 @@
- <div class="card card-primary">
-    <form method="post" enctype="multipart/form-data" class="banner-form">
+<form method="post" enctype="multipart/form-data" class="banner-form">
         {% csrf_token %}
+        <input type="hidden" name="which_form_is_it" value="this_is_form_banner">
         <h2 style="text-align: center;">На головній верх</h2>
-        <div class="banner-wrapper" style="width: 980px;">
-            <div class="banner-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <div class="banner-wrapper" style="width: 80%;">
+            <div class="banner-header">
                 <span>Розмір: 1000x190</span>
                 <label class="switch">
                     <input type="checkbox" id="global-is-active">
@@ -13,81 +13,76 @@
 
             {{ formset.management_form }}
 
-            <div id="banner-container" class="banners-container" style="display: flex; flex-wrap: wrap; gap: 10px;">
+            <template id="empty-form-template">
+                <div class="banner-unit" style="display: none;">
+                    {{ formset.empty_form.id }} {{ formset.empty_form.DELETE }}
+                    <div class="image-block">
+                        <img class="preview" src="#" alt="preview" style="display: none;" />
+                        <label class="upload-btn">
+                            {{ formset.empty_form.main_picture }}
+                            <span>Добавить</span>
+                        </label>
+                        <button type="button" class="remove-banner-btn">✖</button>
+                    </div>
+                    <div class="input-group">
+                        <label>URL:</label>
+                        {{ formset.empty_form.url }}
+                    </div>
+                    <div class="input-group">
+                        <label>Текст:</label>
+                        {{ formset.empty_form.text }}
+                    </div>
+                    <div class="input-group" style="display: none;">
+                        {{ formset.empty_form.scroll_speed }}
+                        {{ formset.empty_form.is_active }}
+                    </div>
+                </div>
+            </template>
+
+            <div id="banner-container" class="banners-container">
                 {% for item in form_data %}
-    <div class="banner-unit" style="...">
-        {{ item.form.id }} {{ item.form.DELETE }}
-        <div class="image-block" style="...">
-            {% if item.image_url %}
-                <img class="preview" src="{{ item.image_url }}" alt="preview" style="...">
-            {% else %}
-                <img class="preview" src="#" alt="preview" style="display: none; ...">
-            {% endif %}
-            <label class="upload-btn" style="...">
-                {{ item.form.main_picture }}
-                <span>Добавить</span>
-            </label>
-            <button type="button" class="remove-banner-btn" style="...">✖</button>
-        </div>
-        <div class="input-group" style="margin-bottom: 5px;">
-            <label style="display: block; font-size: 0.9em;">URL:</label>
-            {{ item.form.url }}
-        </div>
-        <div class="input-group" style="margin-bottom: 5px;">
-            <label style="display: block; font-size: 0.9em;">Текст:</label>
-            {{ item.form.text }}
-        </div>
-        <div class="input-group" style="display: none;">
-            {{ item.form.scroll_speed }}
-            {{ item.form.is_active }}
-        </div>
-    </div>
-{% endfor %}
+                    <div class="banner-unit">
+                        {{ item.form.id }} {{ item.form.DELETE }}
+                        <div class="image-block">
+                            {% if item.image_url %}
+                                <img class="preview" src="{{ item.image_url }}" alt="preview" />
+                            {% else %}
+                                <img class="preview" src="#" alt="preview" style="display: none;" />
+                            {% endif %}
+                            <label class="upload-btn">
+                                {{ item.form.main_picture }}
+                                <span>Добавить</span>
+                            </label>
+                            <button type="button" class="remove-banner-btn">✖</button>
+                        </div>
+                        <div class="input-group">
+                            <label>URL:</label>
+                            {{ item.form.url }}
+                        </div>
+                        <div class="input-group">
+                            <label>Текст:</label>
+                            {{ item.form.text }}
+                        </div>
+                        <div class="input-group" style="display: none;">
+                            {{ item.form.scroll_speed }}
+                            {{ item.form.is_active }}
+                        </div>
+                    </div>
+                {% endfor %}
             </div>
 
-            <div class="global-controls" style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
+            <div class="global-controls">
                 <div style="display: flex; align-items: center;">
-                    <label for="global-scroll-speed" style="margin-right: 10px; font-size: 0.9em;">Швидкість вращения:</label>
-                    <select id="global-scroll-speed" class="form-control" style="width: 60px; padding: 5px; font-size: 0.9em;">
+                    <label for="global-scroll-speed">Швидкість вращения:</label>
+                    <select id="global-scroll-speed" class="form-control">
                         <option value="5">5c</option>
                         <option value="10">10c</option>
                         <option value="15">15c</option>
                     </select>
                 </div>
-                <button type="submit" class="save-btn btn btn-primary" style="padding: 8px 15px; font-size: 1em;">Сохранить</button>
+                <button type="submit" class="save-btn btn btn-primary">Сохранить</button>
             </div>
 
-            <button type="button" id="add-banner-form" class="btn btn-secondary" style="margin-top: 10px;">Добавить фото</button>
-            </div>
-
-
-        <button type="button" id="add-banner-form" class="add-photo-btn">Добавить фото</button>
-
-        <div class="footer">
-            <label>Скорость вращения</label>
-            {{ rotation_speed_form_field }}
-            <button type="submit" class="save-btn">Сохранить</button>
+            <button type="button" id="add-banner-form" class="btn btn-secondary">Добавить фото</button>
         </div>
-    </div>
-</form>
-
-<!-- Шаблон для JavaScript -->
-<div id="empty-form-template" class="banner-unit" style="display:none;">
-    {{ formset.empty_form.id }} {{ formset.empty_form.DELETE }}
-    <div class="image-block">
-        <img class="preview" src="#" alt="preview" style="display: none;">
-        <label class="upload-btn">
-            {{ formset.empty_form.main_picture }}
-            <span>Добавить</span>
-        </label>
-        <button type="button" class="remove-banner-btn">✖</button>
-    </div>
-    <div class="input-group">
-        {{ formset.empty_form.url }}
-        {{ formset.empty_form.text }}
-        {{ formset.empty_form.scroll_speed }}
-        <label>
-            {{ formset.empty_form.is_active }} Активний
-        </label>
-    </div>
-</div>
+    </form>

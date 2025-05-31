@@ -5,9 +5,7 @@ from  users.models import User
 from core.models import Cinemas, Halls, Sessions,Seats, Tickets
 from main.models import Banners, Cross_Banner, News
 from django.forms import inlineformset_factory, formset_factory, modelformset_factory
-from datetime import timedelta
 
-from django.forms import BaseModelFormSet
 
 class CrossBannerForm(forms.ModelForm):
     image = forms.ImageField(required=False, label='Зображення для банера')
@@ -56,8 +54,8 @@ class PictureForm(forms.ModelForm):
 PictureFormSet = modelformset_factory(
     model=Picture,
     form=PictureForm,
-    fields=['image', 'gallery', 'image_type'],  # <-- додано image_type
-    extra=3,
+    fields=['image', 'gallery', 'image_type'],
+    extra=1,
     can_delete=True,
 )
 
@@ -88,10 +86,10 @@ class BannerForm(forms.ModelForm):
             if commit:
                 banner.save()
 
-                # Обробляємо зображення
+
                 main_picture_file = self.cleaned_data.get('main_picture')
                 if main_picture_file:
-                    # Спробуємо знайти картинку з типом 'main_picture'
+
                     picture = banner.gallery.pictures.filter(image_type='main_picture').first()
                     if not picture:
                         picture = Picture(gallery=banner.gallery, image_type='main_picture')
@@ -120,7 +118,7 @@ class NewsForm(forms.ModelForm):
         if commit:
             news.save()
 
-            # Зберігаємо зображення
+
             main_picture_file = self.cleaned_data.get('main_picture')
             if main_picture_file:
                 picture = news.gallery.pictures.filter(image_type='main_picture').first()
