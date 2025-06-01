@@ -3,13 +3,15 @@ from django.db.models import Count
 from django.utils import timezone
 from movie.models import Movies
 from users.models import User
+from django.urls import reverse
+
 
 from django.forms import formset_factory
 from main.models import Gallery, Banners, Cross_Banner, News
 from core.models import Cinemas, Halls, Sessions, Seats, Tickets
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .forms import (BlockSEOForm, MovieForm, PictureFormSet, GalleryForm, CinemaForm, HallsForm, SessionsForm,
-                    TicketForm,SeatForm,   BannersFormSet,  NewsFormSet,  PictureForm, UserForm, SessionFormSet , Picture,  CrossBannerForm , modelformset_factory)
+                    TicketForm,SeatForm, PictureFormSet1,  BannersFormSet,  NewsFormSet,  PictureForm, UserForm, SessionFormSet , Picture,  CrossBannerForm , modelformset_factory)
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpRequest, HttpResponse
 from django.template.loader import render_to_string
@@ -24,20 +26,8 @@ def index(request):
     movie_count = Movies.objects.count()
     today = timezone.now().date()
     date_from = today - timezone.timedelta(days=30)
-    ticket_sales = Tickets.objects.filter(
-
-        session__date__gte=date_from,
-        session__date__lte=today
-    ).values(
-
-        'session__date'
-    ).annotate(
-
-        count=Count('id')
-    ).order_by(
-
-        'session__date'
-    )
+    ticket_sales = (Tickets.objects.filter(session__date__gte=date_from,session__date__lte=today).
+                    values('session__date').annotate(count=Count('id')).order_by('session__date' ))
     chart_labels = [item['session__date'].strftime('%Y-%m-%d') for item in ticket_sales]
     chart_data = [item['count'] for item in ticket_sales]
     knob_data = {
@@ -87,6 +77,7 @@ def movie_list(request):
 
 @staff_member_required
 def add_movie(request, movie_id=None):
+
     movie_instance = None
     block_seo_instance = None
     gallery_instance = None
@@ -103,14 +94,9 @@ def add_movie(request, movie_id=None):
         block_seo_form = BlockSEOForm(request.POST, instance=block_seo_instance)
         movie_form = MovieForm(request.POST, instance=movie_instance)
         gallery_form = GalleryForm(request.POST, instance=gallery_instance)
-        picture_formset = PictureFormSet(
-            request.POST,
-            request.FILES,
-            instance=gallery_instance,
-            prefix='pictures'
-        )
+        picture_formset = PictureFormSet1( request.POST, request.FILES, instance=gallery_instance, prefix='pictures' )
         main_picture_form = PictureForm(request.POST, request.FILES, prefix='main_picture_form', initial={
-            'image_type': 'main_picture', 'gallery': gallery_instance})
+                                                        'image_type': 'main_picture', 'gallery': gallery_instance})
 
         if block_seo_form.is_valid() and movie_form.is_valid() and gallery_form.is_valid() and picture_formset.is_valid() and main_picture_form.is_valid():
             block_seo_instance = block_seo_form.save()
@@ -159,7 +145,7 @@ def add_movie(request, movie_id=None):
         block_seo_form = BlockSEOForm(instance=block_seo_instance)
         movie_form = MovieForm(instance=movie_instance)
         gallery_form = GalleryForm(instance=gallery_instance)
-        picture_formset = PictureFormSet(
+        picture_formset = PictureFormSet1(
             instance=gallery_instance,
             prefix='pictures'
         )
@@ -202,11 +188,11 @@ def cinema_list(request):
 
 @staff_member_required
 def add_cinema_create(request, cinema_id=None):
-
-
     cinema_instance = None
     block_seo_instance = None
     gallery_instance = None
+
+
 
     if cinema_id is not None:
         cinema_instance = get_object_or_404(Cinemas, pk=cinema_id)
@@ -215,43 +201,84 @@ def add_cinema_create(request, cinema_id=None):
 
         if gallery_instance is None:
             gallery_instance = Gallery.objects.create()
+    else:
+        gallery_instance = Gallery.objects.create()
 
     if request.method == 'POST':
-
-        block_seo_form = BlockSEOForm(request.POST, instance=block_seo_instance)
         cinema_form = CinemaForm(request.POST, instance=cinema_instance)
+        block_seo_form = BlockSEOForm(request.POST, instance=block_seo_instance)
         gallery_form = GalleryForm(request.POST, instance=gallery_instance)
-        picture_formset = PictureFormSet(request.POST, request.FILES, instance=gallery_instance)
 
-        print("POST DATA:", request.POST)
-        print("block_seo_form errors:", block_seo_form.errors)
-        print("cinema_form errors:", cinema_form.errors)
-        print("gallery_form errors:", gallery_form.errors)
-        print("picture_formset errors:", picture_formset.errors)
+        picture_formset = PictureFormSet1(request.POST, request.FILES,
+                                         queryset=Picture.objects.filter(gallery=gallery_instance),
+                                         prefix='pictures')
 
-        if block_seo_form.is_valid() and cinema_form.is_valid() and gallery_form.is_valid() and picture_formset.is_valid():
+        logo_form = PictureForm(request.POST, request.FILES, prefix='logo')
+        banner_form = PictureForm(request.POST, request.FILES, prefix='banner')
+
+        if (cinema_form.is_valid() and block_seo_form.is_valid() and gallery_form.is_valid()
+                and picture_formset.is_valid() and logo_form.is_valid() and banner_form.is_valid()):
+
+            # Save related objects
             block_seo_instance = block_seo_form.save()
             gallery_instance = gallery_form.save()
 
+            # Save cinema
             cinema_instance = cinema_form.save(commit=False)
             cinema_instance.seo_block = block_seo_instance
             cinema_instance.gallery = gallery_instance
-
             if cinema_id is None and not cinema_instance.date:
                 cinema_instance.date = timezone.now().date()
-
             cinema_instance.save()
 
-            picture_formset.instance = gallery_instance
-            picture_formset.save()
+            # Save logo
+            logo_instance = logo_form.save(commit=False)
+            logo_instance.gallery = gallery_instance
+            logo_instance.image_type = 'logo'
+            logo_instance.save()
+
+            # Save banner
+            banner_instance = banner_form.save(commit=False)
+            banner_instance.gallery = gallery_instance
+            banner_instance.image_type = 'main_picture'
+            banner_instance.save()
+
+            # Save gallery pictures
+            pictures = picture_formset.save(commit=False)
+            for picture in pictures:
+                picture.gallery = gallery_instance
+                picture.image_type = 'gallery'
+                picture.save()
+            picture_formset.save_m2m()
 
             return redirect('cinema_lists')
-    else:
 
-        block_seo_form = BlockSEOForm(instance=block_seo_instance)
+        else:
+            print("Form Errors:")
+            print("cinema_form:", cinema_form.errors)
+            print("seo_form:", block_seo_form.errors)
+            print("gallery_form:", gallery_form.errors)
+            print("picture_formset:", picture_formset.errors)
+            print("logo_form:", logo_form.errors)
+            print("banner_form:", banner_form.errors)
+
+    else:
         cinema_form = CinemaForm(instance=cinema_instance)
+        block_seo_form = BlockSEOForm(instance=block_seo_instance)
         gallery_form = GalleryForm(instance=gallery_instance)
-        picture_formset = PictureFormSet(instance=gallery_instance)
+
+        picture_formset = PictureFormSet1(
+            queryset=Picture.objects.filter(gallery=gallery_instance),
+            prefix='pictures'
+        )
+
+        # ok to prefill preview
+        logo_instance = Picture.objects.filter(gallery=gallery_instance, image_type='logo').first()
+        banner_instance = Picture.objects.filter(gallery=gallery_instance, image_type='main_picture').first()
+        logo_form = PictureForm(instance=logo_instance, prefix='logo')
+        banner_form = PictureForm(instance=banner_instance, prefix='banner')
+
+    halls = Halls.objects.filter(cinema=cinema_instance) if cinema_instance else Halls.objects.none()
 
     return render(request, 'admin/cinema/add_cinema.html', {
         'block_seo_form': block_seo_form,
@@ -259,7 +286,10 @@ def add_cinema_create(request, cinema_id=None):
         'gallery_form': gallery_form,
         'picture_formset': picture_formset,
         'cinema': cinema_instance,
-        'form': cinema_form,  # Якщо потрібно для заголовка сторінки
+        'form': cinema_form,
+        'logo_form': logo_form,
+        'banner_form': banner_form,
+        'halls': halls,
     })
 
 @staff_member_required
@@ -286,7 +316,7 @@ def halls_list(request):
         return render(request, 'admin/halls/halls_lists.html', context)
 
 @staff_member_required
-def add_halls_create(request, halls_id=None):
+def add_halls_create(request,   halls_id=None):
     halls_instance = None
     block_seo_instance = None
     gallery_instance = None
@@ -327,7 +357,7 @@ def add_halls_create(request, halls_id=None):
             picture_formset.instance = gallery_instance
             picture_formset.save()
 
-            return redirect('halls_lists')
+            return redirect( 'cinema_lists')
     else:
         # Ініціалізуємо форми без даних POST
         block_seo_form = BlockSEOForm(instance=block_seo_instance)

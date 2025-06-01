@@ -1,34 +1,29 @@
-{# gallery_form.html #}
 
-
-
-
-
-                            {% for form in picture_formset %}
-<div id="gallery-formset">
-                                <div class="gallery-image-form border p-3 mb-3">
-                                {{ form.id }}
-                                {% if form.non_field_errors %}...{% endif %}
-
-                                <div class="form-group">
-                                    {{ form.image_type.label_tag }}
-                                    {{ form.image_type }}
-                                    {% if form.image_type.help_text %}...{% endif %}
-                                    {% for error in form.image_type.errors %}...{% endfor %}
-                                </div>
-                                 <div class="form-group">
-                                    {{ form.image.label_tag }}
-                                     {% if form.instance.pk and form.instance.image %}...{% endif %}
-                                     {{ form.image }}
-                                    {% if form.image.help_text %}...{% endif %}
-                                    {% for error in form.image.errors %}...{% endfor %}
-                                </div>
-
-                                {# Поле DELETE #}
-                                <div class="form-group form-check">
-                                     {{ form.DELETE }} {{ form.DELETE.label_tag }}
-                                     {% for error in form.DELETE.errors %}...{% endfor %}
-                                </div>
+                            <div id="pictures-formset">
+                                {% for form in picture_formset %}
+                                    <div class="gallery-image-form border p-3 mb-3">
+                                        <div style="display: none;">{{ form.id }}</div>
+                                        {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+                                        <div class="form-group">
+                                            {{ form.image.label_tag }}
+                                            {% if form.instance.pk and form.instance.image %}
+                                                <img src="{{ form.instance.image.url }}" alt="Поточне зображення" style="max-width: 100px; max-height: 100px; margin-bottom: 10px;">
+                                            {% endif %}
+                                            {{ form.image }}
+                                            {% if form.image.help_text %}<small class="form-text text-muted">{{ form.image.help_text }}</small>{% endif %}
+                                            {% for error in form.image.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                                        </div>
+                                        <div class="form-group form-check">
+                                            {{ form.DELETE }}
+                                            {{ form.DELETE.label_tag }}
+                                            {% for error in form.DELETE.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                                        </div>
+                                        <div style="display: none;">{{ form.image_type.label_tag }} {{ form.image_type }}</div>
+                                        <div class="form-group" style="display: none;">
+                                            <label for="{{ form.prefix }}-gallery">Gallery:</label>
+                                            {{ form.gallery }}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                                {{ picture_formset.empty_form }}
                             </div>
-                           {% endfor %}
-                        </div>

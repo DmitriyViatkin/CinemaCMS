@@ -1,0 +1,22 @@
+<div class="banner-form border p-3 mb-3">
+    {% for field in banner_form %}
+        {% if field.name == 'image' %}
+            <div class="form-group">
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.errors %}
+                    <div class="alert alert-danger">{{ field.errors }}</div>
+                {% endif %}
+                <div class="image-preview" style="max-width: 200px; max-height: 200px; margin-top: 10px;">
+                    {% if banner_form.instance.baner_picture %}
+                        <img src="{{ banner_form.instance.baner_picture.url }}" style="max-width: 100%; max-height: 100%;">
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    {% endfor %}
+    {% for hidden in banner_form.hidden_fields %}
+        {{ hidden }}
+    {% endfor %}
+</div>
+

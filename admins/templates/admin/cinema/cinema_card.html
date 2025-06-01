@@ -10,11 +10,9 @@
 
   <div class="card-body d-flex flex-column">
     <h5 class="card-title">{{ cinema.title }}</h5>
-    <p class="card-text">{{ cinema.description|truncatewords:25 }}</p>
+
     <a href="{% url 'add_cinema_edit' cinema.id %}" class="btn btn-primary mt-auto">Детальніше</a>
   </div>
 
-  <div class="card-footer text-muted">
-    {{ cinema.city }}
-  </div>
+
 </div>

@@ -55,7 +55,7 @@ PictureFormSet = modelformset_factory(
     model=Picture,
     form=PictureForm,
     fields=['image', 'gallery', 'image_type'],
-    extra=1,
+    extra=0,
     can_delete=True,
 )
 
@@ -213,18 +213,10 @@ class MovieForm(forms.ModelForm):
         }
 
 
-PictureFormSet1 = inlineformset_factory(
-    Gallery,
-    Picture,
-    form=PictureForm,
-    fields=('image_type', 'image',),
-    extra=0,
-    max_num=10,
-    can_delete=True )
 
 PICTURE_TYPE_DEFAULT = 'gallery'
 
-PictureFormSet = inlineformset_factory(
+PictureFormSet1 = inlineformset_factory(
     Gallery,
     Picture,
     form=PictureForm,
@@ -233,36 +225,6 @@ PictureFormSet = inlineformset_factory(
     max_num=10,
     can_delete=True,)
 
-class TopBannerForm(forms.Form):
-
-    def __init__(self, data=None, files=None, prefix=None, instance=None, **kwargs):
-        super().__init__(data=data, files=files, prefix=prefix, **kwargs)
-
-        self.prefix = prefix
-        self.gallery_instance = instance.get('gallery') if instance else None
-        self.banner_instance = instance.get('banner') if instance else None
-        self.picture_inctance = instance.get('picture') if instance else None
-
-        self.banner_form = BannerForm(data=data, prefix=f'{prefix}-banner', instance=self.banner_instance)
-        self.picture_form = PictureForm(data = data, prefix = f'{prefix}-picture', instance=self.picture_inctance)
-
-    def is_valid(self):
-        return self.banner_form.is_valid() and self.picture_form.is_valid()
-
-    def save(self):
-        gallery = Gallery.objects.create()
-
-        banner = self.banner_form.save(commit=False)
-        banner.gallery = gallery
-        banner.save()
-
-        picture = self.picture_form.save(commit=False)
-        picture.gallery = gallery
-        picture.image_type = 'gallery'
-        picture.save()
-
-    def as_p(self):
-        return self.banner_form.as_p() + self.picture_form.as_p()
 
 
 

@@ -1,18 +1,19 @@
 {% extends 'admin/index.html' %}
-
-{% block title %}Список кінотеатрів{% endblock %} {# Змінено заголовок сторінки #}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/cinema.css' %}">
+{% block title %}Список кінотеатрів{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="container mt-5 position-relative"> {# Додаємо position-relative для контейнера #}
   <h2 class="mb-4 text-center">Список кінотеатрів</h2>
 
   {% if cinemas %}
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
       {% for cinema in cinemas %}
-  <div class="col">
-    {% include 'admin/cinema/cinema_card.html' with cinema=cinema %}
-  </div>
-{% endfor %}
+        <div class="col">
+          {% include 'admin/cinema/cinema_card.html' with cinema=cinema %}
+        </div>
+      {% endfor %}
     </div>
 
     {% if cinemas.has_other_pages %}
@@ -46,5 +47,10 @@
   {% else %}
     <p class="text-center text-muted">Немає доступних кінотеатрів.</p>
   {% endif %}
+<br>
+<a href="{% url 'add_cinema_create' %}" class="add-cinema-button" style="display: inline-flex; align-items: center; text-decoration: none; cursor: pointer; border: none; background: none;">
+    <img src="{% static 'images/plus.svg' %}" alt="Додати кінотеатр" width="200" height="200" style="vertical-align: middle;">
+    <span class="add-text" style="margin-left: 5px; vertical-align: middle;"> Додати кінотеатр </span>
+</a>
 </div>
 {% endblock %}

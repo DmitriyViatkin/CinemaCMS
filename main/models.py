@@ -32,7 +32,8 @@ class Gallery(models.Model):
 class Picture(models.Model):
     id = models.AutoField(primary_key=True)
     gallery = models.ForeignKey(Gallery, related_name='pictures', on_delete=models.CASCADE, verbose_name='Галерея')
-    image_type = models.CharField(max_length=20, choices=[('main_picture', 'Главное изображение'), ('gallery', 'Галерея')],
+    image_type = models.CharField(max_length=20, choices=[('main_picture', 'Главное изображение'), ('gallery', 'Галерея'),
+                                                          ('logo', 'Лого')],
         verbose_name='Тип зображення')
     image = models.ImageField(upload_to='images/', verbose_name='Зображення')
 
@@ -149,7 +150,7 @@ class Gallery(models.Model):
 class Picture(models.Model):
     id = models.AutoField(primary_key=True)
     gallery = models.ForeignKey(Gallery, related_name='pictures', on_delete=models.CASCADE, verbose_name='Галерея')
-    image_type = models.CharField(max_length=20, choices=[('main_picture', 'Главное изображение'), ('gallery', 'Галерея')],
+    image_type = models.CharField(max_length=20, choices=[('main_picture', 'Головне зображення'), ('gallery', 'Галерея'), ('logo', 'Логотип')],
         verbose_name='Тип зображення')
     image = models.ImageField(upload_to='images/', verbose_name='Зображення')
 
