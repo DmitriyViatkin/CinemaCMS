@@ -3,10 +3,10 @@ from django.db.models import Count
 from django.utils import timezone
 from movie.models import Movies
 from users.models import User
-from django.urls import reverse
+
+from django.db.models import Prefetch
 
 
-from django.forms import formset_factory
 from main.models import Gallery, Banners, Cross_Banner, News
 from core.models import Cinemas, Halls, Sessions, Seats, Tickets
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -15,9 +15,7 @@ from .forms import (BlockSEOForm, MovieForm, PictureFormSet, GalleryForm, Cinema
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpRequest, HttpResponse
 from django.template.loader import render_to_string
-from django.contrib import messages
 
-from datetime import timedelta
 
 @staff_member_required
 def index(request):
@@ -172,19 +170,17 @@ def delete_movie(request, pk):
 
 @staff_member_required
 def cinema_list(request):
-    cinemas_list = Cinemas.objects.select_related('gallery').prefetch_related('gallery__pictures').order_by('title')
-
+    cinemas_list = Cinemas.objects.select_related('gallery').prefetch_related(
+        Prefetch(
+            'gallery__pictures',
+            queryset=Picture.objects.filter(image_type='logo'),
+            to_attr='logos'
+        )
+    ).order_by('title')
     paginator = Paginator(cinemas_list, 10)
-    page = request.GET.get('page')
-    try:
-        cinemas = paginator.page(page)
-    except PageNotAnInteger:
-        cinemas = paginator.page(1)
-    except EmptyPage:
-        cinemas = paginator.page(paginator.num_pages)
-
-    context = {'cinemas': cinemas}
-    return render(request, 'admin/cinema/cinema_list.html', context)
+    page_number = request.GET.get('page')
+    cinemas = paginator.get_page(page_number)
+    return render(request, 'admin/cinema/cinema_list.html', {'cinemas': cinemas})
 
 @staff_member_required
 def add_cinema_create(request, cinema_id=None):
