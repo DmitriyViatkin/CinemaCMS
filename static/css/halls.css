@@ -1,0 +1,76 @@
+.upload-section {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.upload-section > div:first-child { /* Стиль для напису */
+  margin-right: 10px;
+}
+
+.image-preview-container {
+  border: 1px solid #ccc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 10px;
+}
+
+.image-preview-container img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.image-preview-container > div { /* Стиль для тексту "Прев'ю" */
+  font-size: 12px;
+  color: #999;
+  text-align: center;
+}
+
+.upload-section button {
+  margin-left: 5px;
+}
+
+.upload-section button:first-of-type {
+  margin-left: 10px;
+}
+#pictures-formset {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin-bottom: 10px;
+}
+
+.gallery-image-item {
+    flex: 0 0 auto;
+    width: 120px;
+    margin-right: 10px;
+}
+
+.gallery-image-item img {
+    max-width: 100%;
+    max-height: 80px;
+    margin-bottom: 5px;
+    display: block;
+    object-fit: contain; /* Щоб картинка повністю вміщувалася без обрізання */
+}
+
+.gallery-image-item label {
+    display: block;
+    font-size: 10px;
+    margin-bottom: 2px;
+}
+
+.gallery-image-item input[type="file"] {
+    width: 100%;
+    font-size: 10px;
+}
+
+.gallery-image-item .form-check {
+    margin-top: 5px;
+}
+
+.gallery-image-item .form-check-label {
+    font-size: 10px;
+}

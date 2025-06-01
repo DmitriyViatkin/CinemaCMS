@@ -329,7 +329,9 @@ def add_halls_create(request,   halls_id=None):
         block_seo_form = BlockSEOForm(request.POST, instance=block_seo_instance)
         halls_form = HallsForm(request.POST, instance=halls_instance)  # Тут використовуємо HallsForm
         gallery_form = GalleryForm(request.POST, instance=gallery_instance)
-        picture_formset = PictureFormSet(request.POST, request.FILES, instance=gallery_instance)
+        picture_formset = PictureFormSet1(request.POST, request.FILES, instance=gallery_instance, prefix='pictures')
+        logo_form = PictureForm(request.POST, request.FILES, prefix='logo')
+        banner_form = PictureForm(request.POST, request.FILES, prefix='banner')
 
         print("POST DATA:", request.POST)
         print("block_seo_form errors:", block_seo_form.errors)
@@ -350,6 +352,17 @@ def add_halls_create(request,   halls_id=None):
 
             halls_instance.save()
 
+            logo_instance = logo_form.save(commit=False)
+            logo_instance.gallery = gallery_instance
+            logo_instance.image_type = 'logo'
+            logo_instance.save()
+
+            # Save banner
+            banner_instance = banner_form.save(commit=False)
+            banner_instance.gallery = gallery_instance
+            banner_instance.image_type = 'main_picture'
+            banner_instance.save()
+
             picture_formset.instance = gallery_instance
             picture_formset.save()
 
@@ -359,7 +372,11 @@ def add_halls_create(request,   halls_id=None):
         block_seo_form = BlockSEOForm(instance=block_seo_instance)
         halls_form = HallsForm(instance=halls_instance)  # Тепер правильна форма
         gallery_form = GalleryForm(instance=gallery_instance)
-        picture_formset = PictureFormSet(instance=gallery_instance)
+        picture_formset = PictureFormSet1(instance=gallery_instance)
+        logo_instance = Picture.objects.filter(gallery=gallery_instance, image_type='logo').first()
+        banner_instance = Picture.objects.filter(gallery=gallery_instance, image_type='main_picture').first()
+        logo_form = PictureForm(instance=logo_instance, prefix='logo')
+        banner_form = PictureForm(instance=banner_instance, prefix='banner')
 
     return render(request, 'admin/halls/add_halls.html', {
         'block_seo_form': block_seo_form,
@@ -367,7 +384,9 @@ def add_halls_create(request,   halls_id=None):
         'gallery_form': gallery_form,
         'picture_formset': picture_formset,
         'halls': halls_instance,
-        'form': halls_form,  # Якщо потрібно для заголовка сторінки
+        'form': halls_form,
+        'logo_form':logo_form,
+        'banner_form': banner_form
     })
 
 @staff_member_required

@@ -5,7 +5,8 @@
 {% block title %}
     {% if cinema %}Редагувати кінотеатр{% else %}Додати кінотеатр{% endif %}
 {% endblock %}
-<script src="{% static 'admins/js/add_btn.js' %}"></script>
+<script src="{% static 'js/halls.js' %}"></script>
+<link rel="stylesheet" href="{% static 'css/halls.css' %}">
 {% block content %}
 
 <h1>{% if cinema %}Редагувати залл: {{ cinema.title }}{% else %}Додати новий заллр{% endif %}</h1>
@@ -38,33 +39,88 @@
                             {% include 'admin/card_forms/halls_form.html'%}
 
 
-                            <h2>SEO Інформація</h2>
+
+                        <br>
+                                   <h2>Схема зала</h2>
+<div class="main-picture-form">
+    <div class="image-preview" style="width: 200px; height: 200px; overflow: hidden; display: flex; justify-content: center; align-items: center;">
+      {% if logo_form.instance.image %}
+        <img src="{{ logo_form.instance.image.url }}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+      {% else %}
+        <div style="font-size: 12px; color: #999; text-align: center;">Прев'ю</div>
+      {% endif %}
+    </div>
+    {{ logo_form.image }}
+    <input type="hidden" name="{{ logo_form.prefix }}-image_type" value="logo">
+</div>
+
+<h2>Верхній Баннер</h2>
+<div class="banner-form">
+    <div class="image-preview" style="width: 200px; height: 200px; overflow: hidden; display: flex; justify-content: center; align-items: center;">
+      {% if banner_form.instance.image %}
+        <img src="{{ banner_form.instance.image.url }}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+      {% else %}
+        <div style="font-size: 12px; color: #999; text-align: center;">Прев'ю</div>
+      {% endif %}
+    </div>
+    {{ banner_form.image }}
+    <input type="hidden" name="{{ banner_form.prefix }}-image_type" value="main_picture">
+</div>
+<br>
+                             <h3>Картинки галереї</h3>
+
+                                <div id="pictures-formset" style="display: flex; flex-wrap: nowrap; overflow-x: auto;">
+                                    {{ picture_formset.management_form }}
+                                    {% for form in picture_formset %}
+                                        <div class="gallery-image-item border p-2 mr-2" style="flex: 0 0 auto; width: 120px;">
+                                            <div style="display: none;">{{ form.id }}</div>
+                                            {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+                                            <div class="form-group">
+                                                <label for="{{ form.prefix }}-image" style="display: block; font-size: 10px;">{{ form.image.label }}</label>
+                                                {% if form.instance.pk and form.instance.image %}
+                                                    <img src="{{ form.instance.image.url }}" alt="Поточне зображення" style="max-width: 100%; max-height: 80px; margin-bottom: 5px; display: block;">
+                                                {% else %}
+                                                    <div style="width: 100%; height: 80px; border: 1px dashed #ccc; display: flex; justify-content: center; align-items: center; font-size: 10px; color: #777;">Прев'ю</div>
+                                                {% endif %}
+                                                {{ form.image }}
+                                                {% for error in form.image.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                                            </div>
+                                            <div class="form-group form-check">
+                                                {{ form.DELETE }}
+                                                <label class="form-check-label" for="{{ form.prefix }}-DELETE" style="font-size: 10px;">Видалити</label>
+                                                {% for error in form.DELETE.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                                            </div>
+                                            <div style="display: none;">{{ form.image_type }}</div>
+                                            <div style="display: none;">{{ form.gallery }}</div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+
+                                <button id="add-picture-form" type="button" class="btn btn-success mt-2">Додати ще одне зображення</button>
+
+                                <template id="empty-picture-template">
+                                    <div class="gallery-image-item border p-2 mr-2" style="flex: 0 0 auto; width: 120px;">
+                                        <div style="width: 100%; height: 80px; border: 1px dashed #ccc; display: flex; justify-content: center; align-items: center; font-size: 10px; color: #777;">Додати</div>
+                                        <div class="form-group">
+                                            <label for="__prefix__-image" style="display: block; font-size: 10px;">Зображення</label>
+                                            <input type="file" name="__prefix__-image" id="__prefix__-image">
+                                        </div>
+                                        <div class="form-group form-check">
+                                            <input type="checkbox" name="__prefix__-DELETE" class="form-check-input" id="__prefix__-DELETE">
+                                            <label class="form-check-label" for="__prefix__-DELETE" style="font-size: 10px;">Видалити</label>
+                                        </div>
+                                        <input type="hidden" name="__prefix__-image_type" id="__prefix__-image_type">
+                                        <input type="hidden" name="__prefix__-gallery" id="__prefix__-gallery">
+                                    </div>
+                                </template>
+
+                           <br>
+                        <h2>SEO Інформація</h2>
                             {# Включаємо шаблон-фрагмент для полів форми SEO #}
                             {% include 'admin/card_forms/seo_form.html' with form=block_seo_form %}
 
 
-                             <h3>Картинки галереї</h3>
-
-                       <div id="gallery-formset">
-                           <input type="hidden" name="form-TOTAL_FORMS" value="1" id="id_form-TOTAL_FORMS">
-                            <input type="hidden" name="form-INITIAL_FORMS" value="0" id="id_form-INITIAL_FORMS">
-                            <input type="hidden" name="form-MIN_NUM_FORMS" value="0" id="id_form-MIN_NUM_FORMS">
-                            <input type="hidden" name="form-MAX_NUM_FORMS" value="1000" id="id_form-MAX_NUM_FORMS">
-                            {{ picture_formset.management_form }}
-                            {% for form in picture_formset %}
-                                {% include 'admin/card_forms/gallery_form.html' with form=form %}
-                            {% endfor %}
-                        </div>
-
-                        <button id="add-picture-form" type="button" class="btn btn-success mt-2">Додати ще одне зображення</button>
-
-                        <template id="empty-picture-form">
-                            {% include 'admin/card_forms/gallery_form.html' with form=picture_formset.empty_form %}
-                        </template>
-
-                    </div> {# Кінець card-body #}
-
-                        </div> {# Кінець card-body #}
+            </div>
 
                         <div class="card-footer">
 
@@ -79,5 +135,6 @@
         </div>
     </div>
 </section>
-<script src="{% static 'js/add_btn.js' %}"></script>
+<script src="{% static 'js/halls.js' %}"></script>
+
 {% endblock %}

@@ -221,7 +221,7 @@ PictureFormSet1 = inlineformset_factory(
     Picture,
     form=PictureForm,
     fields=('image',),
-    extra=0,
+    extra=1,
     max_num=10,
     can_delete=True,)
 
