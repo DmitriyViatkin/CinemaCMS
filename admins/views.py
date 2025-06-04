@@ -7,11 +7,11 @@ from users.models import User
 from django.db.models import Prefetch
 
 
-from main.models import Gallery, Banners, Cross_Banner, News, PaigesNews
+from main.models import Gallery, Banners, Cross_Banner, News, PaigesNews, Promotion
 from core.models import Cinemas, Halls, Sessions, Seats, Tickets
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .forms import (PaigesNewsForm,BlockSEOForm, MovieForm, PictureFormSet, GalleryForm, CinemaForm, HallsForm, SessionsForm,
-                    TicketForm,SeatForm, PictureFormSet1,  BannersFormSet,  NewsFormSet,  PictureForm, UserForm, SessionFormSet , Picture,  CrossBannerForm , modelformset_factory)
+                    TicketForm,SeatForm, PictureFormSet1,PromotionForm,  BannersFormSet,  NewsFormSet,  PictureForm, UserForm, SessionFormSet , Picture,  CrossBannerForm , modelformset_factory)
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpRequest, HttpResponse
 from django.template.loader import render_to_string
@@ -916,6 +916,172 @@ def news_paige_add(request, news_id=None):
 
 @staff_member_required
 def news_paige_delete(request, news_id):
+    news = get_object_or_404(PaigesNews, pk=news_id)
+    if request.method=='POST':
+        news.delete()
+
+    return redirect('news')
+
+@staff_member_required
+def promotion_paige(request):
+    promotion_list_all = Promotion.objects.all().order_by('-date')
+    paginator = Paginator(promotion_list_all, 10)
+    page_number = request.GET.get('page')
+    print(promotion_list_all)
+
+    try:
+        promotion_page = paginator.page(page_number)
+    except PageNotAnInteger:
+        promotion_page = paginator.page(1)
+    except EmptyPage:
+        promotion_page = paginator.page(paginator.num_pages)
+    context = {'promotions': promotion_page}
+    return render(request, 'admin/promotion/promotion_list.html', context)
+
+@staff_member_required
+def  promotion_paige_add(request, promotion_id=None):
+    promotion_instance = None
+    block_seo_instance = None
+    gallery_instance = None
+
+    current_main_picture_object = None
+
+    if promotion_id:
+        promotion_instance = get_object_or_404(PaigesNews, pk=promotion_id)
+        block_seo_instance = promotion_instance.seo_block
+        gallery_instance = promotion_instance.gallery
+
+        if gallery_instance is None:
+            gallery_instance = Gallery.objects.create()
+            promotion_instance.gallery = gallery_instance
+            promotion_instance.save()
+
+
+        current_main_picture_object = gallery_instance.pictures.filter(image_type='main_picture').first()
+
+
+    if gallery_instance is None:
+        gallery_instance = Gallery.objects.create()  # Создаем новую галерею
+
+
+    if request.method=='POST':
+        block_seo_form = BlockSEOForm(request.POST, instance=block_seo_instance)
+        promotion_form = PromotionForm(request.POST, instance=promotion_instance)
+        gallery_form = GalleryForm(request.POST, instance=gallery_instance)
+
+
+        picture_formset = PictureFormSet(
+            request.POST,
+            request.FILES,
+            queryset=Picture.objects.filter(gallery=gallery_instance).exclude(pk=current_main_picture_object.pk) if current_main_picture_object else Picture.objects.filter(gallery=gallery_instance),
+            prefix='pictures', initial=[{'image_type': 'gallery_image'}]
+        )
+
+        main_picture_form = PictureForm(request.POST, request.FILES, instance=current_main_picture_object, prefix='main_picture_form')
+
+
+        if f'{main_picture_form.prefix}-image_type' not in request.POST:
+            main_picture_form.data = main_picture_form.data.copy()
+            main_picture_form.data[f'{main_picture_form.prefix}-image_type'] = 'main_picture'
+
+        if f'{main_picture_form.prefix}-gallery' not in request.POST and gallery_instance.pk:
+            main_picture_form.data = main_picture_form.data.copy()
+            main_picture_form.data[f'{main_picture_form.prefix}-gallery'] = gallery_instance.pk
+
+
+
+        if (block_seo_form.is_valid() and
+                promotion_form.is_valid() and
+                gallery_form.is_valid() and
+                picture_formset.is_valid() and
+                main_picture_form.is_valid()):
+
+            block_seo_saved = block_seo_form.save()
+            gallery_saved = gallery_form.save()
+
+            promotion_saved = promotion_form.save(commit=False)
+            promotion_saved.seo_block = block_seo_saved
+            promotion_saved.gallery = gallery_saved
+            promotion_saved.save()
+
+
+            if main_picture_form.cleaned_data.get('image'):
+                main_picture_saved = main_picture_form.save(commit=False)
+                main_picture_saved.gallery = gallery_saved
+                main_picture_saved.image_type = 'main_picture'
+                main_picture_saved.save()
+
+                if current_main_picture_object and current_main_picture_object.pk!=main_picture_saved.pk:
+                    current_main_picture_object.delete()
+
+            elif main_picture_form.cleaned_data.get('DELETE') and current_main_picture_object:
+                current_main_picture_object.delete()
+
+
+            instances = picture_formset.save(commit=False)
+            for picture in instances:
+                if not picture.pk:
+                    picture.gallery = gallery_saved
+                    if not picture.image_type:
+                        picture.image_type = 'gallery_image'
+                picture.save()
+
+
+            for picture in picture_formset.deleted_objects:
+                picture.delete()
+
+            return redirect('promotion')
+
+        else:
+
+            print("Ошибка валидации форм")
+            print("block_seo_form.errors:", block_seo_form.errors)
+            print("Promotion_form.errors:", promotion_form.errors)
+            print("gallery_form.errors:", gallery_form.errors)
+            print("picture_formset.errors:", picture_formset.errors)
+            print("main_picture_form.errors:", main_picture_form.errors)
+
+            return render(request, 'admin/promotion/add_promotion.html', {
+                'block_seo_form': block_seo_form,
+                'promotion_form': promotion_form,
+                'gallery_form': gallery_form,
+                'picture_formset': picture_formset,
+                'main_picture_form': main_picture_form,
+                'promotion': promotion_instance,
+                'is_edit': promotion_instance is not None,
+            })
+
+
+    else:
+        block_seo_form = BlockSEOForm(instance=block_seo_instance)
+        promotion_form = PaigesNewsForm(instance=promotion_instance)
+        gallery_form = GalleryForm(instance=gallery_instance)
+
+
+        picture_formset = PictureFormSet(
+            queryset=Picture.objects.filter(gallery=gallery_instance).exclude(pk=current_main_picture_object.pk) if current_main_picture_object else Picture.objects.filter(gallery=gallery_instance),
+            prefix='pictures'
+        )
+
+        main_picture_form = PictureForm(
+            instance=current_main_picture_object,
+            prefix='main_picture_form',
+            initial={'image_type': 'main_picture'}
+        )
+
+    return render(request, 'admin/promotion/add_promotion.html', {
+        'block_seo_form': block_seo_form,
+        'promotion_form': promotion_form,
+        'gallery_form': gallery_form,
+        'picture_formset': picture_formset,
+        'main_picture_form': main_picture_form,
+        'promotion': promotion_instance,
+        'is_edit': promotion_instance is not None,
+    })
+
+
+@staff_member_required
+def promotion_paige_delete(request, news_id):
     news = get_object_or_404(PaigesNews, pk=news_id)
     if request.method=='POST':
         news.delete()

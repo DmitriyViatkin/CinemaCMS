@@ -54,5 +54,10 @@ urlpatterns = [
     path('news/', views.news_paige, name='news'),
     path('news/add_news', views.news_paige_add, name='add_news'),
     path('news/<int:news_id>/edit/', views.news_paige_add, name='edit_news'),
-    path('news/<int:news_id>/delete_news/', views.news_paige_delete, name='delete_news')
+    path('news/<int:news_id>/delete_news/', views.news_paige_delete, name='delete_news'),
+
+    path('promotion/', views.promotion_paige, name='promotion'),
+    path('promotion/add_promotion', views.promotion_paige_add, name='add_promotion'),
+    path('promotion/<int:promotion_id>/edit/', views.promotion_paige_add, name='edit_promotion'),
+    path('promotion/<int:promotion_id>/delete_promotion/', views.promotion_paige_delete, name='delete_promotion')
 ]

@@ -1,0 +1,63 @@
+{% extends 'admin/index.html' %}
+
+{% block title %}Список акцій {% endblock %}
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="card-title mb-0">Список акцій</h3>
+                        <div class="card-tools">
+
+                            <a href="{% url 'add_promotion' %}" class="btn btn-success btn-sm">
+                                <i class="fas fa-plus"></i> Додати Акцію
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+
+                        <table id="promotion_Table" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Назва</th>
+                                    <th>Дата створення</th>
+                                    <th>Статус</th>
+                                </tr>
+                            </thead>
+
+                                {% for promotion in promotions %}
+                                <tr>
+                                    <td>{{ promotion.title }}</td>
+                                    <td>{{ promotion.date|date:"d.m.Y" }}</td>
+                                    <td>{{ promotion.is_active }}</td>
+                                    <td>
+
+                                       <a href="{% url 'edit_promotion' promotion.pk %}" class="btn btn-primary btn-sm">Редагувати</a>
+                                   <form action="{% url 'delete_promotion' promotion_id=promotion.pk %}" method="post" style="display:inline;">
+
+                                            {% csrf_token %}
+
+                                            <button type="submit" class="btn btn-danger btn-sm"
+                                                    onclick="return confirm('Ви впевнені, що хочете видалити користувача {{ promotion.title }}?');">
+                                                Видалити
+                                            </button>
+                                   </form>
+                                    </td>
+                                </tr>
+                                {% empty %}
+
+                                <tr>
+                                      <td colspan="7">Список користувачів порожній.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

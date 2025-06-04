@@ -1,0 +1,278 @@
+{% extends 'admin/index.html' %}
+{% load static %}
+{% block title %}Додати новину{% endblock %}
+
+{% block content %}
+
+
+<section class="content" >
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Додати новину</h3>
+                    </div>
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+
+                        {% if promotion_form.non_field_errors %}
+                            <div class="alert alert-danger">{{ news_form.non_field_errors }}</div>
+                        {% endif %}
+                        {% if block_seo_form.non_field_errors %}
+                            <div class="alert alert-danger">{{ block_seo_form.non_field_errors }}</div>
+                        {% endif %}
+                        {% if gallery_form.non_field_errors %}
+                            <div class="alert alert-danger">{{ gallery_form.non_field_errors }}</div>
+                        {% endif %}
+                        {% if picture_formset.non_form_errors %}
+                            <div class="alert alert-danger">{{ picture_formset.non_form_errors }}</div>
+                        {% endif %}
+                        {% if main_picture_form.non_field_errors %}
+                            <div class="alert alert-danger">{{ main_picture_form.non_field_errors }}</div>
+                        {% endif %}
+
+                        <div class="card-body">
+                            <h2>Інформація про новину</h2>
+
+                                        <div class="card-body">
+                  <div class="form-group">
+                        {{ promotion_form.title.label_tag }}
+                        {{ promotion_form.title }}
+                        {% if promotion_form.title.help_text %}<small class="form-text text-muted">{{ promotion_form.title.help_text }}</small>{% endif %}
+                        {% for error in promotion_form.title.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+
+                        {{ promotion_form.date.label_tag }}
+                        {{ promotion_form.date }}
+                        {% if promotion_form.date.help_text %}<small class="form-text text-muted">{{ promotion_form.date.help_text }}</small>{% endif %} {# ИСПРАВЛЕНО: добавлен пробел #}
+                        {% for error in promotion_form.date.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+
+                        {{ promotion_form.is_active.label_tag }}
+                        {{ promotion_form.is_active }}
+                        {% if promotion_form.is_active.help_text %}<small class="form-text text-muted">{{ promotion_form.gallery.help_text }}</small>{% endif %} {# ИСПРАВЛЕНО: добавлен пробел #}
+                        {% for error in promotion_form.is_active.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+
+
+                  </div>
+                </div>
+
+                <div class="card-body">
+                  <div class="form-group">
+                        {{ promotion_form.description.label_tag }}
+                        {{ promotion_form.description }}
+                        {% if promotion_form.description.help_text %}<small class="form-text text-muted">{{ news_form.description.help_text }}</small>{% endif %} {# ИСПРАВЛЕНО: добавлен пробел #}
+                        {% for error in promotion_form.description.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                  </div>
+                </div>
+
+                            <h3>Головна картинка</h3>
+               <div class="main-picture-form border p-3 mb-3" style="width: 400px; height: 200px;">
+
+                    {% for field in main_picture_form %}
+                       {% if field.name == 'image' %}
+                                         <div class="form-group">
+                                             {{ field.label_tag }}
+                                             {{ field }}
+                                             {% if field.errors %}
+                                                 <div class="alert alert-danger">{{ field.errors }}</div>
+                                             {% endif %}
+                                             <div class="image-preview" style="max-width: 200px; max-height: 200px; margin-top: 10px;">
+
+                                                 {% if promotion.main_picture and news.main_picture.image %}
+                                                     <img src="{{ news.main_picture.image.url }}" alt="Поточне головне зображення" style="max-width: 200px; max-height: 200px;">
+                                                 {% endif %}
+                                             </div>
+                                         </div>
+                                     {% elif field.name == 'DELETE' %}
+                                         <div class="form-group form-check">
+                                             {{ field }}
+                                             {{ field.label_tag }}
+                                             {% for error in field.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                                         </div>
+                                     {% else %}
+
+                                         {{ field }}
+                                     {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="card-body">
+                  <div class="form-group">
+                        {{ promotion_form.url_video.label_tag }}
+                        {{ promotion_form.url_video }}
+                        {% if promotion_form.url_video.help_text %}<small class="form-text text-muted">{{ promotion_form.url_video.help_text }}</small>{% endif %}
+                        {% for error in promotion_form.url_video.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                  </div>
+                </div>
+                            <h3>Картинки галереї</h3>
+                            {{ picture_formset.management_form }}
+                            <div id="pictures-formset">
+                                {% for form in picture_formset %}
+                                    <div class="gallery-image-form border p-3 mb-3">
+                                        {# Эти поля теперь будут скрыты благодаря HiddenInput в PictureForm #}
+                                        {{ form.id }}
+                                        {{ form.image_type }}
+                                        {{ form.gallery }}
+
+                                        {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+                                        <div class="form-group">
+                                            {{ form.image.label_tag }}
+                                            {% if form.instance.pk and form.instance.image %}
+                                                <img src="{{ form.instance.image.url }}" alt="Поточне зображення" style="max-width: 100px; max-height: 100px; margin-bottom: 10px;">
+                                            {% endif %}
+                                            {{ form.image }}
+                                            {% if form.image.help_text %}<small class="form-text text-muted">{{ form.image.help_text }}</small>{% endif %} {# ИСПРАВЛЕНО: добавлен пробел #}
+                                            {% for error in form.image.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                                            <div class="image-preview" style="max-width: 100px; max-height: 100px; margin-top: 10px;"></div>
+                                        </div>
+                                        <div class="form-group form-check">
+                                            {{ form.DELETE }}
+                                            {{ form.DELETE.label_tag }}
+                                            {% for error in form.DELETE.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                                        </div>
+                                        <button type="button" class="btn btn-danger mt-2 remove-form">Видалити</button>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <button id="add-picture-form" type="button" class="btn btn-success mt-2">Додати ще одне зображення</button>
+                        </div>
+                            <h2>SEO Інформація</h2>
+                            {% include 'admin/card_forms/seo_form.html' with form=block_seo_form %}
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary">Створити</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <div id="empty-form-template" style="display: none;">
+        {% for field in picture_formset.empty_form %}
+            {% if field.name == 'image' %}
+                <div class="form-group">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.help_text %}<small class="form-text text-muted">{{ field.help_text }}</small>{% endif %}
+                    {% for error in field.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                </div>
+                <div class="image-preview" style="max-width: 100px; max-height: 100px; margin-top: 10px;"></div>
+            {% elif field.name == 'DELETE' %}
+                <div class="form-group form-check">
+                    {{ field }}
+                    {{ field.label_tag }}
+                    {% for error in field.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                </div>
+            {% else %}
+
+                {{ field }}
+            {% endif %}
+        {% endfor %}
+        <button type="button" class="btn btn-danger mt-2 remove-form">Видалити</button>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Предварительный просмотр главной картинки
+            const mainPictureInput = document.querySelector('.main-picture-form input[type="file"]');
+            const mainPicturePreview = document.querySelector('.main-picture-form .image-preview');
+
+            if (mainPictureInput && mainPicturePreview) {
+                mainPictureInput.addEventListener('change', function() {
+                    previewImage(this, mainPicturePreview, 200, 200);
+                });
+            }
+
+            // Обработка формсета галереи
+            const addPictureFormButton = document.getElementById('add-picture-form');
+            const picturesFormsetContainer = document.getElementById('pictures-formset');
+            const emptyFormTemplate = document.getElementById('empty-form-template').innerHTML;
+            const totalForms = document.querySelector('#id_pictures-TOTAL_FORMS');
+            let formCount = picturesFormsetContainer.querySelectorAll('.gallery-image-form').length;
+
+            function updateFormIndices(formElement, newIndex) {
+                formElement.querySelectorAll('[id], [name], [for]').forEach(node => {
+                    if (node.id) {
+                        node.id = node.id.replace(/-\d+-/, `-${newIndex}-`);
+                        node.id = node.id.replace(/__prefix__/, newIndex);
+                    }
+                    if (node.name) {
+                        node.name = node.name.replace(/-\d+-/, `-${newIndex}-`);
+                        node.name = node.name.replace(/__prefix__/, newIndex);
+                    }
+                    if (node.tagName === 'LABEL' && node.htmlFor) {
+                        node.htmlFor = node.htmlFor.replace(/-\d+-/, `-${newIndex}-`);
+                        node.htmlFor = node.htmlFor.replace(/__prefix__/, newIndex);
+                    }
+                });
+                // Инициализация предпросмотра изображения для новой формы
+                const fileInput = formElement.querySelector('input[type="file"]');
+                const previewContainer = formElement.querySelector('.image-preview');
+                if (fileInput && previewContainer) {
+                    fileInput.addEventListener('change', function() {
+                        previewImage(this, previewContainer, 100, 100);
+                    });
+                }
+            }
+
+            function previewImage(input, previewContainer, maxWidth, maxHeight) {
+                if (input.files && input.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewContainer.innerHTML = `<img src="${e.target.result}" style="max-width: ${maxWidth}px; max-height: ${maxHeight}px;">`;
+                    }
+                    reader.readAsDataURL(input.files[0]);
+                } else {
+                    previewContainer.innerHTML = '';
+                }
+            }
+
+            addPictureFormButton.addEventListener('click', function() {
+                const newFormWrapper = document.createElement('div');
+                newFormWrapper.classList.add('gallery-image-form', 'border', 'p-3', 'mb-3');
+                newFormWrapper.innerHTML = emptyFormTemplate;
+
+                updateFormIndices(newFormWrapper, formCount);
+
+                picturesFormsetContainer.appendChild(newFormWrapper);
+                formCount++;
+                totalForms.value = formCount;
+            });
+
+            // Делегирование события для кнопок удаления (для уже существующих и новых форм)
+            picturesFormsetContainer.addEventListener('click', function(event) {
+                if (event.target.classList.contains('remove-form')) {
+                    event.preventDefault();
+                    const formToRemove = event.target.closest('.gallery-image-form');
+                    const deleteCheckbox = formToRemove.querySelector('input[type="checkbox"][id$="-DELETE"]');
+
+                    if (deleteCheckbox) {
+                        deleteCheckbox.checked = true;
+                        formToRemove.style.display = 'none';
+                    } else {
+                        formToRemove.remove();
+                    }
+                    formCount--;
+                    totalForms.value = formCount;
+                }
+            });
+
+            // Инициализация предпросмотра для существующих форм при загрузке страницы
+            picturesFormsetContainer.querySelectorAll('.gallery-image-form').forEach(formElement => {
+                const fileInput = formElement.querySelector('input[type="file"]');
+                const previewContainer = formElement.querySelector('.image-preview');
+                if (fileInput && previewContainer) {
+                    fileInput.addEventListener('change', function() {
+                        previewImage(this, previewContainer, 100, 100);
+                    });
+                    const existingImg = formElement.querySelector('img[alt="Поточне зображення"]');
+                    if (existingImg) {
+                        previewContainer.appendChild(existingImg.cloneNode(true));
+                    }
+                }
+            });
+        });
+    </script>
+{% endblock %}

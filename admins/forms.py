@@ -3,8 +3,18 @@ from main.models import Block_SEO, Gallery, Picture
 from  movie.models import Movies
 from  users.models import User
 from core.models import Cinemas, Halls, Sessions,Seats, Tickets
-from main.models import Banners, Cross_Banner, News, PaigesNews
+from main.models import Banners, Cross_Banner, News, PaigesNews, Promotion
 from django.forms import inlineformset_factory, formset_factory, modelformset_factory
+
+
+class PromotionForm(forms.ModelForm):
+    class Meta:
+        model = Promotion
+        fields = ['title', 'description', 'url_video', 'date', 'is_active']
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'}),
+            'is_active': forms.CheckboxInput()
+        }
 
 class PaigesNewsForm(forms.ModelForm):
     class Meta:
