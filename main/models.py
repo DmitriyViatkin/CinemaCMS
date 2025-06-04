@@ -116,9 +116,8 @@ class News(models.Model):
         verbose_name_plural = 'Новини' # Змінив на "Новини"
 
 
-from django.db import models
 
-
+"""
 class Block_SEO(models.Model):
     id = models.AutoField(primary_key=True)
     title_seo = models.CharField(max_length=250, verbose_name= 'Заголовок') # Залишаємо обов'язковим
@@ -161,8 +160,8 @@ class Picture(models.Model):
     class Meta:
         verbose_name = 'Картинка'
         verbose_name_plural = 'Картинки'
-
-
+"""
+"""
 class Banners(models.Model):
     id = models.AutoField(primary_key=True)
     gallery = models.ForeignKey(
@@ -184,8 +183,8 @@ class Banners(models.Model):
     class Meta:
         verbose_name = 'Банер'
         verbose_name_plural = 'Банери'
-
-class News (models.Model):
+"""
+"""class News (models.Model):
     id = models.AutoField(primary_key=True)
     gallery = models.ForeignKey(
         Gallery,
@@ -206,7 +205,7 @@ class News (models.Model):
         verbose_name_plural = 'Новости'
 
 
-
+"""
 class Cross_Banner (models.Model):
     id = models.AutoField(primary_key=True)
     gallery = models.ForeignKey(Gallery, on_delete=models.CASCADE, null=True, blank=True, verbose_name= 'Картинка')
@@ -231,7 +230,7 @@ class PaigesNews(models.Model):
     gallery = models.ForeignKey(Gallery, on_delete=models.SET_NULL, null=True, blank=True, verbose_name= 'Картинка')
     description = models.TextField(verbose_name= 'Опис')
     url = models.URLField(verbose_name='URL адреса ')
-    date = models.DateField()
+    date = models.DateField(auto_now_add=True, verbose_name='Дата публікації')
     is_active = models.BooleanField(default=False, verbose_name= 'Показ')
 
     def __str__(self):

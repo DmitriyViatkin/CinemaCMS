@@ -49,5 +49,10 @@ urlpatterns = [
     path('user/', views.user_list, name='users'),
     path('user/add_user', views.add_user, name='add_users'),
     path('user/<int:user_id>/edit/', views.add_user, name='edit_users'),
-    path('user/<int:user_id>/delete_user/', views.delete_user, name='delete_user')
+    path('user/<int:user_id>/delete_user/', views.delete_user, name='delete_user'),
+
+    path('news/', views.news_paige, name='news'),
+    path('news/add_news', views.news_paige_add, name='add_news'),
+    path('news/<int:news_id>/edit/', views.news_paige_add, name='edit_news'),
+    path('news/<int:news_id>/delete_news/', views.news_paige_delete, name='delete_news')
 ]

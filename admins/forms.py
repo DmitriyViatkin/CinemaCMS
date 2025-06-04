@@ -3,9 +3,18 @@ from main.models import Block_SEO, Gallery, Picture
 from  movie.models import Movies
 from  users.models import User
 from core.models import Cinemas, Halls, Sessions,Seats, Tickets
-from main.models import Banners, Cross_Banner, News
+from main.models import Banners, Cross_Banner, News, PaigesNews
 from django.forms import inlineformset_factory, formset_factory, modelformset_factory
 
+class PaigesNewsForm(forms.ModelForm):
+    class Meta:
+        model=PaigesNews
+       # exclude =['id', 'seo_block', 'gallery']
+        fields = ['title', 'description', 'url', 'date', 'is_active']
+        widgets= {
+            'date': forms.DateInput(attrs={'type': 'date'}),
+            'is_active':forms.CheckboxInput()
+        }
 
 class CrossBannerForm(forms.ModelForm):
     image = forms.ImageField(required=False, label='Зображення для банера', widget=forms.FileInput() )
@@ -39,23 +48,35 @@ class UserForm(forms.ModelForm):
         exclude = ['last_login', 'date_joined', 'groups', 'user_permissions', 'password']
 
 class PictureForm(forms.ModelForm):
-    image = forms.ImageField(widget=forms.FileInput(), label='Зображення')
-    gallery = forms.ModelChoiceField(queryset=Gallery.objects.all(), widget=forms.HiddenInput(), required=False)
 
+    image = forms.ImageField(label='Зображення')
     class Meta:
         model = Picture
+
         fields = ['image', 'gallery', 'image_type']
+
+        widgets = {
+            'gallery': forms.HiddenInput(),
+            'image_type': forms.HiddenInput(),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if 'image_type' in self.initial:
-            self.instance.image_type = self.initial['image_type']
+
+        self.fields['gallery'].required = False
+
+
+        if not self.instance.pk:
+            self.initial['image_type'] = 'gallery'
+
+
+
 
 PictureFormSet = modelformset_factory(
     model=Picture,
     form=PictureForm,
-    fields=['image', 'gallery', 'image_type'],
-    extra=0,
+    fields=['image', 'gallery', 'image_type'], # Поля должны совпадать с Meta.fields формы
+    extra=1,
     can_delete=True,
 )
 
@@ -110,7 +131,7 @@ class NewsForm(forms.ModelForm):
     def save(self, commit=True):
         news = super().save(commit=False)
 
-        # Створити галерею, якщо її нема
+
         if not news.gallery:
             gallery = Gallery.objects.create()
             news.gallery = gallery
@@ -224,23 +245,6 @@ PictureFormSet1 = inlineformset_factory(
     extra=1,
     max_num=10,
     can_delete=True,)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

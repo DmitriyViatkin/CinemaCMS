@@ -7,10 +7,10 @@ from users.models import User
 from django.db.models import Prefetch
 
 
-from main.models import Gallery, Banners, Cross_Banner, News
+from main.models import Gallery, Banners, Cross_Banner, News, PaigesNews
 from core.models import Cinemas, Halls, Sessions, Seats, Tickets
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from .forms import (BlockSEOForm, MovieForm, PictureFormSet, GalleryForm, CinemaForm, HallsForm, SessionsForm,
+from .forms import (PaigesNewsForm,BlockSEOForm, MovieForm, PictureFormSet, GalleryForm, CinemaForm, HallsForm, SessionsForm,
                     TicketForm,SeatForm, PictureFormSet1,  BannersFormSet,  NewsFormSet,  PictureForm, UserForm, SessionFormSet , Picture,  CrossBannerForm , modelformset_factory)
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpRequest, HttpResponse
@@ -67,11 +67,6 @@ def movie_list(request):
 
     context = {'movies': movies}
     return render(request, 'admin/movies_lists/movies_lists.html', context)
-
-
-
-
-
 
 @staff_member_required
 def add_movie(request, movie_id=None):
@@ -158,9 +153,6 @@ def add_movie(request, movie_id=None):
         'main_picture_form': main_picture_form,
         'movie': movie_instance,
     })
-
-
-
 
 @staff_member_required
 def delete_movie(request, pk):
@@ -436,10 +428,6 @@ def delete_sessions(request, pk):
         return redirect('sessions_list')
 
 @staff_member_required
-
-
-
-
 def seats_list(request: HttpRequest) -> HttpResponse:
     seats_list = Seats.objects.select_related('halls').order_by('number_row', 'seat')
     paginator = Paginator(seats_list, 10)
@@ -713,8 +701,6 @@ def delete_banners(request, banners_id):
 
      return redirect('banners')
 
-
-
 @staff_member_required
 def user_list(request):
 
@@ -770,3 +756,168 @@ def delete_user(request, users_id):
         return redirect('users')
     else: #
         return redirect('users')
+
+@staff_member_required
+def news_paige(request):
+    news_list_all = PaigesNews.objects.all()
+    paginator = Paginator(news_list_all, 10)
+    page_number = request.GET.get('page')
+
+    try:
+        news_page = paginator.page(page_number)
+    except PageNotAnInteger:
+        news_page = paginator.page(1)
+    except EmptyPage:
+        news_page = paginator.page(paginator.num_pages)
+    context = {'news': news_page}
+    return render(request, 'admin/news_paige/news_lists.html', context)
+
+@staff_member_required
+def news_paige_add(request, news_id=None):
+    news_instance = None
+    block_seo_instance = None
+    gallery_instance = None
+
+    current_main_picture_object = None
+
+    if news_id:
+        news_instance = get_object_or_404(PaigesNews, pk=news_id)
+        block_seo_instance = news_instance.seo_block
+        gallery_instance = news_instance.gallery
+
+        if gallery_instance is None:
+            gallery_instance = Gallery.objects.create()
+            news_instance.gallery = gallery_instance
+            news_instance.save()
+
+
+        current_main_picture_object = gallery_instance.pictures.filter(image_type='main_picture').first()
+
+
+    if gallery_instance is None:
+        gallery_instance = Gallery.objects.create()  # Создаем новую галерею
+
+
+    if request.method=='POST':
+        block_seo_form = BlockSEOForm(request.POST, instance=block_seo_instance)
+        news_form = PaigesNewsForm(request.POST, instance=news_instance)
+        gallery_form = GalleryForm(request.POST, instance=gallery_instance)
+
+        # Для modelformset_factory, queryset нужен и для POST (чтобы Django знал, какие объекты обновлять)
+        picture_formset = PictureFormSet(
+            request.POST,
+            request.FILES,
+            queryset=Picture.objects.filter(gallery=gallery_instance).exclude(pk=current_main_picture_object.pk) if current_main_picture_object else Picture.objects.filter(gallery=gallery_instance),
+            prefix='pictures', initial=[{'image_type': 'gallery_image'}]
+        )
+
+        main_picture_form = PictureForm(request.POST, request.FILES, instance=current_main_picture_object, prefix='main_picture_form')
+
+
+        if f'{main_picture_form.prefix}-image_type' not in request.POST:
+            main_picture_form.data = main_picture_form.data.copy()
+            main_picture_form.data[f'{main_picture_form.prefix}-image_type'] = 'main_picture'
+
+        if f'{main_picture_form.prefix}-gallery' not in request.POST and gallery_instance.pk:
+            main_picture_form.data = main_picture_form.data.copy()
+            main_picture_form.data[f'{main_picture_form.prefix}-gallery'] = gallery_instance.pk
+
+
+
+        if (block_seo_form.is_valid() and
+                news_form.is_valid() and
+                gallery_form.is_valid() and
+                picture_formset.is_valid() and  #
+                main_picture_form.is_valid()):
+
+            block_seo_saved = block_seo_form.save()
+            gallery_saved = gallery_form.save()
+
+            news_saved = news_form.save(commit=False)
+            news_saved.seo_block = block_seo_saved
+            news_saved.gallery = gallery_saved
+            news_saved.save()
+
+
+            if main_picture_form.cleaned_data.get('image'):
+                main_picture_saved = main_picture_form.save(commit=False)
+                main_picture_saved.gallery = gallery_saved
+                main_picture_saved.image_type = 'main_picture'
+                main_picture_saved.save()
+
+                if current_main_picture_object and current_main_picture_object.pk!=main_picture_saved.pk:
+                    current_main_picture_object.delete()
+
+            elif main_picture_form.cleaned_data.get('DELETE') and current_main_picture_object:
+                current_main_picture_object.delete()
+
+
+            instances = picture_formset.save(commit=False)
+            for picture in instances:
+                if not picture.pk:
+                    picture.gallery = gallery_saved
+                    if not picture.image_type:
+                        picture.image_type = 'gallery_image'
+                picture.save()
+
+
+            for picture in picture_formset.deleted_objects:
+                picture.delete()
+
+            return redirect('news')
+
+        else:
+
+            print("Ошибка валидации форм")
+            print("block_seo_form.errors:", block_seo_form.errors)
+            print("news_form.errors:", news_form.errors)
+            print("gallery_form.errors:", gallery_form.errors)
+            print("picture_formset.errors:", picture_formset.errors)
+            print("main_picture_form.errors:", main_picture_form.errors)
+
+            return render(request, 'admin/news_paige/add_news.html', {
+                'block_seo_form': block_seo_form,
+                'news_form': news_form,
+                'gallery_form': gallery_form,
+                'picture_formset': picture_formset,
+                'main_picture_form': main_picture_form,
+                'news': news_instance,
+                'is_edit': news_instance is not None,
+            })
+
+
+    else:
+        block_seo_form = BlockSEOForm(instance=block_seo_instance)
+        news_form = PaigesNewsForm(instance=news_instance)
+        gallery_form = GalleryForm(instance=gallery_instance)
+
+
+        picture_formset = PictureFormSet(
+            queryset=Picture.objects.filter(gallery=gallery_instance).exclude(pk=current_main_picture_object.pk) if current_main_picture_object else Picture.objects.filter(gallery=gallery_instance),
+            prefix='pictures'
+        )
+
+        main_picture_form = PictureForm(
+            instance=current_main_picture_object,
+            prefix='main_picture_form',
+            initial={'image_type': 'main_picture'}  # Initial для новой формы главной картинки
+        )
+
+    return render(request, 'admin/news_paige/add_news.html', {
+        'block_seo_form': block_seo_form,
+        'news_form': news_form,
+        'gallery_form': gallery_form,
+        'picture_formset': picture_formset,
+        'main_picture_form': main_picture_form,
+        'news': news_instance,
+        'is_edit': news_instance is not None,
+    })
+
+
+@staff_member_required
+def news_paige_delete(request, news_id):
+    news = get_object_or_404(PaigesNews, pk=news_id)
+    if request.method=='POST':
+        news.delete()
+
+    return redirect('news')
