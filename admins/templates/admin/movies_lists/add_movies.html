@@ -3,349 +3,188 @@
 {% block title %}Додати фільм{% endblock %}
 
 {% block content %}
-<h1>Додати новий фільм</h1>
-
-<section class="content" >
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card card-primary">
-                    <div class="card-header">
-                        <h3 class="card-title">Додати фільм</h3>
-                    </div>
-                    <form method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-
-                        {% if movie_form.non_field_errors %}
-                            <div class="alert alert-danger">{{ movie_form.non_field_errors }}</div>
-                        {% endif %}
-                        {% if block_seo_form.non_field_errors %}
-                            <div class="alert alert-danger">{{ block_seo_form.non_field_errors }}</div>
-                        {% endif %}
-                        {% if gallery_form.non_field_errors %}
-                            <div class="alert alert-danger">{{ gallery_form.non_field_errors }}</div>
-                        {% endif %}
-                        {% if picture_formset.non_form_errors %}
-                            <div class="alert alert-danger">{{ picture_formset.non_form_errors }}</div>
-                        {% endif %}
-                        {% if main_picture_form.non_field_errors %}
-                            <div class="alert alert-danger">{{ main_picture_form.non_field_errors }}</div>
-                        {% endif %}
-
-                        <div class="card-body">
-                            <h2>Інформація про фільм</h2>
-                            {% include 'admin/card_forms/movie_form.html' with form=movie_form %}
-
-                            <h2>SEO Інформація</h2>
-                            {% include 'admin/card_forms/seo_form.html' with form=block_seo_form %}
-
-                            <h2>Галерея</h2>
 
 
-                            <h3>Головна картинка</h3>
-                            <div class="main-picture-form border p-3 mb-3">
-                                {% for field in main_picture_form %}
-                                    {% if field.name == 'image' %}
-                                        <div class="form-group">
-                                            {{ field.label_tag }}
-                                            {{ field }}
-                                            {% if field.errors %}
-                                                <div class="alert alert-danger">{{ field.errors }}</div>
-                                            {% endif %}
-                                            <div class="image-preview" style="max-width: 200px; max-height: 200px; margin-top: 10px;"></div>
-                                        </div>
-                                    {% endif %}
-                                {% endfor %}
-                                <div style="display: none;">{{ main_picture_form.image_type.label_tag }} {{ main_picture_form.image_type }}</div>
-                                <div style="display: none;">{{ main_picture_form.gallery.label_tag }} {{ main_picture_form.gallery }}</div>
-                            </div>
+<section class="content">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card card-primary">
+          <div class="card-header">
+            <h3 class="card-title">Додати фільм</h3>
+          </div>
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
 
-                            <h3>Картинки галереї</h3>
-                            {{ picture_formset.management_form }}
-                            <div id="pictures-formset">
-                                {% for form in picture_formset %}
-                                    <div class="gallery-image-form border p-3 mb-3">
-                                        <div style="display: none;">{{ form.id }}</div>
-                                        {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
-                                        <div class="form-group">
-                                            {{ form.image.label_tag }}
-                                            {% if form.instance.pk and form.instance.image %}
-                                                <img src="{{ form.instance.image.url }}" alt="Поточне зображення" style="max-width: 100px; max-height: 100px; margin-bottom: 10px;">
-                                            {% endif %}
-                                            {{ form.image }}
-                                            {% if form.image.help_text %}<small class="form-text text-muted">{{ form.image.help_text }}</small>{% endif %}
-                                            {% for error in form.image.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-                                        </div>
-                                        <div class="form-group form-check">
-                                            {{ form.DELETE }}
-                                            {{ form.DELETE.label_tag }}
-                                            {% for error in form.DELETE.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-                                        </div>
-                                        <div style="display: none;">{{ form.image_type.label_tag }} {{ form.image_type }}</div>
-                                        <div class="form-group" style="display: none;">
-                                            <label for="{{ form.prefix }}-gallery">Gallery:</label>
-                                            {{ form.gallery }}
-                                        </div>
-                                    </div>
-                                {% endfor %}
-                                {{ picture_formset.empty_form }}
-                            </div>
-                            <button id="add-picture-form" type="button" class="btn btn-success mt-2">Додати ще одне зображення</button>
-                        </div>
+            {% if movie_form.non_field_errors %}
+              <div class="alert alert-danger">{{ movie_form.non_field_errors }}</div>
+            {% endif %}
+            {% if block_seo_form.non_field_errors %}
+              <div class="alert alert-danger">{{ block_seo_form.non_field_errors }}</div>
+            {% endif %}
+            {% if gallery_form.non_field_errors %}
+              <div class="alert alert-danger">{{ gallery_form.non_field_errors }}</div>
+            {% endif %}
+            {% if picture_formset.non_form_errors %}
+              <div class="alert alert-danger">{{ picture_formset.non_form_errors }}</div>
+            {% endif %}
+            {% if main_picture_form.non_field_errors %}
+              <div class="alert alert-danger">{{ main_picture_form.non_field_errors }}</div>
+            {% endif %}
 
-                        <div class="card-footer">
-                            <button type="submit" class="btn btn-primary">Створити</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </section>
+            <div class="card-body">
+              <h2>Інформація про фільм</h2>
+              {% include 'admin/card_forms/movie_form.html' with form=movie_form %}
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Предварительный просмотр главной картинки
-            const mainPictureInput = document.querySelector('.main-picture-form input[type="file"]');
-            const mainPicturePreview = document.querySelector('.main-picture-form .image-preview');
+              <h2>SEO Інформація</h2>
+              {% include 'admin/card_forms/seo_form.html' with form=block_seo_form %}
 
-            if (mainPictureInput && mainPicturePreview) {
-                mainPictureInput.addEventListener('change', function() {
-                    previewImage(this, mainPicturePreview, 200, 200);
-                });
-            }
+              <h2>Галерея</h2>
 
-            // Обработка формсета галереи
-            const addPictureFormButton = document.getElementById('add-picture-form');
-            const picturesFormsetContainer = document.getElementById('pictures-formset');
-            const emptyFormTemplate = document.querySelector('#empty-form .gallery-image-form').cloneNode(true);
-            const totalForms = document.querySelector('#id_pictures-TOTAL_FORMS');
-            let formCount = picturesFormsetContainer.querySelectorAll('.gallery-image-form').length;
-
-            function updateFormIndices(form, newIndex) {
-                form.querySelectorAll('input, select, textarea, label').forEach(node => {
-                    let id = node.getAttribute('id');
-                    let name = node.getAttribute('name');
-
-                    if (id && id.includes('__prefix__')) {
-                        node.setAttribute('id', id.replace('__prefix__', newIndex));
-                    } else if (id && id.includes('-')) {
-                        const parts = id.split('-');
-                        node.setAttribute('id', parts[0] + '-' + newIndex + '-' + parts.slice(2).join('-'));
-                    }
-
-                    if (name && name.includes('__prefix__')) {
-                        node.setAttribute('name', name.replace('__prefix__', newIndex));
-                    } else if (name && name.startsWith('pictures-')) {
-                        const parts = name.split('-');
-                        node.setAttribute('name', 'pictures-' + newIndex + '-' + parts.slice(2).join('-'));
-                    }
-
-                    if (node.tagName === 'LABEL' && node.getAttribute('for') && node.getAttribute('for').includes('__prefix__')) {
-                        node.setAttribute('for', node.getAttribute('for').replace('__prefix__', newIndex));
-                    } else if (node.tagName === 'LABEL' && node.getAttribute('for') && node.getAttribute('for').startsWith('id_pictures-')) {
-                        const parts = node.getAttribute('for').split('-');
-                        node.setAttribute('for', 'id_pictures-' + newIndex + '-' + parts.slice(2).join('-'));
-                    }
-
-                    if (node.tagName === 'INPUT' && node.getAttribute('type') === 'file') {
-                        const preview = form.querySelector('.image-preview');
-                        if (preview) preview.innerHTML = '';
-                        node.addEventListener('change', function() {
-                            previewImage(this, preview, 100, 100);
-                        });
-                    }
-                });
-            }
-
-            function previewImage(input, previewContainer, maxWidth, maxHeight) {
-                if (input.files && input.files[0]) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        previewContainer.innerHTML = `<img src="${e.target.result}" style="max-width: ${maxWidth}px; max-height: ${maxHeight}px;">`;
-                    }
-                    reader.readAsDataURL(input.files[0]);
-                } else {
-                    previewContainer.innerHTML = '';
-                }
-            }
-
-            addPictureFormButton.addEventListener('click', function() {
-                const newForm = emptyFormTemplate.cloneNode(true);
-                updateFormIndices(newForm, formCount);
-
-                const deleteButton = document.createElement('button');
-                deleteButton.classList.add('btn', 'btn-danger', 'mt-2', 'remove-form');
-                deleteButton.textContent = 'Видалити';
-                deleteButton.addEventListener('click', function() {
-                    newForm.remove();
-                    formCount--;
-                    totalForms.value = formCount;
-                    updateFormIndicesOnDelete();
-                });
-                newForm.appendChild(deleteButton);
-
-                picturesFormsetContainer.appendChild(newForm);
-                formCount++;
-                totalForms.value = formCount;
-
-                // Скрываем поля id и image_type в новой форме
-                const newIdField = newForm.querySelector('[id$="-id"]');
-                if (newIdField) {
-                    newIdField.closest('.form-group').style.display = 'none';
-                }
-                const newImageTypeField = newForm.querySelector('[id$="-image_type"]');
-                if (newImageTypeField) {
-                    newImageTypeField.closest('.form-group').style.display = 'none';
-                }
-
-                // Скрываем label поля image_type в новой форме
-                const newImageTypeLabel = newForm.querySelector('label[for$="-image_type"]');
-                if (newImageTypeLabel) {
-                    newImageTypeLabel.style.display = 'none';
-                }
-
-                // Скрываем label и поле Gallery в новой форме
-                const newGalleryLabel = newForm.querySelector('label[for$="-gallery"]');
-                const newGalleryField = newForm.querySelector('[id$="-gallery"]');
-                if (newGalleryLabel) {
-                    newGalleryLabel.style.display = 'none';
-                }
-                if (newGalleryField) {
-                    newGalleryField.closest('.form-group').style.display = 'none';
-                }
-            });
-
-            picturesFormsetContainer.addEventListener('click', function(event) {
-                if (event.target.classList.contains('remove-form')) {
-                    event.preventDefault();
-                    const formToDelete = event.target.closest('.gallery-image-form');
-                    const indexToRemove = Array.from(picturesFormsetContainer.children).indexOf(formToDelete);
-                    formToDelete.remove();
-                    formCount--;
-                    totalForms.value = formCount;
-                    updateFormIndicesOnDelete();
-                }
-            });
-
-            function updateFormIndicesOnDelete() {
-                const forms = picturesFormsetContainer.querySelectorAll('.gallery-image-form');
-                forms.forEach((form, index) => {
-                    updateFormIndices(form, index);
-                    // Скрываем поля id и image_type после обновления индексов
-                    const idField = form.querySelector('[id$="-id"]');
-                    if (idField) {
-                        idField.closest('.form-group').style.display = 'none';
-                    }
-                    const imageTypeField = form.querySelector('[id$="-image_type"]');
-                    if (imageTypeField) {
-                        imageTypeField.closest('.form-group').style.display = 'none';
-                    }
-                    // Скрываем label поля image_type после обновления индексов
-                    const imageTypeLabel = form.querySelector('label[for$="-image_type"]');
-                    if (imageTypeLabel) {
-                        imageTypeLabel.style.display = 'none';
-                    }
-                    // Скрываем label и поле Gallery после обновления индексов
-                    const galleryLabel = form.querySelector('label[for$="-gallery"]');
-                    const galleryField = form.querySelector('[id$="-gallery"]');
-                    if (galleryLabel) {
-                        galleryLabel.style.display = 'none';
-                    }
-                    if (galleryField) {
-                        galleryField.closest('.form-group').style.display = 'none';
-                    }
-                });
-            }
-
-            picturesFormsetContainer.querySelectorAll('.gallery-image-form').forEach((form, index) => {
-                updateFormIndices(form, index);
-                const fileInput = form.querySelector('input[type="file"]');
-                const previewContainer = form.querySelector('.image-preview');
-                if (fileInput && previewContainer) {
-                    fileInput.addEventListener('change', function() {
-                        previewImage(this, previewContainer, 100, 100);
-                    });
-                }
-                // Скрываем поля id и image_type при загрузке страницы
-                const initialIdField = form.querySelector('[id$="-id"]');
-                if (initialIdField) {
-                    initialIdField.closest('.form-group').style.display = 'none';
-                }
-                const initialImageTypeField = form.querySelector('[id$="-image_type"]');
-                if (initialImageTypeField) {
-                    initialImageTypeField.closest('.form-group').style.display = 'none';
-                }
-                // Скрываем label поля image_type при загрузке страницы
-                const initialImageTypeLabel = form.querySelector('label[for$="-image_type"]');
-                if (initialImageTypeLabel) {
-                    initialImageTypeLabel.style.display = 'none';
-                }
-                // Скрываем label и поле Gallery при загрузке страницы
-                const initialGalleryLabel = form.querySelector('label[for$="-gallery"]');
-                const initialGalleryField = form.querySelector('[id$="-gallery"]');
-                if (initialGalleryLabel) {
-                    initialGalleryLabel.style.display = 'none';
-                }
-                if (initialGalleryField) {
-                    initialGalleryField.closest('.form-group').style.display = 'none';
-                }
-            });
-
-            // Скрываем поля id и image_type в пустой форме
-            const emptyFormDiv = document.querySelector('#empty-form .gallery-image-form');
-            if (emptyFormDiv) {
-                const idFieldEmpty = emptyFormDiv.querySelector('[id$="__prefix__-id"]');
-                if (idFieldEmpty) {
-                    idFieldEmpty.closest('.form-group').style.display = 'none';
-                }
-                const imageTypeFieldEmpty = emptyFormDiv.querySelector('[id$="__prefix__-image_type"]');
-                if (imageTypeFieldEmpty) {
-                    imageTypeFieldEmpty.closest('.form-group').style.display = 'none';
-                }
-                // Скрываем label поля image_type в пустой форме
-                const imageTypeLabelEmpty = emptyFormDiv.querySelector('label[for$="__prefix__-image_type"]');
-                if (imageTypeLabelEmpty) {
-                    imageTypeLabelEmpty.style.display = 'none';
-                }
-                // Скрываем label и поле Gallery в пустой форме
-                const galleryLabelEmpty = emptyFormDiv.querySelector('label[for$="__prefix__-gallery"]');
-                const galleryFieldEmpty = emptyFormDiv.querySelector('[id$="__prefix__-gallery"]');
-                if (galleryLabelEmpty) {
-                    galleryLabelEmpty.style.display = 'none';
-                }
-                if (galleryFieldEmpty) {
-                    galleryFieldEmpty.closest('.form-group').style.display = 'none';
-                }
-            }
-
-            // Скрываем label главной картинки "Тип зображення" и "Галерея"
-            const mainImageTypeLabel = document.querySelector('.main-picture-form label[for$="-image_type"]');
-            if (mainImageTypeLabel) {
-                mainImageTypeLabel.style.display = 'none';
-            }
-            const mainGalleryLabel = document.querySelector('.main-picture-form label[for$="-gallery"]');
-            if (mainGalleryLabel) {
-                mainGalleryLabel.style.display = 'none';
-            }
-        });
-    </script>
-
-    <div style="display: none;">
-        {{ picture_formset.empty_form }}
-        <div id="empty-form">
-            <div class="gallery-image-form border p-3 mb-3">
-                {% for field in picture_formset.empty_form %}
+              <h3>Головна картинка</h3>
+              <div class="main-picture-form border p-3 mb-3">
+                {% for field in main_picture_form %}
+                  {% if field.name == 'image' %}
                     <div class="form-group">
-                        {{ field.label_tag }}
-                        {{ field }}
-                        {% if field.help_text %}<small class="form-text text-muted">{{ field.help_text }}</small>{% endif %}
-                        {% for error in field.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                      {{ field.label_tag }}
+                      {{ field }}
+                      {% if field.errors %}
+                        <div class="alert alert-danger">{{ field.errors }}</div>
+                      {% endif %}
+                      <div class="image-preview" style="max-width: 200px; max-height: 200px; margin-top: 10px;"></div>
                     </div>
+                  {% endif %}
                 {% endfor %}
-                <div class="image-preview" style="max-width: 100px; max-height: 100px; margin-top: 10px;"></div>
-            </div>
-        </div>
-    </div>
+                <div style="display: none;">{{ main_picture_form.image_type }}</div>
+                <div style="display: none;">{{ main_picture_form.gallery }}</div>
+              </div>
 
+              <h3>Картинки галереї</h3>
+              {{ picture_formset.management_form }}
+              <div id="pictures-formset">
+                {% for form in picture_formset %}
+                  <div class="gallery-image-form border p-3 mb-3">
+                    <div style="display: none;">{{ form.id }}</div>
+                    {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+                    <div class="form-group">
+                      {{ form.image.label_tag }}
+                      {% if form.instance.pk and form.instance.image %}
+                        <img src="{{ form.instance.image.url }}" style="max-width: 100px; max-height: 100px; margin-bottom: 10px;">
+                      {% endif %}
+                      {{ form.image }}
+                    </div>
+                    <div class="form-group form-check">
+                      {{ form.DELETE }} {{ form.DELETE.label_tag }}
+                    </div>
+                    <div style="display: none;">{{ form.image_type }}</div>
+                    <div style="display: none;">{{ form.gallery }}</div>
+                    <div class="image-preview" style="max-width: 100px; max-height: 100px; margin-top: 10px;"></div>
+                  </div>
+                {% endfor %}
+              </div>
+              <button id="add-picture-form" type="button" class="btn btn-success mt-2">Додати ще одне зображення</button>
+            </div>
+
+            <div class="card-footer">
+              <button type="submit" class="btn btn-primary">Створити</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<div id="empty-form" style="display: none;">
+  <div class="gallery-image-form border p-3 mb-3">
+    {% for field in picture_formset.empty_form %}
+      <div class="form-group">
+
+        {% if field.name == 'image' %}
+          {{ field.label_tag }}
+        {% endif %}
+        {{ field }}
+
+
+        {% if field.name == 'gallery' or field.name == 'image_type' or field.name == 'id' %}
+          <style>
+
+
+            label[for="{{ field.id_for_label }}"] { display: none; }
+          </style>
+        {% endif %}
+      </div>
+    {% endfor %}
+    <div class="image-preview" style="max-width: 100px; max-height: 100px; margin-top: 10px;"></div>
+  </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    function previewImage(input, previewContainer, maxWidth, maxHeight) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          previewContainer.innerHTML = `<img src="${e.target.result}" style="max-width:${maxWidth}px; max-height:${maxHeight}px;">`;
+        };
+        reader.readAsDataURL(input.files[0]);
+      } else {
+        previewContainer.innerHTML = '';
+      }
+    }
+
+    const mainPictureInput = document.querySelector('.main-picture-form input[type="file"]');
+    const mainPreview = document.querySelector('.main-picture-form .image-preview');
+    if (mainPictureInput && mainPreview) {
+      mainPictureInput.addEventListener('change', function () {
+        previewImage(this, mainPreview, 200, 200);
+      });
+    }
+
+    const formsetContainer = document.getElementById('pictures-formset');
+    const addBtn = document.getElementById('add-picture-form');
+    const totalForms = document.getElementById('id_pictures-TOTAL_FORMS');
+    let formCount = formsetContainer.querySelectorAll('.gallery-image-form').length;
+
+    function updateFormIndex(form, index) {
+      form.querySelectorAll('input, select, textarea, label').forEach(el => {
+        ['name', 'id', 'for'].forEach(attr => {
+          if (el.hasAttribute(attr)) {
+            el.setAttribute(attr, el.getAttribute(attr).replace(/pictures-(\d+|__prefix__)-/, `pictures-${index}-`));
+          }
+        });
+      });
+    }
+
+    addBtn.addEventListener('click', () => {
+      const emptyTemplate = document.querySelector('#empty-form .gallery-image-form');
+      const newForm = emptyTemplate.cloneNode(true);
+      updateFormIndex(newForm, formCount);
+      formsetContainer.appendChild(newForm);
+      totalForms.value = ++formCount;
+
+      const fileInput = newForm.querySelector('input[type="file"]');
+      const preview = newForm.querySelector('.image-preview');
+      if (fileInput && preview) {
+        fileInput.addEventListener('change', function () {
+          previewImage(this, preview, 100, 100);
+        });
+      }
+    });
+
+    // Ініціалізація попереднього перегляду для існуючих форм
+    formsetContainer.querySelectorAll('.gallery-image-form').forEach(form => {
+      const fileInput = form.querySelector('input[type="file"]');
+      const preview = form.querySelector('.image-preview');
+      if (fileInput && preview) {
+        fileInput.addEventListener('change', function () {
+          previewImage(this, preview, 100, 100);
+        });
+      }
+    });
+  });
+</script>
 
 {% endblock %}

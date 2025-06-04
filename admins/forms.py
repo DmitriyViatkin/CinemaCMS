@@ -3,9 +3,17 @@ from main.models import Block_SEO, Gallery, Picture
 from  movie.models import Movies
 from  users.models import User
 from core.models import Cinemas, Halls, Sessions,Seats, Tickets
-from main.models import Banners, Cross_Banner, News, PaigesNews, Promotion
+from main.models import Banners, Cross_Banner, News, PaigesNews, Promotion, PaigesCinema
 from django.forms import inlineformset_factory, formset_factory, modelformset_factory
 
+
+class PaigesCinemaForm(forms.ModelForm):
+    class Meta:
+        model = PaigesCinema
+        exclude = ['id', 'seo_block', 'gallery']
+        fields = '__all__'
+        widgets = {
+            'is_active': forms.CheckboxInput(),}
 
 class PromotionForm(forms.ModelForm):
     class Meta:
@@ -74,13 +82,15 @@ class PictureForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         self.fields['gallery'].required = False
+        self.fields['gallery'].label = ''  # Устанавливаем пустую метку
+        self.fields['image_type'].label = ''  # Устанавливаем пустую метку
 
+
+        if 'id' in self.fields:
+            self.fields['id'].label = ''
 
         if not self.instance.pk:
             self.initial['image_type'] = 'gallery'
-
-
-
 
 PictureFormSet = modelformset_factory(
     model=Picture,
@@ -89,8 +99,6 @@ PictureFormSet = modelformset_factory(
     extra=1,
     can_delete=True,
 )
-
-
 class GalleryForm(forms.ModelForm):
 
     class Meta:
@@ -251,10 +259,11 @@ PictureFormSet1 = inlineformset_factory(
     Gallery,
     Picture,
     form=PictureForm,
-    fields=('image',),
+    fields=('image', 'image_type'),
     extra=1,
     max_num=10,
-    can_delete=True,)
+    can_delete=True,
+)
 
 
 

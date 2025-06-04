@@ -59,5 +59,10 @@ urlpatterns = [
     path('promotion/', views.promotion_paige, name='promotion'),
     path('promotion/add_promotion', views.promotion_paige_add, name='add_promotion'),
     path('promotion/<int:promotion_id>/edit/', views.promotion_paige_add, name='edit_promotion'),
-    path('promotion/<int:promotion_id>/delete_promotion/', views.promotion_paige_delete, name='delete_promotion')
+    path('promotion/<int:promotion_id>/delete_promotion/', views.promotion_paige_delete, name='delete_promotion'),
+
+    path('paige/', views.paige, name='paige'),
+    path('paige/add_paige', views.paige_add, name='add_paige'),
+    path('paige/<int:paige_id>/edit/', views.paige_add, name='edit_paige'),
+    path('paige/<int:paige_id>/delete_paige/', views.paige_delete, name='delete_paige'),
 ]

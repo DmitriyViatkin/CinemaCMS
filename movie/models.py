@@ -30,7 +30,7 @@ class Movies(models.Model):
     video_type = models.CharField(max_length=5, choices=VIDEO_CHOISES, verbose_name='Тип відео ')
     relise_date = models.DateField(verbose_name='Дата проката')
     age_limit = models.IntegerField(verbose_name='Вікова категорія')
-    date = models.DateField(verbose_name='Дата')
+    date = models.DateField(auto_now_add=True, verbose_name='Дата створення запису')
 
     gallery = models.ForeignKey(Gallery, on_delete=models.SET_NULL, null=True, blank=True,
                                 related_name='movies', verbose_name='Галерея зображень')

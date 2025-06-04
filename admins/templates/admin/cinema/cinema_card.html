@@ -12,5 +12,6 @@
     <h5 class="card-title">{{ cinema.title }}</h5>
 
     <a href="{% url 'add_cinema_edit' cinema.id %}" class="btn btn-primary mt-auto">Детальніше</a>
+    <a href="{% url 'delete_cinema' cinema.id %}" class="btn btn-primary mt-auto">Видалити</a>
   </div>
 </div>
