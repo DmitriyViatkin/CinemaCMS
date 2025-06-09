@@ -4,6 +4,8 @@
 
 {% block content %}
 
+<link rel="stylesheet" href="{% static 'css/movie_css.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
 <section class="content" >
     <div class="container-fluid">
@@ -67,36 +69,8 @@
                 </div>
 
                             <h3>Головна картинка</h3>
-               <div class="main-picture-form border p-3 mb-3" style="width: 400px; height: 200px;">
+                {% include 'admin/card_forms/main_image.html'  %}
 
-                    {% for field in main_picture_form %}
-                       {% if field.name == 'image' %}
-                                         <div class="form-group">
-                                             {{ field.label_tag }}
-                                             {{ field }}
-                                             {% if field.errors %}
-                                                 <div class="alert alert-danger">{{ field.errors }}</div>
-                                             {% endif %}
-                                             <div class="image-preview" style="max-width: 200px; max-height: 200px; margin-top: 10px;">
-
-                                                 {% if news.main_picture and news.main_picture.image %}
-                                                     <img src="{{ news.main_picture.image.url }}" alt="Поточне головне зображення" style="max-width: 200px; max-height: 200px;">
-                                                 {% endif %}
-                                             </div>
-                                         </div>
-                                     {% elif field.name == 'DELETE' %}
-                                         <div class="form-group form-check">
-                                             {{ field }}
-                                             {{ field.label_tag }}
-                                             {% for error in field.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-                                         </div>
-                                     {% else %}
-                                         {# Другие поля главной картинки (например, image_type, gallery), если они есть, #}
-                                         {# будут выведены здесь. Если они HiddenInput в PictureForm, они будут скрыты. #}
-                                         {{ field }}
-                                     {% endif %}
-                    {% endfor %}
-                </div>
                 <div class="card-body">
                   <div class="form-group">
                         {{ news_form.url.label_tag }}
@@ -106,37 +80,7 @@
                   </div>
                 </div>
                             <h3>Картинки галереї</h3>
-                            {{ picture_formset.management_form }}
-                            <div id="pictures-formset">
-                                {% for form in picture_formset %}
-                                    <div class="gallery-image-form border p-3 mb-3">
-                                        {# Эти поля теперь будут скрыты благодаря HiddenInput в PictureForm #}
-                                        {{ form.id }}
-                                        {{ form.image_type }}
-                                        {{ form.gallery }}
-
-                                        {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
-                                        <div class="form-group">
-                                            {{ form.image.label_tag }}
-                                            {% if form.instance.pk and form.instance.image %}
-                                                <img src="{{ form.instance.image.url }}" alt="Поточне зображення" style="max-width: 100px; max-height: 100px; margin-bottom: 10px;">
-                                            {% endif %}
-                                            {{ form.image }}
-                                            {% if form.image.help_text %}<small class="form-text text-muted">{{ form.image.help_text }}</small>{% endif %} {# ИСПРАВЛЕНО: добавлен пробел #}
-                                            {% for error in form.image.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-                                            <div class="image-preview" style="max-width: 100px; max-height: 100px; margin-top: 10px;"></div>
-                                        </div>
-                                        <div class="form-group form-check">
-                                            {{ form.DELETE }}
-                                            {{ form.DELETE.label_tag }}
-                                            {% for error in form.DELETE.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-                                        </div>
-                                        <button type="button" class="btn btn-danger mt-2 remove-form">Видалити</button>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                            <button id="add-picture-form" type="button" class="btn btn-success mt-2">Додати ще одне зображення</button>
-                        </div>
+                           {% include 'admin/card_forms/gallery_form.html'  %}
                             <h2>SEO Інформація</h2>
                             {% include 'admin/card_forms/seo_form.html' with form=block_seo_form %}
                         <div class="card-footer">
@@ -148,132 +92,11 @@
         </div>
     </section>
 
-    {# СКРЫТЫЙ БЛОК для шаблона пустой формы #}
-    <div id="empty-form-template" style="display: none;">
-        {% for field in picture_formset.empty_form %}
-            {% if field.name == 'image' %}
-                <div class="form-group">
-                    {{ field.label_tag }}
-                    {{ field }}
-                    {% if field.help_text %}<small class="form-text text-muted">{{ field.help_text }}</small>{% endif %} {# ИСПРАВЛЕНО: добавлен пробел #}
-                    {% for error in field.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-                </div>
-                <div class="image-preview" style="max-width: 100px; max-height: 100px; margin-top: 10px;"></div>
-            {% elif field.name == 'DELETE' %}
-                <div class="form-group form-check">
-                    {{ field }}
-                    {{ field.label_tag }}
-                    {% for error in field.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-                </div>
-            {% else %}
-                {# Эти поля (image_type, gallery, id) будут скрыты благодаря HiddenInput в PictureForm #}
-                {{ field }}
-            {% endif %}
-        {% endfor %}
-        <button type="button" class="btn btn-danger mt-2 remove-form">Видалити</button>
-    </div>
 
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Предварительный просмотр главной картинки
-            const mainPictureInput = document.querySelector('.main-picture-form input[type="file"]');
-            const mainPicturePreview = document.querySelector('.main-picture-form .image-preview');
-
-            if (mainPictureInput && mainPicturePreview) {
-                mainPictureInput.addEventListener('change', function() {
-                    previewImage(this, mainPicturePreview, 200, 200);
-                });
-            }
-
-            // Обработка формсета галереи
-            const addPictureFormButton = document.getElementById('add-picture-form');
-            const picturesFormsetContainer = document.getElementById('pictures-formset');
-            const emptyFormTemplate = document.getElementById('empty-form-template').innerHTML;
-            const totalForms = document.querySelector('#id_pictures-TOTAL_FORMS');
-            let formCount = picturesFormsetContainer.querySelectorAll('.gallery-image-form').length;
-
-            function updateFormIndices(formElement, newIndex) {
-                formElement.querySelectorAll('[id], [name], [for]').forEach(node => {
-                    if (node.id) {
-                        node.id = node.id.replace(/-\d+-/, `-${newIndex}-`);
-                        node.id = node.id.replace(/__prefix__/, newIndex);
-                    }
-                    if (node.name) {
-                        node.name = node.name.replace(/-\d+-/, `-${newIndex}-`);
-                        node.name = node.name.replace(/__prefix__/, newIndex);
-                    }
-                    if (node.tagName === 'LABEL' && node.htmlFor) {
-                        node.htmlFor = node.htmlFor.replace(/-\d+-/, `-${newIndex}-`);
-                        node.htmlFor = node.htmlFor.replace(/__prefix__/, newIndex);
-                    }
-                });
-                // Инициализация предпросмотра изображения для новой формы
-                const fileInput = formElement.querySelector('input[type="file"]');
-                const previewContainer = formElement.querySelector('.image-preview');
-                if (fileInput && previewContainer) {
-                    fileInput.addEventListener('change', function() {
-                        previewImage(this, previewContainer, 100, 100);
-                    });
-                }
-            }
-
-            function previewImage(input, previewContainer, maxWidth, maxHeight) {
-                if (input.files && input.files[0]) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        previewContainer.innerHTML = `<img src="${e.target.result}" style="max-width: ${maxWidth}px; max-height: ${maxHeight}px;">`;
-                    }
-                    reader.readAsDataURL(input.files[0]);
-                } else {
-                    previewContainer.innerHTML = '';
-                }
-            }
-
-            addPictureFormButton.addEventListener('click', function() {
-                const newFormWrapper = document.createElement('div');
-                newFormWrapper.classList.add('gallery-image-form', 'border', 'p-3', 'mb-3');
-                newFormWrapper.innerHTML = emptyFormTemplate;
-
-                updateFormIndices(newFormWrapper, formCount);
-
-                picturesFormsetContainer.appendChild(newFormWrapper);
-                formCount++;
-                totalForms.value = formCount;
-            });
-
-            // Делегирование события для кнопок удаления (для уже существующих и новых форм)
-            picturesFormsetContainer.addEventListener('click', function(event) {
-                if (event.target.classList.contains('remove-form')) {
-                    event.preventDefault();
-                    const formToRemove = event.target.closest('.gallery-image-form');
-                    const deleteCheckbox = formToRemove.querySelector('input[type="checkbox"][id$="-DELETE"]');
-
-                    if (deleteCheckbox) {
-                        deleteCheckbox.checked = true;
-                        formToRemove.style.display = 'none';
-                    } else {
-                        formToRemove.remove();
-                    }
-                    formCount--;
-                    totalForms.value = formCount;
-                }
-            });
-
-            // Инициализация предпросмотра для существующих форм при загрузке страницы
-            picturesFormsetContainer.querySelectorAll('.gallery-image-form').forEach(formElement => {
-                const fileInput = formElement.querySelector('input[type="file"]');
-                const previewContainer = formElement.querySelector('.image-preview');
-                if (fileInput && previewContainer) {
-                    fileInput.addEventListener('change', function() {
-                        previewImage(this, previewContainer, 100, 100);
-                    });
-                    const existingImg = formElement.querySelector('img[alt="Поточне зображення"]');
-                    if (existingImg) {
-                        previewContainer.appendChild(existingImg.cloneNode(true));
-                    }
-                }
-            });
-        });
-    </script>
+<script>
+    // DEFAULT_IMAGE_URL должен быть объявлен ПЕРВЫМ среди JS, которые его используют
+    const DEFAULT_IMAGE_URL = "{% static 'images/картинка.png' %}";
+</script>
+<script src="{% static 'js/gallery.js' %}"></script>
 {% endblock %}
