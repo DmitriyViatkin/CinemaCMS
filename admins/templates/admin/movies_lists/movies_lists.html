@@ -10,7 +10,7 @@
                 Додати фільм
         </a>
     </div>
-  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+  <div class="cards-grid-container">
     {% for movie in movies %}
           {% include 'admin/movies_lists/movi_card.html' with movie=movie %}
     {% endfor %}
@@ -33,4 +33,27 @@
     </span>
   </div>
      </section>
+ <style>
+.card-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: flex-start;
+    /* Или: justify-content: space-around; / space-between; / center; если нужно другое выравнивание */
+}
+
+
+.card {
+    flex: 0 0 calc(33.333% - 20px); /* Например, 3 карточки в ряд с учетом gap */
+    /* Или просто задайте максимальную ширину для гибкости */
+    max-width: 300px;
+}
+ .cards-grid-container {
+    display: grid; /* Делаем контейнер грид-контейнером */
+    /* Определяем колонки. Например, адаптивная сетка с мин. шириной 280px */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px; /* ЭТО ОНО! Устанавливает отступ между карточками */
+}
+
+</style>
 {% endblock %}

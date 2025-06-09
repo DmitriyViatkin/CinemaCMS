@@ -1,0 +1,96 @@
+{% load static %}
+{% for field in banner_form %}
+    {% if field.name == 'image' %}
+        <div class="form-group field-row-aligned banner-form-container" style="display: flex; align-items: center; gap: 15px;">
+            <label style="min-width: 120px;">Фото верхнього баннера</label>
+
+            <div class="image-preview-container" style="position: relative; width: 130px; height: 90px; border: 1px solid #000; display: flex; align-items: center; justify-content: center;">
+                {% if field.value and field.value.url %}
+                    <img src="{{ field.value.url }}" alt="Превью" style="max-width: 100%; max-height: 100%;">
+                {% else %}
+                    <img src="{% static 'images/картинка.png' %}" alt="Превью" style="max-width: 100%; max-height: 100%;">
+                {% endif %}
+            </div>
+
+            <!-- Скрытый input для файла -->
+            <input id="{{ field.id_for_label }}" name="{{ field.html_name }}" type="file" style="display: none;">
+            <!-- Кастомная кнопка загрузки -->
+            <label for="{{ field.id_for_label }}" class="btn btn-light btn-sm">загрузить</label>
+
+            <!-- Кнопка удаления -->
+            <button type="button" class="btn btn-light btn-sm remove-image-btn">Удалить</button>
+
+            {% if field.errors %}
+                <div class="alert alert-danger">{{ field.errors }}</div>
+            {% endif %}
+        </div>
+
+    {% elif field.name == 'DELETE' %}
+        <!-- Поле DELETE скрыто, но будет активироваться кнопкой "Удалить" -->
+        <div style="display: none;">{{ field }}</div>
+
+    {% elif field.name == 'image_type' or field.name == 'gallery' %}
+        <div style="display: none;">{{ field }}</div>
+
+    {% else %}
+        {{ field }}
+    {% endif %}
+{% endfor %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".remove-image-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            const container = btn.closest(".banner-form-container");
+            const deleteInput = container.querySelector("input[type=checkbox][name$='-DELETE']");
+            const fileInput = container.querySelector("input[type='file']");
+            const imgPreview = container.querySelector("img");
+
+            // Сбросить input[type=file]
+            if (fileInput) fileInput.value = "";
+
+            // Показать превью-заглушку
+            if (imgPreview) {
+                imgPreview.src = "{% static 'images/картинка.png' %}";
+            }
+
+            // Активировать DELETE checkbox
+            if (deleteInput) deleteInput.checked = true;
+        });
+    });
+});
+    document.addEventListener("DOMContentLoaded", function () {
+    // Превью при завантаженні
+    document.querySelectorAll(".banner-form-container").forEach(function (container) {
+        const fileInput = container.querySelector("input[type='file']");
+        const imageTag = container.querySelector("img");
+
+        if (fileInput && imageTag) {
+            fileInput.addEventListener("change", function (e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (evt) {
+                        imageTag.src = evt.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // Видалення зображення
+        const removeBtn = container.querySelector(".remove-image-btn");
+        const deleteInput = container.querySelector("input[type=checkbox][name$='-DELETE']");
+
+        if (removeBtn) {
+            removeBtn.addEventListener("click", function () {
+                if (fileInput) fileInput.value = "";
+                if (imageTag) imageTag.src = "{% static 'images/картинка.png' %}";
+                if (deleteInput) deleteInput.checked = true;
+            });
+        }
+    });
+});
+</script>
+<style>
+
+</style>

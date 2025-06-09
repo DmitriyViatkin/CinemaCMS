@@ -1,0 +1,253 @@
+/* --- Общие стили для выравнивания лейблов и полей в одну строку --- */
+/* Используется для form-group, где лейбл и поле должны быть в одну строку */
+.form-group.field-row-aligned {
+    display: flex;
+    align-items: center; /* Выравнивание элементов по вертикали по центру */
+    margin-bottom: 15px; /* Отступ между строками полей */
+}
+
+.form-group.field-row-aligned .label-wrapper {
+    min-width: 150px; /* Минимальная ширина для лейбла */
+    text-align: right;
+    margin-right: 15px; /* Отступ между лейблом и полем */
+}
+
+/* Для textarea, чтобы лейбл выравнивался по верхнему краю */
+.form-group.field-row-aligned .label-wrapper.align-self-start {
+    align-self: flex-start;
+}
+
+.form-group.field-row-aligned .input-wrapper {
+    flex-grow: 1; /* Поле занимает оставшееся пространство */
+}
+
+/* Убедимся, что поля ввода занимают 80% своей обёртки */
+.form-group.field-row-aligned .input-wrapper input[type="text"],
+.form-group.field-row-aligned .input-wrapper input[type="url"],
+.form-group.field-row-aligned .input-wrapper input[type="number"],
+.form-group.field-row-aligned .input-wrapper textarea,
+.form-group.field-row-aligned .input-wrapper select,
+.form-group.field-row-aligned .input-wrapper .input-group,
+.form-control {
+    width: 80%;
+    box-sizing: border-box; /* Важно: включает padding и border в общую ширину */
+}
+
+/* --- Стили для секции с несколькими колонками (Тип видео, Дата проката, etc.) --- */
+/* Родительский div с классами d-flex flex-wrap justify-content-between */
+.d-flex.flex-wrap.justify-content-between {
+    gap: 20px; /* Отступ между элементами */
+}
+
+/* Каждый form-group внутри этой секции */
+.d-flex.flex-wrap.justify-content-between .form-group.flex-item {
+    flex: 1 1 calc(25.333% - 20px); /* 3 колонки с учетом gap */
+    min-width: 280px; /* Минимальная ширина, чтобы не сильно сжимались */
+    box-sizing: border-box;
+    margin-bottom: 0; /* Отступ уже задан через gap */
+}
+
+/* Для строк внутри .flex-item (лейбл + поле) */
+.form-group.flex-item .field-row .input-wrapper {
+    flex-grow: 1; /* Оставляем, чтобы оно заполняло доступное место */
+    max-width: 300px; /* <-- НОВОЕ: Задайте максимальную ширину для обертки поля */
+    /* background-color: #f0f8ff; /* Для отладки */
+}
+
+/* Если хотите задать max-width непосредственно для поля select (если это выпадающий список) */
+.form-group.flex-item .field-row .input-wrapper select {
+    max-width: 300px; /* <-- НОВОЕ: Задайте максимальную ширину для самого поля */
+    /* Или просто width: 100%; если max-width на .input-wrapper уже задан */
+}
+
+/* Убедитесь, что .form-control также не переопределяет это */
+.form-control {
+    /* ... ваши существующие стили ... */
+    /* Если у вас здесь стоит width: 100%;, то max-width на родителе (input-wrapper) будет контролировать размер */
+    /* Если вы хотите, чтобы само поле не занимало всю ширину родительского .input-wrapper,
+       то можно задать width: auto; или конкретную ширину, но flex-grow: 1 тогда потеряет смысл.
+       Обычно лучше контролировать через max-width на родителе или напрямую на элементе. */
+}
+
+/* --- Стили для флажков (checkboxes) --- */
+/* Для группы флажков, если они в одной строке с общим лейблом */
+.form-group.field-row-aligned .input-wrapper.d-flex {
+    align-items: center;
+}
+
+.form-check {
+    display: flex; /* Делает сам form-check флекс-контейнером */
+    align-items: center; /* Выравнивает инпут и лейбл по центру */
+    /* padding-left: 0; */ /* Убираем это, чтобы Bootstrap мог управлять отступом */
+    /* Или, если вы хотите полный контроль, обнуляем padding-left и сами управляем */
+    padding-left: 0; /* Оставляем, если хотим вручную управлять */
+}
+
+.form-check-input {
+    /* Эти стили заменят или дополнят стили Bootstrap для input.form-check-input */
+    /* Убираем позиционирование Bootstrap, если оно мешает */
+    position: static; /* или relative */
+    margin-top: 0; /* Убираем любой нежелательный margin-top */
+    margin-left: .5rem; /* Убираем любой нежелательный margin-left */
+    margin-right: .5rem; /* Отступ между чекбоксом и лейблом */
+    flex-shrink: 0; /* Чекбокс не должен сжиматься */
+}
+
+.form-check-label {
+    margin-bottom: 0; /* Убираем нижний отступ */
+}
+/* --- Для SEO блока (если seo_form.html рендерится аналогично) --- */
+.seo-form-layout {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Стили для кнопки "Создать" в подвале карточки */
+.card-footer.text-center {
+    padding: 1.25rem;
+    text-align: center;
+}
+
+/* Общие стили для h4 заголовков внутри card-body */
+.card-body h4 {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    margin-top: 30px;
+}
+
+
+label[for="id_for_label_for_hidden_field_id"] {
+    display: none;
+}
+
+/* Убедитесь, что h3.card-title в card-header не имеет лишних отступов */
+.card-header .card-title {
+    margin-left: 0;
+}
+
+/* --- Стили для формсета галереи --- */
+#pictures-formset {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 15px;
+    width: 100%;
+}
+
+.gallery-image-form {
+    flex: 1 1 calc(20% - 15px); /* Или 30%, если влезает */
+    max-width: calc(20% - 15px);
+    box-sizing: border-box;
+}
+
+.gallery-image-form .image-preview {
+    max-width: 100%;
+    height: auto;
+}
+
+.gallery-image-form .image-preview img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+.custom-file-input-wrapper {
+    position: relative;
+    display: inline-block; /* Или block, в зависимости от желаемого макета */
+    flex-grow: 1; /* Позволить ему занимать доступное пространство */
+}
+
+.custom-file-input-wrapper input[type="file"] {
+    position: absolute; /* Скрыть нативный инпут */
+    left: 0;
+    top: 0;
+    opacity: 0; /* Сделать его полностью прозрачным */
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+    z-index: 10; /* Убедиться, что он кликабелен */
+}
+
+.custom-file-button {
+    /* Стилизуйте свою пользовательскую кнопку */
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: .25rem;
+    /* Добавьте больше стилей по необходимости */
+}
+
+
+
+/* ... Ваш существующий CSS для скрытия чекбокса ... */
+.gallery-delete-checkbox {
+    display: none !important; /* Убедиться, что он скрыт */
+}
+.image-preview {
+    position: relative; /* Обязательно для позиционирования крестика внутри */
+}
+
+.remove-image-cross {
+    position: absolute;
+    top: -8px;       /* Отрегулируйте позицию по вертикали */
+    right: -8px;     /* Отрегулируйте позицию по горизонтали */
+    width: 24px;     /* Размер кнопки */
+    height: 24px;
+    border-radius: 50%; /* Делаем круглой */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    line-height: 1; /* Для лучшего центрирования иконки */
+    z-index: 10;     /* Чтобы кнопка была поверх картинки */
+    border: 1px solid rgba(0,0,0,0.1); /* Небольшая обводка */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Небольшая тень */
+}
+
+.remove-image-cross i {
+    font-size: 14px; /* Размер иконки крестика */
+}
+
+/* Контейнер для трех полей */
+.d-flex.justify-content-between.align-items-center.flex-wrap {
+    /* Эти стили уже от Bootstrap, они сделают элементы Flex-контейнерами и распределят их */
+    margin-bottom: 15px; /* Отступ под этим блоком */
+}
+
+/* Стили для каждого отдельного поля (Дата, Вікова, Жанр) */
+.flex-field-item {
+    /* Если вы хотите, чтобы они делили пространство поровну */
+    flex-basis: 33%; /* Пример: 32% для каждого, чтобы оставить немного места для margin/gap */
+
+    /* background-color: #f0f0f0; /* Для отладки */
+}
+
+.flex-field-item .label-wrapper {
+    /* Стили для лейблов внутри этих полей */
+    flex-shrink: 0; /* Чтобы лейбл не сжимался */
+    text-align: right; /* Если хотите, чтобы лейблы были справа от своего текста */
+    margin-right: 5px; /* Маленький отступ между лейблом и полем */
+    /* min-width: Xpx; если нужно выровнять двоеточия (как в SEO блоке) */
+}
+
+.flex-field-item .input-wrapper {
+    flex-grow: 1; /* Поле ввода будет заполнять остальное пространство */
+}
+
+/* Для полей типа select (как Жанр) или input (Дата, Вікова) */
+.flex-field-item .input-wrapper select,
+.flex-field-item .input-wrapper input[type="text"],
+.flex-field-item .input-wrapper input[type="date"] { /* Убедитесь, что тип для даты правильный */
+    width: 80%; /* Заполняем всю ширину своего input-wrapper */
+    box-sizing: border-box;
+}
+
+/* Опционально: если поля слишком широкие, можно задать max-width для .input-wrapper */
+/* Например, если вы хотите, чтобы "Вікова категорія" была короче */
+/*
+.flex-field-item:nth-child(2) .input-wrapper {
+    max-width: 150px;
+}
+*/

@@ -8,9 +8,9 @@
   <h2 class="mb-4 text-center">Список кінотеатрів</h2>
 
   {% if cinemas %}
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    <div class="cards-grid-container">
       {% for cinema in cinemas %}
-        <div class="col">
+        <div >
           {% include 'admin/cinema/cinema_card.html' with cinema=cinema %}
         </div>
       {% endfor %}
@@ -53,4 +53,28 @@
     <span class="add-text" style="margin-left: 5px; vertical-align: middle;"> Додати кінотеатр </span>
 </a>
 </div>
+
+ <style>
+.card-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+
+    justify-content: flex-start;
+}
+
+
+.card {
+    flex: 0 0 calc(33.333% - 20px);
+
+    max-width: 300px;
+}
+ .cards-grid-container {
+    display: grid;
+
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 30px; /
+}
+
+</style>
 {% endblock %}

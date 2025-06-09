@@ -3,37 +3,58 @@
 
 
 
-<div class="card-body">
+<div class="card-body form-block">
+  <div class="form-group field-row-aligned">
+    <label class="label-wrapper">{{ form.title.label }}</label>
+    <div class="input-wrapper">{{ form.title }}</div>
+  </div>
 
-<div class="form-group">
-   <br>
-    {{ form.title.label_tag }}
-    {{ form.title }}
-    {% if form.title.help_text %}<small class="form-text text-muted">{{ form.title.help_text }}</small>{% endif %}
-    {% for error in form.title.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+  <div class="form-group field-row-aligned">
+    <label class="label-wrapper">{{ form.description.label }}</label>
+    <div class="input-wrapper">{{ form.description }}</div>
+  </div>
+
+  <div class="form-group field-row-aligned">
+    <label class="label-wrapper">{{ form.conditions.label }}</label>
+    <div class="input-wrapper">{{ form.conditions }}</div>
+  </div>
+
+  <div class="form-group field-row-aligned">
+    <label class="label-wrapper">{{ form.city.label }}</label>
+    <div class="input-wrapper">{{ form.city }}</div>
+  </div>
 </div>
-    </div>
-<div class="card-body">
-<div class="form-group">
-    {{ form.description.label_tag }}
-    {{ form.description }}
-    {% if form.description.help_text %}<small class="form-text text-muted">{{ form.description.help_text }}</small>{% endif %}
-    {% for error in form.description.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-</div>
-    </div>
-<div class="card-body">
-<div class="form-group">
-    {{ form.conditions.label_tag }}
-    {{ form.conditions }}
-    {% if form.conditions.help_text %}<small class="form-text text-muted">{{ form.conditions.help_text }}</small>{% endif %}
-    {% for error in form.conditions.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-</div>
-    </div>
-<div class="card-body">
-<div class="form-group">
-    {{ form.city.label_tag }}
-    {{ form.city }}
-    {% if form.city.help_text %}<small class="form-text text-muted">{{ form.city.help_text }}</small>{% endif %}
-    {% for error in form.city.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-</div>
-    </div>
+<style>
+    .form-block {
+  width: 100%;
+  max-width: 100%;
+}
+
+.field-row-aligned {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.label-wrapper {
+  min-width: 200px;
+  margin-right: 15px;
+  text-align: left;
+  font-weight: bold;
+}
+
+.input-wrapper {
+  flex-grow: 1;
+}
+
+.input-wrapper input,
+.input-wrapper textarea,
+.input-wrapper select {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 1rem;
+}
+</style>

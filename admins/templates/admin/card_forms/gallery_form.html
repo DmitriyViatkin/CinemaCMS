@@ -1,29 +1,77 @@
+{% load static %}
 
-                            <div id="pictures-formset">
-                                {% for form in picture_formset %}
-                                    <div class="gallery-image-form border p-3 mb-3">
-                                        <div style="display: none;">{{ form.id }}</div>
-                                        {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
-                                        <div class="form-group">
-                                            {{ form.image.label_tag }}
-                                            {% if form.instance.pk and form.instance.image %}
-                                                <img src="{{ form.instance.image.url }}" alt="Поточне зображення" style="max-width: 100px; max-height: 100px; margin-bottom: 10px;">
-                                            {% endif %}
-                                            {{ form.image }}
-                                            {% if form.image.help_text %}<small class="form-text text-muted">{{ form.image.help_text }}</small>{% endif %}
-                                            {% for error in form.image.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-                                        </div>
-                                        <div class="form-group form-check">
-                                            {{ form.DELETE }}
-                                            {{ form.DELETE.label_tag }}
-                                            {% for error in form.DELETE.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-                                        </div>
-                                        <div style="display: none;">{{ form.image_type.label_tag }} {{ form.image_type }}</div>
-                                        <div class="form-group" style="display: none;">
-                                            <label for="{{ form.prefix }}-gallery">Gallery:</label>
-                                            {{ form.gallery }}
-                                        </div>
-                                    </div>
-                                {% endfor %}
-                                {{ picture_formset.empty_form }}
-                            </div>
+{{ picture_formset.management_form }}
+
+
+
+<div id="pictures-formset">
+    {% for form in picture_formset %}
+        <div class="gallery-image-form border p-3 mb-3" data-exists="true" data-form-type="gallery"> {# Добавил data-exists и data-form-type #}
+
+            {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+
+            <div class="form-group field-row-aligned">
+                <div class="input-wrapper flex-grow-1 d-flex flex-column align-items-center">
+                    <div class="image-preview-container">
+                        {% if form.image.value %}
+                            <img src="{{ form.image.value.url }}" alt="Загруженное изображение">
+                        {% else %}
+                            <img src="{% static 'images/картинка.png' %}" alt="Изображение не загружено">
+                        {% endif %}
+                        {# ИСПОЛЬЗУЙТЕ ОБЩИЙ КЛАСС ДЛЯ КРЕСТИКА #}
+                        <button type="button" class="btn btn-danger btn-sm remove-item-cross" title="Видалити зображення" style="display: none;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <div class="custom-file-input-wrapper">
+                        {{ form.image }}
+                        <label class="btn btn-secondary custom-file-button">Додати</label>
+                    </div>
+
+                    {% if form.errors.image %}
+                        <div class="alert alert-danger">{{ form.errors.image }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <button type="button" class="btn btn-light btn-sm remove-gallery-btn mt-2">Видалити</button>
+
+            {{ form.id }}
+            {{ form.DELETE }}
+            {{ form.image_type }}
+            {{ form.gallery }}
+        </div>
+    {% endfor %}
+</div>
+
+<button id="add-picture-form" type="button" class="btn btn-success mt-2">Додати ще одне зображення</button>
+
+<div id="empty-form" style="display: none;">
+    <div class="gallery-image-form border p-3 mb-3" data-exists="false" data-form-type="gallery"> {# data-exists и data-form-type #}
+
+        <div class="form-group field-row-aligned">
+            <div class="input-wrapper flex-grow-1 d-flex flex-column align-items-center">
+                <div class="image-preview-container">
+                    <img src="{% static 'images/картинка.png' %}" alt="Изображение не загружено">
+                    {# ИСПОЛЬЗУЙТЕ ОБЩИЙ КЛАСС ДЛЯ КРЕСТИКА #}
+                    <button type="button" class="btn btn-danger btn-sm remove-item-cross" title="Видалити зображення" style="display: none;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="custom-file-input-wrapper">
+                    {{ picture_formset.empty_form.image }}
+                    <label class="btn btn-secondary custom-file-button">Додати</label>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" class="btn btn-light btn-sm remove-gallery-btn mt-2">Видалити</button>
+
+        {{ picture_formset.empty_form.id }}
+        {{ picture_formset.empty_form.DELETE }}
+        {{ picture_formset.empty_form.image_type }}
+        {{ picture_formset.empty_form.gallery }}
+    </div>
+</div>

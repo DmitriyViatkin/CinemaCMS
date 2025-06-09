@@ -1,19 +1,20 @@
 
 <div class="card h-100">
+
   {% if movie.main_picture %}
     <img src="{{ movie.main_picture.image.url }}" class="card-img-top" alt="{{ movie.title }}" style="height: 250px; object-fit: cover;">
   {% else %}
-    <div class="d-flex align-items-center justify-content-center" style="height: 250px; background-color: #e9ecef;">
-      <span class="text-muted">Зображення відсутнє</span>
-    </div>
+      <div class="d-flex align-items-center justify-content-center" style="height: 250px; background-color: #e9ecef;">
+        <span class="text-muted">Зображення відсутнє</span>
+      </div>
   {% endif %}
+
   <div class="card-body">
-    <h5 class="card-title">{{ movie.title }}</h5>
-    </div>
+      <h5 class="card-title">{{ movie.title }}</h5>
+  </div>
+
   <div class="card-body" >
     <a href="{% url 'add_movie_edit' movie.pk %}" class="btn btn-info btn-sm">Редагувати</a>
-
     <a href="{% url 'delete_movie' movie.pk %}" class="btn btn-danger btn-sm" onclick="return confirm('Ви впевнені, що хочете видалити фільм {{ movie.title }}?');">Видалити</a>
-
   </div>
 </div>

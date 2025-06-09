@@ -2,50 +2,70 @@
 {% load static %}
 
 
-      <div class="card-body">
-                  <div class="form-group">
-                        {{ block_seo_form.title_seo.label_tag }}
-                        {{ block_seo_form.title_seo }}
-                        {% if block_seo_form.title_seo.help_text %}<small class="form-text text-muted">{{ block_seo_form.title_seo.help_text }}</small>{% endif %}
-                        {% for error in block_seo_form.title_seo.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-                  </div>
-                </div>
+  <div class="seo-block-wrapper">
+  <div class="card-body seo-form-layout">
 
-                <div class="card-body">
-                  <div class="form-group">
-                        {{ block_seo_form.seo_url.label_tag }}
-                        {{ block_seo_form.seo_url }}
-                        {% if block_seo_form.seo_url.help_text %}<small class="form-text text-muted">{{ block_seo_form.seo_url.help_text }}</small>{% endif %}
-                        {% for error in block_seo_form.seo_url.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-                  </div>
-                </div>
+    <div class="seo-grid-layout">
+      <!-- Левая колонка -->
+      <div class="seo-label-column">
+        <span class="seo-block-label">SEO блок:</span>
+      </div>
 
-                <div class="card-body">
-                  <div class="form-group">
-                        {{ block_seo_form.seo_text.label_tag }}
-                        {{ block_seo_form.seo_text }}
-                        {% if block_seo_form.seo_text.help_text %}<small class="form-text text-muted">{{ block_seo_form.seo_text.help_text }}</small>{% endif %}
-                        {% for error in block_seo_form.seo_text.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-                  </div>
-                </div>
+      <!-- Правая колонка с полями -->
+      <div class="seo-fields-column">
+        <div class="form-group field-row-aligned">
+          <div class="label-wrapper">{{ block_seo_form.seo_url.label_tag }}</div>
+          <div class="input-wrapper">{{ block_seo_form.seo_url }}</div>
+        </div>
 
-                <div class="card-body">
-                  <div class="form-group">
-                         {{ block_seo_form.seo_keywords.label_tag }}
-                         {{ block_seo_form.seo_keywords }}
-                         {% if block_seo_form.seo_keywords.help_text %}<small class="form-text text-muted">{{ block_seo_form.seo_keywords.help_text }}</small>{% endif %}
-                         {% for error in block_seo_form.seo_keywords.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-                  </div>
-                </div>
+        <div class="form-group field-row-aligned">
+          <div class="label-wrapper">{{ block_seo_form.title_seo.label_tag }}</div>
+          <div class="input-wrapper">{{ block_seo_form.title_seo }}</div>
+        </div>
 
-                <div class="card-body">
-                  <div class="form-group">
-                        {{ block_seo_form.seo_description.label_tag }}
-                        {{ block_seo_form.seo_description }}
-                        {% if block_seo_form.seo_description.help_text %}<small class="form-text text-muted">{{ block_seo_form.seo_description.help_text }}</small>{% endif %}
-                        {% for error in block_seo_form.seo_description.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-                    </div>
-                  </div>
+        <div class="form-group field-row-aligned">
+          <div class="label-wrapper">{{ block_seo_form.seo_keywords.label_tag }}</div>
+          <div class="input-wrapper">{{ block_seo_form.seo_keywords }}</div>
+        </div>
+
+        <div class="form-group field-row-aligned">
+          <div class="label-wrapper align-self-start">{{ block_seo_form.seo_description.label_tag }}</div>
+          <div class="input-wrapper">{{ block_seo_form.seo_description }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<style>
+.seo-block-wrapper {
+  width: 100%;
+}
+
+.card-body.seo-form-layout {
+  width: 100%;
+  max-width: 100%;
+  padding: 20px;
+  margin: 0;
+}
+
+.seo-grid-layout {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 10px;
+  width: 100%; /* Очень важно: растягивает форму на всю ширину */
+}
+
+.field-row-aligned .input-wrapper {
+  flex: 1;
+  width: 100%; /* Растягивает инпут */
+}
+
+input[type="text"],
+textarea {
+  width: 100%; /* Поля тянутся по всей ширине родителя */
+  box-sizing: border-box;
+}
+</style>
 
 
 

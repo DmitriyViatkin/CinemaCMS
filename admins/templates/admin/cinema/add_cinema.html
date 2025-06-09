@@ -1,5 +1,4 @@
 
-
 {% extends 'admin/index.html' %}
 {% load static %}
 
@@ -9,7 +8,8 @@
 
 {% block content %}
 <h1>{% if cinema %}Редагувати кінотеатр: {{ cinema.title }}{% else %}Додати новий кінотеатр{% endif %}</h1>
-
+<link rel="stylesheet" href="{% static 'css/movie_css.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <section class="content" style="width: 80%;">
   <div class="container-fluid">
     <div class="row">
@@ -32,58 +32,18 @@
               <h2>Інформація про кінотеатр</h2>
               {% include 'admin/card_forms/cinema_form.html' with form=cinema_form %}
 <br>
-              <h2>Лого</h2>
-              <div class="main-picture-form">
-                <div class="image-preview">
-                  {% if logo_form.instance.image %}
-                    <img src="{{ logo_form.instance.image.url }}" style="max-width: 100%; max-height: 100%;">
-                  {% endif %}
-                </div>
-                {{ logo_form.image }}
-                <input type="hidden" name="{{ logo_form.prefix }}-image_type" value="logo">
-              </div>
-<br>
-              <h2>Баннер</h2>
-              <div class="banner-form">
-                <div class="image-preview">
-                  {% if banner_form.instance.image %}
-                    <img src="{{ banner_form.instance.image.url }}" style="max-width: 100%; max-height: 100%;">
-                  {% endif %}
-                </div>
-                {{ banner_form.image }}
-                <input type="hidden" name="{{ banner_form.prefix }}-image_type" value="main_picture">
-              </div>
-<br>
-              <h2>Картинки галереї</h2>
-              <div id="gallery-formset">
-                {{ picture_formset.management_form }}
-                {% for form in picture_formset %}
-                  <div class="gallery-image-form">
-                       {{ form.id }}
-                    <div class="image-preview">
-                      {% if form.instance.image %}
-                        <img src="{{ form.instance.image.url }}" style="max-width: 100%; max-height: 100%;">
-                      {% endif %}
-                    </div>
-                    {{ form.image }}
-                    <input type="hidden" name="{{ form.prefix }}-image_type" value="gallery">
-                    <button type="button" class="remove-form btn btn-danger mt-1">Видалити</button>
-                  </div>
-                {% endfor %}
-              </div>
-<br>
-              <button id="add-picture-form" type="button" class="btn btn-success mt-2">Додати ще одне зображення</button>
 
-            <template id="empty-picture-form">
-                  <div class="gallery-image-form">
-                    <div class="image-preview"></div>
-                    <input type="hidden" name="pictures-__prefix__-id" id="id_pictures-__prefix__-id"> <!-- ✅ вже є -->
-                    <input type="file" name="pictures-__prefix__-image">
-                    <input type="hidden" name="pictures-__prefix__-image_type" value="gallery">
-                    <button type="button" class="remove-form btn btn-danger mt-1">Видалити</button>
-                  </div>
-            </template>
-              {% include 'admin/card_forms/hall.html' with form=cinema_form %}
+              {%include 'admin/card_forms/logo_card.html'%}
+<br>
+
+
+                {% include 'admin/card_forms/banner_image.html'   %}
+
+<br>
+   <h3>Картинки галереї</h3>
+
+            {% include 'admin/card_forms/gallery_form.html'   %}
+              {% include 'admin/card_forms/hall.html'   %}
              <a href="{% url 'add_halls_create'   %}" class="btn btn-success">Додати зал</a>
               <br>
               <h2>SEO Інформація</h2>
@@ -101,6 +61,73 @@
     </div>
   </div>
 </section>
-
+<script>
+    const DEFAULT_IMAGE_URL = "{% static 'images/картинка.png' %}";
+</script>
+<script src="{% static 'js/add_movie.js' %}"></script>
 <script src="{% static 'js/add_btn.js'%}"> </script>
+<style>
+    .image-preview-container {
+    position: relative;
+    width: 130px;
+    height: 90px;
+    border: 1px solid #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background-color: #f8f8f8;
+    border-radius: 6px;
+}
+
+.image-preview-container img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain; /* або cover — залежить від твоїх потреб */
+}
+
+.form-group.field-row-aligned,
+.gallery-picture-block {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+/* Вирівнювання кнопок */
+.custom-file-button-logo,
+.remove-logo-btn {
+    white-space: nowrap;
+}
+
+/* Для картинки галереї */
+.gallery-picture-block {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.gallery-picture-block .image-preview-container {
+    margin-bottom: 5px;
+}
+
+/* Червоний хрестик */
+.remove-logo-cross {
+    background: rgba(255, 0, 0, 0.7);
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75em;
+    cursor: pointer;
+    border: none;
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    z-index: 10;
+}
+
+</style>
 {% endblock %}

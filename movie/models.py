@@ -15,11 +15,7 @@ class Movies(models.Model):
         ("FAN", "Фентезі"),
     ]
 
-    VIDEO_CHOISES = [
-        ("2D", "2D"),
-        ("3D", "3D"),
-        ("imax", "IMAX")
-    ]
+
 
     id = models.AutoField(primary_key=True)
     seo_block = models.OneToOneField(Block_SEO, on_delete=models.CASCADE, verbose_name='Блок СЕО ')
@@ -27,11 +23,13 @@ class Movies(models.Model):
     title = models.CharField(max_length=255, verbose_name='Назва')
     url_trailer = models.URLField(verbose_name='URL трелера ')
     description = models.TextField(verbose_name='Опис ')
-    video_type = models.CharField(max_length=5, choices=VIDEO_CHOISES, verbose_name='Тип відео ')
+
     relise_date = models.DateField(verbose_name='Дата проката')
     age_limit = models.IntegerField(verbose_name='Вікова категорія')
     date = models.DateField(auto_now_add=True, verbose_name='Дата створення запису')
-
+    is_2d =  models.BooleanField(default=False, verbose_name='2D')
+    is_3d = models.BooleanField(default=False, verbose_name='3D')
+    is_imax = models.BooleanField(default=False, verbose_name='IMAX')
     gallery = models.ForeignKey(Gallery, on_delete=models.SET_NULL, null=True, blank=True,
                                 related_name='movies', verbose_name='Галерея зображень')
 

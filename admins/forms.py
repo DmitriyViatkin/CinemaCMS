@@ -15,6 +15,7 @@ class PaigesCinemaForm(forms.ModelForm):
         widgets = {
             'is_active': forms.CheckboxInput(),}
 
+
 class PromotionForm(forms.ModelForm):
     class Meta:
         model = Promotion
@@ -23,6 +24,7 @@ class PromotionForm(forms.ModelForm):
             'date': forms.DateInput(attrs={'type': 'date'}),
             'is_active': forms.CheckboxInput()
         }
+
 
 class PaigesNewsForm(forms.ModelForm):
     class Meta:
@@ -33,6 +35,7 @@ class PaigesNewsForm(forms.ModelForm):
             'date': forms.DateInput(attrs={'type': 'date'}),
             'is_active':forms.CheckboxInput()
         }
+
 
 class CrossBannerForm(forms.ModelForm):
     image = forms.ImageField(required=False, label='Зображення для банера', widget=forms.FileInput() )
@@ -65,9 +68,10 @@ class UserForm(forms.ModelForm):
         fields = '__all__'
         exclude = ['last_login', 'date_joined', 'groups', 'user_permissions', 'password']
 
+
 class PictureForm(forms.ModelForm):
 
-    image = forms.ImageField(label='Зображення')
+    image = forms.ImageField(label='')
     class Meta:
         model = Picture
 
@@ -82,9 +86,13 @@ class PictureForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         self.fields['gallery'].required = False
-        self.fields['gallery'].label = ''  # Устанавливаем пустую метку
-        self.fields['image_type'].label = ''  # Устанавливаем пустую метку
+        self.fields['gallery'].label = ''
+        self.fields['image_type'].label = ''
+        self.fields['image'].label = 'Главная картинка'
 
+        self.fields['image'].widget.attrs.update({
+            'style': 'display: none;',  # <-- повністю ховає стандартну кнопку
+        })
 
         if 'id' in self.fields:
             self.fields['id'].label = ''
@@ -92,13 +100,9 @@ class PictureForm(forms.ModelForm):
         if not self.instance.pk:
             self.initial['image_type'] = 'gallery'
 
-PictureFormSet = modelformset_factory(
-    model=Picture,
-    form=PictureForm,
-    fields=['image', 'gallery', 'image_type'], # Поля должны совпадать с Meta.fields формы
-    extra=1,
-    can_delete=True,
-)
+
+PictureFormSet = modelformset_factory( model=Picture, form=PictureForm, fields=['image', 'gallery', 'image_type'],
+                                                                                        extra=1,can_delete=True,)
 class GalleryForm(forms.ModelForm):
 
     class Meta:
@@ -137,6 +141,7 @@ class BannerForm(forms.ModelForm):
 
             return banner
 
+
 BannersFormSet = modelformset_factory(Banners, form=BannerForm, extra=0, can_delete=True)
 
 class NewsForm(forms.ModelForm):
@@ -168,8 +173,8 @@ class NewsForm(forms.ModelForm):
 
         return news
 
-NewsFormSet = modelformset_factory(News, form=NewsForm, extra=0, can_delete=True)
 
+NewsFormSet = modelformset_factory(News, form=NewsForm, extra=0, can_delete=True)
 
 class TicketForm(forms.ModelForm):
     class Meta:
@@ -231,10 +236,23 @@ class BlockSEOForm(forms.ModelForm):
 
     class Meta:
         model = Block_SEO
-        fields = ['title_seo', 'seo_url', 'seo_text', 'seo_keywords', 'seo_description']
+        fields = ['title_seo', 'seo_url',   'seo_keywords', 'seo_description']
+        labels = {
+            "title_seo": 'title',
+            "seo_url" : "URL ",
+            "seo_keywords" : "keywords",
+
+            'seo_description':'description'
+
+        }
         widgets = {
-            'seo_text': forms.Textarea(attrs={'rows': 4}),
-            'seo_description': forms.Textarea(attrs={'rows': 4}),
+
+            'seo_description': forms.Textarea(attrs={'class':'form-control'}),
+            "title_seo":  forms.TextInput(attrs={'class':'form-control'}),
+            "seo_url":  forms.TextInput(attrs={'class':'form-control'}),
+            "seo_keywords":  forms.TextInput(attrs={'class':'form-control'}),
+
+
         }
 
 
@@ -244,26 +262,42 @@ class MovieForm(forms.ModelForm):
         model = Movies
 
         fields = ['genre', 'title', 'url_trailer', 'description',
-                  'video_type', 'relise_date', 'age_limit']
+                    'relise_date', 'age_limit', 'is_2d','is_3d','is_imax']
+        labels = {
+            'genre': 'Жанр:',
+            'title': 'Назва:',
+            'url_trailer': 'URL трейлера:',
+            'description': 'Опис:',
+
+            'relise_date': 'Дата проката:',
+            'age_limit': 'Вікова категорія:',
+            'is_2d': ' 2D ',
+            'is_3d': ' 3D ',
+            'is_imax': ' IMAX ',
+        }
 
         widgets = {
-            'description': forms.Textarea(attrs={'rows': 6}),
-            'relise_date': forms.DateInput(attrs={'type': 'date'}),
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'genre': forms.Select(attrs={'class': 'form-control'}),
+            'url_trailer': forms.URLInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 6}),
+            'relise_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+
+            'age_limit': forms.NumberInput(attrs={'class': 'form-control'}),
+            'is_2d': forms.CheckboxInput(attrs={'class': 'form-check-input', 'data-bootstrap-switch': ''}),
+
+            'is_3d': forms.CheckboxInput(attrs={'class': 'form-check-input', 'data-bootstrap-switch': ''}),
+
+            'is_imax': forms.CheckboxInput(attrs={'class': 'form-check-input', 'data-bootstrap-switch': ''}),
+
         }
 
 
 
 PICTURE_TYPE_DEFAULT = 'gallery'
 
-PictureFormSet1 = inlineformset_factory(
-    Gallery,
-    Picture,
-    form=PictureForm,
-    fields=('image', 'image_type'),
-    extra=1,
-    max_num=10,
-    can_delete=True,
-)
+PictureFormSet1 = inlineformset_factory( Gallery,  Picture, form=PictureForm,  fields=('image', 'image_type'),
+                                                                    extra=1,    max_num=10,    can_delete=True,)
 
 
 

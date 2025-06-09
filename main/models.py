@@ -6,7 +6,7 @@ class Block_SEO(models.Model):
     id = models.AutoField(primary_key=True)
     title_seo = models.CharField(max_length=250, verbose_name= 'Заголовок') # Залишаємо обов'язковим
     seo_url = models.SlugField(verbose_name= 'URL адреса ', unique=True) # Додали unique=True раніше, за замовчуванням обов'язкове
-    seo_text = models.TextField(verbose_name= 'текст', blank=True) # <--- ЗРОБЛЕНО НЕОБОВ'ЯЗКОВИМ
+
     seo_keywords = models.CharField(max_length=250, verbose_name= 'Ключові слова', blank=True) # <--- ЗРОБЛЕНО НЕОБОВ'ЯЗКОВИМ
     seo_description = models.TextField(verbose_name= 'Опис', blank=True) # <--- ЗРОБЛЕНО НЕОБОВ'ЯЗКОВИМ
 
