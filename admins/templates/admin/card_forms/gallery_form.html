@@ -35,12 +35,14 @@
                 </div>
             </div>
 
-            <button type="button" class="btn btn-light btn-sm remove-gallery-btn mt-2">Видалити</button>
+            <button type="button" class="btn btn-light btn-sm remove-gallery-btn mt-2" style="display :none" >Видалити</button>
 
-            {{ form.id }}
-            {{ form.DELETE }}
+             {{ form.id }}
             {{ form.image_type }}
             {{ form.gallery }}
+            <div class="delete-checkbox-hidden-field" style="display :none">
+    {{ form.DELETE }}
+</div>
         </div>
     {% endfor %}
 </div>
@@ -54,7 +56,7 @@
             <div class="input-wrapper flex-grow-1 d-flex flex-column align-items-center">
                 <div class="image-preview-container">
                     <img src="{% static 'images/картинка.png' %}" alt="Изображение не загружено">
-                    {# ИСПОЛЬЗУЙТЕ ОБЩИЙ КЛАСС ДЛЯ КРЕСТИКА #}
+
                     <button type="button" class="btn btn-danger btn-sm remove-item-cross" title="Видалити зображення" style="display: none;">
                         <i class="fas fa-times"></i>
                     </button>
@@ -67,11 +69,13 @@
             </div>
         </div>
 
-        <button type="button" class="btn btn-light btn-sm remove-gallery-btn mt-2">Видалити</button>
+        <button type="button" class="btn btn-light btn-sm remove-gallery-btn mt-2"style="display :none>Видалити</button>
 
-        {{ picture_formset.empty_form.id }}
-        {{ picture_formset.empty_form.DELETE }}
+         {{ picture_formset.empty_form.id }}
         {{ picture_formset.empty_form.image_type }}
         {{ picture_formset.empty_form.gallery }}
+        <div class="delete-checkbox-hidden-field" style="display :none">
+            {{ picture_formset.empty_form.DELETE }}
+        </div>
     </div>
 </div>

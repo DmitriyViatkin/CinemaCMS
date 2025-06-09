@@ -77,18 +77,16 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!container) return;
 
         const fileInput = container.querySelector('input[type="file"]');
-        // ИСПРАВЛЕНО: ищем image-preview-container
         const previewContainer = container.querySelector('.image-preview-container');
         const customFileButton = container.querySelector('.custom-file-button');
-        // ИСПРАВЛЕНО: ищем remove-item-cross
         const removeCrossBtn = previewContainer ? previewContainer.querySelector('.remove-item-cross') : null;
         const deleteCheckbox = container.querySelector(`input[type="checkbox"][name$="${formPrefix}-DELETE"]`);
 
         const updatePreviewAndCrossVisibility = (file) => {
-            if (!previewContainer) return; // Добавлена проверка на всякий случай
+            if (!previewContainer) return;
 
             const imgElement = previewContainer.querySelector('img');
-            if (!imgElement) return; // Добавлена проверка
+            if (!imgElement) return;
 
             if (file) {
                 const reader = new FileReader();
@@ -99,17 +97,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 reader.readAsDataURL(file);
             } else {
                 imgElement.src = DEFAULT_IMAGE_URL;
-                if (removeCrossBtn) removeCrossBtn.style.display = 'none';
+                if (removeCrossBtn) removeCrossBtn.style.display = 'block'; // <-- ИЗМЕНЕНО: всегда показывать при сбросе
             }
         };
 
-        if (previewContainer && previewContainer.querySelector('img')) { // Убедимся, что img существует
-            const currentImgSrc = previewContainer.querySelector('img').src;
-            if (currentImgSrc && !currentImgSrc.includes(DEFAULT_IMAGE_URL)) {
-                if (removeCrossBtn) removeCrossBtn.style.display = 'block';
-            } else {
-                if (removeCrossBtn) removeCrossBtn.style.display = 'none';
-            }
+        // ИСПРАВЛЕНО: УДАЛЯЕМ УСЛОВИЕ, чтобы крестик отображался всегда при загрузке
+        if (previewContainer && previewContainer.querySelector('img') && removeCrossBtn) {
+            removeCrossBtn.style.display = 'block';
         }
 
 
@@ -130,7 +124,7 @@ document.addEventListener('DOMContentLoaded', function() {
             removeCrossBtn.addEventListener('click', function(event) {
                 event.preventDefault();
                 if (fileInput) fileInput.value = '';
-                updatePreviewAndCrossVisibility(null);
+                updatePreviewAndCrossVisibility(null); // Это вызовет сброс и покажет крестик
                 if (deleteCheckbox) deleteCheckbox.checked = true;
             });
         }
@@ -170,24 +164,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const initializeGalleryForm = (form) => {
         const fileInput = form.querySelector('input[type="file"]');
-        // ИСПРАВЛЕНО: ищем image-preview-container
         const previewContainer = form.querySelector('.image-preview-container');
         const customFileButton = form.querySelector('.custom-file-button');
-        // ИСПРАВЛЕНО: ищем remove-item-cross
         const removeCrossBtn = previewContainer ? previewContainer.querySelector('.remove-item-cross') : null;
         const removeFullBtn = form.querySelector('.remove-gallery-btn');
 
-        if (previewContainer && previewContainer.querySelector('img')) { // Убедимся, что img существует
-            const currentImgSrc = previewContainer.querySelector('img').src;
-            if (currentImgSrc && !currentImgSrc.includes(DEFAULT_IMAGE_URL)) {
-                if (removeCrossBtn) {
-                    removeCrossBtn.style.display = 'block';
-                }
-            } else {
-                if (removeCrossBtn) {
-                    removeCrossBtn.style.display = 'none';
-                }
-            }
+        // ИСПРАВЛЕНО: УДАЛЯЕМ УСЛОВИЕ, чтобы крестик отображался всегда при загрузке
+        if (previewContainer && previewContainer.querySelector('img') && removeCrossBtn) {
+            removeCrossBtn.style.display = 'block';
         }
 
 
@@ -224,10 +208,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const handleGalleryRemoval = (formToDelete) => {
         const deleteCheckbox = formToDelete.querySelector('input[type="checkbox"][name$="-DELETE"]');
-        // ИСПРАВЛЕНО: ищем image-preview-container, затем img
         const imagePreviewImg = formToDelete.querySelector('.image-preview-container img');
         const fileInputToClear = formToDelete.querySelector('input[type="file"]');
-        // ИСПРАВЛЕНО: ищем remove-item-cross
         const removeCrossBtn = formToDelete.querySelector('.remove-item-cross');
 
         if (deleteCheckbox) {
@@ -239,9 +221,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (imagePreviewImg) {
             imagePreviewImg.src = DEFAULT_IMAGE_URL;
         }
+        // ИСПРАВЛЕНО: Если вы хотите, чтобы крестик отображался даже на дефолтной картинке
         if (removeCrossBtn) {
-            removeCrossBtn.style.display = 'none';
+            removeCrossBtn.style.display = 'block'; // Показать крестик после сброса на дефолтную
         }
+
 
         formToDelete.style.display = 'none';
 
@@ -251,6 +235,7 @@ document.addEventListener('DOMContentLoaded', function() {
             hideGalleryFormFields(form);
         });
     };
+
 
 
     if (picturesFormsetContainer) {

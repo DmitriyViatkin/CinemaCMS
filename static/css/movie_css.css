@@ -137,75 +137,89 @@ label[for="id_for_label_for_hidden_field_id"] {
 }
 
 .gallery-image-form {
-    flex: 1 1 calc(20% - 15px); /* Или 30%, если влезает */
-    max-width: calc(20% - 15px);
+    flex: 1 1 calc(30% - 15px);
+    max-width: calc(20% - 15px); /* У вас тут 20%, а flex: 1 1 calc(30% - 15px); - это 30%. Убедитесь, что это то, что вы хотите. Я бы выставил одно значение, например flex: 1 1 calc(25% - 15px); max-width: calc(25% - 15px); для 4 колонок или flex: 1 1 calc(33.33% - 15px); max-width: calc(33.33% - 15px); для 3 колонок. */
     box-sizing: border-box;
+    position: relative; /* Добавляем relative к галерейной форме, если крестик будет позиционироваться относительно нее */
 }
 
-.gallery-image-form .image-preview {
-    max-width: 100%;
+/* Это контейнер, который содержит img и крестик. ОН ДОЛЖЕН БЫТЬ RELATIVE! */
+.image-preview-container { /* Ваш класс из HTML */
+    position: relative; /* ВАЖНО: Делаем его позиционированным контекстом для абсолютного крестика */
+    max-width: 100%; /* Убедитесь, что он занимает всю доступную ширину */
+    height: auto; /* Или задайте фиксированную высоту, если нужно */
+    overflow: hidden; /* Скрыть все, что выходит за границы контейнера */
+    display: flex; /* Используйте flexbox, чтобы центрировать изображение, если оно меньше контейнера */
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #ddd; /* Опционально: рамка для предпросмотра */
+    padding: 5px; /* Опционально: внутренний отступ */
+    background-color: #f8f8f8; /* Опционально: фон */
+}
+
+
+.image-preview-container img { /* Используем класс контейнера для img */
+    width: 100%; /* Занимает всю ширину контейнера */
     height: auto;
+    max-height: 150px; /* Опционально: ограничить максимальную высоту картинки */
+    object-fit: contain; /* Сохраняет пропорции, вписывая изображение в контейнер */
+    display: block; /* Убирает лишние отступы под изображением */
 }
 
-.gallery-image-form .image-preview img {
-    width: 100%;
-    height: auto;
-    object-fit: contain;
-}
-
-.custom-file-input-wrapper {
-    position: relative;
-    display: inline-block; /* Или block, в зависимости от желаемого макета */
-    flex-grow: 1; /* Позволить ему занимать доступное пространство */
-}
-
-.custom-file-input-wrapper input[type="file"] {
-    position: absolute; /* Скрыть нативный инпут */
-    left: 0;
-    top: 0;
-    opacity: 0; /* Сделать его полностью прозрачным */
-    cursor: pointer;
-    width: 100%;
-    height: 100%;
-    z-index: 10; /* Убедиться, что он кликабелен */
-}
-
-.custom-file-button {
-    /* Стилизуйте свою пользовательскую кнопку */
-    padding: .375rem .75rem;
-    font-size: 1rem;
-    line-height: 1.5;
-    border-radius: .25rem;
-    /* Добавьте больше стилей по необходимости */
-}
-
-
-
-/* ... Ваш существующий CSS для скрытия чекбокса ... */
-.gallery-delete-checkbox {
-    display: none !important; /* Убедиться, что он скрыт */
-}
-.image-preview {
-    position: relative; /* Обязательно для позиционирования крестика внутри */
-}
-
-.remove-image-cross {
+/* Стилизация крестика */
+.remove-item-cross { /* ИСПОЛЬЗУЕМ remove-item-cross, как в HTML и JS */
     position: absolute;
-    top: -8px;       /* Отрегулируйте позицию по вертикали */
-    right: -8px;     /* Отрегулируйте позицию по горизонтали */
-    width: 24px;     /* Размер кнопки */
+    top: 5px;   /* Отступ от верхнего края image-preview-container */
+    right: 5px; /* Отступ от правого края image-preview-container */
+    width: 24px;
     height: 24px;
-    border-radius: 50%; /* Делаем круглой */
+    border-radius: 50%;
+    background-color: rgba(220, 53, 69, 0.9); /* Красный цвет, слегка прозрачный */
+    color: white; /* Белый крестик */
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0;
-    line-height: 1; /* Для лучшего центрирования иконки */
-    z-index: 10;     /* Чтобы кнопка была поверх картинки */
-    border: 1px solid rgba(0,0,0,0.1); /* Небольшая обводка */
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Небольшая тень */
+    line-height: 1;
+    z-index: 10;
+    cursor: pointer; /* Делаем его кликабельным */
+    border: none; /* Убираем рамку */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: background-color 0.2s ease; /* Плавный переход цвета при наведении */
 }
 
+.remove-item-cross:hover {
+    background-color: rgba(220, 53, 69, 1); /* Чуть более насыщенный красный при наведении */
+}
+
+.remove-item-cross i {
+    font-size: 14px;
+}
+/* ... Ваш существующий CSS для скрытия чекбокса ... */
+/* --- Скрываем чекбокс удаления (DELETE) и его метку --- */
+/* Класс для обертки чекбокса, который вы добавили в HTML */
+.delete-checkbox-hidden-field {
+    display: none;
+    visibility: hidden;
+    height: 0;
+    width: 0;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    line-height: 0;
+    font-size: 0;
+}
+
+input[type="checkbox"][name$="-DELETE"] {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* Скрыть метку, если она где-то есть */
+label[for$="-DELETE"] {
+    display: none !important;
+}
 .remove-image-cross i {
     font-size: 14px; /* Размер иконки крестика */
 }
