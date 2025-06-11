@@ -1,10 +1,106 @@
 from django import forms
-from main.models import Block_SEO, Gallery, Picture
+from main.models import Block_SEO, Gallery, Picture, MainPaiges
 from  movie.models import Movies
 from  users.models import User
 from core.models import Cinemas, Halls, Sessions,Seats, Tickets
-from main.models import Banners, Cross_Banner, News, PaigesNews, Promotion, PaigesCinema
+from main.models import Banners, Cross_Banner, News, PaigesNews, Promotion, PaigesCinema, Contact
 from django.forms import inlineformset_factory, formset_factory, modelformset_factory
+from django.forms.widgets import HiddenInput
+
+class ContactForm(forms.ModelForm):
+    contact_picture = forms.ImageField(required=False, label="Лого")
+    delete_contact_picture = forms.BooleanField(required=False, initial=False, widget=forms.HiddenInput())
+
+    class Meta:
+        model = Contact
+        fields = ['title', 'address', 'latitude', 'longitude', 'phone_number', 'gallery']
+        widgets = {
+            'longitude': HiddenInput(), # Теперь HiddenInput будет распознан
+            'gallery': HiddenInput(),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['latitude'].required = False
+        self.fields['longitude'].required = False
+        self.fields['gallery'].required = False
+
+        if self.instance and self.instance.pk:
+            current_gallery = self.instance.gallery
+            if current_gallery:
+                first_picture = current_gallery.pictures.first()
+                if first_picture:
+                    self.current_contact_image = first_picture
+
+    def clean_gallery(self):
+        gallery_data = self.cleaned_data.get('gallery')
+        if gallery_data is None:
+            return None
+        if isinstance(gallery_data, str) and not gallery_data:
+            return None
+        return gallery_data
+
+    def save(self, commit=True):
+        contact = super().save(commit=False)
+
+        contact_picture = self.cleaned_data.get('contact_picture')
+        delete_contact_picture = self.cleaned_data.get('delete_contact_picture')
+
+        if delete_contact_picture:
+            if contact.gallery:
+                contact.gallery.delete()
+                contact.gallery = None
+        elif contact_picture:
+            if contact.gallery:
+                contact.gallery.pictures.all().delete()
+                gallery = contact.gallery
+            else:
+                gallery = Gallery.objects.create()
+                contact.gallery = gallery
+
+            Picture.objects.create(gallery=gallery, image=contact_picture)
+        elif not contact.gallery:
+             contact.gallery = None
+
+        if commit:
+            contact.save()
+        return contact
+
+    def get_current_contact_image(self):
+        if self.instance and self.instance.pk and self.instance.gallery:
+            return self.instance.gallery.pictures.first()
+        return None
+
+# Важно: используйте modelformset_factory для Contact, так как Gallery - это ForeignKey на Contact
+# А не inlineformset_factory, если вы не управляете Gallery как инлайн-дочерними объектами Contact.
+ContactFormSet = modelformset_factory(Contact, form=ContactForm, extra=0, can_delete=True)
+
+
+class MainPaigesForm(forms.ModelForm):
+    class Meta:
+        model = MainPaiges
+        exclude = ['id', 'seo_block', ] # Убедитесь, что 'seo_block' действительно нужно исключать, если это связано с SEO_text
+        # fields = '__all__' # Если вы используете exclude, то fields = '__all__' не нужен и может вызвать конфликт.
+                           # Лучше перечислить все поля явно, если exclude вызывает проблемы, или убрать fields = '__all__'
+        labels = {
+            'phone_1': 'Телефон ',
+            'phone_2': ' ',
+            'SEO_text': 'SEO текст ',
+        }
+
+        widgets = {
+            # Здесь вы уже добавляете 'form-control', но мы хотим добавить еще 'phone-input'
+            'phone_1': forms.TextInput(attrs={'class': 'form-control phone-input'}), # Добавили phone-input
+            'phone_2': forms.TextInput(attrs={'class': 'form-control phone-input'}), # Добавили phone-input
+
+            'SEO_text': forms.Textarea(attrs={'class': 'form-control', 'rows': 6}),
+            'is_active': forms.CheckboxInput(attrs={'data-bootstrap-switch': ''}),
+        }
+
+    # Метод __init__ должен быть здесь, прямо внутри класса MainPaigesForm, но вне Meta
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['is_active'].widget.attrs.update({'data-bootstrap-switch': 'true'}),
 
 
 class PaigesCinemaForm(forms.ModelForm):
@@ -13,7 +109,7 @@ class PaigesCinemaForm(forms.ModelForm):
         exclude = ['id', 'seo_block', 'gallery']
         fields = '__all__'
         widgets = {
-            'is_active': forms.CheckboxInput(),}
+            'is_active': forms.CheckboxInput(attrs={'data-bootstrap-switch': ''}),}
 
 
 class PromotionForm(forms.ModelForm):

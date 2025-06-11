@@ -19,6 +19,7 @@ class Block_SEO(models.Model):
         verbose_name = 'Блок СЕО'
         verbose_name_plural = 'Блоки СЕО'
 
+
 class Gallery(models.Model):
     id = models.AutoField(primary_key=True)
 
@@ -26,8 +27,6 @@ class Gallery(models.Model):
     class Meta:
         verbose_name = 'Галерея'
         verbose_name_plural = 'Галереї'
-
-
 
 
 class Picture(models.Model):
@@ -79,6 +78,7 @@ class Banners(models.Model):
         verbose_name = 'Банер'
         verbose_name_plural = 'Банери'
 
+
 class News(models.Model):
     id = models.AutoField(primary_key=True)
     gallery = models.ForeignKey(
@@ -114,8 +114,6 @@ class News(models.Model):
         verbose_name_plural = 'Новини'
 
 
-
-
 class Cross_Banner (models.Model):
     id = models.AutoField(primary_key=True)
     gallery = models.ForeignKey(Gallery, on_delete=models.CASCADE, null=True, blank=True, verbose_name= 'Картинка')
@@ -132,6 +130,7 @@ class Cross_Banner (models.Model):
     class Meta:
         verbose_name = 'Сквозной Банер'
         verbose_name_plural = 'Сквозние Банери'
+
 
 class PaigesNews(models.Model):
     id = models.AutoField(primary_key=True)
@@ -152,17 +151,17 @@ class PaigesNews(models.Model):
         verbose_name = 'Сторінка Новини'
         verbose_name_plural = 'Сторінки Новин'
 
+
 class MainPaiges (models.Model):
-    name_cinema = models.CharField(max_length=250, verbose_name= "Кинотеатр")
+
     id = models.AutoField(primary_key=True)
     seo_block = models.OneToOneField(Block_SEO, on_delete= models.CASCADE, verbose_name= 'Блок СЕО ')
-    gallery = models.ForeignKey(Gallery, on_delete=models.SET_NULL, null=True, blank=True, verbose_name= 'Картинка')
     SEO_text  = models.TextField(verbose_name= 'Сео текст ')
-    phone = models.CharField(max_length=16, verbose_name= "Телефон")
+    phone_1  = models.CharField(max_length=16, verbose_name= "Телефон")
+    phone_2 = models.CharField(max_length=16, verbose_name="Телефон")
     is_active = models.BooleanField(default=False, verbose_name= 'Показ')
 
-    def __str__(self):
-        return self.name_cinema
+
 
     class Meta:
         verbose_name = 'Головна сторінка'
@@ -187,11 +186,19 @@ class PaigesCinema(models.Model):
 
 class Contact(models.Model):
     id = models.AutoField(primary_key=True)
-
+    seo_block = models.ForeignKey(Block_SEO, on_delete=models.CASCADE, verbose_name='Блок СЕО ')
+    gallery = models.ForeignKey(
+        Gallery,
+        related_name='contact',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        verbose_name='Картинка'
+    )
     title = models.CharField(max_length=100, verbose_name= 'Опис ')
     address = models.CharField(max_length=250, verbose_name= 'Адреса ')
-    latitude = models.FloatField(verbose_name= 'Довгота ')
-    longitude= models.FloatField(verbose_name= 'Широта ')
+    latitude = models.FloatField(null=True, blank=True, verbose_name='Довгота ')
+    longitude = models.FloatField(null=True, blank=True, verbose_name='Широта ')
     phone_number = models.CharField(max_length=15, verbose_name= 'Номер телефону')
     def __str__(self):
         return self.title

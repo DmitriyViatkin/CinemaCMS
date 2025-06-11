@@ -1,0 +1,112 @@
+{% extends 'admin/index.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% block title %}Додати сторінку {% endblock %}
+
+{% block content %}
+{# CSS для Bootstrap Switch - путь должен быть верным (admins/plugins/...) #}
+<link rel="stylesheet" href="{% static 'admins/plugins/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css' %}">
+
+<section class="content" >
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Додати сторінку </h3>
+                    </div>
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        {% if paige_form.non_field_errors %}
+                            <div class="alert alert-danger">{{ paige_form.non_field_errors }}</div>
+                        {% endif %}
+                        {% if block_seo_form.non_field_errors %}
+                            <div class="alert alert-danger">{{ block_seo_form.non_field_errors }}</div>
+                        {% endif %}
+
+                        <div class="card-body">
+                            <h2>Інформація про сторінку </h2>
+                            <div class="card-body">
+                                <div class="form-group" style="display: flex; align-items: center; justify-content: space-between;">
+                                    <div >
+                                        <label>{{ paige_form.phone_1.label }}</label><br>
+                                        <div>
+                                            {{ paige_form.phone_1 }}
+                                            {% for error in paige_form.phone_1.errors %}
+                                                <div class="alert alert-danger">{{ error }}</div>
+                                            {% endfor %}
+                                            <br>
+                                            {{ paige_form.phone_2 }}
+                                            {% for error in paige_form.phone_2.errors %}
+                                                <div class="alert alert-danger">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center" style="margin-left: 20px;">
+                                        <div class="form-group mb-0 mr-4">
+                                            <label for="{{ paige_form.is_active.id_for_label }}" class="mr-2">{{ paige_form.is_active.label }}</label>
+                                            {{ paige_form.is_active|add_class:"form-control" }}
+                                        </div>
+                                        <div>
+                                            <button type="button" class="btn btn-outline-secondary active">Український</button>
+                                            <button type="button" class="btn btn-outline-secondary">Русский</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        {{ paige_form.SEO_text.label_tag }}
+                                        {{ paige_form.SEO_text }}
+                                        {% if paige_form.SEO_text.help_text %}
+                                            <small class="form-text text-muted">{{ paige_form.SEO_text.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in paige_form.SEO_text.errors %}
+                                            <div class="alert alert-danger">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            <h2>SEO Інформація</h2>
+                            {% include 'admin/card_forms/seo_form.html' with form=block_seo_form %}
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary">Створити</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# JS для Bootstrap Switch. Он должен быть здесь, после jQuery и Bootstrap JS из admin/index.html #}
+<script src="{% static 'admins/plugins/bootstrap-switch/js/bootstrap-switch.min.js' %}" ></script>
+
+{# Единственное подключение ajax_datatable.js. #}
+{# ПОМНИТЕ: Если вы ещё не нашли ajax_datatable.js командой find, сделайте это и измените путь! #}
+<script src="{% static 'admins/ajax_datatable/js/ajax_datatable.js' %}"></script>
+{# Если find для ajax_datatable.js показал ./static/ajax_datatable/js/ajax_datatable.js, то строка должна быть: #}
+{# <script src="{% static 'ajax_datatable/js/ajax_datatable.js' %}"></script> #}
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof jQuery !== 'undefined') {
+            $('input[data-bootstrap-switch]').each(function(){
+                $(this).bootstrapSwitch('state', $(this).prop('checked'));
+            });
+        } else {
+            console.error("jQuery is not loaded. Bootstrap Switch cannot be initialized.");
+        }
+    });
+</script>
+
+<style>
+.phone-input {
+    width: 50%;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+}
+</style>
+
+{% endblock %}

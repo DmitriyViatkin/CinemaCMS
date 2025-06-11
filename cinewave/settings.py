@@ -50,15 +50,17 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
+    'widget_tweaks'
 
 
 
 ]
 
 MIDDLEWARE = [
+
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -132,7 +134,7 @@ LANGUAGE_CODE = 'ru-ru'
 TIME_ZONE = 'Europe/Kyiv'
 
 USE_I18N = True
-
+USE_L10N = True
 USE_TZ = True
 
 
@@ -141,6 +143,11 @@ USE_TZ = True
 MEDIA_URL = '/media/'
 MEDIA_ROOT=BASE_DIR/'media'
 STATIC_URL = '/static/'
+LOCALE_PATHS = (
+     os.path.join(BASE_DIR, 'locale'),
+)
+
+
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]

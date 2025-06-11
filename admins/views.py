@@ -3,15 +3,15 @@ from django.db.models import Count
 from django.utils import timezone
 from movie.models import Movies
 from users.models import User
-
+import logging
 from django.db.models import Prefetch
 
-from main.models import Gallery, Banners, Cross_Banner, News, PaigesNews, Promotion, PaigesCinema
+from main.models import Gallery, Banners, Cross_Banner, News, PaigesNews, Promotion, PaigesCinema, MainPaiges, Contact, Block_SEO
 from core.models import Cinemas, Halls, Sessions, Seats, Tickets
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .forms import (PaigesNewsForm,PaigesCinemaForm,BlockSEOForm, MovieForm, PictureFormSet, GalleryForm, CinemaForm,
-                    HallsForm,  TicketForm,SeatForm, PictureFormSet1,PromotionForm,  BannersFormSet,
-                    NewsFormSet, PictureForm, UserForm, SessionFormSet , Picture,  CrossBannerForm )
+                    HallsForm,  TicketForm,SeatForm, MainPaigesForm,PromotionForm,  BannersFormSet,
+                    NewsFormSet, PictureForm, UserForm, SessionFormSet , Picture,  CrossBannerForm , ContactFormSet)
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpRequest, HttpResponse
 from django.template.loader import render_to_string
@@ -44,6 +44,90 @@ def index(request):
     }
 
     return render(request,'admin/index.html', context)
+
+
+
+@staff_member_required
+def new_contacts(request):
+    print(f"--- new_contacts view called, Request method: {request.method} ---")
+
+    seo_instance = None
+    try:
+        seo_instance = Block_SEO.objects.get(id=1)
+        print(f"DEBUG: Found existing Block_SEO instance with ID: {seo_instance.id}")
+    except Block_SEO.DoesNotExist:
+        print("DEBUG: Block_SEO instance with id=1 does not exist. A new one will be created if form is valid.")
+        seo_instance = None
+    except Exception as e:
+        print(f"ERROR: An unexpected error occurred while retrieving Block_SEO: {e}")
+
+    if request.method=='POST':
+        print("DEBUG: Handling POST request.")
+        formset = ContactFormSet(request.POST, request.FILES, queryset=Contact.objects.all())
+        block_seo_form = BlockSEOForm(request.POST, instance=seo_instance)
+
+        print(f"DEBUG: Data from POST request (first 200 chars): {str(request.POST)[:200]}...")
+        if request.FILES:
+            print(f"DEBUG: Files from POST request: {request.FILES.keys()}")
+        else:
+            print("DEBUG: No files in POST request.")
+
+        if formset.is_valid() and block_seo_form.is_valid():
+            print("DEBUG: Both ContactFormSet and BlockSEOForm are valid. Proceeding to save.")
+
+
+            try:
+
+                contacts = formset.save()
+                print(f"DEBUG: Formset saved {len(contacts)} contacts.")
+
+                for obj in formset.deleted_objects:
+                    print(f"DEBUG: Deleting contact: {obj.title} (ID: {obj.id})")
+                    if obj.gallery:
+                        obj.gallery.delete()
+                        print(f"DEBUG: Deleted gallery for contact {obj.title}")
+                    obj.delete()
+
+            except Exception as e:
+                print(f"ERROR: An error occurred during formset save: {e}")
+
+                raise e
+            block_seo_form.save()
+            print(f"DEBUG: BlockSEOForm saved. New/updated title_seo: {block_seo_form.instance.title_seo}")
+
+            print("DEBUG: Redirecting to 'con' (contacts list page).")
+            return redirect('con')
+        else:
+            print("WARNING: One or more forms are NOT valid. Displaying errors.")
+            if not formset.is_valid():
+                print("ERROR: ContactFormSet is INVALID.")
+                for i, form in enumerate(formset):
+                    if form.errors:
+                        print(f"  Form {i} errors: {form.errors}")
+                    if form.non_field_errors():
+                        print(f"  Form {i} non-field errors: {form.non_field_errors()}")
+            else:
+                print("DEBUG: ContactFormSet is VALID.")
+
+            if not block_seo_form.is_valid():
+                print("ERROR: BlockSEOForm is INVALID.")
+                print(f"  BlockSEOForm errors: {block_seo_form.errors}")
+                print(f"  BlockSEOForm non_field_errors: {block_seo_form.non_field_errors()}")
+            else:
+                print("DEBUG: BlockSEOForm is VALID.")
+
+    else:  # GET request
+        print("DEBUG: Handling GET request.")
+        formset = ContactFormSet(queryset=Contact.objects.all())
+        block_seo_form = BlockSEOForm(instance=seo_instance)
+
+    print("DEBUG: Rendering new_contacts.html template.")
+    return render(request, 'admin/paige_list/new_contacts.html', {
+        'formset': formset,
+        'block_seo_form': block_seo_form
+    })
+
+
 
 @staff_member_required
 def movie_list(request):
@@ -1265,7 +1349,53 @@ def paige(request):
     return render(request, 'admin/paige_list/paige_lists.html', context)
 
 @staff_member_required
-def  paige_add(request, paige_id=None):
+def  main_paige (request, paige_id=None):
+    paige_instance = None
+    block_seo_instance = None
+
+    if paige_id:
+        paige_instance = get_object_or_404(MainPaiges, pk=paige_id)
+        block_seo_instance = paige_instance.seo_block
+
+    if request.method=='POST':
+        block_seo_form = BlockSEOForm(request.POST, instance=block_seo_instance)
+        paige_form = MainPaigesForm(request.POST, instance=paige_instance)
+
+        if  block_seo_form.is_valid() and paige_form.is_valid()  :
+
+            block_seo  = block_seo_form.save()
+            paige = paige_form.save(commit=False)
+            paige.seo_block = block_seo
+            paige.save()
+            return redirect('paige')
+
+        else:
+            print("Ошибка валидации форм")
+            print("block_seo_form.errors:", block_seo_form.errors)
+            print("paige_form.errors:", paige_form.errors)
+
+            return render(request, 'admin/paige_list/main_paige.html', {
+                'block_seo_form': block_seo_form,
+                'paige_form': paige_form,
+                'is_edit': paige_instance is not None,
+            })
+
+
+    else:
+        block_seo_form = BlockSEOForm(instance=block_seo_instance)
+        paige_form = MainPaigesForm(instance=paige_instance)
+
+
+
+    return render(request,  'admin/paige_list/main_paige.html', {
+        'block_seo_form': block_seo_form,
+        'paige_form': paige_form,
+
+        'is_edit': paige_instance is not None,
+    })
+
+@staff_member_required
+def  paige_add (request, paige_id=None):
     paige_instance = None
     block_seo_instance = None
     gallery_instance = None
@@ -1273,7 +1403,7 @@ def  paige_add(request, paige_id=None):
     current_main_picture_object = None
 
     if paige_id:
-        paige_instance = get_object_or_404(PaigesNews, pk=paige_id)
+        paige_instance = get_object_or_404(PaigesCinema, pk=paige_id)
         block_seo_instance = paige_instance.seo_block
         gallery_instance = paige_instance.gallery
 
@@ -1282,19 +1412,15 @@ def  paige_add(request, paige_id=None):
             paige_instance.gallery = gallery_instance
             paige_instance.save()
 
-
         current_main_picture_object = gallery_instance.pictures.filter(image_type='main_picture').first()
-
 
     if gallery_instance is None:
         gallery_instance = Gallery.objects.create()  # Создаем новую галерею
-
 
     if request.method=='POST':
         block_seo_form = BlockSEOForm(request.POST, instance=block_seo_instance)
         paige_form = PaigesCinemaForm(request.POST, instance=paige_instance)
         gallery_form = GalleryForm(request.POST, instance=gallery_instance)
-
 
         picture_formset = PictureFormSet(
             request.POST,
@@ -1305,7 +1431,6 @@ def  paige_add(request, paige_id=None):
 
         main_picture_form = PictureForm(request.POST, request.FILES, instance=current_main_picture_object, prefix='main_picture_form')
 
-
         if f'{main_picture_form.prefix}-image_type' not in request.POST:
             main_picture_form.data = main_picture_form.data.copy()
             main_picture_form.data[f'{main_picture_form.prefix}-image_type'] = 'main_picture'
@@ -1314,22 +1439,19 @@ def  paige_add(request, paige_id=None):
             main_picture_form.data = main_picture_form.data.copy()
             main_picture_form.data[f'{main_picture_form.prefix}-gallery'] = gallery_instance.pk
 
-
-
         if (block_seo_form.is_valid() and
                 paige_form.is_valid() and
                 gallery_form.is_valid() and
                 picture_formset.is_valid() and  #
                 main_picture_form.is_valid()):
 
-            block_seo  = block_seo_form.save()
+            block_seo = block_seo_form.save()
             gallery = gallery_form.save()
 
             paige = paige_form.save(commit=False)
             paige.seo_block = block_seo
             paige.gallery = gallery
             paige.save()
-
 
             if main_picture_form.cleaned_data.get('image'):
                 main_picture = main_picture_form.save(commit=False)
@@ -1343,7 +1465,6 @@ def  paige_add(request, paige_id=None):
             elif main_picture_form.cleaned_data.get('DELETE') and current_main_picture_object:
                 current_main_picture_object.delete()
 
-
             instances = picture_formset.save(commit=False)
             for picture in instances:
                 if not picture.pk:
@@ -1351,7 +1472,6 @@ def  paige_add(request, paige_id=None):
                     if not picture.image_type:
                         picture.image_type = 'gallery_image'
                 picture.save()
-
 
             for picture in picture_formset.deleted_objects:
                 picture.delete()
@@ -1383,7 +1503,6 @@ def  paige_add(request, paige_id=None):
         news_form = PaigesNewsForm(instance=paige_instance)
         gallery_form = GalleryForm(instance=gallery_instance)
 
-
         picture_formset = PictureFormSet(
             queryset=Picture.objects.filter(gallery=gallery_instance).exclude(pk=current_main_picture_object.pk) if current_main_picture_object else Picture.objects.filter(gallery=gallery_instance),
             prefix='pictures'
@@ -1395,7 +1514,7 @@ def  paige_add(request, paige_id=None):
             initial={'image_type': 'main_picture'}
         )
 
-    return render(request,  'admin/paige_list/add_paige.html', {
+    return render(request, 'admin/paige_list/add_paige.html', {
         'block_seo_form': block_seo_form,
         'paige_form': news_form,
         'gallery_form': gallery_form,
@@ -1404,7 +1523,6 @@ def  paige_add(request, paige_id=None):
         'paige': paige_instance,
         'is_edit': paige_instance is not None,
     })
-
 
 @staff_member_required
 def  paige_delete(request, news_id):

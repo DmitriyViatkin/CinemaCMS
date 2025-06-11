@@ -63,6 +63,9 @@ urlpatterns = [
 
     path('paige/', views.paige, name='paige'),
     path('paige/add_paige', views.paige_add, name='add_paige'),
+    path('paige/main_paige', views.main_paige, name='main_paige'),
+    path('paige/con', views.new_contacts, name='con'),
+    path('paige/main_paige/<int:paige_id>/edit/', views.main_paige, name='edit_main_paige'),
     path('paige/<int:paige_id>/edit/', views.paige_add, name='edit_paige'),
     path('paige/<int:paige_id>/delete_paige/', views.paige_delete, name='delete_paige'),
 ]
