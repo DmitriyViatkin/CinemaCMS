@@ -24,9 +24,21 @@ class User(AbstractUser):
 
 class Email_campaing(models.Model):
     id = models.AutoField(primary_key=True)
-    users = models.ManyToManyField(User)
-    text = models.TextField()
-    status= models.CharField(max_length=20, choices=[("send","Відправлено"),("not sent","Не відправлено")])
+    users = models.ManyToManyField(User, verbose_name="Користувачі")
+    text = models.TextField(verbose_name="Текст листа")
+    status = models.CharField(
+        max_length=20,
+        choices=[("send", "Відправлено"), ("not sent", "Не відправлено")],
+        default="not sent",
+        verbose_name="Статус"
+    )
+    created_at = models.DateTimeField(auto_now_add=True, null=True, verbose_name="Дата створення")
+
+
+    class Meta:
+        verbose_name = "Email кампанія"
+        verbose_name_plural = "Email кампанії"
+        ordering = ['-created_at'] # Сортування за датою створення
 
 class Tamplate_email(models.Model):
     id = models.AutoField(primary_key=True)

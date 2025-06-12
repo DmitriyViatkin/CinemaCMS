@@ -61,6 +61,14 @@
             </a>
           </li>
           <li class="nav-item">
+            <a href="{% url 'cinema_lists' %}" class="nav-link">
+              <i class="nav-icon far fa-image"></i>
+              <p>
+               Кінотеатри
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
             <a href="{% url 'tickets_lists' %}" class="nav-link">
               <i class="nav-icon far fa-image"></i>
               <p>
@@ -97,67 +105,13 @@
               </li>
             </ul>
           </li>
-           <li class="nav-item">
-            <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-book"></i>
-              <p>
-                Кинотеатр
-                <i class="fas fa-angle-left right"></i>
-              </p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item">
-                <a href="{% url 'cinema_lists' %}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Кінотеатр</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="{% url 'halls_lists' %}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Зали</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="{% url 'seats_list' %}" class="nav-link">
-                    <i class="far fa-circle nav-icon"></i>
-                    <p>Місця</p>
-                </a>
-
-              </li>
-
-
-            </ul>
-          </li>
           <li class="nav-item">
-            <a href="{% url 'paige' %}"class="nav-link">
-              <i class="nav-icon fas fa-book"></i>
-              <p>
-                Сторінки
-                <i class="fas fa-angle-left right"></i>
-              </p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item">
                 <a href="{% url 'paige' %}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
+                  <i class="nav-icon far fa-image"></i>
                   <p>Список сторінок</p>
                 </a>
-              </li>
-              <li class="nav-item">
-                <a href="{% url 'main_paige' %}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Главная</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="{% url 'con' %}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Контакти</p>
-                </a>
-              </li>
-              </ul>
           </li>
+
 
         </ul>
       </nav>

@@ -1,6 +1,14 @@
-{% extends 'admin/index.html' %}
+Добре, ось повний шаблон admin/paige_list/paige_lists.html вже з виправленою синтаксичною помилкою та всіма попередніми змінами:
 
-{% block title %}Список новин{% endblock %}
+Оновлений шаблон admin/paige_list/paige_lists.html
+HTML
+
+{% extends 'admin/index.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}Управління сторінками та даними сайту{% endblock %}
+
 {% block content %}
 <section class="content">
     <div class="container-fluid">
@@ -8,55 +16,119 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h3 class="card-title mb-0">Список сторінок</h3>
+                        <h3 class="card-title mb-0">{% translate "Управління сторінками та даними сайту" %}</h3>
                         <div class="card-tools">
-
                             <a href="{% url 'add_paige' %}" class="btn btn-success btn-sm">
-                                <i class="fas fa-plus"></i> Додати сторінку        </a>
+                                <i class="fas fa-plus"></i> {% translate "Додати сторінку" %}
+                            </a>
                         </div>
                     </div>
                     <div class="card-body">
-
-                        <table id="news_Table" class="table table-bordered table-hover">
+                        <table id="unifiedPagesTable" class="table table-bordered table-hover"> {# Єдина таблиця #}
                             <thead>
                                 <tr>
-                                    <th>Назва</th>
-                                    <th>Дата створення</th>
-                                    <th>Статус</th>
+                                    <th>{% translate "Назва" %}</th>
+                                    <th>{% translate "Дата створення" %}</th>
+                                    <th>{% translate "Статус" %}</th>
+                                    <th>{% translate "Дії" %}</th> {# Повернуто стовпець "Дії" #}
                                 </tr>
                             </thead>
-
-                                {% for paige in paiges %}
+                            <tbody>
+                                {# --- Звичайні сторінки (PaigesCinema) --- #}
+                                {% for paige_item in paiges %}
                                 <tr>
-                                    <td>{{ paige.title }}</td>
-                                    <td>{{ paige.date|date:"d.m.Y" }}</td>
-                                    <td>{{ paige.is_active }}</td>
+                                    <td>{{ paige_item.title }}</td>
+                                    <td>{{ paige_item.date|date:"d.m.Y" }}</td>
                                     <td>
-
-                                       <a href="{% url 'edit_paige' paige.pk %}" class="btn btn-primary btn-sm">Редагувати</a>
-                                   <form action="{% url 'delete_paige' paige_id=paige.pk %}" method="post" style="display:inline;">
-
+                                        {% if paige_item.is_active %}
+                                            <span class="badge badge-success">{% translate "ВКЛ" %}</span>
+                                        {% else %}
+                                            <span class="badge badge-secondary">{% translate "ВЫКЛ" %}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'edit_paige' paige_item.pk %}" class="btn btn-primary btn-sm">{% translate "Редагувати" %}</a>
+                                        <form action="{% url 'delete_paige' paige_id=paige_item.pk %}" method="post" style="display:inline;">
                                             {% csrf_token %}
-
                                             <button type="submit" class="btn btn-danger btn-sm"
-                                                    onclick="return confirm('Ви впевнені, що хочете видалити сторінку {{ paige.title }}?');">
-                                                Видалити
+                                                    onclick="return confirm('{% translate 'Ви впевнені, що хочете видалити сторінку' %} {{ paige_item.title }}?');">
+                                                {% translate "Видалити" %}
                                             </button>
-                                   </form>
+                                        </form>
                                     </td>
                                 </tr>
-                                {% empty %}
-
-                                <tr>
-                                      <td colspan="7">Список сторінок пустий.</td>
-                                </tr>
                                 {% endfor %}
+
+                                {# --- Головна сторінка (MainPaiges) --- #}
+                                {% if main_paige %}
+                                <tr>
+                                    <td><strong>{% translate "Головна сторінка" %}</strong></td> {# Виділяємо назву #}
+                                    {# Припускаємо, що MainPaiges має поле 'date_published'. Виправлений синтаксис. #}
+                                    <td>
+                                        {% if main_paige.date_published %}
+                                            {{ main_paige.date_published|date:"d.m.Y" }}
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                    <td><span class="badge badge-success">{% translate "ВКЛ" %}</span></td> {# Головна сторінка завжди активна #}
+                                    <td>
+                                        <a href="{% url 'edit_main_paige' main_paige.pk %}" class="btn btn-primary btn-sm">{% translate "Редагувати" %}</a>
+                                        {# Зазвичай головну сторінку не видаляють #}
+                                    </td>
+                                </tr>
+                                {% endif %}
+
+                                {# --- Контактні дані (Contact) --- #}
+                                {% if contact %}
+                                <tr>
+                                    <td><strong>{% translate "Контактні дані" %}</strong></td> {# Виділяємо назву #}
+                                    {# Можливо, у Contact немає поля дати створення, або воно нерелевантне. Виправлений синтаксис. #}
+                                    <td>
+                                        {# Якщо у моделі Contact є поле для дати (наприклад, date_created), використовуйте його #}
+                                        {% if contact.date_created %} {# ПРИКЛАД: Замініть 'date_created' на реальне ім'я поля #}
+                                            {{ contact.date_created|date:"d.m.Y" }}
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                    <td><span class="badge badge-success">{% translate "ВКЛ" %}</span></td> {# Контактні дані завжди активні #}
+                                    <td>
+                                        <a href="{% url 'con' %}" class="btn btn-primary btn-sm">{% translate "Редагувати" %}</a>
+                                        {# Зазвичай контактні дані не видаляють #}
+                                    </td>
+                                </tr>
+                                {% endif %}
+
+                                {# Якщо жодних даних не знайдено #}
+                                {% if not paiges and not main_paige and not contact %}
+                                <tr>
+                                    <td colspan="4">{% translate "Не знайдено жодних сторінок або даних." %}</td>
+                                </tr>
+                                {% endif %}
                             </tbody>
                         </table>
-                    </div>
+
+                        {# Пагінація залишається, оскільки вона застосовується лише до списку paiges #}
+                        <div class="d-flex justify-content-center mt-3">
+                            <ul class="pagination">
+                                {% if paiges.has_previous %}
+                                    <li class="page-item"><a class="page-link" href="?page=1">&laquo; {% translate "перша" %}</a></li>
+                                    <li class="page-item"><a class="page-link" href="?page={{ paiges.previous_page_number }}">{% translate "попередня" %}</a></li>
+                                {% endif %}
+
+                                <li class="page-item active"><span class="page-link">{% translate "Сторінка" %} {{ paiges.number }} {% translate "з" %} {{ paiges.paginator.num_pages }}.</span></li>
+
+                                {% if paiges.has_next %}
+                                    <li class="page-item"><a class="page-link" href="?page={{ paiges.next_page_number }}">{% translate "наступна" %}</a></li>
+                                    <li class="page-item"><a class="page-link" href="?page={{ paiges.paginator.num_pages }}">{% translate "остання" %} &raquo;</a></li>
+                                {% endif %}
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 {% endblock %}

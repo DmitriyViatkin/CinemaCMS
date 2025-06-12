@@ -1,27 +1,48 @@
 
 {% extends 'admin/index.html' %}
 {% load static %}
+{% load i18n %}
 
 {% block title %}
-    {% if cinema %}Редагувати кінотеатр{% else %}Додати кінотеатр{% endif %}
+    {% if cinema %}{% translate "Редагувати кінотеатр" %}{% else %}{% translate "Додати кінотеатр" %}{% endif %}
 {% endblock %}
 
 {% block content %}
-<h1>{% if cinema %}Редагувати кінотеатр: {{ cinema.title }}{% else %}Додати новий кінотеатр{% endif %}</h1>
+
+<h1>{% if cinema %}{% translate "Редагувати кінотеатр" %}: {{ cinema.title }}{% else %}{% translate "Додати новий кінотеатр" %}{% endif %}</h1>
 <link rel="stylesheet" href="{% static 'css/movie_css.css' %}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-<section class="content" style="width: 80%;">
+<section class="content" style="width: 90%;">
+
   <div class="container-fluid">
     <div class="row">
       <div class="col-md-12">
         <div class="card card-primary">
           <div class="card-header">
-            <h3 class="card-title">{% if cinema %}Редагувати{% else %}Додати{% endif %} кінотеатр</h3>
+            <h3 class="card-title">{% if cinema %}{% translate "Редагувати" %}{% else %}{% translate "Додати" %}{% endif %} {% translate "кінотеатр" %}</h3>
           </div>
+             <div style="text-align: right; margin-bottom: 20px;">
+<form action="{% url 'set_language' %}" method="post">{% csrf_token %}
+                        <input name="next" type="hidden" value="{{ redirect_to }}">
+                        <select name="language">
+                            {% get_current_language as LANGUAGE_CODE %}
+                            {% get_available_languages as LANGUAGES %}
+                            {% get_language_info_list for LANGUAGES as languages %}
+                            {% for language in languages %}
+                                <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %}
+                                        selected{% endif %}>
+                                    {{ language.name_local }} ({{ language.code }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <input type="submit" value="Go">
+                    </form>
+</div>
 
           <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
 
+            {# Общие ошибки формы (не ошибки полей) #}
             {% if cinema_form.non_field_errors %}<div class="alert alert-danger">{{ cinema_form.non_field_errors }}</div>{% endif %}
             {% if block_seo_form.non_field_errors %}<div class="alert alert-danger">{{ block_seo_form.non_field_errors }}</div>{% endif %}
             {% if gallery_form.non_field_errors %}<div class="alert alert-danger">{{ gallery_form.non_field_errors }}</div>{% endif %}
@@ -29,7 +50,7 @@
 
             <div class="card-body">
 
-              <h2>Інформація про кінотеатр</h2>
+              <h2>{% translate "Інформація про кінотеатр" %}</h2>
               {% include 'admin/card_forms/cinema_form.html' with form=cinema_form %}
 <br>
 
@@ -37,22 +58,24 @@
 <br>
 
 
-                {% include 'admin/card_forms/banner_image.html'   %}
+                {% include 'admin/card_forms/banner_image.html' %}
 
 <br>
-   <h3>Картинки галереї</h3>
+              <h3>{% translate "Картинки галереї" %}</h3>
 
-            {% include 'admin/card_forms/gallery_form.html'   %}
-              {% include 'admin/card_forms/hall.html'   %}
-             <a href="{% url 'add_halls_create'   %}" class="btn btn-success">Додати зал</a>
-              <br>
-              <h2>SEO Інформація</h2>
+            {% include 'admin/card_forms/gallery_form.html' %}
+              {% include 'admin/card_forms/hall.html' %}
+            {% if cinema.pk %}
+    <a href="{% url 'add_halls_create' cinema_pk=cinema.pk %}" class="btn btn-success">{% translate "Додати зал" %}</a>
+{% endif %}
+<br>
+
               {% include 'admin/card_forms/seo_form.html' with form=block_seo_form %}
             </div>
 
             <div class="card-footer">
               <button type="submit" class="btn btn-primary">
-                {% if cinema %}Оновити{% else %}Створити{% endif %}
+                {% if cinema %}{% translate "Оновити" %}{% else %}{% translate "Створити" %}{% endif %}
               </button>
             </div>
           </form>

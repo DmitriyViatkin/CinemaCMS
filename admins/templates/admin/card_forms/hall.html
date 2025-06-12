@@ -1,11 +1,12 @@
+{% load i18n %}
 <h2>Список Залів</h2>
 
 <table class="table">
     <thead>
         <tr>
-            <th>Назва</th>
-            <th>Дата створення</th>
-            <th>Дії</th>
+            <th>{% translate 'Назва' %}</th>
+            <th>{% translate 'Дата створення' %}</th>
+            <th>{% translate "Дії" %}</th>
         </tr>
     </thead>
     <tbody>
@@ -21,17 +22,17 @@
                         <div class="modal-dialog" role="document">
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <h5 class="modal-title" id="deleteHallModalLabel{{ hall.id }}">Підтвердження видалення</h5>
+                                    <h5 class="modal-title" id="deleteHallModalLabel{{ hall.id }}">{% translate "Підтвердження видалення" %}</h5>
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                     </button>
                                 </div>
                                 <div class="modal-body">
-                                    Ви впевнені, що хочете видалити зал "{{ hall.title }}"?
+                                    {% translate "Ви впевнені, що хочете видалити зал" %}" {{ hall.title }}"?
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Скасувати</button>
-                                    <a href="{% url 'delete_halls' hall.id %}" class="btn btn-danger">Видалити</a>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{% translate "Скасувати" %} </button>
+                                    <a href="{% url 'delete_halls' hall.id %}" class="btn btn-danger">{% translate "Видалити" %}</a>
                                 </div>
                             </div>
                         </div>
@@ -40,7 +41,7 @@
             </tr>
         {% empty %}
             <tr>
-                <td colspan="3">Для цього кінотеатру ще не додано жодного залу.</td>
+                <td colspan="3">{% translate "Для цього кінотеатру ще не додано жодного залу."%} </td>
             </tr>
         {% endfor %}
     </tbody>

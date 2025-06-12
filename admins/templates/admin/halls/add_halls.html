@@ -1,12 +1,13 @@
 {% extends 'admin/index.html' %}
 {% load static %}
+{% load i18n %}
+
 
 {% block title %}
-    {% if halls %}Редагувати зал{% else %}Додати зал{% endif %}
+    {% if halls %}{% translate "Редагувати зал"%}{% else %}Додати зал{% endif %}
 {% endblock %}
 
-{# Стили перенесены в movie_css.css #}
-ч
+
 {% block content %}
 
 
@@ -16,8 +17,24 @@
         <div class="row">
           <div class="col-md-12">
             <div class="card card-primary">
-              <div class="card-header">
-                <h3 class="card-title">{% if halls %}Редагувати{% else %}Додати{% endif %} Зал</h3> <br>
+                    <div class="card-header">  <div style="text-align: right; margin-bottom: 20px;">
+                        <form action="{% url 'set_language' %}" method="post">{% csrf_token %}
+                                                <input name="next" type="hidden" value="{{ redirect_to }}">
+                                                <select name="language">
+                                                    {% get_current_language as LANGUAGE_CODE %}
+                                                    {% get_available_languages as LANGUAGES %}
+                                                    {% get_language_info_list for LANGUAGES as languages %}
+                                                    {% for language in languages %}
+                                                        <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %}
+                                                                selected{% endif %}>
+                                                            {{ language.name_local }} ({{ language.code }})
+                                                        </option>
+                                                    {% endfor %}
+                                                </select>
+                                                <input type="submit" value="Go">
+                        </form>
+                    </div>
+                <h3 class="card-title">{% if halls %}{% translate 'Редагувати'%} {% else %} {% translate "Додати" %} {% endif %} Зал</h3> <br>
               </div>
 
               <form method="post" enctype="multipart/form-data">
@@ -29,30 +46,30 @@
                   {% if picture_formset.non_form_errors %}<div class="alert alert-danger">{{ picture_formset.non_form_errors }}</div>{% endif %}
 
                   <div class="card-body">
-                      <h2>Інформація про зал</h2>
+
                       {% include 'admin/card_forms/halls_form.html' with form=halls_form%}
 
                       <br>
-                      {# Включаем шаблон для схемы зала (бывший sheme_image.html) #}
+
                       {% include 'admin/card_forms/sheme_image.html' %}
                       <br>
 
-                      {# Включаем шаблон для баннера #}
+
                       {% include 'admin/card_forms/banner_image.html' %}
                       <br>
 
-                      <h3>Картинки галереї</h3>
+                      <h3>{% translate 'Картинки галереї'%} </h3>
                       {% include 'admin/card_forms/gallery_form.html' %}
 
                       <br>
-                      <h2>SEO Інформація</h2>
-                      {# Включаем шаблон-фрагмент для полей формы SEO #}
+
+
                       {% include 'admin/card_forms/seo_form.html' with form=block_seo_form %}
                   </div>
 
                   <div class="card-footer">
                       <button type="submit" class="btn btn-primary">
-                          {% if halls  %}Оновити{% else %}Створити{% endif %}
+                          {% if halls  %} {% translate "Оновити" %} {% else %}Створити{% endif %}
                       </button>
                   </div>
               </form>

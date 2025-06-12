@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function previewImage(input, previewContainer, maxWidth, maxHeight) {
         const imgElement = previewContainer.querySelector('img');
-        // ИСПРАВЛЕНО: ищем remove-item-cross
+
         const removeCrossBtn = previewContainer.querySelector('.remove-item-cross');
 
         if (input.files && input.files[0]) {

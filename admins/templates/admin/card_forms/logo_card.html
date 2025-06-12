@@ -1,9 +1,9 @@
 {% load static %}
-
+{% load i18n %}
 {% for field in logo_form %}
     {% if field.name == 'image' %}
         <div class="form-group field-row-aligned logo-form-container" style="display: flex; align-items: center; gap: 15px;">
-            <label style="min-width: 120px;">Логотип</label>
+            <label style="min-width: 120px;">{% translate "Логотип" %} </label>
 
             <div class="image-preview-container" style="position: relative; width: 130px; height: 90px; border: 1px solid #000; display: flex; align-items: center; justify-content: center;">
                 {% if field.value and field.value.url %}
@@ -11,20 +11,20 @@
                 {% else %}
                     <img src="{% static 'images/картинка.png' %}" alt="Логотип" style="max-width: 100%; max-height: 100%;">
                 {% endif %}
-                {# Кнопка-крестик для логотипа #}
-                <button type="button" class="btn btn-danger btn-sm remove-logo-cross" title="Удалить логотип"
+
+                <button type="button" class="btn btn-danger btn-sm remove-logo-cross" title="{% translate Видалити %}"
                         style="position: absolute; top: -5px; right: -5px; display: none; z-index: 10;">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
 
-            {# Стандартный input[type="file"] будет скрыт через forms.py #}
+
             {{ field }}
 
-            {# Кастомная кнопка загрузки - УДАЛИЛИ АТРИБУТ "for" #}
-            <label class="btn btn-light btn-sm custom-file-button-logo">загрузить</label>
 
-            <button type="button" class="btn btn-light btn-sm remove-logo-btn">Удалить</button>
+            <label class="btn btn-light btn-sm custom-file-button-logo"> {% translate "Завантажить" %} </label>
+
+            <button type="button" class="btn btn-light btn-sm remove-logo-btn">{% translate 'Видалить' %} </button>
 
             {% if field.errors %}
                 <div class="alert alert-danger">{{ field.errors }}</div>
@@ -41,13 +41,13 @@
 {% endfor %}
 
 <script>
-// --- ГЛОБАЛЬНЫЕ КОНСТАНТЫ ---
 
 
-// --- ОСНОВНАЯ ЛОГИКА DOMContentLoaded ---
+
+
 document.addEventListener('DOMContentLoaded', function() {
 
-    // --- ЛОГИКА ДЛЯ ЛОГОТИПА ---
+    // ---   ---
     const logoContainer = document.querySelector('.logo-form-container');
     if (logoContainer) {
         const logoFileInput = logoContainer.querySelector("input[type='file']");
@@ -71,14 +71,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         };
 
-        // Инициализация видимости крестика логотипа при загрузке страницы
+        //
         if (logoImageTag && logoImageTag.src && !logoImageTag.src.includes(DEFAULT_IMAGE_URL)) {
             if (removeLogoCrossBtn) removeLogoCrossBtn.style.display = 'block';
         } else {
             if (removeLogoCrossBtn) removeLogoCrossBtn.style.display = 'none';
         }
 
-        // Обработчик изменения файла логотипа
+        //
         if (logoFileInput) {
             logoFileInput.addEventListener("change", function (e) {
                 updateLogoPreviewAndCrossVisibility(e.target.files[0]);
@@ -86,15 +86,15 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // Обработчик для кастомной кнопки "загрузить" логотипа
-        // Теперь только этот обработчик вызывает клик по скрытому input
+
+        //
         if (customLogoUploadButton) {
             customLogoUploadButton.addEventListener('click', function() {
                 logoFileInput.click();
             });
         }
 
-        // Обработчик для удаления логотипа (крестиком или кнопкой "Удалить")
+        //
         const handleLogoRemoval = () => {
             if (logoFileInput) logoFileInput.value = "";
             updateLogoPreviewAndCrossVisibility(null);
@@ -109,22 +109,21 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // --- ИНИЦИАЛИЗАЦИЯ JQUERY ПЛАГИНОВ ---
-    // ЭТОТ КОД ДОЛЖЕН НАХОДИТЬСЯ ВНУТРИ document.addEventListener('DOMContentLoaded', function() { ... });
-    // и должен быть полностью завершен, без оборванных частей.
+
+    //
     $(function () {
       $('#reservationdatetime').datetimepicker({ icons: { time: 'far fa-clock' } });
       $('#reservation').daterangepicker({ singleDatePicker: true, showDropdowns: true, locale: { format: 'MM/DD/YYYY' } });
       $('#timepicker').datetimepicker({ format: 'LT' });
       $('input[data-bootstrap-switch]').each(function(){
           $(this).bootstrapSwitch('state', $(this).prop('checked'));
-      }); // <-- ЗАКРЫВАЮЩИЙ СКОБКИ jQuery ФУНКЦИИ И .each()
-    }); // <-- ЗАКРЫВАЮЩИЙ СКОБКИ $()
-}); // <-- ЗАКРЫВАЮЩИЙ СКОБКИ DOMContentLoaded
+      });
+    });
+});
 </script>
 
 <style>
-    /* Стили для кнопки-крестика, если нужны */
+
     .remove-logo-cross {
         background: rgba(255, 0, 0, 0.7);
         color: white;

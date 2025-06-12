@@ -1,12 +1,12 @@
 {% load static %}
-
+{% load i18n %}
 {{ picture_formset.management_form }}
 
 
 
 <div id="pictures-formset">
     {% for form in picture_formset %}
-        <div class="gallery-image-form border p-3 mb-3" data-exists="true" data-form-type="gallery"> {# Добавил data-exists и data-form-type #}
+        <div class="gallery-image-form border p-3 mb-3" data-exists="true" data-form-type="gallery">
 
             {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
 
@@ -18,15 +18,15 @@
                         {% else %}
                             <img src="{% static 'images/картинка.png' %}" alt="Изображение не загружено">
                         {% endif %}
-                        {# ИСПОЛЬЗУЙТЕ ОБЩИЙ КЛАСС ДЛЯ КРЕСТИКА #}
+
                         <button type="button" class="btn btn-danger btn-sm remove-item-cross" title="Видалити зображення" style="display: none;">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
 
                     <div class="custom-file-input-wrapper">
-                        {{ form.image }}
-                        <label class="btn btn-secondary custom-file-button">Додати</label>
+                        {{form.image}}
+                        <label class="btn btn-secondary custom-file-button">{% translate "Додати" %} </label>
                     </div>
 
                     {% if form.errors.image %}
@@ -35,7 +35,7 @@
                 </div>
             </div>
 
-            <button type="button" class="btn btn-light btn-sm remove-gallery-btn mt-2" style="display :none" >Видалити</button>
+            <button type="button" class="btn btn-light btn-sm remove-gallery-btn mt-2" style="display :none" > {% translate "Видалити" %}</button>
 
              {{ form.id }}
             {{ form.image_type }}
@@ -47,10 +47,10 @@
     {% endfor %}
 </div>
 
-<button id="add-picture-form" type="button" class="btn btn-success mt-2">Додати ще одне зображення</button>
+<button id="add-picture-form" type="button" class="btn btn-success mt-2">{% translate "Додати ще одне зображення" %}</button>
 
 <div id="empty-form" style="display: none;">
-    <div class="gallery-image-form border p-3 mb-3" data-exists="false" data-form-type="gallery"> {# data-exists и data-form-type #}
+    <div class="gallery-image-form border p-3 mb-3" data-exists="false" data-form-type="gallery">
 
         <div class="form-group field-row-aligned">
             <div class="input-wrapper flex-grow-1 d-flex flex-column align-items-center">
@@ -63,13 +63,13 @@
                 </div>
 
                 <div class="custom-file-input-wrapper">
-                    {{ picture_formset.empty_form.image }}
-                    <label class="btn btn-secondary custom-file-button">Додати</label>
+                    {{picture_formset.empty_form.image}}
+                    <label class="btn btn-secondary custom-file-button"> {% translate "Додати" %}</label>
                 </div>
             </div>
         </div>
 
-        <button type="button" class="btn btn-light btn-sm remove-gallery-btn mt-2"style="display :none>Видалити</button>
+        <button type="button" class="btn btn-light btn-sm remove-gallery-btn mt-2" style="display :none"> {% translate "Видалити" %} </button>
 
          {{ picture_formset.empty_form.id }}
         {{ picture_formset.empty_form.image_type }}

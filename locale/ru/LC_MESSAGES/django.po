@@ -1,0 +1,290 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-06-12 20:11+0300\n"
+"PO-Revision-Date: 2025-06-12 17:16+0300\n"
+"Last-Translator: YOUR NAME <YOUR_EMAIL@example.com>\n"
+"Language-Team: Russian <ru@li.org>\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || "
+"(n%100>=11 && n%100<=14)? 2 : 3);\n"
+
+#: admins/forms.py:144
+
+msgid "Назва новини"
+msgstr "Добавить новость"
+
+#: admins/forms.py:145 admins/forms.py:348 core/models.py:13 core/models.py:32
+#: main/models.py:141 main/models.py:176 main/models.py:216 movie/models.py:26
+msgid "Опис"
+msgstr "Описание"
+
+#: admins/forms.py:146
+msgid "Посилання на відео"
+msgstr "Ссылка на видео"
+
+#: admins/forms.py:147 main/models.py:143 main/models.py:218
+msgid "Дата публікації"
+msgstr "Дата публикации"
+
+#: admins/forms.py:148
+msgid "Вкл"
+msgstr "Вкл"
+
+#: admins/forms.py:346 admins/templates/admin/card_forms/hall.html:7
+#: core/models.py:12 core/models.py:30 main/models.py:138 main/models.py:174
+#: movie/models.py:24
+msgid "Назва"
+msgstr "Название"
+
+#: admins/forms.py:347
+
+msgid "Кінотеатр"
+msgstr "кинотеатр"
+
+#: admins/forms.py:349
+msgid "Ряд"
+msgstr "Ряд"
+
+#: admins/forms.py:401
+msgid "Жанр:"
+msgstr "Жанр:"
+
+#: admins/forms.py:402
+
+msgid "Назва:"
+msgstr "Название"
+
+#: admins/forms.py:403
+
+msgid "URL трейлера:"
+msgstr "URL трейлера"
+
+#: admins/forms.py:404
+
+msgid "Опис:"
+msgstr "Описание"
+
+#: admins/forms.py:406
+#, fuzzy
+#| msgid "Дата проката"
+msgid "Дата проката:"
+msgstr "Дата проката"
+
+#: admins/forms.py:407
+
+msgid "Вікова категорія:"
+msgstr "Возрастная категория"
+
+#: admins/templates/admin/card_forms/gallery_form.html:29
+#: admins/templates/admin/card_forms/gallery_form.html:67
+#: admins/templates/admin/cinema/add_cinema.html:22
+#: admins/templates/admin/halls/add_halls.html:37
+msgid "Додати"
+msgstr "Добавить"
+
+#: admins/templates/admin/card_forms/gallery_form.html:38
+#: admins/templates/admin/card_forms/gallery_form.html:72
+#: admins/templates/admin/card_forms/hall.html:35
+msgid "Видалити"
+msgstr "Удалить"
+
+#: admins/templates/admin/card_forms/gallery_form.html:50
+msgid "Додати ще одне зображення"
+msgstr "Добавить ещё одно изображение"
+
+#: admins/templates/admin/card_forms/hall.html:8
+msgid "Дата створення"
+msgstr "Дата создания"
+
+#: admins/templates/admin/card_forms/hall.html:9
+msgid "Дії"
+msgstr "Действия"
+
+#: admins/templates/admin/card_forms/hall.html:25
+msgid "Підтвердження видалення"
+msgstr "Подтверждение удаления"
+
+#: admins/templates/admin/card_forms/hall.html:31
+msgid "Ви впевнені, що хочете видалити зал"
+msgstr "Вы уверены, что хотите удалить зал"
+
+#: admins/templates/admin/card_forms/hall.html:34
+msgid "Скасувати"
+msgstr "Отменить"
+
+#: admins/templates/admin/card_forms/hall.html:44
+msgid "Для цього кінотеатру ще не додано жодного залу."
+msgstr "Для этого кинотеатра пока не добавлено ни одного зала."
+
+#: admins/templates/admin/card_forms/logo_card.html:6
+msgid "Логотип"
+msgstr "Логотип"
+
+#: admins/templates/admin/card_forms/logo_card.html:25
+msgid "Завантажить"
+msgstr "Загрузить"
+
+#: admins/templates/admin/card_forms/logo_card.html:27
+msgid "Видалить"
+msgstr "Удалить"
+
+#: admins/templates/admin/cinema/add_cinema.html:7
+#: admins/templates/admin/cinema/add_cinema.html:12
+msgid "Редагувати кінотеатр"
+msgstr "Редактировать кинотеатр"
+
+#: admins/templates/admin/cinema/add_cinema.html:7
+msgid "Додати кінотеатр"
+msgstr "Добавить кинотеатр"
+
+#: admins/templates/admin/cinema/add_cinema.html:12
+msgid "Додати новий кінотеатр"
+msgstr "Добавить новый кинотеатр"
+
+#: admins/templates/admin/cinema/add_cinema.html:22
+#: admins/templates/admin/halls/add_halls.html:37
+msgid "Редагувати"
+msgstr "Редактировать"
+
+#: admins/templates/admin/cinema/add_cinema.html:22
+msgid "кінотеатр"
+msgstr "кинотеатр"
+
+#: admins/templates/admin/cinema/add_cinema.html:53
+msgid "Інформація про кінотеатр"
+msgstr "Информация о кинотеатре"
+
+#: admins/templates/admin/cinema/add_cinema.html:64
+#: admins/templates/admin/halls/add_halls.html:61
+#: admins/templates/admin/movies_lists/add_movies.html:188
+#: admins/templates/admin/news_paige/add_news.html:82
+#: admins/templates/admin/promotion/add_promotion.html:87
+msgid "Картинки галереї"
+msgstr "Картинки галереи"
+
+#: admins/templates/admin/cinema/add_cinema.html:69
+msgid "Додати зал"
+msgstr "Добавить зал"
+
+#: admins/templates/admin/cinema/add_cinema.html:78
+#: admins/templates/admin/halls/add_halls.html:72
+msgid "Оновити"
+msgstr "Обновить"
+
+#: admins/templates/admin/cinema/add_cinema.html:78
+#: admins/templates/admin/movies_lists/add_movies.html:196
+#: admins/templates/admin/news_paige/add_news.html:87
+#: admins/templates/admin/paige_list/add_paige.html:80
+#: admins/templates/admin/promotion/add_promotion.html:93
+msgid "Створити"
+msgstr "Создать"
+
+#: admins/templates/admin/halls/add_halls.html:7
+msgid "Редагувати зал"
+msgstr "Редактировать зал"
+
+#: admins/templates/admin/movies_lists/add_movies.html:16
+msgid "Додати фільм"
+msgstr "Добавить Фильм"
+
+#: admins/templates/admin/movies_lists/add_movies.html:84
+msgid "Формати:"
+msgstr "Форматы"
+
+#: admins/templates/admin/news_paige/add_news.html:4
+#: admins/templates/admin/news_paige/add_news.html:17
+msgid "Додати новину"
+msgstr "Добавить новость"
+
+#: admins/templates/admin/paige_list/add_paige.html:16
+
+msgid "Додати сторінку"
+msgstr "Добавить страницу"
+
+#: admins/templates/admin/paige_list/add_paige.html:74
+msgid "Картинки галереї "
+msgstr "Картинки галереи"
+
+#: admins/templates/admin/promotion/add_promotion.html:5
+#: admins/templates/admin/promotion/add_promotion.html:17
+msgid "Додати Акцію"
+msgstr "Добавить Акцию"
+
+#: cinewave/settings.py:145
+msgid "Русский"
+msgstr "Русский"
+
+#: cinewave/settings.py:146
+msgid "Українська"
+msgstr "Украинский"
+
+#: core/models.py:14
+msgid "Умови"
+msgstr "Условия"
+
+#: core/models.py:15
+msgid "Місто"
+msgstr "Город"
+
+#: core/models.py:36
+msgid "Кількість рядів"
+msgstr "Количество рядов"
+
+#: core/models.py:37
+msgid "Місць у ряду"
+msgstr "Мест в ряду"
+
+#: main/models.py:142
+msgid "URL адреса "
+msgstr "URL-адрес"
+
+#: main/models.py:146 main/models.py:163 main/models.py:178 main/models.py:219
+msgid "Показ"
+msgstr "Показ"
+
+#: main/models.py:160
+msgid "СЕО текст "
+msgstr "SEO-текст"
+
+#: main/models.py:161 main/models.py:162
+msgid "Телефон"
+msgstr "Телефон"
+
+#: main/models.py:175 main/models.py:215
+msgid "Картинка"
+msgstr "Изображение"
+
+#: main/models.py:213
+msgid "Опис "
+msgstr "Описание"
+
+#: movie/models.py:25
+msgid "URL трейлера"
+msgstr "URL трейлера"
+
+#: movie/models.py:28
+msgid "Дата проката"
+msgstr "Дата проката"
+
+#: movie/models.py:29
+msgid "Вікова категорія"
+msgstr "Возрастная категория"
+
+#: movie/models.py:30
+msgid "Дата створення запису"
+msgstr "Дата создания записи"
+
+#: movie/models.py:35
+msgid "Галерея зображень"
+msgstr "Галерея изображений"

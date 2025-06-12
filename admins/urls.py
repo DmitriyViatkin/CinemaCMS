@@ -21,7 +21,7 @@ urlpatterns = [
     path('cinema_lists/<int:pk>/delete/', views.delete_cinema, name='delete_cinema'),
 
     path('halls_lists/',views.halls_list, name='halls_lists'),
-    path('add_halls/add_halls_create/ ', views.add_halls_create, name='add_halls_create'),
+    path('add_halls/add_halls_create/<int:cinema_pk>/ ', views.add_halls_create, name='add_halls_create'),
     path('add_halls/<int:halls_id>/', views.add_halls_create ,name='add_halls_edit'),
     path('halls_lists/<int:pk>/delete/', views.delete_halls, name='delete_halls'),
 
@@ -63,7 +63,8 @@ urlpatterns = [
 
     path('paige/', views.paige, name='paige'),
     path('paige/add_paige', views.paige_add, name='add_paige'),
-    path('paige/main_paige', views.main_paige, name='main_paige'),
+    path('paige/main_paige/', views.main_paige, name='main_paige'),
+    path('paige/main_paige/edit/<int:pk>/', views.main_paige, name='edit_main_paige'),
     path('paige/con', views.new_contacts, name='con'),
     path('paige/main_paige/<int:paige_id>/edit/', views.main_paige, name='edit_main_paige'),
     path('paige/<int:paige_id>/edit/', views.paige_add, name='edit_paige'),

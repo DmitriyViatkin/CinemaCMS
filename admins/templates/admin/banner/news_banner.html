@@ -14,7 +14,7 @@
 
                 <template id="empty-form-template-news">
                     <div class="banner-unit" style="display: none;">
-                        {{ news_formset.empty_form.id }} {{ news_formset.empty_form.DELETE }}
+                        {{ news_formset.empty_form.id }} <div style="display :none">{{ news_formset.empty_form.DELETE }} </div>
                         <div class="image-block">
                             <img class="preview" src="#" alt="preview" style="display: none;" />
                             <label class="upload-btn">
@@ -39,7 +39,7 @@
                    {% for form_dict in news_form_data %}
                         {% with form=form_dict.form image_url=form_dict.image_url %}
                             <div class="banner-unit">
-                                {{ form.id }} {{ form.DELETE }}
+                                {{ form.id }} <div style="display :none">{{ form.DELETE }}</div>
                                 <div class="image-block">
                                     {% if image_url %}
                                         <img class="preview" src="{{ image_url }}" alt="preview" />

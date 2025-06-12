@@ -6,6 +6,8 @@ from core.models import Cinemas, Halls, Sessions,Seats, Tickets
 from main.models import Banners, Cross_Banner, News, PaigesNews, Promotion, PaigesCinema, Contact
 from django.forms import inlineformset_factory, formset_factory, modelformset_factory
 from django.forms.widgets import HiddenInput
+from django.utils.translation import gettext_lazy as _
+
 
 class ContactForm(forms.ModelForm):
     contact_picture = forms.ImageField(required=False, label="Лого")
@@ -13,10 +15,13 @@ class ContactForm(forms.ModelForm):
 
     class Meta:
         model = Contact
-        fields = ['title', 'address', 'latitude', 'longitude', 'phone_number', 'gallery']
+        fields = ['title', 'address', 'latitude', 'longitude', 'phone_number',]
         widgets = {
-            'longitude': HiddenInput(), # Теперь HiddenInput будет распознан
+            'longitude': HiddenInput(),
             'gallery': HiddenInput(),
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'address': forms.Textarea(attrs={'cols': '50', 'rows': '10', 'class': 'form-control'}),
+            'phone_number': forms.TextInput(attrs={'class': 'form-control phone-input'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -71,17 +76,14 @@ class ContactForm(forms.ModelForm):
             return self.instance.gallery.pictures.first()
         return None
 
-# Важно: используйте modelformset_factory для Contact, так как Gallery - это ForeignKey на Contact
-# А не inlineformset_factory, если вы не управляете Gallery как инлайн-дочерними объектами Contact.
+
 ContactFormSet = modelformset_factory(Contact, form=ContactForm, extra=0, can_delete=True)
 
 
 class MainPaigesForm(forms.ModelForm):
     class Meta:
         model = MainPaiges
-        exclude = ['id', 'seo_block', ] # Убедитесь, что 'seo_block' действительно нужно исключать, если это связано с SEO_text
-        # fields = '__all__' # Если вы используете exclude, то fields = '__all__' не нужен и может вызвать конфликт.
-                           # Лучше перечислить все поля явно, если exclude вызывает проблемы, или убрать fields = '__all__'
+        exclude = ['id', 'seo_block', ]
         labels = {
             'phone_1': 'Телефон ',
             'phone_2': ' ',
@@ -89,15 +91,15 @@ class MainPaigesForm(forms.ModelForm):
         }
 
         widgets = {
-            # Здесь вы уже добавляете 'form-control', но мы хотим добавить еще 'phone-input'
-            'phone_1': forms.TextInput(attrs={'class': 'form-control phone-input'}), # Добавили phone-input
-            'phone_2': forms.TextInput(attrs={'class': 'form-control phone-input'}), # Добавили phone-input
+
+            'phone_1': forms.TextInput(attrs={'class': 'form-control phone-input'}),
+            'phone_2': forms.TextInput(attrs={'class': 'form-control phone-input'}),
 
             'SEO_text': forms.Textarea(attrs={'class': 'form-control', 'rows': 6}),
             'is_active': forms.CheckboxInput(attrs={'data-bootstrap-switch': ''}),
         }
 
-    # Метод __init__ должен быть здесь, прямо внутри класса MainPaigesForm, но вне Meta
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['is_active'].widget.attrs.update({'data-bootstrap-switch': 'true'}),
@@ -107,6 +109,7 @@ class PaigesCinemaForm(forms.ModelForm):
     class Meta:
         model = PaigesCinema
         exclude = ['id', 'seo_block', 'gallery']
+
         fields = '__all__'
         widgets = {
             'is_active': forms.CheckboxInput(attrs={'data-bootstrap-switch': ''}),}
@@ -116,20 +119,40 @@ class PromotionForm(forms.ModelForm):
     class Meta:
         model = Promotion
         fields = ['title', 'description', 'url_video', 'date', 'is_active']
+        labels = {
+            'title':"Назва Акції",
+            'description':"Опис",
+            'url_video': "Посилання на відео",
+            'date':"Дата публікації",
+            'is_active':"Вкл"
+        }
         widgets = {
-            'date': forms.DateInput(attrs={'type': 'date'}),
-            'is_active': forms.CheckboxInput()
+            'title': forms.TextInput(attrs={ 'class': 'form-control'}),
+            'description': forms.Textarea(attrs={  'cols': '50', 'rows': '10','class': 'form-control'}),
+            'date': forms.DateInput(attrs={'type': 'date','class': 'form-control float-right'}),
+            'is_active': forms.CheckboxInput(),
+            'url_video':forms.URLInput(attrs={'size': '30',"class":"form-control float-right"})
         }
 
 
 class PaigesNewsForm(forms.ModelForm):
     class Meta:
         model=PaigesNews
-       # exclude =['id', 'seo_block', 'gallery']
+
         fields = ['title', 'description', 'url', 'date', 'is_active']
-        widgets= {
-            'date': forms.DateInput(attrs={'type': 'date'}),
-            'is_active':forms.CheckboxInput()
+        labels = {
+            'title': _("Назва новини"),
+            'description': _("Опис"),
+            'url': _("Посилання на відео"),
+            'date': _("Дата публікації"),
+            'is_active': _("Вкл")
+        }
+        widgets = {
+            'title': forms.TextInput(attrs={'size': '30', 'class': 'form-control float-center'}),
+            'description': forms.Textarea(attrs={'cols': '50', 'rows': '10', 'class': 'form-control'}),
+            'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control float-right'}),
+            'is_active': forms.CheckboxInput(),
+            'url': forms.URLInput(attrs={'size': '30', "class": "form-control float-right"})
         }
 
 
@@ -176,6 +199,7 @@ class PictureForm(forms.ModelForm):
         widgets = {
             'gallery': forms.HiddenInput(),
             'image_type': forms.HiddenInput(),
+
         }
 
     def __init__(self, *args, **kwargs):
@@ -187,7 +211,7 @@ class PictureForm(forms.ModelForm):
         self.fields['image'].label = 'Главная картинка'
 
         self.fields['image'].widget.attrs.update({
-            'style': 'display: none;',  # <-- повністю ховає стандартну кнопку
+            'style': 'display: none;',
         })
 
         if 'id' in self.fields:
@@ -218,7 +242,7 @@ class BannerForm(forms.ModelForm):
 
         def save(self, commit=True):
             banner = super().save(commit=False)
-            # Якщо у банера немає галереї — створимо
+
             if not banner.gallery:
                 gallery = Gallery.objects.create()
                 banner.gallery = gallery
@@ -318,7 +342,13 @@ class HallsForm(forms.ModelForm):
         exclude = ['seo_block','date', 'gallery']
 
         fields = [ 'title', 'cinema', 'description', 'rows', 'seats_row']
-
+        labels = {
+            'title':_('Назва'),
+            'cinema':_('Кінотеатр'),
+            'description':_("Опис"),
+            'rows':_('Ряд'),
+            'seats_row':'_(Місце)'
+        }
 
 class CinemaForm(forms.ModelForm):
 
@@ -326,6 +356,14 @@ class CinemaForm(forms.ModelForm):
         model = Cinemas
 
         fields = ['title', 'description' , 'conditions', 'city',]
+        widgets = {
+
+            'description': forms.Textarea(attrs={'class': 'form-control'}),
+            "conditions": forms.Textarea(attrs={'class': 'form-control'}),
+            "seo_url": forms.URLInput(attrs={'class': 'form-control'}),
+            'city': forms.TextInput(attrs={'class': 'form-control'}),
+
+        }
 
 
 class BlockSEOForm(forms.ModelForm):
@@ -360,13 +398,13 @@ class MovieForm(forms.ModelForm):
         fields = ['genre', 'title', 'url_trailer', 'description',
                     'relise_date', 'age_limit', 'is_2d','is_3d','is_imax']
         labels = {
-            'genre': 'Жанр:',
-            'title': 'Назва:',
-            'url_trailer': 'URL трейлера:',
-            'description': 'Опис:',
+            'genre': _('Жанр:'),
+            'title': _('Назва:'),
+            'url_trailer': _('URL трейлера:'),
+            'description': _('Опис:'),
 
-            'relise_date': 'Дата проката:',
-            'age_limit': 'Вікова категорія:',
+            'relise_date': _('Дата проката:'),
+            'age_limit': _('Вікова категорія:'),
             'is_2d': ' 2D ',
             'is_3d': ' 3D ',
             'is_imax': ' IMAX ',

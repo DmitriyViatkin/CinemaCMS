@@ -42,7 +42,7 @@
             <div id="banner-container" class="banners-container">
                 {% for item in form_data %}
                     <div class="banner-unit">
-                        {{ item.form.id }} {{ item.form.DELETE }}
+                        {{ item.form.id }} <div style="display :none" >{{ item.form.DELETE }}</div>
                         <div class="image-block">
                             {% if item.image_url %}
                                 <img class="preview" src="{{ item.image_url }}" alt="preview" />

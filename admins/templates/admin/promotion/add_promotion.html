@@ -1,6 +1,8 @@
+
 {% extends 'admin/index.html' %}
 {% load static %}
-{% block title %}Додати новину{% endblock %}
+{% load i18n %}
+{% block title %}{% translate "Додати Акцію" %} {% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/movie_css.css' %}">
@@ -12,8 +14,9 @@
             <div class="col-md-12">
                 <div class="card card-primary">
                     <div class="card-header">
-                        <h3 class="card-title">Додати новину</h3>
+                        <h3 class="card-title">{% translate  "Додати Акцію" %} </h3>
                     </div>
+                    <div >{% include 'admin/card_forms/language.html' %}</div>
                     <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
 
@@ -35,62 +38,65 @@
                         {% endif %}
 
                         <div class="card-body">
-                            <h2>Інформація про новину</h2>
-
-                                        <div class="card-body">
-                  <div class="form-group">
-                        {{ promotion_form.title.label_tag }}
-                        {{ promotion_form.title }}
-                        {% if promotion_form.title.help_text %}<small class="form-text text-muted">{{ promotion_form.title.help_text }}</small>{% endif %}
-                        {% for error in promotion_form.title.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-
-                        {{ promotion_form.date.label_tag }}
-                        {{ promotion_form.date }}
-                        {% if promotion_form.date.help_text %}<small class="form-text text-muted">{{ promotion_form.date.help_text }}</small>{% endif %} {# ИСПРАВЛЕНО: добавлен пробел #}
-                        {% for error in promotion_form.date.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-
-                        {{ promotion_form.is_active.label_tag }}
-                        {{ promotion_form.is_active }}
-                        {% if promotion_form.is_active.help_text %}<small class="form-text text-muted">{{ promotion_form.gallery.help_text }}</small>{% endif %} {# ИСПРАВЛЕНО: добавлен пробел #}
-                        {% for error in promotion_form.is_active.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
 
 
-                  </div>
-                </div>
 
-                <div class="card-body">
-                  <div class="form-group">
-                        {{ promotion_form.description.label_tag }}
-                        {{ promotion_form.description }}
-                        {% if promotion_form.description.help_text %}<small class="form-text text-muted">{{ news_form.description.help_text }}</small>{% endif %} {# ИСПРАВЛЕНО: добавлен пробел #}
-                        {% for error in promotion_form.description.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-                  </div>
-                </div>
+                            <div class="card-body">
+                                            <div class="form-group flex-container">
+                                                {{ promotion_form.title.label_tag }}
+                                                {{ promotion_form.title }}
+                                                {% if promotion_form.title.help_text %}<small class="form-text text-muted">{{ promotion_form.title.help_text }}</small>{% endif %}
+                                                {% for error in promotion_form.title.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
 
-                            <h3>Головна картинка</h3>
+
+                                                {{ promotion_form.date.label_tag }}
+                                                {{ promotion_form.date }}
+                                                {% if promotion_form.date.help_text %}<small class="form-text text-muted">{{ promotion_form.date.help_text }}</small>{% endif %}
+                                                {% for error in promotion_form.date.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+
+                                                {{ promotion_form.is_active.label_tag }}
+                                                {{ promotion_form.is_active }}
+                                                {% if promotion_form.is_active.help_text %}<small class="form-text text-muted">{{ promotion_form.gallery.help_text }}</small>{% endif %}
+                                                {% for error in promotion_form.is_active.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                                            </div>
+
+                            </div>
+                            </div>
+
+                        <div class="card-body">
+                          <div class="form-group">
+                                {{ promotion_form.description.label_tag }}
+                                {{ promotion_form.description }}
+                                {% if promotion_form.description.help_text %}<small class="form-text text-muted">{{ news_form.description.help_text }}</small>{% endif %}
+                                {% for error in promotion_form.description.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                          </div>
+                        </div>
+
+
                {% include 'admin/card_forms/main_image.html'  %}
 
 
-                <div class="card-body">
-                  <div class="form-group">
-                        {{ promotion_form.url_video.label_tag }}
-                        {{ promotion_form.url_video }}
-                        {% if promotion_form.url_video.help_text %}<small class="form-text text-muted">{{ promotion_form.url_video.help_text }}</small>{% endif %}
-                        {% for error in promotion_form.url_video.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-                  </div>
-                </div>
-                            <h3>Картинки галереї</h3>
+                        <div class="card-body">
+                          <div class="form-group form-group-inline-field">
+                                {{ promotion_form.url_video.label_tag }}
+                                {{ promotion_form.url_video }}
+                                {% if promotion_form.url_video.help_text %}<small class="form-text text-muted">{{ promotion_form.url_video.help_text }}</small>{% endif %}
+                                {% for error in promotion_form.url_video.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                          </div>
+                        </div>
+                            <h3>{% translate  "Картинки галереї" %}</h3>
                            {% include 'admin/card_forms/gallery_form.html'  %}
 
-                            <h2>SEO Інформація</h2>
+
                             {% include 'admin/card_forms/seo_form.html' with form=block_seo_form %}
                         <div class="card-footer">
-                            <button type="submit" class="btn btn-primary">Створити</button>
+                            <button type="submit" class="btn btn-primary">{% translate "Створити" %} </button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
+         </div>
     </section>
 
 
@@ -124,4 +130,64 @@
     const DEFAULT_IMAGE_URL = "{% static 'images/картинка.png' %}";
 </script>
 <script src="{% static 'js/gallery.js' %}"></script>
+
+
+<style>
+    #id_title {
+    width: 450px;
+}
+    #id_url_video{
+        width: 450px;
+        align-items: center;
+    }
+     #id_date{
+        width: 100px;
+
+    }
+
+.flex-container {
+    display: flex; /* Робить контейнер Flex-контейнером */
+    align-items: center; /* Вирівнює елементи по центру вертикально */
+    gap: 10px; /* Додає простір між елементами (наприклад, між міткою та полем) */
+    /* Можливо, знадобиться: */
+    flex-wrap: wrap; /* Дозволяє елементам переноситися на новий рядок, якщо місця замало */
+}
+
+.flex-container label {
+    /* Якщо мітка занадто довга і ви хочете, щоб вона не займала багато місця, можна задати їй фіксовану ширину */
+    /* min-width: 120px; */
+    /* text-align: right; */ /* Якщо хочете, щоб мітки були вирівняні по правому краю */
+}
+
+.flex-container input,
+.flex-container textarea,
+.flex-container select {
+    /* Переконайтеся, що поля можуть розширюватися */
+    flex-grow: 1;
+    /* Можливо, задайте максимальну ширину для поля */
+    max-width: 400px;
+}
+
+ .form-group-inline-field {
+    display: flex;       /* Робить контейнер Flex-контейнером */
+    align-items: center; /* Вирівнює елементи по центру вертикально */
+    gap: 10px;           /* Додає простір між міткою та полем */
+    flex-wrap: wrap;     /* Дозволяє елементам переноситися на новий рядок, якщо місця замало */
+}
+
+.form-group-inline-field label {
+    /* Можливо, задайте фіксовану мінімальну ширину для мітки */
+    min-width: 150px;
+    text-align: right; /* Вирівнювання тексту мітки по правому краю */
+    flex-shrink: 0;    /* Запобігає стисканню мітки */
+}
+
+.form-group-inline-field input,
+.form-group-inline-field textarea,
+.form-group-inline-field select {
+    flex-grow: 1;      /* Дозволяє полю займати весь доступний простір */
+    max-width: 500px;  /* Обмеження максимальної ширини поля, якщо потрібно */
+}
+
+</style>
 {% endblock %}

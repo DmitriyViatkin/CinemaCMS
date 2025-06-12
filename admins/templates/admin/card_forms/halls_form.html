@@ -1,13 +1,13 @@
 {# admin/card_forms/hall_form.html #}
 {% load static %}
-
+{% load i18n %}
 {# HallsForm: seo_block, title, cinema, description, rows, seats_row #}
 
 
 
 <div class="card-body">
   <div class="form-group">
-    {{ form.title.label_tag }}
+    {% translate form.title.label_tag %}
     {{ form.title }}
     {% if form.title.help_text %}<small class="form-text text-muted">{{ form.title.help_text }}</small>{% endif %}
     {% for error in form.title.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
@@ -16,7 +16,7 @@
 
 <div class="card-body">
   <div class="form-group">
-    {{ form.cinema.label_tag }}
+    {% translate form.cinema.label_tag %}
     {{ form.cinema }}
     {% if form.cinema.help_text %}<small class="form-text text-muted">{{ form.cinema.help_text }}</small>{% endif %}
     {% for error in form.cinema.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
@@ -25,7 +25,7 @@
 
 <div class="card-body">
   <div class="form-group">
-    {{ form.description.label_tag }}
+    {% translate form.description.label_tag %}
     {{ form.description }}
     {% if form.description.help_text %}<small class="form-text text-muted">{{ form.description.help_text }}</small>{% endif %}
     {% for error in form.description.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
@@ -34,7 +34,7 @@
 
 <div class="card-body">
   <div class="form-group">
-    {{ form.rows.label_tag }}
+    {% translate form.rows.label_tag %}
     {{ form.rows }}
     {% if form.rows.help_text %}<small class="form-text text-muted">{{ form.rows.help_text }}</small>{% endif %}
     {% for error in form.rows.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
@@ -43,7 +43,7 @@
 
 <div class="card-body">
   <div class="form-group">
-    {{ form.seats_row.label_tag }}
+    {% translate  form.seats_row.label_tag %}
     {{ form.seats_row }}
     {% if form.seats_row.help_text %}<small class="form-text text-muted">{{ form.seats_row.help_text }}</small>{% endif %}
     {% for error in form.seats_row.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}

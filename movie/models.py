@@ -2,6 +2,7 @@ from django.db import models
 
 # Create your models here.
 from main.models import Block_SEO, Gallery, Picture
+from django.utils.translation import gettext_lazy as _
 
 
 class Movies(models.Model):
@@ -20,18 +21,18 @@ class Movies(models.Model):
     id = models.AutoField(primary_key=True)
     seo_block = models.OneToOneField(Block_SEO, on_delete=models.CASCADE, verbose_name='Блок СЕО ')
     genre = models.CharField(max_length=11, choices=GENRE_CHOISES, verbose_name='Жанр ')
-    title = models.CharField(max_length=255, verbose_name='Назва')
-    url_trailer = models.URLField(verbose_name='URL трелера ')
-    description = models.TextField(verbose_name='Опис ')
+    title = models.CharField(max_length=255, verbose_name=_('Назва'))
+    url_trailer = models.URLField(verbose_name=_('URL трейлера'))
+    description = models.TextField(verbose_name=_('Опис'))
 
-    relise_date = models.DateField(verbose_name='Дата проката')
-    age_limit = models.IntegerField(verbose_name='Вікова категорія')
-    date = models.DateField(auto_now_add=True, verbose_name='Дата створення запису')
+    relise_date = models.DateField(verbose_name=_('Дата проката'))
+    age_limit = models.IntegerField(verbose_name=_('Вікова категорія'))
+    date = models.DateField(auto_now_add=True, verbose_name=_('Дата створення запису'))
     is_2d =  models.BooleanField(default=False, verbose_name='2D')
     is_3d = models.BooleanField(default=False, verbose_name='3D')
     is_imax = models.BooleanField(default=False, verbose_name='IMAX')
     gallery = models.ForeignKey(Gallery, on_delete=models.SET_NULL, null=True, blank=True,
-                                related_name='movies', verbose_name='Галерея зображень')
+                                related_name='movies', verbose_name=_('Галерея зображень'))
 
     def __str__(self):
         return self.title

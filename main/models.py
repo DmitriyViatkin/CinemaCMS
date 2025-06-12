@@ -1,14 +1,15 @@
 from django.db import models
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 
 class Block_SEO(models.Model):
     id = models.AutoField(primary_key=True)
-    title_seo = models.CharField(max_length=250, verbose_name= 'Заголовок') # Залишаємо обов'язковим
-    seo_url = models.SlugField(verbose_name= 'URL адреса ', unique=True) # Додали unique=True раніше, за замовчуванням обов'язкове
+    title_seo = models.CharField(max_length=250, verbose_name= 'Заголовок')
+    seo_url = models.SlugField(verbose_name= 'URL адреса ', unique=True)
 
-    seo_keywords = models.CharField(max_length=250, verbose_name= 'Ключові слова', blank=True) # <--- ЗРОБЛЕНО НЕОБОВ'ЯЗКОВИМ
-    seo_description = models.TextField(verbose_name= 'Опис', blank=True) # <--- ЗРОБЛЕНО НЕОБОВ'ЯЗКОВИМ
+    seo_keywords = models.CharField(max_length=250, verbose_name= 'Ключові слова', blank=True)
+    seo_description = models.TextField(verbose_name= 'Опис', blank=True)
 
 
 
@@ -50,14 +51,14 @@ class Banners(models.Model):
     id = models.AutoField(primary_key=True)
     gallery = models.ForeignKey(
         Gallery,
-        related_name='banners', # Вже було
+        related_name='banners',
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        verbose_name='Картинка' # Можливо, краще "Галерея зображень"
+        verbose_name='Картинка'
     )
-    url = models.URLField(verbose_name='URL адреса', null=True, blank=True) # Додав null=True, blank=True
-    text = models.CharField(max_length=100, verbose_name='текст', null=True, blank=True) # Додав null=True, blank=True
+    url = models.URLField(verbose_name='URL адреса', null=True, blank=True)
+    text = models.CharField(max_length=100, verbose_name='текст', null=True, blank=True)
     scroll_speed = models.DurationField(verbose_name='Швидкість прокрутки (сек.)', null=True, blank=True)
     is_active = models.BooleanField(default=False, verbose_name='Показувати')
 
@@ -121,7 +122,7 @@ class Cross_Banner (models.Model):
     TYPE_CHOICES = [
         ('photo_background', 'Фото на фоне'),
         ('photo', 'Просто фото'),
-        # Додай сюди інші свої варіанти
+
     ]
 
     def __str__(self):
@@ -134,15 +135,15 @@ class Cross_Banner (models.Model):
 
 class PaigesNews(models.Model):
     id = models.AutoField(primary_key=True)
-    title = models.CharField(max_length=250, verbose_name='Назва')
+    title = models.CharField(max_length=250, verbose_name=_('Назва'))
     seo_block = models.OneToOneField(Block_SEO, on_delete= models.CASCADE, verbose_name= 'Блок СЕО ')
     gallery = models.ForeignKey(Gallery, on_delete=models.SET_NULL, null=True, blank=True, verbose_name= 'Картинка')
-    description = models.TextField(verbose_name= 'Опис')
-    url = models.URLField(verbose_name='URL адреса ')
-    date = models.DateField(default=timezone.localdate, verbose_name='Дата публікації')
+    description = models.TextField(verbose_name= _('Опис'))
+    url = models.URLField(verbose_name=_('URL адреса '))
+    date = models.DateField(default=timezone.localdate, verbose_name=_('Дата публікації'))
 
 
-    is_active = models.BooleanField(default=False, verbose_name= 'Показ')
+    is_active = models.BooleanField(default=False, verbose_name= _('Показ'))
 
     def __str__(self):
         return self.title
@@ -156,10 +157,10 @@ class MainPaiges (models.Model):
 
     id = models.AutoField(primary_key=True)
     seo_block = models.OneToOneField(Block_SEO, on_delete= models.CASCADE, verbose_name= 'Блок СЕО ')
-    SEO_text  = models.TextField(verbose_name= 'Сео текст ')
-    phone_1  = models.CharField(max_length=16, verbose_name= "Телефон")
-    phone_2 = models.CharField(max_length=16, verbose_name="Телефон")
-    is_active = models.BooleanField(default=False, verbose_name= 'Показ')
+    SEO_text  = models.TextField(verbose_name= _('СЕО текст '))
+    phone_1  = models.CharField(max_length=16, verbose_name= _("Телефон"))
+    phone_2 = models.CharField(max_length=16, verbose_name=_("Телефон"))
+    is_active = models.BooleanField(default=False, verbose_name= _('Показ'))
 
 
 
@@ -170,11 +171,11 @@ class MainPaiges (models.Model):
 class PaigesCinema(models.Model):
     id = models.AutoField(primary_key=True)
     seo_block = models.OneToOneField(Block_SEO, on_delete= models.CASCADE, verbose_name= 'Блок СЕО ')
-    title = models.CharField(max_length=250, verbose_name='Назва')
-    gallery = models.ForeignKey(Gallery, on_delete=models.SET_NULL, null=True, blank=True, verbose_name= 'Картинка')
-    description = models.TextField(verbose_name= 'Опис')
+    title = models.CharField(max_length=250, verbose_name=_('Назва'))
+    gallery = models.ForeignKey(Gallery, on_delete=models.SET_NULL, null=True, blank=True, verbose_name= _('Картинка'))
+    description = models.TextField(verbose_name= _('Опис'))
     date = models.DateField()
-    is_active = models.BooleanField(default=False, verbose_name= 'Показ')
+    is_active = models.BooleanField(default=False, verbose_name= _('Показ'))
 
     def __str__(self):
         return self.title
@@ -209,13 +210,13 @@ class Contact(models.Model):
 
 class Promotion(models.Model):
     id = models.AutoField(primary_key=True)
-    title = models.CharField(max_length=100, verbose_name='Опис ')
+    title = models.CharField(max_length=100, verbose_name=_('Опис '))
     seo_block = models.OneToOneField(Block_SEO, on_delete=models.CASCADE, verbose_name= 'Блок СЕО ')
-    gallery = models.ForeignKey(Gallery, on_delete=models.SET_NULL, null=True, blank=True, verbose_name= 'Картинка')
-    description = models.TextField(verbose_name= 'Опис')
+    gallery = models.ForeignKey(Gallery, on_delete=models.SET_NULL, null=True, blank=True, verbose_name= _('Картинка'))
+    description = models.TextField(verbose_name= _('Опис'))
     url_video= models.URLField(verbose_name= 'URL адреса ')
-    date = models.DateField(default=timezone.localdate, verbose_name='Дата публікації')
-    is_active = models.BooleanField(default=False, verbose_name='Показ')
+    date = models.DateField(default=timezone.localdate, verbose_name=_('Дата публікації'))
+    is_active = models.BooleanField(default=False, verbose_name=_('Показ'))
 
     def __str__(self):
         return self.title

@@ -1,5 +1,6 @@
 {% extends 'admin/index.html' %}
 {% load static %}
+{% load i18n %}
 {% block title %}Додати фільм{% endblock %}
 
 {% block content %}
@@ -12,8 +13,8 @@
       <div class="col-md-12">
         <div class="card card-primary" style="width: 80%; margin: 0 auto;">
           <div class="card-header">
-            <h3 class="card-title">Додати фільм</h3>
-          </div>
+            <h3 class="card-title">{% translate 'Додати фільм' %} </h3>
+          </div><div >{% include 'admin/card_forms/language.html' %}</div>
           <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
 
@@ -41,7 +42,7 @@
               {#  Title #}
               <div class="form-group field-row-aligned">
                 <div class="label-wrapper text-right">
-                  {{ movie_form.title.label_tag }}
+                    {% trans movie_form.title.label_tag %}
                 </div>
                 <div class="input-wrapper flex-grow-1">
                   {{ movie_form.title }}
@@ -53,7 +54,7 @@
               {#  Description #}
               <div class="form-group field-row-aligned">
                 <div class="label-wrapper text-right align-self-start">
-                  {{ movie_form.description.label_tag }}
+                  {% translate movie_form.description.label_tag %}
                 </div>
                 <div class="input-wrapper flex-grow-1">
                   {{ movie_form.description }}
@@ -68,7 +69,7 @@
               {# URL трейлера #}
               <div class="form-group field-row-aligned">
                 <div class="label-wrapper text-right">
-                  {{ movie_form.url_trailer.label_tag }}
+                  {% translate movie_form.url_trailer.label_tag %}
                 </div>
                 <div class="input-wrapper flex-grow-1">
                   {{ movie_form.url_trailer }}
@@ -80,10 +81,10 @@
 
               <div class="form-group field-row-aligned">
                   <div class="label-wrapper text-right align-self-start" style="min-width: 120px;">
-                      <h3>Формати:</h3>
+                      <h3>{% translate 'Формати:' %}</h3>
                   </div>
                   <div class="input-wrapper flex-grow-1 d-flex align-items-center">
-                      <div class="form-check me-4"> {# Bootstrap 5 me-4 для отступа между флажками #}
+                      <div class="form-check me-4">
                           {{ movie_form.is_2d }}
                           <label class="form-check-label" for="{{ movie_form.is_2d.id_for_label }}">{{ movie_form.is_2d.label }}</label>
                           {% for error in movie_form.is_2d.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
@@ -118,7 +119,7 @@
                 <div class="form-group flex-item">
                   <div class="field-row d-flex align-items-center">
                     <div class="label-wrapper me-3 text-right">
-                      {{ movie_form.relise_date.label_tag }}
+                      {% translate movie_form.relise_date.label_tag %}
                     </div>
                     <div class="input-wrapper flex-grow-1">
                       <div class="input-group">
@@ -140,7 +141,7 @@
                 <div class="form-group flex-item">
                   <div class="field-row d-flex align-items-center">
                     <div class="label-wrapper me-3 text-right">
-                      {{ movie_form.age_limit.label_tag }}
+                      {% translate movie_form.age_limit.label_tag %}
                     </div>
                     <div class="input-wrapper flex-grow-1">
                       {{ movie_form.age_limit }}
@@ -154,7 +155,7 @@
                 <div class="form-group flex-item">
                   <div class="field-row d-flex align-items-center">
                     <div class="label-wrapper me-3 text-right">
-                      {{ movie_form.gallery.label_tag }}
+                      {% translate movie_form.gallery.label_tag %}
                     </div>
                     <div class="input-wrapper flex-grow-1">
                       {{ movie_form.gallery }}
@@ -170,7 +171,7 @@
                 <div class="form-group flex-item">
                   <div class="field-row d-flex align-items-center">
                     <div class="label-wrapper me-3 text-right">
-                      {{ movie_form.genre.label_tag }}
+                     {% translate  movie_form.genre.label_tag %}
                     </div>
                     <div class="input-wrapper flex-grow-1" style="width: 20%;">
                       {{ movie_form.genre }}
@@ -182,17 +183,17 @@
 
               </div>
 
-              </div>>
+              </div>
 
-              <h3>Картинки галереї</h3>
+              <h3>{% translate 'Картинки галереї' %}</h3>
 
             {% include 'admin/card_forms/gallery_form.html'  %}
 
-            {# Подключаем SEO блок #}
+
             {% include 'admin/card_forms/seo_form.html' with form=block_seo_form %}
 
-            <div class="card-footer text-center"> {# Центрируем кнопку #}
-              <button type="submit" class="btn btn-primary">Створити</button>
+            <div class="card-footer text-center">
+              <button type="submit" class="btn btn-primary">{% translate 'Створити' %} </button>
             </div>
           </form>
         </div>
@@ -204,7 +205,7 @@
 
 
 <script>
-    // DEFAULT_IMAGE_URL должен быть объявлен ПЕРВЫМ среди JS, которые его используют
+
     const DEFAULT_IMAGE_URL = "{% static 'images/картинка.png' %}";
 </script>
 
