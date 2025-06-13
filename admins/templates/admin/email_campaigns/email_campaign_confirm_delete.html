@@ -1,0 +1,30 @@
+{% extends 'admin/index.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <div class="card card-danger">
+                    <div class="card-header">
+                        <h3 class="card-title">{% translate "Підтвердження видалення" %}</h3>
+                    </div>
+                    <div class="card-body">
+                        <p>{% translate "Ви впевнені, що хочете видалити Email кампанію" %} <strong>#{{ campaign.id }}</strong>?</p>
+                        <p>{% translate "Текст:" %} "{{ campaign.text|truncatechars:100 }}"</p>
+                        <form method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">{% translate "Видалити" %}</button>
+                            <a href="{% url 'email_campaign_list' %}" class="btn btn-default float-right">{% translate "Скасувати" %}</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

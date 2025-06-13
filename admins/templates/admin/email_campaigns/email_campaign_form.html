@@ -1,0 +1,145 @@
+{% extends 'admin/index.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .email-block {
+        border: 2px solid #000;
+        padding: 20px;
+        width: 980px;
+        margin: 20px auto;
+        border-radius: 8px;
+        font-size: 15px;
+    }
+    .email-title {
+        text-align: center;
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+    .section {
+        margin-bottom: 20px;
+    }
+    .flex-row {
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+    }
+    .box {
+        border: 1px solid #ccc;
+        padding: 15px;
+        border-radius: 5px;
+        width: 100%;
+    }
+    .hint {
+        background-color: #ffffcc;
+        border: 1px dashed #aaa;
+        padding: 10px;
+        font-size: 14px;
+    }
+    .checkbox-list {
+        max-height: 150px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        padding: 10px;
+        background-color: #fafafa;
+    }
+    .btn {
+        padding: 8px 20px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+    .checkbox-item {
+        margin-bottom: 5px;
+    }
+</style>
+
+<div class="email-block">
+    <div class="email-title">E-mail</div>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Выбор получателей -->
+        <div class="section flex-row">
+            <div class="box" style="width: 300px;">
+                <label><input type="radio" name="recipient_mode" value="all" checked> Все пользователи на почту</label><br>
+                <label><input type="radio" name="recipient_mode" value="selected"> Выборочно</label>
+            </div>
+            <div class="box" id="user-select-block" style="display: none;">
+                <strong>Выберите пользователей:</strong>
+                <div class="checkbox-list">
+                    {% for user in form.users.field.queryset %}
+                        <div class="checkbox-item">
+                            <label>
+                                <input type="checkbox" name="users" value="{{ user.id }}">
+                                {{ user.username }} ({{ user.email }})
+                            </label>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- Загрузка шаблона + Выбор из последних -->
+        <div class="section flex-row">
+            <div class="box" style="width: 50%;">
+                {{ form.new_template_file.label_tag }}<br>
+                {{ form.new_template_file }}
+                {% if form.new_template_file.help_text %}
+                    <small>{{ form.new_template_file.help_text }}</small>
+                {% endif %}
+            </div>
+
+            <div class="box" style="width: 50%;">
+                <strong>Выберите один из последних шаблонов:</strong>
+                <div class="checkbox-list">
+                    {% for template in templates %} {# <--- ИЗМЕНИТЕ ЭТО С 'last_templates' НА 'templates' #}
+                        <div class="checkbox-item">
+                            <label>
+                                <input type="radio" name="template_id" value="{{ template.id }}">
+                                {{ template.template_file  }}
+                            </label>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Статус -->
+        <div class="section">
+            {{ form.status.label_tag }}<br>
+            {{ form.status }}
+        </div>
+
+        <!-- Ошибки -->
+        {% if form.non_field_errors %}
+            <div class="section errorlist">
+                {% for error in form.non_field_errors %}
+                    <p style="color: red;">{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="section" style="text-align: center;">
+            <button type="submit" class="btn btn-primary">Начать рассылку</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const radios = document.querySelectorAll('input[name="recipient_mode"]');
+        const userBlock = document.getElementById('user-select-block');
+
+        function toggleUsers() {
+            const selected = document.querySelector('input[name="recipient_mode"]:checked').value;
+            userBlock.style.display = selected === "selected" ? "block" : "none";
+        }
+
+        radios.forEach(r => r.addEventListener("change", toggleUsers));
+        toggleUsers();
+    });
+</script>
+{% endblock %}
