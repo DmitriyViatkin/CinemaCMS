@@ -1,7 +1,7 @@
 from django.urls import path
 from . import views
 
-from .table import MovieListDate
+from .table import MovieListDate, user_list
 
 urlpatterns = [
 
@@ -75,6 +75,7 @@ urlpatterns = [
     path('email_campaigns/<int:campaign_id>/edit/', views.email_campaign_create, name='email_campaign_edit'),
     path('email_campaigns/<int:campaign_id>/delete/', views.email_campaign_delete, name='email_campaign_delete'),
 
+    path('ajax/users/', user_list, name='user_list')
 
 
 

@@ -53,34 +53,78 @@ class SellectUserForm(forms.ModelForm):
 
 
 class EmailCampaignForm(forms.ModelForm):
-    """
-        Форма для создания email-кампании, позволяющая выбирать нескольких пользователей.
-        Теперь также включает поля для загрузки НОВОГО шаблона Email.
-        """
-    users = forms.ModelMultipleChoiceField(
-        queryset=User.objects.all(),
-        widget=forms.CheckboxSelectMultiple,
-        label="Кому отправить?",
-        help_text="Выберите одного или нескольких пользователей для этой кампании.",
-        required=False  # Можно сделать необязательным, если кампания может быть без получателей сразу
+    # !!! ЭТО КРИТИЧЕСКОЕ ИЗМЕНЕНИЕ !!!
+    # users теперь CharField, чтобы принимать строку "1,4" или ""
+    users = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput, # Поле должно быть скрытым
+        help_text="Список ID пользователей, разделенных запятыми."
     )
 
-    # Поле для загрузки НОВОГО шаблона
+    recipient_mode = forms.ChoiceField(
+        choices=[
+            ('all', 'Всі користувачі'),
+            ('selected', 'Вибірково'),
+        ],
+        widget=forms.RadioSelect,
+        initial='all',
+        label='Виберіть отримувачів розсилки'
+    )
+
     new_template_file = forms.FileField(
         label="Загрузить НОВЫЙ файл шаблона (HTML, TXT и т.д.)",
-        required=False,  # Сделать необязательным, если можно выбрать существующий шаблон
+        required=False,
         help_text="Загрузите файл для нового шаблона Email. Если выбрано, этот шаблон будет связан с кампанией."
     )
 
     class Meta:
         model = Email_campaing
-        fields = ['users', 'status', 'template']  # 'template' остаётся для выбора СУЩЕСТВУЮЩИХ
+        fields = ['new_template_file', 'template', 'status', 'users'] # Убедитесь, что здесь нет пробела после 'template'
         labels = {
             'status': "Статус кампании",
             'template': "Выбрать существующий шаблон Email",
         }
 
-    # Валидация для поля template и new_template_file
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['template'].queryset = Tamplate_email.objects.order_by('-id')[:5]
+
+        if not self.instance.pk:
+            self.fields['recipient_mode'].initial = 'all'
+        elif self.instance.users.exists():
+            self.fields['recipient_mode'].initial = 'selected'
+            # При редактировании, инициализируем скрытое поле 'users' для JS
+            initial_user_ids = list(self.instance.users.values_list('id', flat=True))
+            self.initial['users'] = ','.join(map(str, initial_user_ids))
+        else:
+            self.fields['recipient_mode'].initial = 'all'
+
+    # !!! ЭТОТ МЕТОД ОБЯЗАТЕЛЕН !!!
+    def clean_users(self):
+        users_str = self.cleaned_data.get('users', '') # Получаем строку из hidden input
+        recipient_mode = self.data.get('recipient_mode') # Получаем режим выбора
+
+        if recipient_mode == 'all':
+            return [] # Возвращаем пустой список, так как все пользователи будут добавлены в views.py
+
+        # Если режим 'selected'
+        if users_str: # Если строка не пустая, парсим её
+            try:
+                user_ids = [int(uid.strip()) for uid in users_str.split(',') if uid.strip()]
+            except ValueError:
+                raise forms.ValidationError("Неверный формат ID пользователя. Ожидается список чисел через запятую.")
+
+            # Опционально: проверка на существование пользователей
+            existing_user_ids = User.objects.filter(id__in=user_ids).values_list('id', flat=True)
+            if len(set(user_ids)) != len(existing_user_ids):
+                invalid_ids = set(user_ids) - set(existing_user_ids)
+                raise forms.ValidationError(f"Некоторые выбранные ID пользователей недействительны или не существуют: {list(invalid_ids)}")
+
+            return user_ids # Возвращаем список ID
+        else:
+            # Если recipient_mode == 'selected', но users_str пуст
+            raise forms.ValidationError("Виберіть хоча б одного користувача для розсилки.")
+
     def clean(self):
         cleaned_data = super().clean()
         existing_template = cleaned_data.get('template')
@@ -89,8 +133,8 @@ class EmailCampaignForm(forms.ModelForm):
         if not existing_template and not new_template_file:
             self.add_error(None, "Пожалуйста, выберите существующий шаблон ИЛИ загрузите новый файл шаблона.")
         elif existing_template and new_template_file:
-            self.add_error(None,
-                           "Нельзя выбрать существующий шаблон И загрузить новый одновременно. Пожалуйста, выберите что-то одно.")
+            self.add_error(None, "Нельзя выбрать существующий шаблон И загрузить новый одновременно. Пожалуйста, выберите что-то одно.")
+
         return cleaned_data
 
 class ContactForm(forms.ModelForm):
