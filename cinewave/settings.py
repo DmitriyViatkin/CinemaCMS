@@ -52,7 +52,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'widget_tweaks',
-'debug_toolbar'
+    'debug_toolbar',
+    'django_celery_results'
 
 
 
@@ -68,7 +69,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-'debug_toolbar.middleware.DebugToolbarMiddleware'
+    'debug_toolbar.middleware.DebugToolbarMiddleware'
 ]
 
 ROOT_URLCONF = 'cinewave.urls'
@@ -169,6 +170,12 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'viatkindima@gmail.com'
 EMAIL_HOST_PASSWORD = 'zakl bjnl fuuv vpyc'
 DEFAULT_FROM_EMAIL = 'viatkindima@gmail.com'
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
 
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
