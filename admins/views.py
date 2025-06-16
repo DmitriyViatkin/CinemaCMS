@@ -19,13 +19,15 @@ from django.http import HttpRequest, HttpResponse
 from django.template.loader import render_to_string
 from .send_email import send_campaign_email
 from os.path import basename
-
+from .tasks import send_campaign_emails_task
+from django.urls import reverse
 
 
 @staff_member_required
 def email_campaign_create(request, campaign_id=None):
     campaign_instance = None
     is_edit = False
+    current_task_id = None # <-- Инициализируем здесь
 
     if campaign_id:
         campaign_instance = get_object_or_404(Email_campaing, pk=campaign_id)
@@ -47,25 +49,17 @@ def email_campaign_create(request, campaign_id=None):
             existing_template_obj = form.cleaned_data.get('template')
 
             if new_template_file:
-                # Если загружен новый файл
                 file_name = new_template_file.name
                 try:
-
                     template_obj = Tamplate_email.objects.get(template_file__icontains=file_name)
-
                     template_obj.template_file.save(file_name, new_template_file, save=True)
                     print(f"DEBUG: Обновлен существующий шаблон с файлом: {file_name}")
                 except Tamplate_email.DoesNotExist:
-
                     template_obj = Tamplate_email()
                     template_obj.template_file.save(file_name, new_template_file, save=True)
                     print(f"DEBUG: Создан новый шаблон с файлом: {file_name}")
-
-
                 email_campaign.template = template_obj
-
             elif existing_template_obj:
-
                 email_campaign.template = existing_template_obj
                 print(f"DEBUG: Выбран существующий шаблон с ID: {existing_template_obj.id}")
             else:
@@ -96,37 +90,37 @@ def email_campaign_create(request, campaign_id=None):
 
             # --- Отправка email ---
             final_users_queryset = email_campaign.users.all()
-            print(f"DEBUG: Начинаем отправку email для {final_users_queryset.count()} пользователей...")
-            sent_count = 0
-            skipped_count = 0
-            for user in final_users_queryset:
-                if user.email:
-                    print(f"DEBUG: Попытка отправить письмо пользователю: {user.username} с email: {user.email}")
-                    try:
-                        # send_campaign_email(email_campaign, user.email)
-                        sent_count += 1
-                    except Exception as e:
-                        print(f"ОШИБКИ ОТПРАВКИ: Не удалось отправить письмо пользователю {user.email}: {e}")
-                else:
-                    skipped_count += 1
-                    print(f"DEBUG: Пропущен пользователь {user.username}: нет email-адреса.")
+            recipient_email_list = list(
+                final_users_queryset.filter(email__isnull=False).values_list('email', flat=True))
 
-            email_campaign.status = 'send'
-            email_campaign.save()
+            if recipient_email_list:
+                email_campaign.status = 'sending'
+                email_campaign.save()  # сначала сохраняем статус
 
-            return redirect('email_campaign_list')
+                task = send_campaign_emails_task.delay(email_campaign.id, recipient_email_list)
+                return redirect(f"{reverse('email_campaign_create')}?task_id={task.task_id}")
+
+            else:
+                print("DEBUG: Нет email-адресов для отправки. Задача Celery не запущена.")
+                email_campaign.status = 'sent'
+                email_campaign.save()
+                # Если нет получателей, можно просто перенаправить на список или ту же страницу без task_id
+                return redirect('email_campaign_list') # или redirect('email_campaign_create')
+
 
         else:  # Форма невалидна
             print(f"DEBUG: Форма невалидна. Ошибки: {form.errors}")
 
             templates = Tamplate_email.objects.order_by('-id')[:5]
             for template_item in templates:
-                # Используем template_file.name для short_name
                 template_item.short_name = basename(template_item.template_file.name)
 
             raw_user_ids_str = request.POST.get('users', '')
             selected_user_ids_for_template = [int(uid.strip()) for uid in raw_user_ids_str.split(',') if
                                               uid.strip().isdigit()]
+
+
+            current_task_id = request.GET.get('task_id')
 
             context = {
                 'form': form,
@@ -135,6 +129,7 @@ def email_campaign_create(request, campaign_id=None):
                 'is_edit': is_edit,
                 'title': 'Редагувати Email Кампанію' if is_edit else 'Створити Email Кампанію',
                 'selected_user_ids_for_template': selected_user_ids_for_template,
+                'task_id': current_task_id,
             }
             return render(request, 'admin/email_campaigns/email_campaign_form.html', context)
 
@@ -158,6 +153,9 @@ def email_campaign_create(request, campaign_id=None):
             else:
                 print("ОШИБКА КОНФИГУРАЦИИ: Поле 'template' не найдено в EmailCampaignForm. Проверьте admins/forms.py.")
 
+
+        current_task_id = request.GET.get('task_id')
+
     templates = Tamplate_email.objects.order_by('-id')[:5]
     for template_item in templates:
         template_item.short_name = basename(template_item.template_file.name)
@@ -169,6 +167,7 @@ def email_campaign_create(request, campaign_id=None):
         'is_edit': is_edit,
         'title': 'Редагувати Email Кампанію' if is_edit else 'Створити Email Кампанію',
         'selected_user_ids_for_template': selected_user_ids_for_template,
+        'task_id': current_task_id,
     }
 
     return render(request, 'admin/email_campaigns/email_campaign_form.html', context)

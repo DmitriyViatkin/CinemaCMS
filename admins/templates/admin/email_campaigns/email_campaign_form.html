@@ -99,34 +99,42 @@
 
         <!-- Загрузка шаблона + Выбор из последних -->
         <div class="section flex-row">
-            <div class="box" style="width: 50%;">
-                {{ form.new_template_file.label_tag }}<br>
-                {{ form.new_template_file }}
-                {% if form.new_template_file.help_text %}
-                    <small>{{ form.new_template_file.help_text }}</small>
-                {% endif %}
-            </div>
-
-            <div class="box" style="width: 50%;">
-                <strong>Выберите один из последних шаблонов:</strong>
-                <div class="checkbox-list">
-                    {% for template in templates %}
-                        <div class="checkbox-item">
-                            <label>
-                                <input type="radio" name="template_id" value="{{ template.id }}">
-                                {{ template.template_file  }}
-                            </label>
+                        <div class="box" style="width: 50%;">
+                            {{ form.new_template_file.label_tag }}<br>
+                            {{ form.new_template_file }}
+                            {% if form.new_template_file.help_text %}
+                                <small>{{ form.new_template_file.help_text }}</small>
+                            {% endif %}
                         </div>
-                    {% endfor %}
+
+                           <div class="box" style="width: 50%;">
+                            <strong>Выберите один из последних шаблонов:</strong>
+                            <div class="checkbox-list">
+
+                            {% for template in templates %}
+                                <div class="checkbox-item">
+                                    <label>
+                                        <input type="radio" name="template" value="{{ template.id }}" onchange="displaySelectedTemplate(this)"
+                                        {% if forloop.first %}checked{% endif %}> {# This is where 'checked' should be #}
+                                        {{ template.template_file }}
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        </div>
+
                 </div>
             </div>
-        </div>
+
 
         <!-- Статус -->
-        <div class="section">
+        <div class="section" style="display:none">
             {{ form.status.label_tag }}<br>
             {{ form.status }}
         </div>
+        <div class='progress-wrapper'>
+            <div id='progress-bar' class='progress-bar' style="background-color: #68a9ef; width: 0%;">&nbsp;</div>
+        </div>
+        <div id="progress-bar-message">Waiting for progress to start...</div>
 
         <!-- Ошибки -->
         {% if form.non_field_errors %}
@@ -144,8 +152,13 @@
 </div>
 
 
+<script src="{% static 'celery_progress/celery_progress.js' %}"></script>
 
 <script>
+    document.addEventListener("DOMContentLoaded", function () {
+          var progressUrl = "{% url 'celery_progress:task_status' task_id %}";
+          CeleryProgressBar.initProgressBar(progressUrl);
+        });
     document.addEventListener('DOMContentLoaded', function() {
         const radios = document.querySelectorAll('input[name="recipient_mode"]');
         const userBlock = document.getElementById('user-select-block');
@@ -375,9 +388,14 @@
             selectedUserIds = []; // Очищаем массив, если режим по умолчанию не 'selected'
             updateSelectedUsersInput(); // Обновляем скрытое поле
         }
-
+function displaySelectedTemplate(radio) {
+        const selectedTemplateInfo = document.getElementById('selectedTemplateInfo');
+        const templateFileName = radio.nextSibling ? radio.nextSibling.textContent.trim() : 'N/A';
+        selectedTemplateInfo.textContent = `${templateFileName} (ID: ${radio.value})`;
+    }
 
     });
+
 
 </script>
 {% endblock %}

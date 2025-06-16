@@ -87,7 +87,7 @@ class EmailCampaignForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['template'].queryset = Tamplate_email.objects.order_by('-id')[:5]
+        self.fields['template'].queryset = Tamplate_email.objects.order_by('-id')
 
         if not self.instance.pk:
             self.fields['recipient_mode'].initial = 'all'
@@ -99,7 +99,7 @@ class EmailCampaignForm(forms.ModelForm):
         else:
             self.fields['recipient_mode'].initial = 'all'
 
-    # !!! ЭТОТ МЕТОД ОБЯЗАТЕЛЕН !!!
+
     def clean_users(self):
         users_str = self.cleaned_data.get('users', '') # Получаем строку из hidden input
         recipient_mode = self.data.get('recipient_mode') # Получаем режим выбора
