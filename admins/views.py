@@ -4,7 +4,7 @@ from django.db.models import Count
 from django.utils import timezone
 from movie.models import Movies
 from users.models import User, Email_campaing, Tamplate_email
-from django.contrib import messages
+
 from django.db.models import Prefetch
 
 
@@ -13,11 +13,11 @@ from core.models import Cinemas, Halls, Sessions, Seats, Tickets
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .forms import (PaigesNewsForm,PaigesCinemaForm,BlockSEOForm, MovieForm, PictureFormSet, GalleryForm, CinemaForm,
                     HallsForm,  TicketForm,SeatForm, MainPaigesForm,PromotionForm,  BannersFormSet,EmailCampaignForm,
-                    NewsFormSet, PictureForm, UserForm, SessionFormSet ,EmailSendForm,SellectUserForm, Picture,  CrossBannerForm , ContactFormSet)
+                    NewsFormSet, PictureForm, UserForm, SessionFormSet , Picture,  CrossBannerForm , ContactFormSet)
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpRequest, HttpResponse
 from django.template.loader import render_to_string
-from .send_email import send_campaign_email
+
 from os.path import basename
 from .tasks import send_campaign_emails_task
 from django.urls import reverse
@@ -27,7 +27,7 @@ from django.urls import reverse
 def email_campaign_create(request, campaign_id=None):
     campaign_instance = None
     is_edit = False
-    current_task_id = None # <-- Инициализируем здесь
+    current_task_id = None
 
     if campaign_id:
         campaign_instance = get_object_or_404(Email_campaing, pk=campaign_id)
@@ -44,7 +44,7 @@ def email_campaign_create(request, campaign_id=None):
         if form.is_valid():
             email_campaign = form.save(commit=False)
 
-            # --- Логика выбора и сохранения шаблона ---
+            # selecting and saving a template
             new_template_file = form.cleaned_data.get('new_template_file')
             existing_template_obj = form.cleaned_data.get('template')
 
@@ -68,7 +68,7 @@ def email_campaign_create(request, campaign_id=None):
 
             email_campaign.save()
 
-            # --- Логика выбора получателей ---
+            # selecting and saving a users
             recipient_mode = form.cleaned_data.get('recipient_mode')
             selected_user_ids = form.cleaned_data.get('users', [])
 
@@ -88,14 +88,14 @@ def email_campaign_create(request, campaign_id=None):
 
             email_campaign.save()
 
-            # --- Отправка email ---
+            #   SEND email
             final_users_queryset = email_campaign.users.all()
             recipient_email_list = list(
                 final_users_queryset.filter(email__isnull=False).values_list('email', flat=True))
 
             if recipient_email_list:
                 email_campaign.status = 'sending'
-                email_campaign.save()  # сначала сохраняем статус
+                email_campaign.save()
 
                 task = send_campaign_emails_task.delay(email_campaign.id, recipient_email_list)
                 return redirect(f"{reverse('email_campaign_create')}?task_id={task.task_id}")
@@ -104,11 +104,11 @@ def email_campaign_create(request, campaign_id=None):
                 print("DEBUG: Нет email-адресов для отправки. Задача Celery не запущена.")
                 email_campaign.status = 'sent'
                 email_campaign.save()
-                # Если нет получателей, можно просто перенаправить на список или ту же страницу без task_id
-                return redirect('email_campaign_list') # или redirect('email_campaign_create')
+
+                return redirect('email_campaign_list')
 
 
-        else:  # Форма невалидна
+        else:  # form not valid
             print(f"DEBUG: Форма невалидна. Ошибки: {form.errors}")
 
             templates = Tamplate_email.objects.order_by('-id')[:5]
@@ -133,7 +133,7 @@ def email_campaign_create(request, campaign_id=None):
             }
             return render(request, 'admin/email_campaigns/email_campaign_form.html', context)
 
-    else:  # GET-запрос
+    else:  # GET-response
         form = EmailCampaignForm(instance=campaign_instance)
         print(f"DEBUG (GET request): Form fields available: {list(form.fields.keys())}")
 
@@ -165,7 +165,6 @@ def email_campaign_create(request, campaign_id=None):
         'templates': templates,
         'campaign': campaign_instance,
         'is_edit': is_edit,
-        'title': 'Редагувати Email Кампанію' if is_edit else 'Створити Email Кампанію',
         'selected_user_ids_for_template': selected_user_ids_for_template,
         'task_id': current_task_id,
     }
@@ -173,25 +172,34 @@ def email_campaign_create(request, campaign_id=None):
     return render(request, 'admin/email_campaigns/email_campaign_form.html', context)
 
 
-
+@staff_member_required
 def campaign_list(request):
     campaigns = Email_campaing.objects.all().order_by('-created_at')
     return render(request, 'admin/email_campaigns/campaign_list.html', {'campaigns': campaigns})
 
+@staff_member_required
+def delete_template(request, template_id ):
+    print(f"Функція delete_template викликана! Метод запиту: {request.method}, ID шаблону: {template_id}")
+    template = get_object_or_404( Tamplate_email, pk=template_id)
 
+    if request.method == 'POST':
+        template.delete()
+        print('delete')
+        return redirect('campaign_list')
+
+    print('not delete *****************************************************************************************************')
+    return redirect('campaign_list')
 
 @staff_member_required
 def email_campaign_delete(request, campaign_id):
-    """
-    Видалення Email кампанії.
-    """
+
     campaign = get_object_or_404(Email_campaing, pk=campaign_id)
     if request.method == 'POST':
         campaign.delete()
 
         return redirect('email_campaign_list')
 
-    # Якщо це GET-запит (наприклад, для сторінки підтвердження видалення)
+
     context = {
         'campaign': campaign,
         'title': f'Видалити Email кампанію #{campaign.id}'
@@ -678,9 +686,9 @@ def halls_list(request):
 
 @staff_member_required
 
-def add_halls_create(request, cinema_pk, halls_id=None): # <-- Тепер приймає halls_id як необов'язковий
-    # Отримуємо об'єкт кінотеатру, до якого буде належати зал
-    cinema_instance = get_object_or_404(Cinemas, pk=cinema_pk) # Використовуємо Cinema замість Cinemas, якщо це назва вашої моделі
+def add_halls_create(request, cinema_pk, halls_id=None):
+
+    cinema_instance = get_object_or_404(Cinemas, pk=cinema_pk)
 
     halls_instance = None
     block_seo_instance = None
@@ -689,29 +697,26 @@ def add_halls_create(request, cinema_pk, halls_id=None): # <-- Тепер при
     current_main_picture_object = None
     current_cheme_picture_object = None
 
-    # --- Логіка завантаження існуючого залу для редагування ---
+
     if halls_id:
-        # Якщо halls_id присутній, ми редагуємо існуючий зал
-        halls_instance = get_object_or_404(Halls, pk=halls_id, cinema=cinema_instance) # Перевіряємо, що зал належить цьому кінотеатру
+        halls_instance = get_object_or_404(Halls, pk=halls_id, cinema=cinema_instance)
         block_seo_instance = halls_instance.seo_block
         gallery_instance = halls_instance.gallery
 
-        # Якщо у існуючого залу немає галереї, створюємо її
         if gallery_instance is None:
             gallery_instance = Gallery.objects.create()
             halls_instance.gallery = gallery_instance
-            halls_instance.save() # Зберігаємо, щоб прив'язати галерею до залу
+            halls_instance.save() # Сохраняем, чтобы привязать галерею к залу
 
-        # Завантажуємо існуючі зображення банера та схеми, якщо вони є
         if gallery_instance:
             current_main_picture_object = gallery_instance.pictures.filter(image_type='main_picture').first()
             current_cheme_picture_object = gallery_instance.pictures.filter(image_type='logo').first()
-    # --- Кінець логіки завантаження існуючого залу ---
 
 
     if request.method == 'POST':
         block_seo_form = BlockSEOForm(request.POST, instance=block_seo_instance)
-        halls_form = HallsForm(request.POST, instance=halls_instance)
+        # --- ИСПРАВЛЕНИЕ ЗДЕСЬ: ДОБАВЬТЕ request.FILES ---
+        halls_form = HallsForm(request.POST, request.FILES, instance=halls_instance)
         gallery_form = GalleryForm(request.POST, instance=gallery_instance)
 
         banner_form = PictureForm(request.POST, request.FILES, instance=current_main_picture_object,
@@ -719,9 +724,9 @@ def add_halls_create(request, cinema_pk, halls_id=None): # <-- Тепер при
         cheme_form = PictureForm(request.POST, request.FILES, instance=current_cheme_picture_object,
             prefix='logo_form')
 
-        # Завантажуємо існуючі галерейні зображення для формсету
+        # Загружаем существующие галерейные изображения для формсета
         picture_queryset_for_formset = Picture.objects.none()
-        if gallery_instance: # Якщо галерея існує (якщо редагуємо або щойно створили для існуючого залу)
+        if gallery_instance:
             picture_queryset_for_formset = gallery_instance.pictures.filter(image_type='gallery_image').order_by('pk')
 
         picture_formset = PictureFormSet(request.POST, request.FILES, queryset=picture_queryset_for_formset,
@@ -740,10 +745,10 @@ def add_halls_create(request, cinema_pk, halls_id=None): # <-- Тепер при
             halls = halls_form.save(commit=False)
             halls.seo_block = block_seo
             halls.gallery = gallery
-            halls.cinema = cinema_instance # Завжди прив'язуємо зал до поточного кінотеатру
+            halls.cinema = cinema_instance
             halls.save()
 
-            # --- Логіка збереження картинок та формсетів залишається незмінною ---
+            # --- Логика сохранения картинок и формсетов остается неизменной ---
             if banner_form.cleaned_data.get('image'):
                 banner_picture = banner_form.save(commit=False)
                 banner_picture.gallery = gallery
@@ -768,7 +773,7 @@ def add_halls_create(request, cinema_pk, halls_id=None): # <-- Тепер при
 
             instances_gallery = picture_formset.save(commit=False)
             for pic_instance in instances_gallery:
-                if not pic_instance.pk: # Це нове зображення
+                if not pic_instance.pk:
                     pic_instance.gallery = gallery
                     if not pic_instance.image_type:
                         pic_instance.image_type = 'gallery_image'
@@ -776,14 +781,11 @@ def add_halls_create(request, cinema_pk, halls_id=None): # <-- Тепер при
 
             for picture_to_delete in picture_formset.deleted_objects:
                 picture_to_delete.delete()
-            # --- Кінець логіки збереження картинок та формсетів ---
+            # --- Конец логики сохранения картинок и формсетов ---
 
-            # Перенаправлення після успішного збереження/редагування
-            # Перенаправляємо на сторінку редагування кінотеатру,
-            # яка покаже оновлений список залів.
             return redirect('add_cinema_edit', cinema_id=cinema_pk)
 
-        else: # Якщо форми невалідні (POST-запит)
+        else:
             print("Ошибка валидации форм")
             print("block_seo_form.errors:", block_seo_form.errors)
             print("halls_form.errors:", halls_form.errors)
@@ -799,18 +801,18 @@ def add_halls_create(request, cinema_pk, halls_id=None): # <-- Тепер при
                 'picture_formset': picture_formset,
                 'banner_form': banner_form,
                 'cheme_form': cheme_form,
-                'halls': halls_instance, # Передаємо halls_instance (може бути None або об'єкт)
+                'halls': halls_instance,
                 'cinema': cinema_instance,
-                'is_edit': halls_instance is not None, # is_edit тепер залежить від halls_instance
+                'is_edit': halls_instance is not None,
             })
 
-    else: # GET-запит (відображення форми)
+    else:
         block_seo_form = BlockSEOForm(instance=block_seo_instance)
         halls_form = HallsForm(instance=halls_instance)
         gallery_form = GalleryForm(instance=gallery_instance)
 
         picture_queryset_for_formset = Picture.objects.none()
-        if gallery_instance: # Завантажуємо існуючі зображення для формсету
+        if gallery_instance:
             picture_queryset_for_formset = gallery_instance.pictures.filter(image_type='gallery_image').order_by('pk')
 
         picture_formset = PictureFormSet(queryset=picture_queryset_for_formset, prefix='pictures')
@@ -831,6 +833,7 @@ def add_halls_create(request, cinema_pk, halls_id=None): # <-- Тепер при
         'cinema': cinema_instance,
         'is_edit': halls_instance is not None,
     })
+
 
 @staff_member_required
 def delete_halls(request, pk):
@@ -992,10 +995,26 @@ def delete_tickets (request, pk):
 
 @staff_member_required
 def add_banners(request):
-    banner_formset = BannersFormSet(request.POST or None, request.FILES or None, queryset=Banners.objects.all(), prefix='top_banners')
-    cross_banner_instance = Cross_Banner.objects.first()
+    banners_queryset = Banners.objects.all().select_related('gallery').prefetch_related(
+        Prefetch(
+            'gallery__pictures',
+            queryset=Picture.objects.filter(image_type="main_picture"),
+            to_attr='main_pictures_prefetched'
+        )
+    )
+    news_queryset=News.objects.all().select_related('gallery').prefetch_related(
+        Prefetch(
+            'gallery__pictures',
+            queryset=Picture.objects.filter(image_type="main_picture"),
+            to_attr='main_pictures_prefetched'
+        )
+    )
+    banner_formset = BannersFormSet(request.POST or None, request.FILES or None, queryset=banners_queryset, prefix='top_banners')
+    cross_banner_instance =  Cross_Banner.objects.select_related('gallery').prefetch_related( Prefetch( 'gallery__pictures',
+                                                               queryset=Picture.objects.filter(image_type="main_picture"),
+                                                         to_attr='main_picture_for_gallery' )).first()
     cross_banner_form = CrossBannerForm(request.POST or None, request.FILES or None, instance=cross_banner_instance, prefix='cross_banner')
-    news_formset = NewsFormSet(request.POST or None, request.FILES or None, queryset=News.objects.all(), prefix='news')
+    news_formset = NewsFormSet(request.POST or None, request.FILES or None, queryset=news_queryset, prefix='news')
 
 
     if request.method=='POST':
@@ -1014,21 +1033,21 @@ def add_banners(request):
                             continue
                         banner = form.instance
 
-                        # Перевіряємо, чи передано новий файл
+
                         main_picture_file = form.cleaned_data.get('main_picture')
 
-                        # Якщо новина не має галереї — створюємо її
+
                         if banner and not banner.gallery:
                             banner.gallery = Gallery.objects.create()
                             banner.save()
 
-                        # Якщо є галерея — отримуємо або створюємо Picture з типом main_picture
+
                         if banner.gallery:
                             picture = banner.gallery.pictures.filter(image_type='main_picture').first()
                             if not picture:
                                 picture = Picture(gallery=banner.gallery, image_type='main_picture')
 
-                            # Оновлюємо зображення, тільки якщо новий файл передано
+
                             if main_picture_file:
                                 picture.image = main_picture_file
 
@@ -1041,32 +1060,37 @@ def add_banners(request):
                     pass
 
 
+
             elif str(which_form_is_submiting) == "this_is_form_cross_banner":
 
                 if cross_banner_form.is_valid():
-                    cross_banner = cross_banner_form.save()
+
+                    cross_banner = cross_banner_form.save(
+                        commit=False)
+                    if not cross_banner.gallery:
+                        cross_banner.gallery = Gallery.objects.create()
+
+                    cross_banner.save()
+
                     image_file = request.FILES.get('cross_banner-image')
 
-                    if cross_banner:
-                        if not cross_banner.gallery_id:
-                            cross_banner.gallery = Gallery.objects.create()
-                            cross_banner.save()
+                    picture = Picture.objects.filter(gallery=cross_banner.gallery, image_type="main_picture").first()
 
-                        if cross_banner.gallery:
-                            picture = cross_banner.gallery.pictures.first()
+                    if not picture:
 
-                            if not picture:
-                                picture = Picture(gallery=cross_banner.gallery)
 
-                            if image_file:
-                                picture.image = image_file
-                                picture.save()
-                            else:
-                                pass
+                        picture = Picture(gallery=cross_banner.gallery, image_type="main_picture")
+
+                    if image_file:
+
+                        picture.image = image_file
+
+                        picture.save()
+
+                    elif not picture.pk:
+                        pass
+
                     return redirect('add_banners')
-
-                else:
-                    pass
             elif str(which_form_is_submiting)=="this_is_form_news":
 
                 if news_formset.is_valid():
@@ -1077,21 +1101,21 @@ def add_banners(request):
                             continue
                         news = form.instance
 
-                        # Перевіряємо, чи передано новий файл
+
                         main_picture_file = form.cleaned_data.get('main_picture')
 
-                        # Якщо новина не має галереї — створюємо її
+
                         if news and not news.gallery:
                             news.gallery = Gallery.objects.create()
                             news.save()
 
-                        # Якщо є галерея — отримуємо або створюємо Picture з типом main_picture
+
                         if news.gallery:
                             picture = news.gallery.pictures.filter(image_type='main_picture').first()
                             if not picture:
                                 picture = Picture(gallery=news.gallery, image_type='main_picture')
 
-                            # Оновлюємо зображення, тільки якщо новий файл передано
+
                             if main_picture_file:
                                 picture.image = main_picture_file
 
@@ -1107,16 +1131,18 @@ def add_banners(request):
     for form in banner_formset.forms:
         image_url = None
         if form.instance.gallery:
-            picture = form.instance.gallery.pictures.filter(image_type='main_picture').first()
-            if picture and picture.image:
-                image_url = picture.image.url
+
+            if form.instance.gallery.main_pictures_prefetched:  # <-- Исправлено здесь
+                picture = form.instance.gallery.main_pictures_prefetched[0]
+                if picture and picture.image:
+                    image_url = picture.image.url
         form_data.append({'form': form, 'image_url': image_url})
 
     news_form_data = []
     for form in news_formset.forms:
         image_url = None
-        if form.instance.gallery:
-            picture = form.instance.gallery.pictures.filter(image_type='main_picture').first()
+        if form.instance.gallery and form.instance.gallery.main_pictures_prefetched:
+            picture = form.instance.gallery.main_pictures_prefetched[0]
             if picture and picture.image:
                 image_url = picture.image.url
         news_form_data.append({'form': form, 'image_url': image_url})
@@ -1204,7 +1230,7 @@ def add_user(request, user_id=None):
 def delete_user(request, users_id):
     user = get_object_or_404(User, pk=users_id)
 
-    if request.method == 'POST': # <<< Видалення відбувається тільки тут
+    if request.method == 'POST':
         user.delete()
         return redirect('users')
     else: #
@@ -1248,7 +1274,7 @@ def news_paige_add(request, news_id=None):
 
 
     if gallery_instance is None:
-        gallery_instance = Gallery.objects.create()  # Создаем новую галерею
+        gallery_instance = Gallery.objects.create()
 
 
     if request.method=='POST':
@@ -1256,15 +1282,17 @@ def news_paige_add(request, news_id=None):
         news_form = PaigesNewsForm(request.POST, instance=news_instance)
         gallery_form = GalleryForm(request.POST, instance=gallery_instance)
 
-        # Для modelformset_factory, queryset нужен и для POST (чтобы Django знал, какие объекты обновлять)
+
         picture_formset = PictureFormSet(
             request.POST,
             request.FILES,
-            queryset=Picture.objects.filter(gallery=gallery_instance).exclude(pk=current_main_picture_object.pk) if current_main_picture_object else Picture.objects.filter(gallery=gallery_instance),
+            queryset=Picture.objects.filter(gallery=gallery_instance).exclude(pk=current_main_picture_object.pk) if
+            current_main_picture_object else Picture.objects.filter(gallery=gallery_instance),
             prefix='pictures', initial=[{'image_type': 'gallery_image'}]
         )
 
-        main_picture_form = PictureForm(request.POST, request.FILES, instance=current_main_picture_object, prefix='main_picture_form')
+        main_picture_form = PictureForm(request.POST, request.FILES, instance=current_main_picture_object,
+                                        prefix='main_picture_form')
 
 
         if f'{main_picture_form.prefix}-image_type' not in request.POST:
@@ -1346,14 +1374,15 @@ def news_paige_add(request, news_id=None):
 
 
         picture_formset = PictureFormSet(
-            queryset=Picture.objects.filter(gallery=gallery_instance).exclude(pk=current_main_picture_object.pk) if current_main_picture_object else Picture.objects.filter(gallery=gallery_instance),
+            queryset=Picture.objects.filter(gallery=gallery_instance).exclude(pk=current_main_picture_object.pk)
+            if current_main_picture_object else Picture.objects.filter(gallery=gallery_instance),
             prefix='pictures'
         )
 
         main_picture_form = PictureForm(
             instance=current_main_picture_object,
             prefix='main_picture_form',
-            initial={'image_type': 'main_picture'}  # Initial для новой формы главной картинки
+            initial={'image_type': 'main_picture'}
         )
 
     return render(request, 'admin/news_paige/add_news.html', {

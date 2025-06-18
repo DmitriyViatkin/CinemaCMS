@@ -31,6 +31,14 @@
     {% for error in form.description.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
   </div>
 </div>
+<div class="card-body">
+  <div class="form-group">
+    {{form.scheme_hall.label_tag }}
+    {{ form.scheme_hall}}
+    {% if form.scheme_hall.help_text %}<small class="form-text text-muted">{{ form.scheme_hall.help_text }}</small>{% endif %}
+    {% for error in form.scheme_hall.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+  </div>
+</div>
 
 <div class="card-body">
   <div class="form-group">

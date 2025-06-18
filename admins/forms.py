@@ -10,12 +10,10 @@ from django.utils.translation import gettext_lazy as _
 
 
 class TemplateEmailForm(forms.ModelForm):
-    """
-    Форма для создания и редактирования шаблонов email, с загрузкой файла.
-    """
+
     class Meta:
         model = Tamplate_email
-        fields = ['template_file'] # Теперь используем 'template_file'
+        fields = ['template_file']
         labels = {
             'template_file': "Загрузить файл шаблона (HTML, TXT и т.д.)",
         }
@@ -42,7 +40,7 @@ class SellectUserForm(forms.ModelForm):
         class Meta:
             model = Email_campaing
             fields = ['users']
-            # Здесь мы определяем виджеты
+
             widgets = {
                 'users': forms.CheckboxSelectMultiple(attrs={'class': 'form-control'}),
             }
@@ -53,11 +51,10 @@ class SellectUserForm(forms.ModelForm):
 
 
 class EmailCampaignForm(forms.ModelForm):
-    # !!! ЭТО КРИТИЧЕСКОЕ ИЗМЕНЕНИЕ !!!
-    # users теперь CharField, чтобы принимать строку "1,4" или ""
+
     users = forms.CharField(
         required=False,
-        widget=forms.HiddenInput, # Поле должно быть скрытым
+        widget=forms.HiddenInput,
         help_text="Список ID пользователей, разделенных запятыми."
     )
 
@@ -79,7 +76,7 @@ class EmailCampaignForm(forms.ModelForm):
 
     class Meta:
         model = Email_campaing
-        fields = ['new_template_file', 'template', 'status', 'users'] # Убедитесь, что здесь нет пробела после 'template'
+        fields = ['new_template_file', 'template', 'status', 'users']
         labels = {
             'status': "Статус кампании",
             'template': "Выбрать существующий шаблон Email",
@@ -93,7 +90,7 @@ class EmailCampaignForm(forms.ModelForm):
             self.fields['recipient_mode'].initial = 'all'
         elif self.instance.users.exists():
             self.fields['recipient_mode'].initial = 'selected'
-            # При редактировании, инициализируем скрытое поле 'users' для JS
+
             initial_user_ids = list(self.instance.users.values_list('id', flat=True))
             self.initial['users'] = ','.join(map(str, initial_user_ids))
         else:
@@ -101,28 +98,27 @@ class EmailCampaignForm(forms.ModelForm):
 
 
     def clean_users(self):
-        users_str = self.cleaned_data.get('users', '') # Получаем строку из hidden input
-        recipient_mode = self.data.get('recipient_mode') # Получаем режим выбора
-
+        users_str = self.cleaned_data.get('users', '')
+        recipient_mode = self.data.get('recipient_mode')
         if recipient_mode == 'all':
-            return [] # Возвращаем пустой список, так как все пользователи будут добавлены в views.py
+            return []
 
-        # Если режим 'selected'
-        if users_str: # Если строка не пустая, парсим её
+
+        if users_str:
             try:
                 user_ids = [int(uid.strip()) for uid in users_str.split(',') if uid.strip()]
             except ValueError:
                 raise forms.ValidationError("Неверный формат ID пользователя. Ожидается список чисел через запятую.")
 
-            # Опционально: проверка на существование пользователей
+
             existing_user_ids = User.objects.filter(id__in=user_ids).values_list('id', flat=True)
             if len(set(user_ids)) != len(existing_user_ids):
                 invalid_ids = set(user_ids) - set(existing_user_ids)
                 raise forms.ValidationError(f"Некоторые выбранные ID пользователей недействительны или не существуют: {list(invalid_ids)}")
 
-            return user_ids # Возвращаем список ID
+            return user_ids
         else:
-            # Если recipient_mode == 'selected', но users_str пуст
+
             raise forms.ValidationError("Виберіть хоча б одного користувача для розсилки.")
 
     def clean(self):
@@ -469,13 +465,14 @@ class HallsForm(forms.ModelForm):
 
         exclude = ['seo_block','date', 'gallery']
 
-        fields = [ 'title', 'cinema', 'description', 'rows', 'seats_row']
+        fields = [ 'title', 'cinema', 'scheme_hall','description',  ]
         labels = {
+
             'title':_('Назва'),
             'cinema':_('Кінотеатр'),
+            'scheme_hall':_('Схема залу'),
             'description':_("Опис"),
-            'rows':_('Ряд'),
-            'seats_row':'_(Місце)'
+
         }
 
 class CinemaForm(forms.ModelForm):

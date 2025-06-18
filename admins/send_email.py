@@ -4,14 +4,8 @@ from django.utils.html import strip_tags
 
 
 def send_campaign_email(email_campaign_obj, user_email):
-    """
-    Отправляет Email для конкретной кампании заданному пользователю.
 
-    Args:
-        email_campaign_obj: Объект Email_campaing, содержащий информацию о кампании.
-        user_email: Email-адрес получателя.
-    """
-    #
+
     if not email_campaign_obj.template:
         print(f"Ошибка: Кампания #{email_campaign_obj.id} не имеет привязанного шаблона.")
         return False

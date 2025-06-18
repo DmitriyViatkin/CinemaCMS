@@ -59,7 +59,7 @@
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
 
-        <!-- Выбор получателей -->
+
         <div class="section flex-row">
             <div class="box" style="width: 300px;">
                 <label><input type="radio" name="recipient_mode" value="all" class="recipient-mode-radio" checked> Все пользователи на почту</label><br>
@@ -68,7 +68,7 @@
             <div class="box" id="user-select-block" style="display: none;">
                 <h4>Вибір користувачів для розсилки:</h4>
         <div class="form-group">
-            <input type="text" id="user-search-input" class="form-control" placeholder="Пошук користувачів (ім'я, email, прізвище...)">
+            <input type="text" id="user-search-input" class="form-control" placeholder="Пошук користувачів (ім'я ..)">
         </div>
                 <input type="hidden" name="users" id="selected_users_input" value="">
         <div class="table-responsive mt-3">
@@ -77,12 +77,12 @@
                     <tr>
                         <th><input type="checkbox" id="select-all-users"></th>
                         <th>ID</th>
-                        <th>Дата реєстрації</th> {# Заголовки таблицы #}
+                        <th>Дата реєстрації</th>
                         <th>День народження</th>
                         <th>Email</th>
                         <th>Телефон</th>
-                        <th>ПІБ</th> {# ФИО #}
-                        <th>Псевдонім</th> {# Username #}
+                        <th>ПІБ</th>
+                        <th>Псевдонім</th>
                         <th>Місто</th>
 
                     </tr>
@@ -97,7 +97,7 @@
 
 
 
-        <!-- Загрузка шаблона + Выбор из последних -->
+
         <div class="section flex-row">
                         <div class="box" style="width: 50%;">
                             {{ form.new_template_file.label_tag }}<br>
@@ -115,7 +115,7 @@
                                 <div class="checkbox-item">
                                     <label>
                                         <input type="radio" name="template" value="{{ template.id }}" onchange="displaySelectedTemplate(this)"
-                                        {% if forloop.first %}checked{% endif %}> {# This is where 'checked' should be #}
+                                        {% if forloop.first %}checked{% endif %}>
                                         {{ template.template_file }}
                                     </label>
                                 </div>
@@ -126,7 +126,7 @@
             </div>
 
 
-        <!-- Статус -->
+
         <div class="section" style="display:none">
             {{ form.status.label_tag }}<br>
             {{ form.status }}
@@ -136,7 +136,7 @@
         </div>
         <div id="progress-bar-message">Waiting for progress to start...</div>
 
-        <!-- Ошибки -->
+
         {% if form.non_field_errors %}
             <div class="section errorlist">
                 {% for error in form.non_field_errors %}
@@ -176,7 +176,7 @@
         console.log("DEBUG JS: Initial selectedUserIds array:", selectedUserIds);
 
 
-        // Функция для загрузки пользователей
+
         function loadUsers(page = 1, search = '') {
             console.log(`DEBUG JS: Loading users for page: ${page}, search: "${search}"`);
             const url = `${ajaxUserListUrl}?page=${page}&search=${search}`;
@@ -217,14 +217,14 @@
                 .catch(error => console.error('DEBUG JS: Error loading users:', error));
         }
 
-        // Функция для обновления пагинации
+
         function updatePagination(numPages, currentPage, hasPrevious, hasNext, search) {
             userPagination.innerHTML = '';
-            // Кнопка "Предыдущая"
+
             const prevClass = hasPrevious ? '' : 'disabled';
             userPagination.innerHTML += `<li class="page-item ${prevClass}"><a class="page-link" href="#" data-page="${currentPage - 1}">Попередня</a></li>`;
 
-            // Номера страниц (показываем несколько вокруг текущей)
+
             let startPage = Math.max(1, currentPage - 2);
             let endPage = Math.min(numPages, currentPage + 2);
 
@@ -263,15 +263,15 @@
             console.log("DEBUG JS: Pagination updated.");
         }
 
-        // Функция для обновления скрытого поля с выбранными ID пользователей
+
         function updateSelectedUsersInput() {
-            // Получаем уникальные ID и преобразуем их в строку, разделенную запятыми
+
             selectedUsersInput.value = Array.from(new Set(selectedUserIds)).join(',');
             console.log("DEBUG JS: Hidden input 'selected_users_input' updated to:", selectedUsersInput.value);
             console.log("DEBUG JS: Current selectedUserIds array:", selectedUserIds);
         }
 
-        // Функция для обновления состояния чекбокса "Выбрать все"
+
         function updateSelectAllCheckboxState() {
             const allCheckboxes = userTableBody.querySelectorAll('.user-checkbox');
             const checkedCheckboxes = userTableBody.querySelectorAll('.user-checkbox:checked');
@@ -292,7 +292,7 @@
             console.log("DEBUG JS: 'Select All' checkbox state updated. All checkboxes on page:", allCheckboxes.length, "Checked:", checkedCheckboxes.length);
         }
 
-        // Обновляем список выбранных пользователей при изменении состояния чекбокса
+
         userTableBody.addEventListener('change', function(e) {
             if (e.target.classList.contains('user-checkbox')) {
                 const userId = parseInt(e.target.dataset.userId);
@@ -317,7 +317,7 @@
             }
         });
 
-        // Обработчик для чекбокса "Выбрать все"
+
         selectAllUsersCheckbox.addEventListener('change', function() {
             const isChecked = this.checked;
             console.log(`DEBUG JS: 'Select All' checkbox changed. Checked: ${isChecked}`);
@@ -343,7 +343,7 @@
             updateSelectAllCheckboxState();
         });
 
-        // Поиск пользователей с задержкой
+
         let searchTimeout;
         userSearchInput.addEventListener('input', function() {
             const searchTerm = this.value;
@@ -354,26 +354,26 @@
             }, 300);
         });
 
-        // Обработчик для радиокнопок "recipient_mode"
+
         radios.forEach(radio => {
             radio.addEventListener('change', function() {
                 console.log(`DEBUG JS: Recipient mode changed to: "${this.value}"`);
                 if (this.value === 'selected') {
                     userBlock.style.display = 'block';
                     console.log("DEBUG JS: User selection block displayed.");
-                    loadUsers(1, userSearchInput.value); // Загружаем пользователей при переключении
+                    loadUsers(1, userSearchInput.value);
                 } else {
                     userBlock.style.display = 'none';
                     console.log("DEBUG JS: User selection block hidden.");
-                    // Если выбран "все пользователи", очищаем список выбранных ID
+
                     selectedUserIds = [];
-                    updateSelectedUsersInput(); // Обновляем скрытое поле, чтобы оно было пустым
+                    updateSelectedUsersInput();
                     console.log("DEBUG JS: Cleared selected users because 'All users' mode was chosen.");
                 }
             });
         });
 
-        // Инициализация при загрузке страницы:
+
         const initialSelectedMode = document.querySelector('input[name="recipient_mode"]:checked');
         console.log("DEBUG JS: Page loaded. Initial selected recipient mode:", initialSelectedMode ? initialSelectedMode.value : 'None');
 
@@ -384,9 +384,9 @@
         } else {
             userBlock.style.display = 'none';
             console.log("DEBUG JS: Initial mode is 'all' or 'None', hiding user block.");
-            // Убедитесь, что selectedUsersInput пусто, если изначально не 'selected'
-            selectedUserIds = []; // Очищаем массив, если режим по умолчанию не 'selected'
-            updateSelectedUsersInput(); // Обновляем скрытое поле
+
+            selectedUserIds = [];
+            updateSelectedUsersInput();
         }
 function displaySelectedTemplate(radio) {
         const selectedTemplateInfo = document.getElementById('selectedTemplateInfo');
