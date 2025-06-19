@@ -9,6 +9,8 @@ def send_campaign_emails_task(self, campaign_id, recipient_list):
     Задача Celery для отправки писем кампании нескольким получателям.
     """
     email_campaign_obj = None
+    print("DEBUG: send_campaign_emails_task була викликана")
+
     progress_recorder = ProgressRecorder(self)
     try:
         email_campaign_obj = Email_campaing.objects.get(id=campaign_id)

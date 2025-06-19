@@ -29,11 +29,24 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG')
+DEBUG = os.getenv('DEBUG').lower() == 'true'
 
 ALLOWED_HOSTS = []
 
-
+DEBUG_TOOLBAR_PANELS = [
+    'debug_toolbar.panels.versions.VersionsPanel',
+    'debug_toolbar.panels.timer.TimerPanel',
+    'debug_toolbar.panels.settings.SettingsPanel',
+    'debug_toolbar.panels.headers.HeadersPanel',
+    'debug_toolbar.panels.request.RequestPanel',
+    'debug_toolbar.panels.staticfiles.StaticFilesPanel',
+    'debug_toolbar.panels.templates.TemplatesPanel',
+    # 'debug_toolbar.panels.sql.SQLPanel', # ЗАКОМЕНТУЙТЕ ЦЮ СТРІЧКУ
+    'debug_toolbar.panels.signals.SignalsPanel',
+    'debug_toolbar.panels.redirects.RedirectsPanel',
+    # 'debug_toolbar.panels.cache.CachePanel', # Можете додати або видалити інші панелі
+    # 'debug_toolbar.panels.logging.LoggingPanel',
+]
 # Application definition
 
 INSTALLED_APPS = [
@@ -55,6 +68,8 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'django_celery_results',
     'celery_progress'
+
+
 
 
 
