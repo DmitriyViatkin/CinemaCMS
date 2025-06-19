@@ -37,6 +37,7 @@ urlpatterns += i18n_patterns(
     path('user/', include('users.urls')),
     path('cinemas/', include('core.urls')),
     path('movies/', include('movie.urls')),
+    path('celery-progress/', include('celery_progress.urls')),
     prefix_default_language=True,
 )
 if settings.DEBUG:

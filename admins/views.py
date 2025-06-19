@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Count
 from django.utils import timezone
 from movie.models import Movies
-from users.models import User
+from users.models import User,Email_campaing,Tamplate_email
 
 from django.db.models import Prefetch
 
@@ -11,11 +11,189 @@ from core.models import Cinemas, Halls, Sessions, Seats, Tickets
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .forms import (PaigesNewsForm,PaigesCinemaForm,BlockSEOForm, MovieForm, PictureFormSet, GalleryForm, CinemaForm,
                     HallsForm,  TicketForm,SeatForm, MainPaigesForm,PromotionForm,  BannersFormSet,
-                    NewsFormSet, PictureForm, UserForm, SessionFormSet , Picture,  CrossBannerForm , ContactFormSet)
+                    NewsFormSet, PictureForm, UserForm, SessionFormSet , Picture, EmailCampaignForm,  CrossBannerForm , ContactFormSet)
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpRequest, HttpResponse
 from django.template.loader import render_to_string
+from .send_email import send_campaign_email
+from os.path import basename
+from .tasks import send_campaign_emails_task
+from django.urls import reverse
 
+@staff_member_required
+def email_campaign_create(request, campaign_id=None):
+    campaign_instance = None
+    is_edit = False
+    current_task_id = None # <-- Инициализируем здесь
+
+    if campaign_id:
+        campaign_instance = get_object_or_404(Email_campaing, pk=campaign_id)
+        is_edit = True
+
+    if request.method == 'POST':
+        form = EmailCampaignForm(request.POST, request.FILES, instance=campaign_instance)
+
+        print("DEBUG POST: request.POST.get('recipient_mode'):", request.POST.get('recipient_mode'))
+        print("DEBUG POST: request.POST.get('users'):", request.POST.get('users'))
+        print("DEBUG POST: request.FILES.get('new_template_file'):", request.FILES.get('new_template_file'))
+        print("DEBUG POST: request.POST.get('template'):", request.POST.get('template'))
+
+        if form.is_valid():
+            email_campaign = form.save(commit=False)
+
+            # --- Логика выбора и сохранения шаблона ---
+            new_template_file = form.cleaned_data.get('new_template_file')
+            existing_template_obj = form.cleaned_data.get('template')
+
+            if new_template_file:
+                file_name = new_template_file.name
+                try:
+                    template_obj = Tamplate_email.objects.get(template_file__icontains=file_name)
+                    template_obj.template_file.save(file_name, new_template_file, save=True)
+                    print(f"DEBUG: Обновлен существующий шаблон с файлом: {file_name}")
+                except Tamplate_email.DoesNotExist:
+                    template_obj = Tamplate_email()
+                    template_obj.template_file.save(file_name, new_template_file, save=True)
+                    print(f"DEBUG: Создан новый шаблон с файлом: {file_name}")
+                email_campaign.template = template_obj
+            elif existing_template_obj:
+                email_campaign.template = existing_template_obj
+                print(f"DEBUG: Выбран существующий шаблон с ID: {existing_template_obj.id}")
+            else:
+                email_campaign.template = None
+                print("DEBUG: Шаблон не выбран и новый файл не загружен.")
+
+            email_campaign.save()
+
+            # --- Логика выбора получателей ---
+            recipient_mode = form.cleaned_data.get('recipient_mode')
+            selected_user_ids = form.cleaned_data.get('users', [])
+
+            if recipient_mode == "selected":
+                if selected_user_ids:
+                    print(f"DEBUG: Выбран режим 'selected'. Количество ID из формы: {len(selected_user_ids)}")
+                    users_to_set = User.objects.filter(id__in=selected_user_ids)
+                    email_campaign.users.set(users_to_set)
+                else:
+                    print("DEBUG: Режим 'selected' выбран, но ни один пользователь не выбран.")
+                    email_campaign.users.clear()
+            elif recipient_mode == "all":
+                print("DEBUG: Выбран режим 'all'.")
+                all_active_users = User.objects.filter(is_active=True)
+                email_campaign.users.set(all_active_users)
+                print(f"DEBUG: Количество активных пользователей: {all_active_users.count()}")
+
+            email_campaign.save()
+
+            # --- Отправка email ---
+            final_users_queryset = email_campaign.users.all()
+            recipient_email_list = list(
+                final_users_queryset.filter(email__isnull=False).values_list('email', flat=True))
+
+            if recipient_email_list:
+                email_campaign.status = 'sending'
+                email_campaign.save()  # сначала сохраняем статус
+
+                task = send_campaign_emails_task.delay(email_campaign.id, recipient_email_list)
+                return redirect(f"{reverse('email_campaign_create')}?task_id={task.task_id}")
+
+            else:
+                print("DEBUG: Нет email-адресов для отправки. Задача Celery не запущена.")
+                email_campaign.status = 'sent'
+                email_campaign.save()
+                # Если нет получателей, можно просто перенаправить на список или ту же страницу без task_id
+                return redirect('email_campaign_list') # или redirect('email_campaign_create')
+
+
+        else:  # Форма невалидна
+            print(f"DEBUG: Форма невалидна. Ошибки: {form.errors}")
+
+            templates = Tamplate_email.objects.order_by('-id')[:5]
+            for template_item in templates:
+                template_item.short_name = basename(template_item.template_file.name)
+
+            raw_user_ids_str = request.POST.get('users', '')
+            selected_user_ids_for_template = [int(uid.strip()) for uid in raw_user_ids_str.split(',') if
+                                              uid.strip().isdigit()]
+
+
+            current_task_id = request.GET.get('task_id')
+
+            context = {
+                'form': form,
+                'templates': templates,
+                'campaign': campaign_instance,
+                'is_edit': is_edit,
+                'title': 'Редагувати Email Кампанію' if is_edit else 'Створити Email Кампанію',
+                'selected_user_ids_for_template': selected_user_ids_for_template,
+                'task_id': current_task_id,
+            }
+            return render(request, 'admin/email_campaigns/email_campaign_form.html', context)
+
+    else:  # GET-запрос
+        form = EmailCampaignForm(instance=campaign_instance)
+        print(f"DEBUG (GET request): Form fields available: {list(form.fields.keys())}")
+
+        selected_user_ids_for_template = []
+
+        if is_edit and campaign_instance.users.exists():
+            if 'recipient_mode' in form.fields:
+                form.fields['recipient_mode'].initial = 'selected'
+            selected_user_ids_for_template = list(campaign_instance.users.all().values_list('pk', flat=True))
+        else:
+            if 'recipient_mode' in form.fields:
+                form.fields['recipient_mode'].initial = 'all'
+
+        if campaign_instance and campaign_instance.template:
+            if 'template' in form.fields:
+                form.fields['template'].initial = campaign_instance.template.pk
+            else:
+                print("ОШИБКА КОНФИГУРАЦИИ: Поле 'template' не найдено в EmailCampaignForm. Проверьте admins/forms.py.")
+
+
+        current_task_id = request.GET.get('task_id')
+
+    templates = Tamplate_email.objects.order_by('-id')[:5]
+    for template_item in templates:
+        template_item.short_name = basename(template_item.template_file.name)
+
+    context = {
+        'form': form,
+        'templates': templates,
+        'campaign': campaign_instance,
+        'is_edit': is_edit,
+        'title': 'Редагувати Email Кампанію' if is_edit else 'Створити Email Кампанію',
+        'selected_user_ids_for_template': selected_user_ids_for_template,
+        'task_id': current_task_id,
+    }
+
+    return render(request, 'admin/email_campaigns/email_campaign_form.html', context)
+
+
+
+def campaign_list(request):
+    campaigns = Email_campaing.objects.all().order_by('-created_at')
+    return render(request, 'admin/email_campaigns/campaign_list.html', {'campaigns': campaigns})
+
+
+
+@staff_member_required
+def email_campaign_delete(request, campaign_id):
+    """
+    Видалення Email кампанії.
+    """
+    campaign = get_object_or_404(Email_campaing, pk=campaign_id)
+    if request.method == 'POST':
+        campaign.delete()
+
+        return redirect('email_campaign_list')
+
+    # Якщо це GET-запит (наприклад, для сторінки підтвердження видалення)
+    context = {
+        'campaign': campaign,
+        'title': f'Видалити Email кампанію #{campaign.id}'
+    }
+    return render(request, 'admin/email_campaigns/email_campaign_confirm_delete.html', context)
 
 @staff_member_required
 def index(request):
