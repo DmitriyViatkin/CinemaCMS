@@ -26,6 +26,7 @@ class Cinemas(models.Model):
 
 class Halls(models.Model):
     seo_block = models.OneToOneField(Block_SEO, on_delete=models.CASCADE, verbose_name="SEO блок")
+    json_file = models.FileField(upload_to='jsons/', null=True, blank=True)
     id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=255, verbose_name=_('Назва'))
     cinema = models.ForeignKey(Cinemas, on_delete=models.CASCADE, related_name='halls', verbose_name="Кинотеатр")
@@ -33,14 +34,8 @@ class Halls(models.Model):
     gallery = models.ForeignKey(Gallery, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Картинка')
     date = models.DateField(auto_now_add=True, verbose_name='Дата')
 
-    rows = models.PositiveIntegerField(verbose_name=_('Кількість рядів'), null=True, blank=True)
-    seats_row = models.PositiveIntegerField(verbose_name=_('Місць у ряду'), null=True, blank=True)
 
-    def total_seats(self):
-        """Общее количество мест в зале"""
-        if self.rows and self.seats_per_row:
-            return self.rows * self.seats_per_row
-        return 0
+
 
     def __str__(self):
         return f"{self.title} ({self.cinema})"

@@ -465,17 +465,17 @@ class HallsForm(forms.ModelForm):
     class Meta:
         model = Halls
 
-        exclude = ['seo_block','date', 'gallery']
+        exclude = ['seo_block', 'date', 'gallery']
 
-        fields = [ 'title', 'cinema', 'description', 'rows', 'seats_row']
+
+        fields = ['title', 'cinema', 'description', 'json_file']
+
         labels = {
-            'title':_('Назва'),
-            'cinema':_('Кінотеатр'),
-            'description':_("Опис"),
-            'rows':_('Ряд'),
-            'seats_row':'_(Місце)'
+            'title': _('Назва'),
+            'cinema': _('Кінотеатр'),
+            'description': _('Опис'),
+            'json_file': _('JSON-файл для схеми залу'),
         }
-
 class CinemaForm(forms.ModelForm):
 
     class Meta:

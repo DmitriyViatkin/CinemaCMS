@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from .models import Cinemas, Sessions
+from .models import Cinemas, Sessions, Halls
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
@@ -33,5 +33,25 @@ def session_list(request):
         'sessions': sessions
     }
     return render(request, 'core/session_list.html', context)
+def hall_list(request):
+    hall_list = Halls.objects.all()
 
+    paginator = Paginator(hall_list, 10)
+    page = request.GET.get('page')
+    try:
+        hall_list = paginator.page(page)
+    except PageNotAnInteger:
+        hall_list = paginator.page(1)
+    except EmptyPage:
+        hall_list = paginator.page(paginator.num_pages)
+
+    context = {'hall_list': hall_list}
+    return render(request, 'hall/hall_list.html', context)
+
+def hall_detail(request, hall_id):
+
+    hall = get_object_or_404(Halls, pk=hall_id)
+
+    context = {'hall': hall}
+    return render(request, 'hall/hall_detail.html', context)
 
