@@ -21,8 +21,8 @@ urlpatterns = [
     path('cinema_lists/<int:pk>/delete/', views.delete_cinema, name='delete_cinema'),
 
     path('halls_lists/',views.halls_list, name='halls_lists'),
-    path('add_halls/add_halls_create/<int:cinema_pk>/ ', views.add_halls_create, name='add_halls_create'),
-    path('add_halls/<int:halls_id>/', views.add_halls_create ,name='add_halls_edit'),
+    path('add_halls/create/<int:cinema_pk>/'  , views.add_halls_create, name='add_halls_create'),
+    path('add_halls/<int:cinema_pk>/<int:halls_id>/', views.add_halls_create ,name='add_halls_edit'),
     path('halls_lists/<int:pk>/delete/', views.delete_halls, name='delete_halls'),
 
     path('sessions_lists/',views.session_list, name='sessions_list'),
