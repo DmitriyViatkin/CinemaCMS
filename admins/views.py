@@ -241,7 +241,7 @@ def campaign_list(request):
 
 @staff_member_required
 def new_contacts(request):
-    print(f"--- new_contacts view called, Request method: {request.method} ---")
+
 
     seo_instance = None
     try:
@@ -254,11 +254,11 @@ def new_contacts(request):
         print(f"ERROR: An unexpected error occurred while retrieving Block_SEO: {e}")
 
     if request.method=='POST':
-        print("DEBUG: Handling POST request.")
+
         formset = ContactFormSet(request.POST, request.FILES, queryset=Contact.objects.all())
         block_seo_form = BlockSEOForm(request.POST, instance=seo_instance)
 
-        print(f"DEBUG: Data from POST request (first 200 chars): {str(request.POST)[:200]}...")
+
         if request.FILES:
             print(f"DEBUG: Files from POST request: {request.FILES.keys()}")
         else:

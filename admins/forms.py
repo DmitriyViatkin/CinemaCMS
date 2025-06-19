@@ -4,7 +4,7 @@ from  movie.models import Movies
 from  users.models import User, Email_campaing, Tamplate_email
 from core.models import Cinemas, Halls, Sessions,Seats, Tickets
 from main.models import Banners, Cross_Banner, News, PaigesNews, Promotion, PaigesCinema, Contact
-from django.forms import inlineformset_factory, formset_factory, modelformset_factory
+from django.forms import inlineformset_factory,  modelformset_factory
 from django.forms.widgets import HiddenInput
 from django.utils.translation import gettext_lazy as _
 

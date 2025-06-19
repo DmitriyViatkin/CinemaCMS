@@ -99,7 +99,7 @@ class News(models.Model):
     def image(self):
 
         if self.gallery:
-            # Використовуємо related_name='pictures' з моделі Picture
+
             first_picture = self.gallery.pictures.filter(image_type='gallery').first()
             if first_picture:
                 return first_picture.image
