@@ -3,13 +3,44 @@
 {% load static %}
 
 {% block content %}
+<style>
+
+    #hall-scheme-container {
+        margin-top: 20px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        overflow-x: auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 400px;
+
+
+        max-width: 800px;
+
+
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    #hall-scheme-container svg {
+        display: block;
+        max-width: 100%;
+        height: auto;
+    }
+
+
+
+</style>
     <title>Деталі залу: {{ hall.title }}</title>
 
 
-<body>
+
     <h1>Зал: {{ hall.title }}</h1>
     <p>Опис: {{ hall.description }}</p>
-    {# Возможно, другие детали зала #}
+
 
     <h2>Схема залу</h2>
     <div id="hall-scheme-container">
@@ -127,7 +158,7 @@ function renderHallScheme(schemeData, containerId) {
 
 
         seats.forEach(seatData => {
-            const seatNumber = seatData.seat_number;      /
+            const seatNumber = seatData.seat_number;
             const isOccupied = seatData.is_occupied;
 
 
@@ -217,68 +248,5 @@ loadAndRenderHallScheme(schemeFileUrl);
     {% else %}
     <p>Схема залу відсутня або не завантажена.</p>
     {% endif %}
-<style>
 
-    #hall-scheme-container {
-        margin-top: 20px;
-        padding: 15px;
-        background-color: #f8f9fa;
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
-        overflow-x: auto;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 400px;
-
-
-        max-width: 800px;
-
-
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    #hall-scheme-container svg {
-        display: block;
-        max-width: 100%;
-        height: auto;
-    }
-
-    #hall-scheme-container svg {
-        display: block;
-
-        max-width: 700px;
-
-
-        height: auto;
-
-        margin-left: auto;
-        margin-right: auto;
-    }
-     #hall-scheme-container {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            overflow-x: auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 400px;
-        }
-        #hall-scheme-container svg {
-            display: block;
-            max-width: 100%;
-            height: auto;
-        }
-
-        .seat {
-            transition: fill 0.3s ease, stroke 0.3s ease;
-        }
-        .seat:hover {
-            opacity: 0.8;
-        }
-</style>
 {% endblock %}
