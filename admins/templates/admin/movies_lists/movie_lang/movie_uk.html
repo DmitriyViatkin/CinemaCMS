@@ -1,0 +1,26 @@
+
+{% load static %}
+{% load i18n %}
+{#  Title #}
+              <div class="form-group field-row-aligned">
+                <div class="label-wrapper text-right">
+                    <label for="{{ trans movie_form.title_uk.label  %}"> Назва <label>
+                </div>
+                <div class="input-wrapper flex-grow-1">
+                  {{ movie_form.title_uk }}
+                  {% if movie_form.title_uk.help_text %}<small class="form-text text-muted">{{ movie_form.title_uk.help_text }}</small>{% endif %}
+                  {% for error in movie_form.title_uk.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                </div>
+              </div>
+
+              {#  Description #}
+              <div class="form-group field-row-aligned">
+                <div class="label-wrapper text-right align-self-start">
+                 <label for="{{  movie_form.description_uk.label  }}"> Опис </label>
+                </div>
+                <div class="input-wrapper flex-grow-1">
+                  {{ movie_form.description_uk }}
+                  {% if movie_form.description_uk.help_text %}<small class="form-text text-muted">{{ movie_form.description_uk.help_text }}</small>{% endif %}
+                  {% for error in movie_form.description_uk.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                </div>
+              </div>

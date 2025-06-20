@@ -14,7 +14,15 @@
         <div class="card card-primary" style="width: 80%; margin: 0 auto;">
           <div class="card-header">
             <h3 class="card-title">{% translate 'Додати фільм' %} </h3>
-          </div><div >{% include 'admin/card_forms/language.html' %}</div>
+          </div>
+           <div class="tabs-navigation">
+                            <button type="button" class="tab-button active" data-tab-target="#ukrainianTab">
+                                Українська
+                            </button>
+                            <button type="button" class="tab-button" data-tab-target="#russianTab">
+                                Русский
+                            </button>
+                        </div>
           <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
 
@@ -39,29 +47,18 @@
 
 
 
-              {#  Title #}
-              <div class="form-group field-row-aligned">
-                <div class="label-wrapper text-right">
-                    {% trans movie_form.title.label_tag %}
-                </div>
-                <div class="input-wrapper flex-grow-1">
-                  {{ movie_form.title }}
-                  {% if movie_form.title.help_text %}<small class="form-text text-muted">{{ movie_form.title.help_text }}</small>{% endif %}
-                  {% for error in movie_form.title.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-                </div>
-              </div>
+               <div class="tab-content tab-content-compact">
+                                          <div id="ukrainianTab" class="tab-pane active">
 
-              {#  Description #}
-              <div class="form-group field-row-aligned">
-                <div class="label-wrapper text-right align-self-start">
-                  {% translate movie_form.description.label_tag %}
-                </div>
-                <div class="input-wrapper flex-grow-1">
-                  {{ movie_form.description }}
-                  {% if movie_form.description.help_text %}<small class="form-text text-muted">{{ movie_form.description.help_text }}</small>{% endif %}
-                  {% for error in movie_form.description.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-                </div>
-              </div>
+                                                  {% include 'admin/movies_lists/movie_lang/movie_uk.html'   %}
+
+                                          </div>
+                                            <div id="russianTab" class="tab-pane">
+                                                {% include 'admin/movies_lists/movie_lang/movie_ru.html'   %}
+
+                                          </div>
+                                    </div>
+
 
                     {% include 'admin/card_forms/main_image.html'  %}
 
@@ -225,4 +222,51 @@
 <script src="{% static 'admins/dist/js/adminlte.min.js' %}"></script>
 
 <script src="{% static 'js/gallery.js' %}"></script>
+<script src="{% static 'js/tab.js' %}"></script>
+<style>
+    .tabs-navigation {
+        display: flex;
+        border-bottom: 1px solid #ddd;
+        margin-bottom: 20px;
+    }
+
+    /* Стилі для кнопок вкладок */
+    .tab-button {
+        background-color: #f1f1f1;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        padding: 10px 20px;
+        transition: 0.3s;
+        font-size: 17px;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+        margin-right: 2px; /* Невеликий відступ між кнопками */
+    }
+
+    /* Стилі при наведенні на кнопку вкладки */
+    .tab-button:hover {
+        background-color: #ddd;
+    }
+
+    /* Стилі для активної кнопки вкладки */
+    .tab-button.active {
+        background-color: #e0e0e0;
+        border-bottom: 3px solid #007bff; /* Колір виділення активної вкладки */
+        color: #007bff;
+    }
+
+    /* Стилі для вмісту вкладок */
+    .tab-pane {
+        display: none; /* За замовчуванням всі вкладки сховані */
+        padding: 20px 0;
+        border-top: none;
+    }
+
+    /* Стилі для активної вкладки */
+    .tab-pane.active {
+        display: block; /* Активна вкладка видима */
+    }
+
+</style>
 {% endblock %}

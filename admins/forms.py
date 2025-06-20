@@ -240,7 +240,7 @@ class PaigesCinemaForm(forms.ModelForm):
         model = PaigesCinema
         exclude = ['id', 'seo_block', 'gallery']
 
-        fields = '__all__'
+        fields = [ 'title_uk', 'description_uk', 'title_ru', 'description_ru','date' ,'is_active']
         widgets = {
             'is_active': forms.CheckboxInput(attrs={'data-bootstrap-switch': ''}),}
 
@@ -529,7 +529,7 @@ class MovieForm(forms.ModelForm):
     class Meta:
         model = Movies
 
-        fields = ['genre', 'title', 'url_trailer', 'description',
+        fields = ['genre', 'title_uk', 'description_uk','url_trailer', 'description_ru','title_ru',
                     'relise_date', 'age_limit', 'is_2d','is_3d','is_imax']
         labels = {
             'genre': _('Жанр:'),
