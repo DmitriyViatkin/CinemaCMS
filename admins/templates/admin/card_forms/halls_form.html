@@ -36,10 +36,10 @@
 
 <div class="card-body">
   <div class="form-group">
-    {% translate  form.json_file.label_tag %}
-    {{ form.seats_row }}
-    {% if form.json_file.help_text %}<small class="form-text text-muted">{{ form.json_file.help_text }}</small>{% endif %}
-    {% for error in form.json_file.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+    {% translate  form.scheme_hall.label_tag %}
+    {{ form.scheme_hall }}
+    {% if form.scheme_hall.help_text %}<small class="form-text text-muted">{{ form.scheme_hall.help_text }}</small>{% endif %}
+    {% for error in form.scheme_hall.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
   </div>
 </div>
 <style>
