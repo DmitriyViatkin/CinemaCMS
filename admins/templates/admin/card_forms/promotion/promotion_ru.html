@@ -25,6 +25,6 @@
                                 <label class="label-wrapper" for="{{  promotion_form.description.label}}"> Описание </label>
                                 {{ promotion_form.description_ru }}
                                 {% if promotion_form.description_ru.help_text %}<small class="form-text text-muted">{{ news_form.description_ru.help_text }}</small>{% endif %}
-                                {% for error in promotion_form.description_ru.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                                {% for error in promotion_form.description.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
                           </div>
                         </div>

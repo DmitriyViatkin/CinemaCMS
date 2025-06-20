@@ -265,7 +265,7 @@ class PaigesNewsForm(forms.ModelForm):
     class Meta:
         model=PaigesNews
 
-        fields = ['title', 'description', 'url', 'date', 'is_active']
+        fields = ['title_uk', 'description_uk', 'title_ru', 'description_ru','url', 'date', 'is_active']
         labels = {
             'title': _("Назва новини"),
             'description': _("Опис"),

@@ -16,7 +16,14 @@
                     <div class="card-header">
                         <h3 class="card-title">{% translate "Додати новину" %}</h3>
                     </div>
-                    <div >{% include 'admin/card_forms/language.html' %}</div>
+                     <div class="tabs-navigation">
+                            <button type="button" class="tab-button active" data-tab-target="#ukrainianTab">
+                                Українська
+                            </button>
+                            <button type="button" class="tab-button" data-tab-target="#russianTab">
+                                Русский
+                            </button>
+                        </div>
                     <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
 
@@ -36,38 +43,25 @@
                         {% if main_picture_form.non_field_errors %}
                             <div class="alert alert-danger">{{ main_picture_form.non_field_errors }}</div>
                         {% endif %}
+                        <div class="tab-content tab-content-compact">
+                             <div id="ukrainianTab" class="tab-pane active">
+                                  <div class="card-body">
 
-                                    <div class="card-body">
+                                  {% include 'admin/news_paige/cards/news_uk.html' with form=news_form %}
+                                  </div>
+                             </div>
 
+                          <div id="russianTab" class="tab-pane">
+                              <div class="card-body">
 
-                                        <div class="card-body">
-                                           <div class="form-group flex-container">
-                                                {% translate news_form.title.label_tag %}
-                                                {{ news_form.title }}
-                                                {% if news_form.title.help_text %}<small class="form-text text-muted">{{ news_form.title.help_text }}</small>{% endif %}
-                                                {% for error in news_form.title.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-
-                                                {% translate news_form.date.label_tag %}
-                                                {{ news_form.date }}
-                                                {% if news_form.date.help_text %}<small class="form-text text-muted">{{ news_form.relise_date.help_text }}</small>{% endif %}
-                                                {% for error in news_form.date.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-
-                                                {% translate news_form.is_active.label_tag %}
-                                                {{ news_form.is_active }}
-                                                {% if news_form.is_active.help_text %}<small class="form-text text-muted">{{ news_form.gallery.help_text }}</small>{% endif %}
-                                                {% for error in news_form.is_active.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-                                           </div>
-                                      </div>
-                                    </div>
-
-                        <div class="card-body">
-                          <div class="form-group">
-                                {% translate news_form.description.label_tag %}
-                                {{ news_form.description }}
-                                {% if news_form.description.help_text %}<small class="form-text text-muted">{{ news_form.description.help_text }}</small>{% endif %}
-                                {% for error in news_form.description.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                                    {% include 'admin/news_paige/cards/news_ru.html' with form=news_form %}
+                              </div>
                           </div>
                         </div>
+
+
+
+
 
                         {% include 'admin/card_forms/main_image.html'  %}
 
@@ -100,6 +94,7 @@
     const DEFAULT_IMAGE_URL = "{% static 'images/картинка.png' %}";
 </script>
 <script src="{% static 'js/gallery.js' %}"></script>
+<script src="{% static 'js/tab.js' %}"></script>
 <style>
     #id_title {
     width: 450px;

@@ -1,0 +1,30 @@
+                         <div class="card-body">
+                                            <div class="form-group flex-container">
+                                                <label class="label-wrapper" for="{{  news_form.title.label }}">Назва</label>
+                                                {{ news_form.title_ru }}
+                                                {% if news_form.title_ru.help_text %}<small class="form-text text-muted">{{ news_form.title_ru.help_text }}</small>{% endif %}
+                                                {% for error in news_form.title_ru.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+
+
+                                                <label class="label-wrapper" for="{{ news_form.date.label }}"> Дата публікації </label>
+                                                {{ news_form.date }}
+                                                {% if news_form.date.help_text %}<small class="form-text text-muted">{{ news_form.date.help_text }}</small>{% endif %}
+                                                {% for error in news_form.date.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+
+                                                 <label class="label-wrapper" for="{{ news_form.is_active.label }}"> Показувати</label>
+                                                {{ news_form.is_active }}
+                                                {% if news_form.is_active.help_text %}<small class="form-text text-muted">{{ news_form.gallery.help_text }}</small>{% endif %}
+                                                {% for error in news_form.is_active.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                                            </div>
+
+
+
+                        <div class="card-body">
+                          <div class="form-group">
+                                <label class="label-wrapper" for="{{  news_form.description.label}}"> Описание </label>
+                                {{ news_form.description_ru }}
+                                {% if news_form.description_uk.help_text %}<small class="form-text text-muted">{{ news_form.description_ru.help_text }}</small>{% endif %}
+                                {% for error in news_form.description_ru.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                          </div>
+                        </div>
+
