@@ -466,8 +466,12 @@ class HallsForm(forms.ModelForm):
         model = Halls
 
         exclude = ['seo_block','date', 'gallery']
-
-        fields = [ 'title', 'cinema', 'scheme_hall','description',  ]
+        fields = [
+            'title_uk', 'title_ru',
+            'description_uk', 'description_ru',
+            'cinema',
+            'scheme_hall',
+             ]
         labels = {
 
             'title':_('Назва'),

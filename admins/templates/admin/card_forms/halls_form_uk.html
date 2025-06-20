@@ -1,0 +1,39 @@
+{# admin/card_forms/hall_form.html #}
+{% load static %}
+{% load i18n %}
+
+
+
+<div class="card-body">
+  <div class="form-group">
+     <label for="{{ title.id_for_label }}">Назва </label>
+    {{form.title_uk}}
+    {% if form.title_uk.help_text %}
+      <small class="form-text text-muted">{{ form.title_uk.help_text }}</small>
+    {% endif %}
+    {% for error in form.title_uk.errors %}
+      <div class="alert alert-danger">{{ error }}</div>
+    {% endfor %}
+  </div>
+</div>
+
+
+
+<div class="card-body">
+  <div class="form-group">
+     <label for="{{ form.description.id_for_label }}">Опис </label>
+    {{ form.description_uk }}
+    {% if form.description_uk.help_text %}
+      <small class="form-text text-muted">{{ form.description_uk.help_text }}</small>
+    {% endif %}
+    {% for error in form.description_uk.errors %}
+      <div class="alert alert-danger">{{ error }}</div>
+    {% endfor %}
+  </div>
+</div>
+
+
+
+
+
+

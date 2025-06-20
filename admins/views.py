@@ -680,7 +680,7 @@ def add_halls_create(request, cinema_pk, halls_id=None):
     gallery_instance = None
 
     current_main_picture_object = None
-    current_cheme_picture_object = None
+
 
 
     if halls_id:
@@ -695,19 +695,19 @@ def add_halls_create(request, cinema_pk, halls_id=None):
 
         if gallery_instance:
             current_main_picture_object = gallery_instance.pictures.filter(image_type='main_picture').first()
-            current_cheme_picture_object = gallery_instance.pictures.filter(image_type='logo').first()
+
 
 
     if request.method == 'POST':
+
         block_seo_form = BlockSEOForm(request.POST, instance=block_seo_instance)
-        # --- ИСПРАВЛЕНИЕ ЗДЕСЬ: ДОБАВЬТЕ request.FILES ---
+
         halls_form = HallsForm(request.POST, request.FILES, instance=halls_instance)
         gallery_form = GalleryForm(request.POST, instance=gallery_instance)
 
         banner_form = PictureForm(request.POST, request.FILES, instance=current_main_picture_object,
             prefix='banner_form')
-        cheme_form = PictureForm(request.POST, request.FILES, instance=current_cheme_picture_object,
-            prefix='logo_form')
+
 
         # Загружаем существующие галерейные изображения для формсета
         picture_queryset_for_formset = Picture.objects.none()
@@ -721,8 +721,8 @@ def add_halls_create(request, cinema_pk, halls_id=None):
                 halls_form.is_valid() and
                 gallery_form.is_valid() and
                 picture_formset.is_valid() and
-                banner_form.is_valid() and
-                cheme_form.is_valid()):
+                banner_form.is_valid() ):
+
 
             block_seo = block_seo_form.save()
             gallery = gallery_form.save()
@@ -733,7 +733,7 @@ def add_halls_create(request, cinema_pk, halls_id=None):
             halls.cinema = cinema_instance
             halls.save()
 
-            # --- Логика сохранения картинок и формсетов остается неизменной ---
+
             if banner_form.cleaned_data.get('image'):
                 banner_picture = banner_form.save(commit=False)
                 banner_picture.gallery = gallery
@@ -745,16 +745,8 @@ def add_halls_create(request, cinema_pk, halls_id=None):
             elif banner_form.cleaned_data.get('DELETE') and current_main_picture_object:
                 current_main_picture_object.delete()
 
-            if cheme_form.cleaned_data.get('image'):
-                cheme_picture = cheme_form.save(commit=False)
-                cheme_picture.gallery = gallery
-                cheme_picture.image_type = 'logo'
-                cheme_picture.save()
 
-                if current_cheme_picture_object and current_cheme_picture_object.pk != cheme_picture.pk:
-                    current_cheme_picture_object.delete()
-            elif cheme_form.cleaned_data.get('DELETE') and current_cheme_picture_object:
-                current_cheme_picture_object.delete()
+
 
             instances_gallery = picture_formset.save(commit=False)
             for pic_instance in instances_gallery:
@@ -772,12 +764,14 @@ def add_halls_create(request, cinema_pk, halls_id=None):
 
         else:
             print("Ошибка валидации форм")
+
             print("block_seo_form.errors:", block_seo_form.errors)
             print("halls_form.errors:", halls_form.errors)
+            print(halls_form)
             print("gallery_form.errors:", gallery_form.errors)
             print("picture_formset.errors:", picture_formset.errors)
             print("banner_form.errors:", banner_form.errors)
-            print("logo_form.errors:", cheme_form.errors)
+
 
             return render(request, 'admin/halls/add_halls.html', {
                 'block_seo_form': block_seo_form,
@@ -785,7 +779,7 @@ def add_halls_create(request, cinema_pk, halls_id=None):
                 'gallery_form': gallery_form,
                 'picture_formset': picture_formset,
                 'banner_form': banner_form,
-                'cheme_form': cheme_form,
+
                 'halls': halls_instance,
                 'cinema': cinema_instance,
                 'is_edit': halls_instance is not None,
@@ -804,8 +798,7 @@ def add_halls_create(request, cinema_pk, halls_id=None):
 
         banner_form = PictureForm(instance=current_main_picture_object, prefix='banner_form',
             initial={'image_type': 'main_picture'})
-        cheme_form = PictureForm(instance=current_cheme_picture_object, prefix='logo_form',
-            initial={'image_type': 'logo'})
+
 
     return render(request, 'admin/halls/add_halls.html', {
         'block_seo_form': block_seo_form,
@@ -813,7 +806,7 @@ def add_halls_create(request, cinema_pk, halls_id=None):
         'gallery_form': gallery_form,
         'picture_formset': picture_formset,
         'banner_form': banner_form,
-        'cheme_form': cheme_form,
+
         'halls': halls_instance,
         'cinema': cinema_instance,
         'is_edit': halls_instance is not None,

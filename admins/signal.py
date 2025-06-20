@@ -1,18 +1,21 @@
 import json
-
+import io # Добавьте этот импорт, если его нет
 from datetime import date
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from core.models import Halls, Seats
-import io # Добавьте этот импорт, если его нет
+from core.models import Halls, Seats # Убедитесь, что импорты правильные
 
 @receiver(post_save, sender=Halls)
 def process_hall_scheme_from_file_only(sender, instance, created, **kwargs):
     print(f"--- Сигнал process_hall_scheme_from_file_only: HALL ID {instance.id}, created: {created} ---")
 
-    # --- ИСПРАВЛЕНИЕ ЗДЕСЬ: Используем seats_set ---
-    instance.seats_set.all().delete()
+    # ВАЖНО: УБЕДИТЕСЬ, что RelatedManager называется 'seats_set'.
+    # Это либо дефолтное имя (если модель называется Seats),
+    # либо вы явно указали related_name='seats_set' в ForeignKey в модели Seats.
+    # Если RelatedManager называется 'seat_set' (т.е. модель 'Seat'),
+    # ТОГДА ИСПОЛЬЗУЙТЕ: instance.seat_set.all().delete()
+    instance.seats_in_hall.all().delete() # <-- Это строка, которая вызывает ошибку, если RelatedManager другой
     print(f"--- Удалены существующие места для зала ID {instance.id} ---")
 
     scheme_file = instance.scheme_hall
@@ -20,23 +23,21 @@ def process_hall_scheme_from_file_only(sender, instance, created, **kwargs):
     # --- Главная логика: попытка обработать схему из загруженного JSON-файла ---
     if scheme_file and scheme_file.name.endswith('.json'):
         try:
-            # --- ИСПРАВЛЕНИЕ ДЛЯ 'encoding' (если еще не сделано) ---
-            # Открываем файл в бинарном режиме, затем оборачиваем его в TextIOWrapper
             with scheme_file.open('rb') as f_binary:
                 text_stream = io.TextIOWrapper(f_binary, encoding='utf-8')
                 scheme_data = json.load(text_stream)
-            # --- КОНЕЦ ИСПРАВЛЕНИЯ ДЛЯ 'encoding' ---
 
             if isinstance(scheme_data, (dict, list)):
                 print(f"--- Обработка схемы зала '{instance.title}' из файла '{scheme_file.name}' ---")
 
-                # Логика создания Seats из файла
                 if isinstance(scheme_data, list):
+                    # Если JSON - это список залов, находим нужный по имени
                     for hall_data in scheme_data:
                         if hall_data.get('name') == instance.title:
                             _create_seats_from_json_dict(instance, hall_data)
                             break
                 elif isinstance(scheme_data, dict):
+                    # Если JSON - это схема одного зала
                     _create_seats_from_json_dict(instance, scheme_data)
 
             else:
@@ -55,7 +56,6 @@ def process_hall_scheme_from_file_only(sender, instance, created, **kwargs):
         print(f"--- Для зала ID {instance.id} файл схемы не загружен или поле 'scheme_hall' пусто. Места не создаются. ---")
 
 def _create_seats_from_json_dict(hall_instance, scheme_dict):
-    # Эта функция остается без изменений
     seats_to_create = []
     for row_data in scheme_dict.get('rows', []):
         row_number = row_data.get('row_number')
@@ -76,11 +76,11 @@ def _create_seats_from_json_dict(hall_instance, scheme_dict):
                 price = 200.00
 
             seats_to_create.append(
-                Seats(
-                    halls=hall_instance,
+                Seats( # Убедитесь, что это ваша модель Seats
+                    halls=hall_instance, # Убедитесь, что поле ForeignKey в Seats называется 'halls'
                     number_row=row_number,
                     seat=seat_number,
-                    date=date.today(),
+                    date=date.today(), # Возможно, здесь нужна дата показа, а не текущая
                     status=seat_data.get('status', 'F'),
                     is_vip=is_vip,
                     price=price,
