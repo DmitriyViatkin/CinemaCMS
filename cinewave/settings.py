@@ -29,24 +29,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG').lower() == 'true'
+DEBUG = os.getenv('DEBUG')
 
 ALLOWED_HOSTS = []
 
-DEBUG_TOOLBAR_PANELS = [
-    'debug_toolbar.panels.versions.VersionsPanel',
-    'debug_toolbar.panels.timer.TimerPanel',
-    'debug_toolbar.panels.settings.SettingsPanel',
-    'debug_toolbar.panels.headers.HeadersPanel',
-    'debug_toolbar.panels.request.RequestPanel',
-    'debug_toolbar.panels.staticfiles.StaticFilesPanel',
-    'debug_toolbar.panels.templates.TemplatesPanel',
-    # 'debug_toolbar.panels.sql.SQLPanel', # ЗАКОМЕНТУЙТЕ ЦЮ СТРІЧКУ
-    'debug_toolbar.panels.signals.SignalsPanel',
-    'debug_toolbar.panels.redirects.RedirectsPanel',
-    # 'debug_toolbar.panels.cache.CachePanel', # Можете додати або видалити інші панелі
-    # 'debug_toolbar.panels.logging.LoggingPanel',
-]
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -66,10 +53,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'widget_tweaks',
     'debug_toolbar',
-    'django_celery_results',
-    'celery_progress'
-
-
+    'celery_progress',
+'django_celery_results'
 
 
 
@@ -85,7 +70,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware'
+'debug_toolbar.middleware.DebugToolbarMiddleware'
 ]
 
 ROOT_URLCONF = 'cinewave.urls'
@@ -178,7 +163,6 @@ MODELTRANSLATION_TRANSLATION_REGISTRY = "cinewave.translation"
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
-#EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
@@ -195,6 +179,8 @@ CELERY_TASK_SERIALIZER = 'json'
 
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

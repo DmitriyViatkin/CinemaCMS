@@ -1,19 +1,20 @@
 from django import forms
 from main.models import Block_SEO, Gallery, Picture, MainPaiges
 from  movie.models import Movies
-from  users.models import User, Email_campaing, Tamplate_email
+from  users.models import User ,Email_campaing, Tamplate_email
 from core.models import Cinemas, Halls, Sessions,Seats, Tickets
 from main.models import Banners, Cross_Banner, News, PaigesNews, Promotion, PaigesCinema, Contact
-from django.forms import inlineformset_factory,  modelformset_factory
+from django.forms import inlineformset_factory, formset_factory, modelformset_factory
 from django.forms.widgets import HiddenInput
 from django.utils.translation import gettext_lazy as _
 
-
 class TemplateEmailForm(forms.ModelForm):
-
+    """
+    Форма для создания и редактирования шаблонов email, с загрузкой файла.
+    """
     class Meta:
         model = Tamplate_email
-        fields = ['template_file']
+        fields = ['template_file'] # Теперь используем 'template_file'
         labels = {
             'template_file': "Загрузить файл шаблона (HTML, TXT и т.д.)",
         }
@@ -40,7 +41,7 @@ class SellectUserForm(forms.ModelForm):
         class Meta:
             model = Email_campaing
             fields = ['users']
-
+            # Здесь мы определяем виджеты
             widgets = {
                 'users': forms.CheckboxSelectMultiple(attrs={'class': 'form-control'}),
             }
@@ -51,10 +52,11 @@ class SellectUserForm(forms.ModelForm):
 
 
 class EmailCampaignForm(forms.ModelForm):
-
+    # !!! ЭТО КРИТИЧЕСКОЕ ИЗМЕНЕНИЕ !!!
+    # users теперь CharField, чтобы принимать строку "1,4" или ""
     users = forms.CharField(
         required=False,
-        widget=forms.HiddenInput,
+        widget=forms.HiddenInput, # Поле должно быть скрытым
         help_text="Список ID пользователей, разделенных запятыми."
     )
 
@@ -76,7 +78,7 @@ class EmailCampaignForm(forms.ModelForm):
 
     class Meta:
         model = Email_campaing
-        fields = ['new_template_file', 'template', 'status', 'users']
+        fields = ['new_template_file', 'template', 'status', 'users'] # Убедитесь, что здесь нет пробела после 'template'
         labels = {
             'status': "Статус кампании",
             'template': "Выбрать существующий шаблон Email",
@@ -90,7 +92,7 @@ class EmailCampaignForm(forms.ModelForm):
             self.fields['recipient_mode'].initial = 'all'
         elif self.instance.users.exists():
             self.fields['recipient_mode'].initial = 'selected'
-
+            # При редактировании, инициализируем скрытое поле 'users' для JS
             initial_user_ids = list(self.instance.users.values_list('id', flat=True))
             self.initial['users'] = ','.join(map(str, initial_user_ids))
         else:
@@ -98,27 +100,28 @@ class EmailCampaignForm(forms.ModelForm):
 
 
     def clean_users(self):
-        users_str = self.cleaned_data.get('users', '')
-        recipient_mode = self.data.get('recipient_mode')
+        users_str = self.cleaned_data.get('users', '') # Получаем строку из hidden input
+        recipient_mode = self.data.get('recipient_mode') # Получаем режим выбора
+
         if recipient_mode == 'all':
-            return []
+            return [] # Возвращаем пустой список, так как все пользователи будут добавлены в views.py
 
-
-        if users_str:
+        # Если режим 'selected'
+        if users_str: # Если строка не пустая, парсим её
             try:
                 user_ids = [int(uid.strip()) for uid in users_str.split(',') if uid.strip()]
             except ValueError:
                 raise forms.ValidationError("Неверный формат ID пользователя. Ожидается список чисел через запятую.")
 
-
+            # Опционально: проверка на существование пользователей
             existing_user_ids = User.objects.filter(id__in=user_ids).values_list('id', flat=True)
             if len(set(user_ids)) != len(existing_user_ids):
                 invalid_ids = set(user_ids) - set(existing_user_ids)
                 raise forms.ValidationError(f"Некоторые выбранные ID пользователей недействительны или не существуют: {list(invalid_ids)}")
 
-            return user_ids
+            return user_ids # Возвращаем список ID
         else:
-
+            # Если recipient_mode == 'selected', но users_str пуст
             raise forms.ValidationError("Виберіть хоча б одного користувача для розсилки.")
 
     def clean(self):
@@ -132,7 +135,6 @@ class EmailCampaignForm(forms.ModelForm):
             self.add_error(None, "Нельзя выбрать существующий шаблон И загрузить новый одновременно. Пожалуйста, выберите что-то одно.")
 
         return cleaned_data
-
 class ContactForm(forms.ModelForm):
     contact_picture = forms.ImageField(required=False, label="Лого")
     delete_contact_picture = forms.BooleanField(required=False, initial=False, widget=forms.HiddenInput())
@@ -474,7 +476,6 @@ class HallsForm(forms.ModelForm):
             'description':_("Опис"),
 
         }
-
 class CinemaForm(forms.ModelForm):
 
     class Meta:

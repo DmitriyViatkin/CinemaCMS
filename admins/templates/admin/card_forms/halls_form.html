@@ -40,21 +40,14 @@
   </div>
 </div>
 
-<div class="card-body">
-  <div class="form-group">
-    {% translate form.rows.label_tag %}
-    {{ form.rows }}
-    {% if form.rows.help_text %}<small class="form-text text-muted">{{ form.rows.help_text }}</small>{% endif %}
-    {% for error in form.rows.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-  </div>
-</div>
+
 
 <div class="card-body">
   <div class="form-group">
-    {% translate  form.seats_row.label_tag %}
-    {{ form.seats_row }}
-    {% if form.seats_row.help_text %}<small class="form-text text-muted">{{ form.seats_row.help_text }}</small>{% endif %}
-    {% for error in form.seats_row.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+    {% translate  form.scheme_hall.label_tag %}
+    {{ form.scheme_hall }}
+    {% if form.scheme_hall.help_text %}<small class="form-text text-muted">{{ form.scheme_hall.help_text }}</small>{% endif %}
+    {% for error in form.scheme_hall.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
   </div>
 </div>
 <style>

@@ -1,4 +1,3 @@
-from debug_toolbar.management.commands.debugsqlshell import PrintQueryWrapper
 from django.shortcuts import render, get_object_or_404
 from .models import Cinemas, Sessions, Halls
 
@@ -34,7 +33,6 @@ def session_list(request):
         'sessions': sessions
     }
     return render(request, 'core/session_list.html', context)
-
 def hall_list(request):
     hall_list = Halls.objects.all()
 
@@ -56,3 +54,4 @@ def hall_detail(request, hall_id):
 
     context = {'hall': hall}
     return render(request, 'hall/hall_detail.html', context)
+
