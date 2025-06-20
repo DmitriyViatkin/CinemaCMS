@@ -244,7 +244,7 @@ class PaigesCinemaForm(forms.ModelForm):
 class PromotionForm(forms.ModelForm):
     class Meta:
         model = Promotion
-        fields = ['title', 'description', 'url_video', 'date', 'is_active']
+        fields = ['title_uk', 'description_uk', 'title_ru', 'description_ru','url_video', 'date', 'is_active']
         labels = {
             'title':"Назва Акції",
             'description':"Опис",
@@ -485,7 +485,7 @@ class CinemaForm(forms.ModelForm):
     class Meta:
         model = Cinemas
 
-        fields = ['title', 'description' , 'conditions', 'city',]
+        fields = ['title_uk', 'description_uk' , 'conditions_uk', 'city_uk','title_ru', 'description_ru' , 'conditions_ru', 'city_ru',]
         widgets = {
 
             'description': forms.Textarea(attrs={'class': 'form-control'}),

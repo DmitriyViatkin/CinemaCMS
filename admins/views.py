@@ -603,7 +603,7 @@ def add_cinema_create(request, cinema_id=None):
             print("banner_form.errors:", banner_form.errors)
             print("logo_form.errors:", logo_form.errors)
 
-            return render(request, 'admin/paige_list/add_cinema.html', {
+            return render(request, 'admin/cinema/add_cinema.html', {
                 'block_seo_form': block_seo_form,
                 'cinema_form': cinema_form,
                 'gallery_form': gallery_form,
