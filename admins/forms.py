@@ -210,21 +210,25 @@ class MainPaigesForm(forms.ModelForm):
     class Meta:
         model = MainPaiges
         exclude = ['id', 'seo_block', ]
+        fields = ['phone_1_uk' ,'phone_1_ru', 'phone_2_uk', 'phone_2_ru', 'SEO_text_uk', 'SEO_text_ru','is_active' ]
         labels = {
-            'phone_1': 'Телефон ',
-            'phone_2': ' ',
-            'SEO_text': 'SEO текст ',
+            'phone_1_uk': 'Телефон (укр)',
+            'phone_1_ru': 'Телефон (рус)',
+            'phone_2_uk': '',
+            'phone_2_ru': '',
+            'SEO_text_uk': 'SEO текст (укр)',
+            'SEO_text_ru': 'SEO текст (рус)',
         }
 
         widgets = {
-
-            'phone_1': forms.TextInput(attrs={'class': 'form-control phone-input'}),
-            'phone_2': forms.TextInput(attrs={'class': 'form-control phone-input'}),
-
-            'SEO_text': forms.Textarea(attrs={'class': 'form-control', 'rows': 6}),
+            'phone_1_uk': forms.TextInput(attrs={'class': 'form-control phone-input'}),
+            'phone_1_ru': forms.TextInput(attrs={'class': 'form-control phone-input'}),
+            'phone_2_uk': forms.TextInput(attrs={'class': 'form-control phone-input'}),
+            'phone_2_ru': forms.TextInput(attrs={'class': 'form-control phone-input'}),
+            'SEO_text_uk': forms.Textarea(attrs={'class': 'form-control', 'rows': 6}),
+            'SEO_text_ru': forms.Textarea(attrs={'class': 'form-control', 'rows': 6}),
             'is_active': forms.CheckboxInput(attrs={'data-bootstrap-switch': ''}),
         }
-
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

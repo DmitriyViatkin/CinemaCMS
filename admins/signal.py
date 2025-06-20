@@ -10,12 +10,8 @@ from core.models import Halls, Seats # Убедитесь, что импорты
 def process_hall_scheme_from_file_only(sender, instance, created, **kwargs):
     print(f"--- Сигнал process_hall_scheme_from_file_only: HALL ID {instance.id}, created: {created} ---")
 
-    # ВАЖНО: УБЕДИТЕСЬ, что RelatedManager называется 'seats_set'.
-    # Это либо дефолтное имя (если модель называется Seats),
-    # либо вы явно указали related_name='seats_set' в ForeignKey в модели Seats.
-    # Если RelatedManager называется 'seat_set' (т.е. модель 'Seat'),
-    # ТОГДА ИСПОЛЬЗУЙТЕ: instance.seat_set.all().delete()
-    instance.seats_in_hall.all().delete() # <-- Это строка, которая вызывает ошибку, если RelatedManager другой
+
+    instance.seats_in_hall.all().delete()
     print(f"--- Удалены существующие места для зала ID {instance.id} ---")
 
     scheme_file = instance.scheme_hall
