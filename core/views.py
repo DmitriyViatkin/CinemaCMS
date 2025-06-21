@@ -66,54 +66,59 @@ def buy_ticket_view(request, session_id):
         pk=session_id
     )
 
+    # Получаем все места для текущего зала, сортируем по ряду и номеру места
     hall_seats = Seats.objects.filter(halls=session.hall_id).order_by('number_row', 'seat')
 
-    # This is the URL to the static JSON file defining the hall's physical layout
-    scheme_hall_json_url = None
-    if session.hall_id and session.hall_id.scheme_hall:
-        scheme_hall_json_url = session.hall_id.scheme_hall.url
-
+    # Получаем ID забронированных мест для текущего сеанса
     booked_seat_ids = Tickets.objects.filter(session=session).values_list('seat__id', flat=True)
 
     seat_data_map = {}
     max_row = 0
-    max_seat_in_row = {}
+    max_seat_in_row = {} # Для определения максимального номера места в каждом ряду
 
     for seat in hall_seats:
+        # Обновляем максимальный номер ряда
         if seat.number_row > max_row:
             max_row = seat.number_row
 
+        # Обновляем максимальный номер места в текущем ряду
         if seat.number_row not in max_seat_in_row:
             max_seat_in_row[seat.number_row] = 0
         if seat.seat > max_seat_in_row[seat.number_row]:
             max_seat_in_row[seat.number_row] = seat.seat
 
-        current_status = seat.status
+        # Определяем текущий статус места
+        current_status = seat.status # Исходный статус из БД ('F', 'N')
         if seat.id in booked_seat_ids:
-            current_status = "S"  # Override to 'Sold' if a ticket exists for this seat in this session
+            current_status = "S" # Переопределяем на 'S' (Sold), если место забронировано
 
+        # Сохраняем данные места в map для удобной организации по рядам и местам
         if seat.number_row not in seat_data_map:
             seat_data_map[seat.number_row] = {}
 
         seat_data_map[seat.number_row][seat.seat] = {
             'id': seat.id,
-            'status': current_status,  # 'F' (Free), 'S' (Sold), 'N' (Not available)
+            'status': current_status,
             'is_vip': seat.is_vip,
             'price': float(seat.price),
             'row_number': seat.number_row,
             'seat_number': seat.seat
         }
 
+    # Преобразуем seat_data_map в упорядоченный список рядов и мест,
+    # чтобы правильно отобразить "пустые" места (если они есть в схеме, но нет в БД)
     ordered_seat_rows = []
-    for r in sorted(seat_data_map.keys()):
+    for r in sorted(seat_data_map.keys()): # Итерируем по отсортированным номерам рядов
         row_seats = []
+        # Заполняем места в ряду от 1 до max_seat_in_row для этого ряда
         for s in range(1, max_seat_in_row.get(r, 0) + 1):
             if s in seat_data_map.get(r, {}):
                 row_seats.append(seat_data_map[r][s])
             else:
+                # Если места нет в БД (например, проход), создаем фиктивное "недоступное" место
                 row_seats.append({
-                    'id': None,
-                    'status': 'N',
+                    'id': None, # ID None, так как этого места нет в БД
+                    'status': 'N', # Недоступно
                     'is_vip': False,
                     'price': 0.0,
                     'row_number': r,
@@ -128,8 +133,8 @@ def buy_ticket_view(request, session_id):
         'session_time': session.time_session,
         'session_date': session.date,
         'movie_title': session.movie.title,
-        'scheme_hall_json_url': scheme_hall_json_url,  # URL к JSON-файлу базовой схемы
-        'seat_rows_current_status_json': json.dumps(ordered_seat_rows),  # JSON-строка с текущими статусами
+        # Больше не передаем scheme_hall_json_url
+        'seat_rows_current_status_json': json.dumps(ordered_seat_rows), # Это теперь единственный источник данных для схемы
     }
 
     return render(request, 'core/buy_ticket/buy_ticket.html', context)
@@ -190,7 +195,7 @@ def process_ticket_purchase(request, session_id):
          if purchased_tickets_count > 0:
              # Если хоть какие-то билеты были куплены
              # TODO: Можно передать информацию о failed_seats_info на страницу успеха/отчета
-             return HttpResponseRedirect(reverse('ticket_purchase_success'))
+             return HttpResponseRedirect(reverse('profile'))
          else:
              # Если ни одного билета не удалось купить (все были заняты или произошла ошибка)
              # TODO: Добавить систему сообщений для пользователя, чтобы показать failed_seats_info
