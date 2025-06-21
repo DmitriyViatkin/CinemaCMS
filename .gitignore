@@ -1,12 +1,18 @@
-# Python
+
+# Python bytecode
 *.pyc
 __pycache__/
-.Python
 
-
-
-*.egg-info/
-.pytest_cache/
+# Virtual environment
 venv/
 .env
-media
+
+# Editor/IDE specific files (optional, but good practice)
+.Python
+
+# Testing and build artifacts
+*.egg-info/
+.pytest_cache/
+
+# User-uploaded media files
+media/

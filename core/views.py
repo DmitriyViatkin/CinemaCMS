@@ -32,7 +32,9 @@ def session_list(request):
     context = {
         'sessions': sessions
     }
-    return render(request, 'core/session_list.html', context)
+    return render(request, 'core/session_2.html', context)
+
+
 def hall_list(request):
     hall_list = Halls.objects.all()
 

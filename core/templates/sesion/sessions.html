@@ -1,0 +1,25 @@
+<table id="sessions-table" class="display" style="width:100%">
+    <thead>
+        <tr>
+            <th></th> <th>Кінотеатр</th>
+            <th>ID Залу</th>
+            <th>Назва</th>
+            <th>Фільм</th>
+            <th>Час сесії</th>
+            <th>Тривалість</th>
+            <th>Дата</th>
+        </tr>
+    </thead>
+</table>
+
+
+<script>
+$(document).ready(function() {
+    $('#sessions-table').DataTable({
+        "processing": true,
+        "serverSide": true,
+        "ajax": "{% url 'ajax_datatable_sessions' %}" // Звернення до твоєї AjaxDatatableView
+        // Можливо, додаткові налаштування тут
+    });
+});
+</script>

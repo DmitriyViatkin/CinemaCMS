@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .ajax_views import SessionsAjaxView
 
 urlpatterns = [
 
@@ -10,5 +11,11 @@ urlpatterns = [
     path('sessions/', views.session_list, name='session_list'),
     path('halls/', views.hall_list, name='halls_list'),
     path('halls/<int:hall_id>/', views.hall_detail, name='hall_detail'),
+
+
+
+
+    path('ajax_sessions_data/', SessionsAjaxView.as_view(), name='ajax_sessions_data/'),
+
 
 ]
