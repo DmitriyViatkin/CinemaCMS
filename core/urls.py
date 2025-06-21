@@ -14,6 +14,7 @@ urlpatterns = [
 
     path('sessions/<int:session_id>/buy/', views.buy_ticket_view, name='buy_ticket'),
 
+    path('sessions/<int:session_id>/process_purchase/', views.process_ticket_purchase, name='process_ticket_purchase'),
 
 
 
