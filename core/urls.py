@@ -12,10 +12,12 @@ urlpatterns = [
     path('halls/', views.hall_list, name='halls_list'),
     path('halls/<int:hall_id>/', views.hall_detail, name='hall_detail'),
 
+    path('sessions/<int:session_id>/buy/', views.buy_ticket_view, name='buy_ticket'),
 
 
 
-    path('ajax_sessions_data/', SessionsAjaxView.as_view(), name='ajax_sessions_data/'),
+
+    path('ajax_sessions_data/', SessionsAjaxView.as_view(), name='ajax_sessions_data'),
 
 
 ]

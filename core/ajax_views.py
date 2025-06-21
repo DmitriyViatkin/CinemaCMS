@@ -10,6 +10,7 @@ class SessionsAjaxView(AjaxDatatableView):
     title = "Сеанси"
     initial_order = [["cinema__title", "asc"]]  # Початкове сортування
     length_menu = [[10, 25, 50, -1], [10, 25, 50, "Всі"]]  # Додайте "Всі"
+    render_html = True
 
     column_defs = [
         # Стовпець для дій (редагування/видалення)
@@ -28,33 +29,49 @@ class SessionsAjaxView(AjaxDatatableView):
         {"name": "time_session", "visible": True, "searchable": False, "title": "Час сеансу"},
         {"name": "duration", "visible": True, "searchable": False, "title": "Тривалість"},
         {"name": "date", "visible": True, "title": "Дата"},
+        {
+            'name': 'go_to_movie',  # Первая колонка: "Фильм"
+            'title': 'Фильм',
+            'placeholder': True,
+            'searchable': False,
+            'orderable': False,
+        },
+        {
+            'name': 'buy_ticket',  # Вторая колонка: "Купить билет"
+            'title': 'Купить билет',
+            'placeholder': True,
+            'searchable': False,
+            'orderable': False,
+        },
     ]
 
-    def render_columns(self, row, column):
-        # 'row' - це об'єкт моделі Sessions для поточного рядка
-        # 'column' - це словник з визначенням стовпця (один з елементів column_defs)
+    def customize_row(self, row, obj):
+        # Кнопка "Фильм"
+        if obj.movie:
+            movie_url = reverse('movie_detail', kwargs={'movie_id': obj.movie.id})
+            row['go_to_movie'] = f"""
+                       <a href="{movie_url}" class="btn btn-info btn-sm">
+                          Фильм
+                       </a>
+                   """
+        else:
+            row['go_to_movie'] = '-'
 
-        if column.get('name') == 'movie':
-            movie_instance = row.movie  # Отримуємо об'єкт Movie
-            if movie_instance:
-                # ЗВЕРНІТЬ УВАГУ: Переконайтеся, що ваш Movie-модель має поле 'slug'
-                # Якщо ні, і ви хочете використовувати PK, змініть ваш urls.py для фільмів на <int:pk>
-                # і тоді тут використовуйте 'pk': movie_instance.pk
-                try:
-                    url = reverse('movie_detail', kwargs={'movie_slug': movie_instance.slug})
-                    return f'<a href="{url}">{movie_instance.title}</a>'
-                except Exception as e:
-                    # Якщо виникає помилка при reverse (наприклад, slug не існує), обробіть її
-                    print(f"Error reversing URL for movie '{movie_instance.title}': {e}")
-                    return movie_instance.title  # Повертаємо просто назву, якщо посилання не вдалося створити
-            return '—'  # Якщо фільму немає
+        # Кнопка "Купить билет"
+        if obj.id:
+            buy_ticket_url = reverse('buy_ticket', kwargs={'session_id': obj.id})
+            row['buy_ticket'] = f"""
+                       <a href="{buy_ticket_url}" class="btn btn-success btn-sm">
+                           Купить билет
+                       </a>
+                   """
+        else:
+            row['buy_ticket'] = '-'
 
-        # Для інших стовпців просто повертаємо стандартний рендеринг
-        # Базова реалізація handle_row_data повертає значення поля за замовчуванням
-        return super().render_columns(row, column)
+        return row
 
-    def get(self, request, *args, **kwargs):
-        # 🔒 Захист від прямого GET без параметрів DataTables
+
+def get(self, request, *args, **kwargs):
         if 'draw' not in request.GET:
             return JsonResponse({"error": "Invalid request. Must be a DataTables AJAX call."}, status=400)
         return super().get(request, *args, **kwargs)

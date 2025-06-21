@@ -57,3 +57,14 @@ def hall_detail(request, hall_id):
     context = {'hall': hall}
     return render(request, 'hall/hall_detail.html', context)
 
+def buy_ticket_view(request, session_id):
+    session = get_object_or_404(Sessions, pk=session_id)
+
+
+
+    context = {
+        'session': session,
+        'message': f"Это страница для покупки билетов на сеанс с ID: {session_id}"
+    }
+    return render(request, 'core/buy_ticket/buy_ticket.html', context)
+

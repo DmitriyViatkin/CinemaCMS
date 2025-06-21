@@ -11,43 +11,41 @@
     <table id="sessions-table" class="display" style="width:100%">
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Кінотеатр</th>
+                <th></th> <th>Кінотеатр</th>
                 <th>Зал</th>
                 <th>Фільм</th>
                 <th>Час</th>
                 <th>Тривалість</th>
                 <th>Дата</th>
+                <th>Перейти</th>
+            <th>Купить билет</th>
             </tr>
         </thead>
     </table>
 
-    <!-- jQuery + DataTables -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 
-    <!-- DataTables AJAX -->
- <script>
+    <script>
 $(document).ready(function() {
     $('#sessions-table').DataTable({
         processing: true,
         serverSide: true,
-        ajax: "{% url 'ajax_sessions_data/' %}", // Переконайтеся, що ім'я URL відповідає вашому urls.py
+        ajax: "{% url 'ajax_sessions_data' %}",
         columns: [
-            // Для render_row_tools_column_def (перший стовпець)
             { data: null, orderable: false, searchable: false, defaultContent: '', className: 'dt-control' },
+            { data: 'cinema', title: 'Кінотеатр' },
+            { data: 'hall', title: 'Зал' },
+            { data: 'movie', title: 'Фільм' },
+            { data: 'time_session', title: 'Час сеансу' },
+            { data: 'duration', title: 'Тривалість' },
+            { data: 'date', title: 'Дата' },
 
-            // Стовпець ID (якщо ви його включили в column_defs, він має бути тут)
-            // { data: 'id', visible: false }, // Прихований, якщо "visible": False в Django
 
-            { data: 'cinema', title: 'Кінотеатр' },         // data має співпадати з 'name'
-            { data: 'hall', title: 'Зал' },                 // data має співпадати з 'name'
-            { data: 'movie', title: 'Фільм' },               // data має співпадати з 'name'
-            { data: 'time_session', title: 'Час сеансу' },   // data має співпадати з 'name'
-            { data: 'duration', title: 'Тривалість' },       // data має співпадати з 'name'
-            { data: 'date', title: 'Дата' }                  // data має співпадати з 'name'
+            { data: 'go_to_movie', title: 'Перейти', orderable: false, searchable: false },
+            { data: "buy_ticket", title: 'Купить', orderable: false, searchable: false }, // <-- Важно: это имя колонки из Python column_defs
         ],
-        order: [[1, 'asc']] // Сортувати за другим стовпцем (Кінотеатр), індекс 1
+        order: [[1, 'asc']]
     });
 });
 </script>

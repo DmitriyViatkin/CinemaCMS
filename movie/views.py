@@ -31,14 +31,15 @@ def movie_list(request):
 
 
 
-def movie_detail(request, movie_slug):
+def movie_detail(request, movie_id):
     movie = get_object_or_404(
         Movies.objects.select_related('seo_block', 'gallery')
               .prefetch_related(
                   Prefetch('gallery__pictures'),
-                  'movie_sessions'
+                  'movie_sessions' # Make sure 'movie_sessions' is the correct related_name for Sessions
               ),
-        seo_block__seo_url=movie_slug
+        # --- ИЗМЕНЕНИЕ ЗДЕСЬ: фильтруем по 'id' вместо 'seo_block__seo_url' ---
+        id=movie_id
     )
 
     main_picture = movie.gallery.pictures.filter(image_type="main_picture").first() if movie.gallery else None
