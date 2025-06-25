@@ -17,16 +17,40 @@ def cinema_list(request):
         cinemas = paginator.page(1)
     except EmptyPage:
         cinemas = paginator.page(paginator.num_pages)
+    for cinema in cinemas:
+        if hasattr(cinema, 'gallery') and cinema.gallery:
+            # Фільтруємо зображення, щоб знайти логотип
+            logos = [pic for pic in cinema.gallery.pictures.all() if pic.image_type == 'logo']
+            # Якщо знайдено логотип, додаємо його до об'єкта кінотеатру
+            cinema.logo = logos[0] if logos else None
+        else:
+            cinema.logo = None
 
     context = {'cinemas': cinemas }
     return render(request, 'core/cinema_list.html', context)
 
+
 def cinema_detail(request, cinema_slug):
     cinema = get_object_or_404(Cinemas, seo_block__seo_url=cinema_slug)
-    main_picture = cinema.gallery.pictures.filter(image_type="main_picture").first() if hasattr(cinema,
-                                                                                                'gallery') and cinema.gallery else None
-    halls = cinema.halls.all()  # Получаем все залы, связанные с этим кинотеатром
-    context = {'cinema': cinema, 'main_picture': main_picture,'halls': halls}
+
+    main_picture = None
+    logo_picture = None
+    gallery_pictures = []
+
+    if hasattr(cinema, 'gallery') and cinema.gallery:
+        main_picture = cinema.gallery.pictures.filter(image_type="main_picture").first()
+        logo_picture = cinema.gallery.pictures.filter(image_type="logo").first()  # This gets a Picture object
+        gallery_pictures = cinema.gallery.pictures.filter(image_type="gallery").all()
+
+    halls = cinema.halls.all()
+
+    context = {
+        'cinema': cinema,
+        'main_picture': main_picture,
+        'halls': halls,
+        'logo': logo_picture,  # Pass the Picture object
+        'gallery_pictures': gallery_pictures,
+    }
     return render(request, 'core/cinema_detail.html', context)
 
 def session_list(request):
@@ -66,33 +90,33 @@ def buy_ticket_view(request, session_id):
         pk=session_id
     )
 
-    # Получаем все места для текущего зала, сортируем по ряду и номеру места
+
     hall_seats = Seats.objects.filter(halls=session.hall_id).order_by('number_row', 'seat')
 
-    # Получаем ID забронированных мест для текущего сеанса
+
     booked_seat_ids = Tickets.objects.filter(session=session).values_list('seat__id', flat=True)
 
     seat_data_map = {}
     max_row = 0
-    max_seat_in_row = {} # Для определения максимального номера места в каждом ряду
+    max_seat_in_row = {}
 
     for seat in hall_seats:
-        # Обновляем максимальный номер ряда
+
         if seat.number_row > max_row:
             max_row = seat.number_row
 
-        # Обновляем максимальный номер места в текущем ряду
+
         if seat.number_row not in max_seat_in_row:
             max_seat_in_row[seat.number_row] = 0
         if seat.seat > max_seat_in_row[seat.number_row]:
             max_seat_in_row[seat.number_row] = seat.seat
 
-        # Определяем текущий статус места
-        current_status = seat.status # Исходный статус из БД ('F', 'N')
-        if seat.id in booked_seat_ids:
-            current_status = "S" # Переопределяем на 'S' (Sold), если место забронировано
 
-        # Сохраняем данные места в map для удобной организации по рядам и местам
+        current_status = seat.status
+        if seat.id in booked_seat_ids:
+            current_status = "S"
+
+
         if seat.number_row not in seat_data_map:
             seat_data_map[seat.number_row] = {}
 
@@ -105,20 +129,19 @@ def buy_ticket_view(request, session_id):
             'seat_number': seat.seat
         }
 
-    # Преобразуем seat_data_map в упорядоченный список рядов и мест,
-    # чтобы правильно отобразить "пустые" места (если они есть в схеме, но нет в БД)
+
     ordered_seat_rows = []
-    for r in sorted(seat_data_map.keys()): # Итерируем по отсортированным номерам рядов
+    for r in sorted(seat_data_map.keys()):
         row_seats = []
-        # Заполняем места в ряду от 1 до max_seat_in_row для этого ряда
+
         for s in range(1, max_seat_in_row.get(r, 0) + 1):
             if s in seat_data_map.get(r, {}):
                 row_seats.append(seat_data_map[r][s])
             else:
-                # Если места нет в БД (например, проход), создаем фиктивное "недоступное" место
+
                 row_seats.append({
-                    'id': None, # ID None, так как этого места нет в БД
-                    'status': 'N', # Недоступно
+                    'id': None, #
+                    'status': 'N',
                     'is_vip': False,
                     'price': 0.0,
                     'row_number': r,
@@ -133,32 +156,30 @@ def buy_ticket_view(request, session_id):
         'session_time': session.time_session,
         'session_date': session.date,
         'movie_title': session.movie.title,
-        # Больше не передаем scheme_hall_json_url
-        'seat_rows_current_status_json': json.dumps(ordered_seat_rows), # Это теперь единственный источник данных для схемы
+
+        'seat_rows_current_status_json': json.dumps(ordered_seat_rows),
     }
 
     return render(request, 'core/buy_ticket/buy_ticket.html', context)
 
- # Убедитесь, что пользователь авторизован
-@login_required  # Убедитесь, что пользователь авторизован
+
+@login_required
 def process_ticket_purchase(request, session_id):
      if request.method == 'POST':
          session = get_object_or_404(Sessions, pk=session_id)
          selected_seat_ids_json = request.POST.get('selected_seats')
 
          if not selected_seat_ids_json:
-             # Обработать ошибку: места не выбраны
-             # TODO: Добавить систему сообщений для пользователя (например, Django Messages)
+
              return HttpResponseRedirect(reverse('buy_ticket', args=[session_id]))
 
          selected_seat_ids = json.loads(selected_seat_ids_json)
 
          if not selected_seat_ids:
-             # Обработать ошибку: пустой список мест
-             # TODO: Добавить систему сообщений для пользователя
+
              return HttpResponseRedirect(reverse('buy_ticket', args=[session_id]))
 
-         # Создаем список для хранения билетов, которые не удалось создать (если мы хотим об этом сообщать)
+
          failed_seats_info = []
          purchased_tickets_count = 0
 
@@ -166,39 +187,33 @@ def process_ticket_purchase(request, session_id):
              try:
                  seat = get_object_or_404(Seats, pk=seat_id)
 
-                 # Дополнительная проверка на занятость перед созданием билета
-                 # Уникальность 'session' и 'seat' в модели Tickets поможет,
-                 # но явная проверка тут тоже хороша
-                 if Tickets.objects.filter(session=session, seat=seat).exists():
-                     # Место уже занято! Не создаем билет для этого места.
-                     # Вместо отката транзакции (которой нет), мы просто пропускаем это место
-                     # и записываем информацию о неудаче.
-                     failed_seats_info.append(f"Ряд {seat.number_row}, Место {seat.seat} уже занято.")
-                     continue  # Пропускаем это место и переходим к следующему
 
-                 # Создаем билет
+                 if Tickets.objects.filter(session=session, seat=seat).exists():
+
+                     failed_seats_info.append(f"Ряд {seat.number_row}, Место {seat.seat} уже занято.")
+                     continue
+
+
                  ticket = Tickets.objects.create(
                      session=session,
-                     movie=session.movie,  # Удобно передать фильм из сеанса
+                     movie=session.movie,
                      seat=seat,
-                     profile=request.user,  # Привязываем к текущему пользователю
-                     halls=session.hall_id  # Привязываем к залу из сеанса
+                     profile=request.user,
+                     halls=session.hall_id
                  )
                  purchased_tickets_count += 1
-                 # purchased_tickets.append(ticket) # Если нужен список созданных объектов Ticket
-             except Exception as e:
-                 # Обработка других ошибок, которые могут возникнуть при создании билета для конкретного места
-                 failed_seats_info.append(f"Ошибка при создании билета для места ID {seat_id}: {e}")
-                 print(f"Ошибка при обработке места {seat_id}: {e}")  # Для отладки на сервере
 
-         # После попытки создания билетов для всех выбранных мест
+             except Exception as e:
+
+                 failed_seats_info.append(f"Ошибка при создании билета для места ID {seat_id}: {e}")
+                 print(f"Ошибка при обработке места {seat_id}: {e}")
+
+
          if purchased_tickets_count > 0:
-             # Если хоть какие-то билеты были куплены
-             # TODO: Можно передать информацию о failed_seats_info на страницу успеха/отчета
+
              return HttpResponseRedirect(reverse('profile'))
          else:
-             # Если ни одного билета не удалось купить (все были заняты или произошла ошибка)
-             # TODO: Добавить систему сообщений для пользователя, чтобы показать failed_seats_info
+
              print(f"Не удалось купить билеты для выбранных мест: {failed_seats_info}")
              return HttpResponseRedirect(reverse('buy_ticket', args=[session_id]))
 

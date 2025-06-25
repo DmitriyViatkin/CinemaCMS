@@ -129,11 +129,16 @@ class EmailCampaignForm(forms.ModelForm):
         existing_template = cleaned_data.get('template')
         new_template_file = cleaned_data.get('new_template_file')
 
-        if not existing_template and not new_template_file:
-            self.add_error(None, "Пожалуйста, выберите существующий шаблон ИЛИ загрузите новый файл шаблона.")
-        elif existing_template and new_template_file:
-            self.add_error(None, "Нельзя выбрать существующий шаблон И загрузить новый одновременно. Пожалуйста, выберите что-то одно.")
-
+        # Приоритет — файл
+        if new_template_file:
+            # Сбрасываем выбранный шаблон, чтобы использовать только файл
+            cleaned_data['template'] = None
+        elif not existing_template:
+            # Нет файла — требуем хотя бы выбранный шаблон
+            self.add_error(
+                'template',
+                "Пожалуйста, выберите существующий шаблон или загрузите новый файл."
+            )
         return cleaned_data
 class ContactForm(forms.ModelForm):
     contact_picture = forms.ImageField(required=False, label="Лого")

@@ -24,8 +24,7 @@ from django.urls import reverse
 def email_campaign_create(request, campaign_id=None):
     campaign_instance = None
     is_edit = False
-    current_task_id = None # <-- Инициализируем здесь
-
+    current_task_id = None #
     if campaign_id:
         campaign_instance = get_object_or_404(Email_campaing, pk=campaign_id)
         is_edit = True
@@ -41,7 +40,7 @@ def email_campaign_create(request, campaign_id=None):
         if form.is_valid():
             email_campaign = form.save(commit=False)
 
-            # --- Логика выбора и сохранения шаблона ---
+
             new_template_file = form.cleaned_data.get('new_template_file')
             existing_template_obj = form.cleaned_data.get('template')
 

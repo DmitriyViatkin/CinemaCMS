@@ -3,18 +3,18 @@
 {% load static %} {# Завантажуємо статичні файли, якщо потрібні #}
 
 {% block title %}
-    {# Використовуємо seo_title, якщо є, і назву фільму як запасний варіант #}
+
     {{ movie.seo_block.title_seo|default:movie.title }} - Деталі фільму
 {% endblock %}
 
 {% block meta_keywords %}
-    {# Використовуємо seo_keywords, додаючи додаткові слова #}
-    {{ movie.seo_block.seo_keywords|default:'' }}{% if movie.seo_block.seo_keywords %},{% endif %} галерея, фото, картинки
+
+    {{ movie.seo_block.seo_keywords|default:'' }}{% if movie.seo_block.seo_keywords %},{% endif %} г
 {% endblock %}
 
 {% block meta_description %}
-    {# Використовуємо seo_description, додаючи додатковий текст #}
-    {{ movie.seo_block.seo_description|default:'' }}. Перегляньте галерею зображень та головне зображення до фільму.
+
+    {{ movie.seo_block.seo_description|default:'' }}.
 {% endblock %}
 
 {% block content %}

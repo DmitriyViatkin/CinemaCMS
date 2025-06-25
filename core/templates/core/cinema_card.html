@@ -1,16 +1,13 @@
 {# cinema_card.html #}
 <div class="card h-100">
-  {% if cinema.main_picture %}
-    <img src="{{ cinema.main_picture.image.url }}" class="card-img-top" alt="{{ cinema.title }}" style="height: 250px; object-fit: cover;">
-  {% else %}
-    <div class="d-flex align-items-center justify-content-center" style="height: 250px; background-color: #e9ecef;">
-      <span class="text-muted">Зображення відсутнє</span>
-    </div>
-  {% endif %}
+    {% if cinema.logo %}
+        <img src="{{ cinema.logo.image.url }}" alt="Логотип {{ cinema.title }}">
+    {% else %}
+        <p>Логотип недоступний.</p>
+    {% endif %}
 
   <div class="card-body d-flex flex-column">
     <h5 class="card-title">{{ cinema.title }}</h5>
-    <p class="card-text">{{ cinema.description|truncatewords:25 }}</p>
     <a href="{% url 'cinema_detail' cinema.seo_block.seo_url %}" class="btn btn-primary mt-auto">Детальніше</a>
   </div>
 

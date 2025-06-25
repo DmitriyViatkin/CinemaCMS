@@ -9,6 +9,6 @@
   {% endif %}
   <div class="card-body">
     <h5 class="card-title">{{ movie.title }}</h5>
-    <a href="{% url 'movie_detail' movie_slug=movie.seo_block.seo_url %}" class="btn btn-primary">Детальніше</a>
+ <a href="{% url 'movie_detail' movie_id=movie.id %}" class="btn btn-primary">Детальніше</a>
   </div>
 </div>

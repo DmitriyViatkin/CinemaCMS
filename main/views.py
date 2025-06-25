@@ -146,11 +146,12 @@ def promotions_list(request):
             queryset=Picture.objects.filter(image_type='main_picture'),
             to_attr='main_picture_list'
         )
-    ).order_by('-date_publication')
+    ).order_by('-date') # <--- CHANGED FROM 'date_publication' TO 'date'
 
 
     for promo in promotions_list:
         if promo.gallery and hasattr(promo.gallery, 'main_picture_list'):
+            # Ensure main_picture_list is not empty before accessing index 0
             promo.main_picture = promo.gallery.main_picture_list[0] if promo.gallery.main_picture_list else None
         else:
             promo.main_picture = None
@@ -164,6 +165,7 @@ def promotions_list(request):
         promotions = paginator.page(1)
     except EmptyPage:
         promotions = paginator.page(paginator.num_pages)
+
 
     return render(request, 'main/action.html', {'promotions': promotions})
 

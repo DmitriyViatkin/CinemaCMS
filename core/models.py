@@ -53,7 +53,7 @@ class Sessions(models.Model):
 
     id = models.AutoField(primary_key=True)
     cinema = models.ForeignKey(Cinemas, on_delete=models.CASCADE, related_name='sessions', verbose_name="Кинотеатр")
-    hall_id = models.ForeignKey(Halls, on_delete=models.CASCADE, verbose_name= 'Зал')
+    hall_id = models.ForeignKey(Halls, on_delete=models.CASCADE,related_name='sessions', verbose_name= 'Зал')
     movie = models.ForeignKey(Movies, on_delete=models.SET_NULL, related_name='movie_sessions',null=True, blank=True)
 
     time_session = models.TimeField(verbose_name= 'Час сеансу')

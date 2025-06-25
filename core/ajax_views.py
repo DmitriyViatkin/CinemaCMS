@@ -13,31 +13,30 @@ class SessionsAjaxView(AjaxDatatableView):
     render_html = True
 
     column_defs = [
-        # Стовпець для дій (редагування/видалення)
+
         AjaxDatatableView.render_row_tools_column_def(),
 
-        # ID (можливо, не потрібно показувати, але корисно для відладки)
-        {"name": "id", "visible": False, "searchable": False},  # Зазвичай ID не показують
 
-        # Для пов'язаних полів: 'name' - це назва стовпця для AjaxDatatable,
-        # 'foreign_field' - це шлях до поля в моделі
+        {"name": "id", "visible": False, "searchable": False},
+
+
         {"name": "cinema", "foreign_field": "cinema__title", "visible": True, "title": "Кінотеатр"},
         {"name": "hall", "foreign_field": "hall_id__title", "visible": True, "title": "Зал"},
         {"name": "movie", "foreign_field": "movie__title", "visible": True, "title": "Фільм", },
 
-        # Для власних полів моделі Sessions
+
         {"name": "time_session", "visible": True, "searchable": False, "title": "Час сеансу"},
         {"name": "duration", "visible": True, "searchable": False, "title": "Тривалість"},
         {"name": "date", "visible": True, "title": "Дата"},
         {
-            'name': 'go_to_movie',  # Первая колонка: "Фильм"
+            'name': 'go_to_movie',
             'title': 'Фильм',
             'placeholder': True,
             'searchable': False,
             'orderable': False,
         },
         {
-            'name': 'buy_ticket',  # Вторая колонка: "Купить билет"
+            'name': 'buy_ticket',
             'title': 'Купить билет',
             'placeholder': True,
             'searchable': False,
@@ -51,13 +50,13 @@ class SessionsAjaxView(AjaxDatatableView):
             movie_url = reverse('movie_detail', kwargs={'movie_id': obj.movie.id})
             row['go_to_movie'] = f"""
                        <a href="{movie_url}" class="btn btn-info btn-sm">
-                          Фильм
+                          {obj.movie.title}
                        </a>
                    """
         else:
             row['go_to_movie'] = '-'
 
-        # Кнопка "Купить билет"
+
         if obj.id:
             buy_ticket_url = reverse('buy_ticket', kwargs={'session_id': obj.id})
             row['buy_ticket'] = f"""
