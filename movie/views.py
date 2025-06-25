@@ -38,7 +38,7 @@ def movie_detail(request, movie_id):
                   Prefetch('gallery__pictures'),
                   'movie_sessions' # Make sure 'movie_sessions' is the correct related_name for Sessions
               ),
-        # --- ИЗМЕНЕНИЕ ЗДЕСЬ: фильтруем по 'id' вместо 'seo_block__seo_url' ---
+
         id=movie_id
     )
 

@@ -6,6 +6,22 @@
     <title>Сеанси</title>
 
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    <style>
+        #sessions-table thead .filters th {
+            padding-top: 5px;
+            padding-bottom: 5px;
+            text-align: center; /* Центрируем содержимое */
+        }
+        #sessions-table thead .filters input,
+        #sessions-table thead .filters select {
+            width: 100%;
+            box-sizing: border-box; /* Важно для корректной ширины с padding */
+            padding: 3px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            height: 28px; /* Добавим высоту для select, если нужно */
+        }
+    </style>
 
 
     <table id="sessions-table" class="display" style="width:100%">
@@ -18,37 +34,87 @@
                 <th>Тривалість</th>
                 <th>Дата</th>
                 <th>Перейти</th>
-            <th>Купить билет</th>
+                <th>Купить билет</th>
             </tr>
         </thead>
+        <tbody>
+            </tbody>
     </table>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 
     <script>
-$(document).ready(function() {
-    $('#sessions-table').DataTable({
-        processing: true,
-        serverSide: true,
-        ajax: "{% url 'ajax_sessions_data' %}",
-        columns: [
-            { data: null, orderable: false, searchable: false, defaultContent: '', className: 'dt-control' },
-            { data: 'cinema', title: 'Кінотеатр' },
-            { data: 'hall', title: 'Зал' },
-            { data: 'movie', title: 'Фільм' },
-            { data: 'time_session', title: 'Час сеансу' },
-            { data: 'duration', title: 'Тривалість' },
-            { data: 'date', title: 'Дата' },
+    $(document).ready(function() {
+        $('#sessions-table').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: "{% url 'ajax_sessions_data' %}",
+            columns: [
+                { data: null, orderable: false, searchable: false, defaultContent: '', className: 'dt-control' },
+                { data: 'cinema', title: 'Кінотеатр' },
+                { data: 'hall', title: 'Зал' },
+                { data: 'movie', title: 'Фільм' },
+                { data: 'time_session', title: 'Час сеансу' },
+                { data: 'duration', title: 'Тривалість' },
+                { data: 'date', title: 'Дата' },
+                { data: 'go_to_movie', title: 'Перейти', orderable: false, searchable: false },
+                { data: "buy_ticket", title: 'Купить', orderable: false, searchable: false },
+            ],
+            order: [[1, 'asc']], // Сортировка по второму столбцу ('cinema') по возрастанию
 
+            initComplete: function () {
+                $('#sessions-table thead tr')
+                    .clone(true)
+                    .addClass('filters')
+                    .appendTo('#sessions-table thead');
 
-            { data: 'go_to_movie', title: 'Перейти', orderable: false, searchable: false },
-            { data: "buy_ticket", title: 'Купить', orderable: false, searchable: false }, // <-- Важно: это имя колонки из Python column_defs
-        ],
-        order: [[1, 'asc']]
-    });
-});
-</script>
+                $('#sessions-table thead .filters th').each(function () {
+                    $(this).off('click.DT');
+                });
+
+                let api = this.api();
+                api.columns().every(function () {
+                    let column = this;
+                    let colIdx = column.index();
+
+                    if (colIdx === 0 || colIdx === 7 || colIdx === 8) {
+                        $('.filters th').eq(colIdx).html('');
+                        return;
+                    }
+
+                    let headerCell = $('.filters th').eq(colIdx);
+                    let select = $('<select><option value=""></option></select>');
+                    headerCell.empty().append(select);
+
+                    select.on('change', function () {
+                        let val = $.fn.dataTable.util.escapeRegex($(this).val());
+                        column.search(val ? val : '', false, false).draw();
+                    });
+                });
+
+                // Функція для завантаження унікальних значень
+                function loadUniqueValues(url, colIndex) {
+                    let select = $('.filters th').eq(colIndex).find('select');
+                    $.get(url, function(data) {
+                        data.values.forEach(function(val) {
+                            select.append(new Option(val, val));
+                        }); // <-- Закрывающая скобка для forEach и get
+                    });
+                }
+
+                // Завантажуємо значення для кожного стовпця
+                loadUniqueValues("{% url 'unique_cinemas' %}", 1); // Кінотеатр
+                loadUniqueValues("{% url 'unique_halls' %}", 2);   // Зал
+                loadUniqueValues("{% url 'unique_movies' %}", 3);  // Фільм
+
+            } // <-- Закрывающая скобка для initComplete
+
+        }); // <-- Закрывающая скобка для DataTable
+
+    }); // <-- Закрывающая скобка для $(document).ready
+
+    </script>
 
 
 {% endblock %}

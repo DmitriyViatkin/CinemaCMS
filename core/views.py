@@ -1,31 +1,35 @@
 from django.shortcuts import render, get_object_or_404
 from .models import Cinemas, Sessions, Halls, Seats, Tickets
 from django.http import HttpResponseRedirect
+from main.models import Picture
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 import json
+from django.db.models import Prefetch
+
+
+
 
 def cinema_list(request):
-    cinemas_list = Cinemas.objects.select_related('gallery').prefetch_related('gallery__pictures').order_by('title')
-
+    cinemas_list = Cinemas.objects.select_related('gallery','seo_block').prefetch_related(
+        Prefetch(
+            'gallery__pictures',
+            queryset=Picture.objects.filter(image_type='logo'),
+            to_attr='logos'
+        )
+    ).order_by('title')
     paginator = Paginator(cinemas_list, 10)
-    page = request.GET.get('page')
-    try:
-        cinemas = paginator.page(page)
-    except PageNotAnInteger:
-        cinemas = paginator.page(1)
-    except EmptyPage:
-        cinemas = paginator.page(paginator.num_pages)
+    page_number = request.GET.get('page')
+    cinemas = paginator.get_page(page_number)
 
-    context = {'cinemas': cinemas }
-    return render(request, 'core/cinema_list.html', context)
+    return render(request, 'core/cinema_list.html', {'cinemas': cinemas})
 
 def cinema_detail(request, cinema_slug):
     cinema = get_object_or_404(Cinemas, seo_block__seo_url=cinema_slug)
     main_picture = cinema.gallery.pictures.filter(image_type="main_picture").first() if hasattr(cinema,
                                                                                                 'gallery') and cinema.gallery else None
-    halls = cinema.halls.all()  # Получаем все залы, связанные с этим кинотеатром
+    halls = cinema.halls.all()
     context = {'cinema': cinema, 'main_picture': main_picture,'halls': halls}
     return render(request, 'core/cinema_detail.html', context)
 

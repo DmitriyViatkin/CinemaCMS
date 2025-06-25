@@ -1,0 +1,3315 @@
+[
+{
+    "model": "core.cinemas",
+    "pk": 1,
+    "fields": {
+        "seo_block": 1,
+        "title": "test",
+        "title_ru": "test",
+        "title_uk": null,
+        "description": "svrsagvrgw",
+        "description_ru": "svrsagvrgw",
+        "description_uk": null,
+        "conditions": "agarwgarweg",
+        "conditions_ru": "agarwgarweg",
+        "conditions_uk": null,
+        "city": "Запорожье",
+        "city_ru": "Запорожье",
+        "city_uk": null,
+        "gallery": 1,
+        "date": "2025-04-29"
+    }
+},
+{
+    "model": "core.cinemas",
+    "pk": 2,
+    "fields": {
+        "seo_block": 13,
+        "title": "Байда",
+        "title_ru": "Байда",
+        "title_uk": null,
+        "description": "дуже великий екран;\r\nсистема кругової поляризації REAL3D;\r\nзвук DOLBY DIGITAL SURROUND-EX;\r\nкомфортна відстань між рядами крісел;\r\nсистема обігріву і кондиціонування повітря;\r\nсучасні ергономічні крісла;\r\nможливість оплати квитків онлайн;\r\nрепертуар світових прем’єр.",
+        "description_ru": "дуже великий екран;\r\nсистема кругової поляризації REAL3D;\r\nзвук DOLBY DIGITAL SURROUND-EX;\r\nкомфортна відстань між рядами крісел;\r\nсистема обігріву і кондиціонування повітря;\r\nсучасні ергономічні крісла;\r\nможливість оплати квитків онлайн;\r\nрепертуар світових прем’єр.",
+        "description_uk": null,
+        "conditions": "дуже великий екран;\r\nсистема кругової поляризації REAL3D;\r\nзвук DOLBY DIGITAL SURROUND-EX;\r\nкомфортна відстань між рядами крісел;\r\nсистема обігріву і кондиціонування повітря;\r\nсучасні ергономічні крісла;\r\nможливість оплати квитків онлайн;\r\nрепертуар світових прем’єр.",
+        "conditions_ru": "дуже великий екран;\r\nсистема кругової поляризації REAL3D;\r\nзвук DOLBY DIGITAL SURROUND-EX;\r\nкомфортна відстань між рядами крісел;\r\nсистема обігріву і кондиціонування повітря;\r\nсучасні ергономічні крісла;\r\nможливість оплати квитків онлайн;\r\nрепертуар світових прем’єр.",
+        "conditions_uk": null,
+        "city": "Запорожье",
+        "city_ru": "Запорожье",
+        "city_uk": null,
+        "gallery": 39,
+        "date": "2025-05-11"
+    }
+},
+{
+    "model": "core.cinemas",
+    "pk": 5,
+    "fields": {
+        "seo_block": 33,
+        "title": "Довженко",
+        "title_ru": "Довженко",
+        "title_uk": null,
+        "description": "Текст",
+        "description_ru": "Текст",
+        "description_uk": null,
+        "conditions": "Текст",
+        "conditions_ru": "Текст",
+        "conditions_uk": null,
+        "city": "Запорожье",
+        "city_ru": "Запорожье",
+        "city_uk": null,
+        "gallery": 283,
+        "date": "2025-06-04"
+    }
+},
+{
+    "model": "core.cinemas",
+    "pk": 6,
+    "fields": {
+        "seo_block": 35,
+        "title": "пеер",
+        "title_ru": "пеер",
+        "title_uk": null,
+        "description": "пяваік",
+        "description_ru": "пяваік",
+        "description_uk": null,
+        "conditions": "іяпкяпка",
+        "conditions_ru": "іяпкяпка",
+        "conditions_uk": null,
+        "city": "Запорожье",
+        "city_ru": "Запорожье",
+        "city_uk": null,
+        "gallery": 290,
+        "date": "2025-06-04"
+    }
+},
+{
+    "model": "core.cinemas",
+    "pk": 7,
+    "fields": {
+        "seo_block": 53,
+        "title": "Тото",
+        "title_ru": "тото",
+        "title_uk": "Тото",
+        "description": "тототоот",
+        "description_ru": "тототоот",
+        "description_uk": "тототоот",
+        "conditions": "тототоот",
+        "conditions_ru": "тототоот",
+        "conditions_uk": "тототоот",
+        "city": "тототоот",
+        "city_ru": "тототоот",
+        "city_uk": "тототоот",
+        "gallery": 769,
+        "date": "2025-06-20"
+    }
+},
+{
+    "model": "core.cinemas",
+    "pk": 8,
+    "fields": {
+        "seo_block": 56,
+        "title": "Poole Inc",
+        "title_ru": null,
+        "title_uk": "Poole Inc",
+        "description": "Right take find hotel once during. Media morning production fly wish beyond commercial. First discuss media sort air.",
+        "description_ru": "",
+        "description_uk": "Right take find hotel once during. Media morning production fly wish beyond commercial. First discuss media sort air.",
+        "conditions": "House bill also nation information. Election point reason around reality mean can. Future race since speech their especially keep. Truth second quickly.",
+        "conditions_ru": "",
+        "conditions_uk": "House bill also nation information. Election point reason around reality mean can. Future race since speech their especially keep. Truth second quickly.",
+        "city": "West Morganchester",
+        "city_ru": null,
+        "city_uk": "West Morganchester",
+        "gallery": 817,
+        "date": "2025-06-24"
+    }
+},
+{
+    "model": "core.cinemas",
+    "pk": 9,
+    "fields": {
+        "seo_block": 59,
+        "title": "Delgado, Boyd and Daniels",
+        "title_ru": null,
+        "title_uk": "Delgado, Boyd and Daniels",
+        "description": "Discuss thing onto card both hard mouth. Yourself hour type piece instead fly. Until race consider build herself when. Situation road away painting different road Republican.",
+        "description_ru": "",
+        "description_uk": "Discuss thing onto card both hard mouth. Yourself hour type piece instead fly. Until race consider build herself when. Situation road away painting different road Republican.",
+        "conditions": "Right college everybody which collection this major. Its sometimes next wall system main pull. Image participant system appear.",
+        "conditions_ru": "",
+        "conditions_uk": "Right college everybody which collection this major. Its sometimes next wall system main pull. Image participant system appear.",
+        "city": "Port James",
+        "city_ru": null,
+        "city_uk": "Port James",
+        "gallery": 820,
+        "date": "2025-06-24"
+    }
+},
+{
+    "model": "core.halls",
+    "pk": 2,
+    "fields": {
+        "seo_block": 8,
+        "scheme_hall": "scheme_hall/sheme_wu9sZmT.json",
+        "title": "Калейдоскоп",
+        "title_ru": "Калейдоскоп",
+        "title_uk": "Калейдоскоп",
+        "cinema": 1,
+        "description": "Калейдоскоп",
+        "description_ru": "sfvbfadbadzbvadbv",
+        "description_uk": "Калейдоскоп",
+        "gallery": 8,
+        "date": "2025-05-02"
+    }
+},
+{
+    "model": "core.halls",
+    "pk": 3,
+    "fields": {
+        "seo_block": 9,
+        "scheme_hall": "1",
+        "title": "red",
+        "title_ru": "red",
+        "title_uk": null,
+        "cinema": 1,
+        "description": "test",
+        "description_ru": "test",
+        "description_uk": null,
+        "gallery": 9,
+        "date": "2025-05-02"
+    }
+},
+{
+    "model": "core.halls",
+    "pk": 4,
+    "fields": {
+        "seo_block": 10,
+        "scheme_hall": "1",
+        "title": "red2",
+        "title_ru": "red2",
+        "title_uk": null,
+        "cinema": 1,
+        "description": "eeeee",
+        "description_ru": "eeeee",
+        "description_uk": null,
+        "gallery": null,
+        "date": "2025-05-02"
+    }
+},
+{
+    "model": "core.halls",
+    "pk": 6,
+    "fields": {
+        "seo_block": 12,
+        "scheme_hall": "scheme_hall/sheme.json",
+        "title": "red2",
+        "title_ru": "red2",
+        "title_uk": "red2",
+        "cinema": 1,
+        "description": "eeeee",
+        "description_ru": "eeeee",
+        "description_uk": "eeeee",
+        "gallery": 12,
+        "date": "2025-05-02"
+    }
+},
+{
+    "model": "core.halls",
+    "pk": 7,
+    "fields": {
+        "seo_block": 16,
+        "scheme_hall": "1",
+        "title": "55",
+        "title_ru": "55",
+        "title_uk": null,
+        "cinema": 1,
+        "description": "прр",
+        "description_ru": "прр",
+        "description_uk": null,
+        "gallery": 169,
+        "date": "2025-05-31"
+    }
+},
+{
+    "model": "core.halls",
+    "pk": 8,
+    "fields": {
+        "seo_block": 17,
+        "scheme_hall": "scheme_hall/sheme_5vNwgWp.json",
+        "title": "Тритон",
+        "title_ru": "13",
+        "title_uk": "Тритон",
+        "cinema": 2,
+        "description": "ыфвумфуМфУЫМИуымЫФУМ",
+        "description_ru": "dsvgsrgvr333",
+        "description_uk": "ыфвумфуМфУЫМИуымЫФУМ",
+        "gallery": 172,
+        "date": "2025-05-31"
+    }
+},
+{
+    "model": "core.halls",
+    "pk": 9,
+    "fields": {
+        "seo_block": 18,
+        "scheme_hall": "scheme_hall/sheme_FyLcEJn.json",
+        "title": "Tepa",
+        "title_ru": "Tepa",
+        "title_uk": "Tepa",
+        "cinema": 2,
+        "description": "фувацупа",
+        "description_ru": "фувацупа",
+        "description_uk": "",
+        "gallery": 174,
+        "date": "2025-06-01"
+    }
+},
+{
+    "model": "core.halls",
+    "pk": 10,
+    "fields": {
+        "seo_block": 39,
+        "scheme_hall": "1",
+        "title": "tessvfv",
+        "title_ru": "tessvfv",
+        "title_uk": null,
+        "cinema": 1,
+        "description": "gbfndhfnf",
+        "description_ru": "gbfndhfnf",
+        "description_uk": null,
+        "gallery": 697,
+        "date": "2025-06-12"
+    }
+},
+{
+    "model": "core.halls",
+    "pk": 13,
+    "fields": {
+        "seo_block": 42,
+        "scheme_hall": "scheme_hall/sheme_IpIobCC.json",
+        "title": "889",
+        "title_ru": null,
+        "title_uk": "889",
+        "cinema": 6,
+        "description": "ч я яч",
+        "description_ru": null,
+        "description_uk": "ч я яч",
+        "gallery": 755,
+        "date": "2025-06-16"
+    }
+},
+{
+    "model": "core.halls",
+    "pk": 14,
+    "fields": {
+        "seo_block": 43,
+        "scheme_hall": "scheme_hall/sheme_pcgqjdk.json",
+        "title": "dvsv",
+        "title_ru": null,
+        "title_uk": "dvsv",
+        "cinema": 1,
+        "description": "sdvSDVS",
+        "description_ru": null,
+        "description_uk": "sdvSDVS",
+        "gallery": 759,
+        "date": "2025-06-19"
+    }
+},
+{
+    "model": "core.halls",
+    "pk": 17,
+    "fields": {
+        "seo_block": 46,
+        "scheme_hall": "scheme_hall/sheme_vAgX2A9.json",
+        "title": "reere",
+        "title_ru": null,
+        "title_uk": "reere",
+        "cinema": 1,
+        "description": "sfvfasgvaefe",
+        "description_ru": null,
+        "description_uk": "sfvfasgvaefe",
+        "gallery": 762,
+        "date": "2025-06-20"
+    }
+},
+{
+    "model": "core.halls",
+    "pk": 18,
+    "fields": {
+        "seo_block": 47,
+        "scheme_hall": "scheme_hall/sheme_f6ATsyR.json",
+        "title": "56",
+        "title_ru": null,
+        "title_uk": "56",
+        "cinema": 1,
+        "description": "yyyy",
+        "description_ru": null,
+        "description_uk": "yyyy",
+        "gallery": 763,
+        "date": "2025-06-20"
+    }
+},
+{
+    "model": "core.halls",
+    "pk": 19,
+    "fields": {
+        "seo_block": 48,
+        "scheme_hall": "scheme_hall/sheme_XcLdYXC.json",
+        "title": "56",
+        "title_ru": null,
+        "title_uk": "56",
+        "cinema": 1,
+        "description": "yyyy",
+        "description_ru": null,
+        "description_uk": "yyyy",
+        "gallery": 764,
+        "date": "2025-06-20"
+    }
+},
+{
+    "model": "core.halls",
+    "pk": 20,
+    "fields": {
+        "seo_block": 49,
+        "scheme_hall": "scheme_hall/sheme_vtPJ3WD.json",
+        "title": "Два языка",
+        "title_ru": null,
+        "title_uk": "Два языка",
+        "cinema": 2,
+        "description": "мыавпкяриквяряветоявео",
+        "description_ru": null,
+        "description_uk": "мыавпкяриквяряветоявео",
+        "gallery": 765,
+        "date": "2025-06-20"
+    }
+},
+{
+    "model": "core.halls",
+    "pk": 21,
+    "fields": {
+        "seo_block": 50,
+        "scheme_hall": "scheme_hall/sheme_DlNwIVp.json",
+        "title": "Два языка",
+        "title_ru": null,
+        "title_uk": "Два языка",
+        "cinema": 2,
+        "description": "мыавпкяриквяряветоявео",
+        "description_ru": null,
+        "description_uk": "мыавпкяриквяряветоявео",
+        "gallery": 766,
+        "date": "2025-06-20"
+    }
+},
+{
+    "model": "core.halls",
+    "pk": 22,
+    "fields": {
+        "seo_block": 51,
+        "scheme_hall": "scheme_hall/sheme_ey8OnGY.json",
+        "title": "Два языка",
+        "title_ru": null,
+        "title_uk": "Два языка",
+        "cinema": 2,
+        "description": "мыавпкяриквяряветоявео",
+        "description_ru": null,
+        "description_uk": "мыавпкяриквяряветоявео",
+        "gallery": 767,
+        "date": "2025-06-20"
+    }
+},
+{
+    "model": "core.halls",
+    "pk": 23,
+    "fields": {
+        "seo_block": 52,
+        "scheme_hall": "scheme_hall/sheme_ir3wxaP.json",
+        "title": "Только укр",
+        "title_ru": null,
+        "title_uk": "Только укр",
+        "cinema": 2,
+        "description": "торлькамк",
+        "description_ru": "",
+        "description_uk": "торлькамк",
+        "gallery": 768,
+        "date": "2025-06-20"
+    }
+},
+{
+    "model": "core.halls",
+    "pk": 24,
+    "fields": {
+        "seo_block": 57,
+        "scheme_hall": "scheme_hall/scheme_hall/example.json",
+        "title": "old",
+        "title_ru": null,
+        "title_uk": "old",
+        "cinema": 8,
+        "description": "Full him together body. Like TV four role prove positive foot. Hand office strong staff owner newspaper.",
+        "description_ru": null,
+        "description_uk": "Full him together body. Like TV four role prove positive foot. Hand office strong staff owner newspaper.",
+        "gallery": 818,
+        "date": "2025-06-24"
+    }
+},
+{
+    "model": "core.halls",
+    "pk": 25,
+    "fields": {
+        "seo_block": 58,
+        "scheme_hall": "scheme_hall/scheme_hall/example_ZDGrH0k.json",
+        "title": "direction",
+        "title_ru": null,
+        "title_uk": "direction",
+        "cinema": 8,
+        "description": "Fish very buy. Arm represent peace.",
+        "description_ru": null,
+        "description_uk": "Fish very buy. Arm represent peace.",
+        "gallery": 819,
+        "date": "2025-06-24"
+    }
+},
+{
+    "model": "core.halls",
+    "pk": 26,
+    "fields": {
+        "seo_block": 60,
+        "scheme_hall": "scheme_hall/scheme_hall/example_prdlX74.json",
+        "title": "clearly",
+        "title_ru": null,
+        "title_uk": "clearly",
+        "cinema": 9,
+        "description": "Have necessary minute color market benefit again hot. Choose article skill matter list likely seek.",
+        "description_ru": null,
+        "description_uk": "Have necessary minute color market benefit again hot. Choose article skill matter list likely seek.",
+        "gallery": 821,
+        "date": "2025-06-24"
+    }
+},
+{
+    "model": "core.halls",
+    "pk": 27,
+    "fields": {
+        "seo_block": 61,
+        "scheme_hall": "scheme_hall/scheme_hall/example_GDTkrNI.json",
+        "title": "bad",
+        "title_ru": null,
+        "title_uk": "bad",
+        "cinema": 9,
+        "description": "Stuff on open sit. Nothing people member. Simple it young.",
+        "description_ru": null,
+        "description_uk": "Stuff on open sit. Nothing people member. Simple it young.",
+        "gallery": 822,
+        "date": "2025-06-24"
+    }
+},
+{
+    "model": "core.sessions",
+    "pk": 7,
+    "fields": {
+        "cinema": 1,
+        "hall_id": 2,
+        "movie": 1,
+        "time_session": "12:00:00",
+        "duration": "01:00:00",
+        "date": "2025-05-21"
+    }
+},
+{
+    "model": "core.sessions",
+    "pk": 8,
+    "fields": {
+        "cinema": 1,
+        "hall_id": 3,
+        "movie": 2,
+        "time_session": "12:00:00",
+        "duration": "01:00:00",
+        "date": "2025-05-14"
+    }
+},
+{
+    "model": "core.sessions",
+    "pk": 9,
+    "fields": {
+        "cinema": 1,
+        "hall_id": 3,
+        "movie": 3,
+        "time_session": "15:09:30",
+        "duration": "01:00:00",
+        "date": "2025-05-09"
+    }
+},
+{
+    "model": "core.sessions",
+    "pk": 10,
+    "fields": {
+        "cinema": 1,
+        "hall_id": 2,
+        "movie": 1,
+        "time_session": "13:09:00",
+        "duration": "01:33:00",
+        "date": "2025-06-11"
+    }
+},
+{
+    "model": "core.sessions",
+    "pk": 11,
+    "fields": {
+        "cinema": 1,
+        "hall_id": 2,
+        "movie": 1,
+        "time_session": "13:09:00",
+        "duration": "01:18:00",
+        "date": "2025-05-25"
+    }
+},
+{
+    "model": "core.sessions",
+    "pk": 12,
+    "fields": {
+        "cinema": 1,
+        "hall_id": 3,
+        "movie": 1,
+        "time_session": "01:48:00",
+        "duration": "01:21:00",
+        "date": "2025-05-31"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 126,
+    "fields": {
+        "number_row": 1,
+        "seat": 2,
+        "date": "2025-05-02",
+        "status": "F",
+        "halls": 3,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 127,
+    "fields": {
+        "number_row": 1,
+        "seat": 1,
+        "date": "2025-05-31",
+        "status": "F",
+        "halls": 7,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 128,
+    "fields": {
+        "number_row": 1,
+        "seat": 2,
+        "date": "2025-05-31",
+        "status": "F",
+        "halls": 7,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 129,
+    "fields": {
+        "number_row": 1,
+        "seat": 3,
+        "date": "2025-05-31",
+        "status": "F",
+        "halls": 7,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 130,
+    "fields": {
+        "number_row": 1,
+        "seat": 4,
+        "date": "2025-05-31",
+        "status": "F",
+        "halls": 7,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 131,
+    "fields": {
+        "number_row": 2,
+        "seat": 1,
+        "date": "2025-05-31",
+        "status": "F",
+        "halls": 7,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 132,
+    "fields": {
+        "number_row": 2,
+        "seat": 2,
+        "date": "2025-05-31",
+        "status": "F",
+        "halls": 7,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 133,
+    "fields": {
+        "number_row": 2,
+        "seat": 3,
+        "date": "2025-05-31",
+        "status": "F",
+        "halls": 7,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 134,
+    "fields": {
+        "number_row": 2,
+        "seat": 4,
+        "date": "2025-05-31",
+        "status": "F",
+        "halls": 7,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 135,
+    "fields": {
+        "number_row": 3,
+        "seat": 1,
+        "date": "2025-05-31",
+        "status": "F",
+        "halls": 7,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 136,
+    "fields": {
+        "number_row": 3,
+        "seat": 2,
+        "date": "2025-05-31",
+        "status": "F",
+        "halls": 7,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 137,
+    "fields": {
+        "number_row": 3,
+        "seat": 3,
+        "date": "2025-05-31",
+        "status": "F",
+        "halls": 7,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 138,
+    "fields": {
+        "number_row": 3,
+        "seat": 4,
+        "date": "2025-05-31",
+        "status": "F",
+        "halls": 7,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 139,
+    "fields": {
+        "number_row": 4,
+        "seat": 1,
+        "date": "2025-05-31",
+        "status": "F",
+        "halls": 7,
+        "is_vip": true,
+        "price": "200.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 140,
+    "fields": {
+        "number_row": 4,
+        "seat": 2,
+        "date": "2025-05-31",
+        "status": "F",
+        "halls": 7,
+        "is_vip": true,
+        "price": "200.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 141,
+    "fields": {
+        "number_row": 4,
+        "seat": 3,
+        "date": "2025-05-31",
+        "status": "F",
+        "halls": 7,
+        "is_vip": true,
+        "price": "200.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 142,
+    "fields": {
+        "number_row": 4,
+        "seat": 4,
+        "date": "2025-05-31",
+        "status": "F",
+        "halls": 7,
+        "is_vip": true,
+        "price": "200.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 343,
+    "fields": {
+        "number_row": 1,
+        "seat": 1,
+        "date": "2025-06-12",
+        "status": "F",
+        "halls": 10,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 344,
+    "fields": {
+        "number_row": 1,
+        "seat": 2,
+        "date": "2025-06-12",
+        "status": "F",
+        "halls": 10,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 345,
+    "fields": {
+        "number_row": 1,
+        "seat": 3,
+        "date": "2025-06-12",
+        "status": "F",
+        "halls": 10,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 346,
+    "fields": {
+        "number_row": 1,
+        "seat": 4,
+        "date": "2025-06-12",
+        "status": "F",
+        "halls": 10,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 347,
+    "fields": {
+        "number_row": 2,
+        "seat": 1,
+        "date": "2025-06-12",
+        "status": "F",
+        "halls": 10,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 348,
+    "fields": {
+        "number_row": 2,
+        "seat": 2,
+        "date": "2025-06-12",
+        "status": "F",
+        "halls": 10,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 349,
+    "fields": {
+        "number_row": 2,
+        "seat": 3,
+        "date": "2025-06-12",
+        "status": "F",
+        "halls": 10,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 350,
+    "fields": {
+        "number_row": 2,
+        "seat": 4,
+        "date": "2025-06-12",
+        "status": "F",
+        "halls": 10,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 351,
+    "fields": {
+        "number_row": 3,
+        "seat": 1,
+        "date": "2025-06-12",
+        "status": "F",
+        "halls": 10,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 352,
+    "fields": {
+        "number_row": 3,
+        "seat": 2,
+        "date": "2025-06-12",
+        "status": "F",
+        "halls": 10,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 353,
+    "fields": {
+        "number_row": 3,
+        "seat": 3,
+        "date": "2025-06-12",
+        "status": "F",
+        "halls": 10,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 354,
+    "fields": {
+        "number_row": 3,
+        "seat": 4,
+        "date": "2025-06-12",
+        "status": "F",
+        "halls": 10,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 355,
+    "fields": {
+        "number_row": 4,
+        "seat": 1,
+        "date": "2025-06-12",
+        "status": "F",
+        "halls": 10,
+        "is_vip": true,
+        "price": "200.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 356,
+    "fields": {
+        "number_row": 4,
+        "seat": 2,
+        "date": "2025-06-12",
+        "status": "F",
+        "halls": 10,
+        "is_vip": true,
+        "price": "200.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 357,
+    "fields": {
+        "number_row": 4,
+        "seat": 3,
+        "date": "2025-06-12",
+        "status": "F",
+        "halls": 10,
+        "is_vip": true,
+        "price": "200.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 358,
+    "fields": {
+        "number_row": 4,
+        "seat": 4,
+        "date": "2025-06-12",
+        "status": "F",
+        "halls": 10,
+        "is_vip": true,
+        "price": "200.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 391,
+    "fields": {
+        "number_row": 1,
+        "seat": 1,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 19,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 392,
+    "fields": {
+        "number_row": 1,
+        "seat": 2,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 19,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 393,
+    "fields": {
+        "number_row": 1,
+        "seat": 3,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 19,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 394,
+    "fields": {
+        "number_row": 1,
+        "seat": 4,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 19,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 395,
+    "fields": {
+        "number_row": 1,
+        "seat": 5,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 19,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 396,
+    "fields": {
+        "number_row": 2,
+        "seat": 1,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 19,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 397,
+    "fields": {
+        "number_row": 2,
+        "seat": 2,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 19,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 398,
+    "fields": {
+        "number_row": 2,
+        "seat": 3,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 19,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 399,
+    "fields": {
+        "number_row": 2,
+        "seat": 4,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 19,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 400,
+    "fields": {
+        "number_row": 2,
+        "seat": 5,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 19,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 401,
+    "fields": {
+        "number_row": 2,
+        "seat": 6,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 19,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 402,
+    "fields": {
+        "number_row": 3,
+        "seat": 1,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 19,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 403,
+    "fields": {
+        "number_row": 3,
+        "seat": 2,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 19,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 404,
+    "fields": {
+        "number_row": 3,
+        "seat": 3,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 19,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 405,
+    "fields": {
+        "number_row": 3,
+        "seat": 4,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 19,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 406,
+    "fields": {
+        "number_row": 3,
+        "seat": 5,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 19,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 407,
+    "fields": {
+        "number_row": 3,
+        "seat": 6,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 19,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 408,
+    "fields": {
+        "number_row": 3,
+        "seat": 7,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 19,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 409,
+    "fields": {
+        "number_row": 4,
+        "seat": 1,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 19,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 410,
+    "fields": {
+        "number_row": 4,
+        "seat": 2,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 19,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 411,
+    "fields": {
+        "number_row": 4,
+        "seat": 3,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 19,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 412,
+    "fields": {
+        "number_row": 4,
+        "seat": 4,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 19,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 413,
+    "fields": {
+        "number_row": 1,
+        "seat": 1,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 22,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 414,
+    "fields": {
+        "number_row": 1,
+        "seat": 2,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 22,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 415,
+    "fields": {
+        "number_row": 1,
+        "seat": 3,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 22,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 416,
+    "fields": {
+        "number_row": 1,
+        "seat": 4,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 22,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 417,
+    "fields": {
+        "number_row": 1,
+        "seat": 5,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 22,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 418,
+    "fields": {
+        "number_row": 2,
+        "seat": 1,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 22,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 419,
+    "fields": {
+        "number_row": 2,
+        "seat": 2,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 22,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 420,
+    "fields": {
+        "number_row": 2,
+        "seat": 3,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 22,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 421,
+    "fields": {
+        "number_row": 2,
+        "seat": 4,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 22,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 422,
+    "fields": {
+        "number_row": 2,
+        "seat": 5,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 22,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 423,
+    "fields": {
+        "number_row": 2,
+        "seat": 6,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 22,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 424,
+    "fields": {
+        "number_row": 3,
+        "seat": 1,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 22,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 425,
+    "fields": {
+        "number_row": 3,
+        "seat": 2,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 22,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 426,
+    "fields": {
+        "number_row": 3,
+        "seat": 3,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 22,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 427,
+    "fields": {
+        "number_row": 3,
+        "seat": 4,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 22,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 428,
+    "fields": {
+        "number_row": 3,
+        "seat": 5,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 22,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 429,
+    "fields": {
+        "number_row": 3,
+        "seat": 6,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 22,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 430,
+    "fields": {
+        "number_row": 3,
+        "seat": 7,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 22,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 431,
+    "fields": {
+        "number_row": 4,
+        "seat": 1,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 22,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 432,
+    "fields": {
+        "number_row": 4,
+        "seat": 2,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 22,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 433,
+    "fields": {
+        "number_row": 4,
+        "seat": 3,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 22,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 434,
+    "fields": {
+        "number_row": 4,
+        "seat": 4,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 22,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 457,
+    "fields": {
+        "number_row": 1,
+        "seat": 1,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 9,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 458,
+    "fields": {
+        "number_row": 1,
+        "seat": 2,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 9,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 459,
+    "fields": {
+        "number_row": 1,
+        "seat": 3,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 9,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 460,
+    "fields": {
+        "number_row": 1,
+        "seat": 4,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 9,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 461,
+    "fields": {
+        "number_row": 1,
+        "seat": 5,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 9,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 462,
+    "fields": {
+        "number_row": 2,
+        "seat": 1,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 9,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 463,
+    "fields": {
+        "number_row": 2,
+        "seat": 2,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 9,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 464,
+    "fields": {
+        "number_row": 2,
+        "seat": 3,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 9,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 465,
+    "fields": {
+        "number_row": 2,
+        "seat": 4,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 9,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 466,
+    "fields": {
+        "number_row": 2,
+        "seat": 5,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 9,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 467,
+    "fields": {
+        "number_row": 2,
+        "seat": 6,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 9,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 468,
+    "fields": {
+        "number_row": 3,
+        "seat": 1,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 9,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 469,
+    "fields": {
+        "number_row": 3,
+        "seat": 2,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 9,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 470,
+    "fields": {
+        "number_row": 3,
+        "seat": 3,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 9,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 471,
+    "fields": {
+        "number_row": 3,
+        "seat": 4,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 9,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 472,
+    "fields": {
+        "number_row": 3,
+        "seat": 5,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 9,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 473,
+    "fields": {
+        "number_row": 3,
+        "seat": 6,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 9,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 474,
+    "fields": {
+        "number_row": 3,
+        "seat": 7,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 9,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 475,
+    "fields": {
+        "number_row": 4,
+        "seat": 1,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 9,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 476,
+    "fields": {
+        "number_row": 4,
+        "seat": 2,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 9,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 477,
+    "fields": {
+        "number_row": 4,
+        "seat": 3,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 9,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 478,
+    "fields": {
+        "number_row": 4,
+        "seat": 4,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 9,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 479,
+    "fields": {
+        "number_row": 1,
+        "seat": 1,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 8,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 480,
+    "fields": {
+        "number_row": 1,
+        "seat": 2,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 8,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 481,
+    "fields": {
+        "number_row": 1,
+        "seat": 3,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 8,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 482,
+    "fields": {
+        "number_row": 1,
+        "seat": 4,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 8,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 483,
+    "fields": {
+        "number_row": 1,
+        "seat": 5,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 8,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 484,
+    "fields": {
+        "number_row": 2,
+        "seat": 1,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 8,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 485,
+    "fields": {
+        "number_row": 2,
+        "seat": 2,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 8,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 486,
+    "fields": {
+        "number_row": 2,
+        "seat": 3,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 8,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 487,
+    "fields": {
+        "number_row": 2,
+        "seat": 4,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 8,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 488,
+    "fields": {
+        "number_row": 2,
+        "seat": 5,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 8,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 489,
+    "fields": {
+        "number_row": 2,
+        "seat": 6,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 8,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 490,
+    "fields": {
+        "number_row": 3,
+        "seat": 1,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 8,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 491,
+    "fields": {
+        "number_row": 3,
+        "seat": 2,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 8,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 492,
+    "fields": {
+        "number_row": 3,
+        "seat": 3,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 8,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 493,
+    "fields": {
+        "number_row": 3,
+        "seat": 4,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 8,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 494,
+    "fields": {
+        "number_row": 3,
+        "seat": 5,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 8,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 495,
+    "fields": {
+        "number_row": 3,
+        "seat": 6,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 8,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 496,
+    "fields": {
+        "number_row": 3,
+        "seat": 7,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 8,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 497,
+    "fields": {
+        "number_row": 4,
+        "seat": 1,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 8,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 498,
+    "fields": {
+        "number_row": 4,
+        "seat": 2,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 8,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 499,
+    "fields": {
+        "number_row": 4,
+        "seat": 3,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 8,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 500,
+    "fields": {
+        "number_row": 4,
+        "seat": 4,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 8,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 501,
+    "fields": {
+        "number_row": 1,
+        "seat": 1,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 23,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 502,
+    "fields": {
+        "number_row": 1,
+        "seat": 2,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 23,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 503,
+    "fields": {
+        "number_row": 1,
+        "seat": 3,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 23,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 504,
+    "fields": {
+        "number_row": 1,
+        "seat": 4,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 23,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 505,
+    "fields": {
+        "number_row": 1,
+        "seat": 5,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 23,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 506,
+    "fields": {
+        "number_row": 2,
+        "seat": 1,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 23,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 507,
+    "fields": {
+        "number_row": 2,
+        "seat": 2,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 23,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 508,
+    "fields": {
+        "number_row": 2,
+        "seat": 3,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 23,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 509,
+    "fields": {
+        "number_row": 2,
+        "seat": 4,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 23,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 510,
+    "fields": {
+        "number_row": 2,
+        "seat": 5,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 23,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 511,
+    "fields": {
+        "number_row": 2,
+        "seat": 6,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 23,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 512,
+    "fields": {
+        "number_row": 3,
+        "seat": 1,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 23,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 513,
+    "fields": {
+        "number_row": 3,
+        "seat": 2,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 23,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 514,
+    "fields": {
+        "number_row": 3,
+        "seat": 3,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 23,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 515,
+    "fields": {
+        "number_row": 3,
+        "seat": 4,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 23,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 516,
+    "fields": {
+        "number_row": 3,
+        "seat": 5,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 23,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 517,
+    "fields": {
+        "number_row": 3,
+        "seat": 6,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 23,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 518,
+    "fields": {
+        "number_row": 3,
+        "seat": 7,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 23,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 519,
+    "fields": {
+        "number_row": 4,
+        "seat": 1,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 23,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 520,
+    "fields": {
+        "number_row": 4,
+        "seat": 2,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 23,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 521,
+    "fields": {
+        "number_row": 4,
+        "seat": 3,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 23,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 522,
+    "fields": {
+        "number_row": 4,
+        "seat": 4,
+        "date": "2025-06-20",
+        "status": "F",
+        "halls": 23,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 523,
+    "fields": {
+        "number_row": 1,
+        "seat": 1,
+        "date": "2025-06-21",
+        "status": "F",
+        "halls": 2,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 524,
+    "fields": {
+        "number_row": 1,
+        "seat": 2,
+        "date": "2025-06-21",
+        "status": "F",
+        "halls": 2,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 525,
+    "fields": {
+        "number_row": 1,
+        "seat": 3,
+        "date": "2025-06-21",
+        "status": "F",
+        "halls": 2,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 526,
+    "fields": {
+        "number_row": 1,
+        "seat": 4,
+        "date": "2025-06-21",
+        "status": "F",
+        "halls": 2,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 527,
+    "fields": {
+        "number_row": 1,
+        "seat": 5,
+        "date": "2025-06-21",
+        "status": "F",
+        "halls": 2,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 528,
+    "fields": {
+        "number_row": 2,
+        "seat": 1,
+        "date": "2025-06-21",
+        "status": "F",
+        "halls": 2,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 529,
+    "fields": {
+        "number_row": 2,
+        "seat": 2,
+        "date": "2025-06-21",
+        "status": "F",
+        "halls": 2,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 530,
+    "fields": {
+        "number_row": 2,
+        "seat": 3,
+        "date": "2025-06-21",
+        "status": "F",
+        "halls": 2,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 531,
+    "fields": {
+        "number_row": 2,
+        "seat": 4,
+        "date": "2025-06-21",
+        "status": "F",
+        "halls": 2,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 532,
+    "fields": {
+        "number_row": 2,
+        "seat": 5,
+        "date": "2025-06-21",
+        "status": "F",
+        "halls": 2,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 533,
+    "fields": {
+        "number_row": 2,
+        "seat": 6,
+        "date": "2025-06-21",
+        "status": "F",
+        "halls": 2,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 534,
+    "fields": {
+        "number_row": 3,
+        "seat": 1,
+        "date": "2025-06-21",
+        "status": "F",
+        "halls": 2,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 535,
+    "fields": {
+        "number_row": 3,
+        "seat": 2,
+        "date": "2025-06-21",
+        "status": "F",
+        "halls": 2,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 536,
+    "fields": {
+        "number_row": 3,
+        "seat": 3,
+        "date": "2025-06-21",
+        "status": "F",
+        "halls": 2,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 537,
+    "fields": {
+        "number_row": 3,
+        "seat": 4,
+        "date": "2025-06-21",
+        "status": "F",
+        "halls": 2,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 538,
+    "fields": {
+        "number_row": 3,
+        "seat": 5,
+        "date": "2025-06-21",
+        "status": "F",
+        "halls": 2,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 539,
+    "fields": {
+        "number_row": 3,
+        "seat": 6,
+        "date": "2025-06-21",
+        "status": "F",
+        "halls": 2,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 540,
+    "fields": {
+        "number_row": 3,
+        "seat": 7,
+        "date": "2025-06-21",
+        "status": "F",
+        "halls": 2,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 541,
+    "fields": {
+        "number_row": 4,
+        "seat": 1,
+        "date": "2025-06-21",
+        "status": "F",
+        "halls": 2,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 542,
+    "fields": {
+        "number_row": 4,
+        "seat": 2,
+        "date": "2025-06-21",
+        "status": "F",
+        "halls": 2,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 543,
+    "fields": {
+        "number_row": 4,
+        "seat": 3,
+        "date": "2025-06-21",
+        "status": "F",
+        "halls": 2,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 544,
+    "fields": {
+        "number_row": 4,
+        "seat": 4,
+        "date": "2025-06-21",
+        "status": "F",
+        "halls": 2,
+        "is_vip": false,
+        "price": "120.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 545,
+    "fields": {
+        "number_row": 6,
+        "seat": 18,
+        "date": "2025-06-24",
+        "status": "F",
+        "halls": 24,
+        "is_vip": false,
+        "price": "21.82"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 546,
+    "fields": {
+        "number_row": 8,
+        "seat": 2,
+        "date": "2025-06-24",
+        "status": "S",
+        "halls": 24,
+        "is_vip": true,
+        "price": "79.02"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 547,
+    "fields": {
+        "number_row": 6,
+        "seat": 2,
+        "date": "2025-06-24",
+        "status": "N",
+        "halls": 24,
+        "is_vip": true,
+        "price": "35.62"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 548,
+    "fields": {
+        "number_row": 6,
+        "seat": 7,
+        "date": "2025-06-24",
+        "status": "F",
+        "halls": 24,
+        "is_vip": true,
+        "price": "93.21"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 549,
+    "fields": {
+        "number_row": 6,
+        "seat": 3,
+        "date": "2025-06-24",
+        "status": "S",
+        "halls": 24,
+        "is_vip": false,
+        "price": "81.06"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 550,
+    "fields": {
+        "number_row": 1,
+        "seat": 3,
+        "date": "2025-06-24",
+        "status": "N",
+        "halls": 24,
+        "is_vip": false,
+        "price": "96.18"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 551,
+    "fields": {
+        "number_row": 7,
+        "seat": 19,
+        "date": "2025-06-24",
+        "status": "F",
+        "halls": 24,
+        "is_vip": true,
+        "price": "54.29"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 552,
+    "fields": {
+        "number_row": 10,
+        "seat": 13,
+        "date": "2025-06-24",
+        "status": "S",
+        "halls": 24,
+        "is_vip": false,
+        "price": "96.51"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 553,
+    "fields": {
+        "number_row": 6,
+        "seat": 15,
+        "date": "2025-06-24",
+        "status": "N",
+        "halls": 24,
+        "is_vip": true,
+        "price": "53.98"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 554,
+    "fields": {
+        "number_row": 4,
+        "seat": 11,
+        "date": "2025-06-24",
+        "status": "F",
+        "halls": 24,
+        "is_vip": true,
+        "price": "44.23"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 555,
+    "fields": {
+        "number_row": 7,
+        "seat": 8,
+        "date": "2025-06-24",
+        "status": "S",
+        "halls": 25,
+        "is_vip": false,
+        "price": "61.67"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 556,
+    "fields": {
+        "number_row": 9,
+        "seat": 17,
+        "date": "2025-06-24",
+        "status": "N",
+        "halls": 25,
+        "is_vip": true,
+        "price": "96.74"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 557,
+    "fields": {
+        "number_row": 3,
+        "seat": 19,
+        "date": "2025-06-24",
+        "status": "F",
+        "halls": 25,
+        "is_vip": true,
+        "price": "18.71"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 558,
+    "fields": {
+        "number_row": 6,
+        "seat": 10,
+        "date": "2025-06-24",
+        "status": "S",
+        "halls": 25,
+        "is_vip": false,
+        "price": "41.20"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 559,
+    "fields": {
+        "number_row": 4,
+        "seat": 15,
+        "date": "2025-06-24",
+        "status": "N",
+        "halls": 25,
+        "is_vip": false,
+        "price": "75.93"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 560,
+    "fields": {
+        "number_row": 5,
+        "seat": 4,
+        "date": "2025-06-24",
+        "status": "F",
+        "halls": 25,
+        "is_vip": false,
+        "price": "19.10"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 561,
+    "fields": {
+        "number_row": 8,
+        "seat": 12,
+        "date": "2025-06-24",
+        "status": "S",
+        "halls": 25,
+        "is_vip": false,
+        "price": "47.03"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 562,
+    "fields": {
+        "number_row": 2,
+        "seat": 11,
+        "date": "2025-06-24",
+        "status": "N",
+        "halls": 25,
+        "is_vip": false,
+        "price": "73.65"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 563,
+    "fields": {
+        "number_row": 2,
+        "seat": 13,
+        "date": "2025-06-24",
+        "status": "F",
+        "halls": 25,
+        "is_vip": false,
+        "price": "56.77"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 564,
+    "fields": {
+        "number_row": 3,
+        "seat": 2,
+        "date": "2025-06-24",
+        "status": "S",
+        "halls": 25,
+        "is_vip": false,
+        "price": "30.54"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 565,
+    "fields": {
+        "number_row": 10,
+        "seat": 8,
+        "date": "2025-06-24",
+        "status": "N",
+        "halls": 26,
+        "is_vip": false,
+        "price": "43.33"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 566,
+    "fields": {
+        "number_row": 1,
+        "seat": 9,
+        "date": "2025-06-24",
+        "status": "F",
+        "halls": 26,
+        "is_vip": true,
+        "price": "42.22"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 567,
+    "fields": {
+        "number_row": 6,
+        "seat": 2,
+        "date": "2025-06-24",
+        "status": "S",
+        "halls": 26,
+        "is_vip": true,
+        "price": "80.66"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 568,
+    "fields": {
+        "number_row": 4,
+        "seat": 11,
+        "date": "2025-06-24",
+        "status": "N",
+        "halls": 26,
+        "is_vip": false,
+        "price": "62.50"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 569,
+    "fields": {
+        "number_row": 1,
+        "seat": 3,
+        "date": "2025-06-24",
+        "status": "F",
+        "halls": 26,
+        "is_vip": true,
+        "price": "12.42"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 570,
+    "fields": {
+        "number_row": 3,
+        "seat": 19,
+        "date": "2025-06-24",
+        "status": "S",
+        "halls": 26,
+        "is_vip": true,
+        "price": "38.37"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 571,
+    "fields": {
+        "number_row": 9,
+        "seat": 2,
+        "date": "2025-06-24",
+        "status": "N",
+        "halls": 26,
+        "is_vip": false,
+        "price": "68.39"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 572,
+    "fields": {
+        "number_row": 3,
+        "seat": 8,
+        "date": "2025-06-24",
+        "status": "F",
+        "halls": 26,
+        "is_vip": true,
+        "price": "65.99"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 573,
+    "fields": {
+        "number_row": 2,
+        "seat": 9,
+        "date": "2025-06-24",
+        "status": "S",
+        "halls": 26,
+        "is_vip": false,
+        "price": "27.47"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 574,
+    "fields": {
+        "number_row": 8,
+        "seat": 3,
+        "date": "2025-06-24",
+        "status": "N",
+        "halls": 26,
+        "is_vip": true,
+        "price": "59.17"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 575,
+    "fields": {
+        "number_row": 2,
+        "seat": 4,
+        "date": "2025-06-24",
+        "status": "F",
+        "halls": 27,
+        "is_vip": true,
+        "price": "46.96"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 576,
+    "fields": {
+        "number_row": 1,
+        "seat": 6,
+        "date": "2025-06-24",
+        "status": "S",
+        "halls": 27,
+        "is_vip": false,
+        "price": "55.27"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 577,
+    "fields": {
+        "number_row": 2,
+        "seat": 18,
+        "date": "2025-06-24",
+        "status": "N",
+        "halls": 27,
+        "is_vip": false,
+        "price": "93.13"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 578,
+    "fields": {
+        "number_row": 9,
+        "seat": 16,
+        "date": "2025-06-24",
+        "status": "F",
+        "halls": 27,
+        "is_vip": false,
+        "price": "99.00"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 579,
+    "fields": {
+        "number_row": 1,
+        "seat": 19,
+        "date": "2025-06-24",
+        "status": "S",
+        "halls": 27,
+        "is_vip": true,
+        "price": "16.77"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 580,
+    "fields": {
+        "number_row": 5,
+        "seat": 7,
+        "date": "2025-06-24",
+        "status": "N",
+        "halls": 27,
+        "is_vip": false,
+        "price": "46.30"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 581,
+    "fields": {
+        "number_row": 6,
+        "seat": 6,
+        "date": "2025-06-24",
+        "status": "F",
+        "halls": 27,
+        "is_vip": true,
+        "price": "78.74"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 582,
+    "fields": {
+        "number_row": 6,
+        "seat": 12,
+        "date": "2025-06-24",
+        "status": "S",
+        "halls": 27,
+        "is_vip": false,
+        "price": "11.48"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 583,
+    "fields": {
+        "number_row": 2,
+        "seat": 19,
+        "date": "2025-06-24",
+        "status": "N",
+        "halls": 27,
+        "is_vip": false,
+        "price": "73.86"
+    }
+},
+{
+    "model": "core.seats",
+    "pk": 584,
+    "fields": {
+        "number_row": 4,
+        "seat": 20,
+        "date": "2025-06-24",
+        "status": "F",
+        "halls": 27,
+        "is_vip": true,
+        "price": "85.79"
+    }
+},
+{
+    "model": "core.tickets",
+    "pk": 7,
+    "fields": {
+        "session": 7,
+        "movie": 1,
+        "seat": 535,
+        "profile": 1,
+        "date": "2025-06-21T12:13:55.884Z",
+        "halls": 2
+    }
+},
+{
+    "model": "core.tickets",
+    "pk": 8,
+    "fields": {
+        "session": 7,
+        "movie": 1,
+        "seat": 541,
+        "profile": 1,
+        "date": "2025-06-21T12:13:55.899Z",
+        "halls": 2
+    }
+},
+{
+    "model": "core.tickets",
+    "pk": 9,
+    "fields": {
+        "session": 7,
+        "movie": 1,
+        "seat": 543,
+        "profile": 1,
+        "date": "2025-06-21T12:13:55.905Z",
+        "halls": 2
+    }
+},
+{
+    "model": "core.tickets",
+    "pk": 10,
+    "fields": {
+        "session": 8,
+        "movie": 2,
+        "seat": 126,
+        "profile": 1,
+        "date": "2025-06-21T12:17:18.229Z",
+        "halls": 3
+    }
+},
+{
+    "model": "core.tickets",
+    "pk": 11,
+    "fields": {
+        "session": 9,
+        "movie": 3,
+        "seat": 126,
+        "profile": 1,
+        "date": "2025-06-21T12:17:40.509Z",
+        "halls": 3
+    }
+},
+{
+    "model": "core.tickets",
+    "pk": 12,
+    "fields": {
+        "session": 7,
+        "movie": 1,
+        "seat": 524,
+        "profile": 1,
+        "date": "2025-06-22T11:33:55.246Z",
+        "halls": 2
+    }
+}
+]

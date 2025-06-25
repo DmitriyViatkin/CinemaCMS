@@ -96,7 +96,7 @@
             <div class="list-group">
                 {% for session in sessions %}
 
-                    <a href="{% url 'buy_tiсket' session_id=session.id %}" class="list-group-item list-group-item-action">
+                    <a href="{% url 'buy_ticket' session_id=session.id %}" class="list-group-item list-group-item-action">
                         <div class="d-flex w-100 justify-content-between">
                             {# Дата та час сеансу #}
                             <h5 class="mb-1">
@@ -106,7 +106,7 @@
                             <small>Кінотеатр: {{ session.cinema.title|default:"Невідомо" }}</small>
                         </div>
 
-                        <p class="mb-1">Зал: {{ session.hall_id.title|default:"Невідомо" }}</p> {# Припускаємо, що Hall має поле title #}
+                        <p class="mb-1">Зал: {{ session.hall_id.title|default:"Невідомо" }}</p>
 
                     </a>
                 {% endfor %}
