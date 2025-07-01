@@ -37,6 +37,26 @@ class Movies(models.Model):
     def __str__(self):
         return self.title
 
+    def get_youtube_embed_url(self):
+        """
+        Перетворює стандартний YouTube URL на URL для вбудовування (embed).
+        Наприклад:
+        З 'https://www.youtube.com/watch?v=VIDEO_ID'
+        На 'https://www.youtube.com/embed/VIDEO_ID'
+        """
+        if self.url_trailer:
+            # Парсимо ID відео з різних форматів YouTube URL
+            # наприклад, watch?v=ID, youtu.be/ID, embed/ID
+            import re
+            match = re.search(r'(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})',                self.url_trailer)
+            if match:
+                video_id = match.group(1)
+                return f"https://www.youtube.com/embed/{video_id}"
+        return None
+
+    def __str__(self):
+        return self.title
+
 
     class Meta:
         verbose_name = 'Кіно стрічка'
