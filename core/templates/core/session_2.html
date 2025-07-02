@@ -1,0 +1,125 @@
+{% extends 'main/index1.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Можете визначити класи тут або у вашому окремому CSS-файлі */
+    .col-time {
+        width: 10%; /* Фіксована ширина для часу */
+        min-width: 100px; /* Мінімальна ширина, щоб не стискалося занадто сильно */
+    }
+    .col-movie {
+        width: 30%; /* Фільм займає 50% від доступної ширини таблиці */
+    }
+    .col-price {
+        width: 10%; /* Фіксована ширина для ціни */
+    }
+    .col-action {
+        width: 10%; /* Фіксована ширина для кнопки дії */
+    }
+    /* Якщо таблиця має батьківський контейнер з max-width,
+       переконайтесь, що сума ширини стовпців не перевищує max-width,
+       або використовуйте flexbox/grid для батьківського контейнера, якщо потрібна більша гнучкість.
+       Також можна задати max-width для самої таблиці, як ми робили раніше: */
+    .sessions-table {
+        width: 100%;
+        max-width: 900px; /* Максимальна ширина для всієї таблиці */
+        margin: 0 auto; /* Центрування таблиці, якщо вона не на всю ширину екрану */
+    }
+</style>
+
+<h1 class="text-center my-4">Розклад сеансів</h1>
+<form method="get" class="row g-2 align-items-center mb-4" style="width: 80%; margin-left: 10%;">
+    <div class="col-auto form-check">
+        <input class="form-check-input" type="checkbox" name="is_2d" value="1" id="filter2D" onchange="this.form.submit()"
+               {% if filter.is_2d %}checked{% endif %}>
+        <label class="form-check-label" for="filter2D">2D</label>
+    </div>
+
+    <div class="col-auto form-check">
+        <input class="form-check-input" type="checkbox" name="is_3d" value="1" id="filter3D" onchange="this.form.submit()"
+               {% if filter.is_3d %}checked{% endif %}>
+        <label class="form-check-label" for="filter3D">3D</label>
+    </div>
+
+    <div class="col-auto form-check">
+        <input class="form-check-input" type="checkbox" name="is_imax" value="1" id="filterIMAX" onchange="this.form.submit()"
+               {% if filter.is_imax %}checked{% endif %}>
+        <label class="form-check-label" for="filterIMAX">IMAX</label>
+    </div>
+    <div class="col-auto">
+        <input type="date" name="date" value="{{ selected_date }}" class="form-control" onchange="this.form.submit()">
+    </div>
+
+    <div class="col-auto">
+        <select name="cinema" class="form-select" onchange="this.form.submit()">
+            <option value="">Всі кінотеатри</option>
+            {% for cinema in cinemas %}
+                <option value="{{ cinema.id }}" {% if cinema.id|stringformat:"s" == selected_cinema %}selected{% endif %}>
+                    {{ cinema.title }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="col-auto">
+        <select name="hall" class="form-select" onchange="this.form.submit()">
+            <option value="">Всі зали</option>
+            {% for hall in halls %}
+                <option value="{{ hall.id }}" {% if hall.id|stringformat:"s" == selected_hall %}selected{% endif %}>
+                    {{ hall.title }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="col-auto">
+        <select name="movie" class="form-select" onchange="this.form.submit()">
+            <option value="">Всі фільми</option>
+            {% for movie in movies %}
+                <option value="{{ movie.id }}" {% if movie.id|stringformat:"s" == selected_movie %}selected{% endif %}>
+                    {{ movie.title }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+
+</form>
+<div style="width: 80%; margin-left: 10%;">
+{% if grouped_sessions %}
+    {% for day_info, sessions in grouped_sessions.items %}
+        <h2 class="mt-4">{{ day_info.0 }}, {{ day_info.1 }}</h2>
+
+        <table class="table table-bordered table-striped"  style="width: 50%;" >
+            <thead>
+                <tr>
+                    <th class="col-time">Дата і час</th> {# Задаємо ширину для кожного заголовка #}
+                    <th class="col-movie">Фільм</th>
+                    <th class="col-price">Ціна</th>
+                    <th class="col-action">Дія</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for session in sessions %}
+                <tr>
+                    <td>{{ session.time_session|time:"H:i" }}</td>
+                    <td>
+                        <a href="{% url 'movie_detail' session.movie.id %}">
+                            {{ session.movie.title }}
+                        </a>
+                    </td>
+                    <td>{{ session.price }} грн</td>
+                    <td>
+                        <a href="{% url 'buy_ticket' session.id %}" class="btn btn-success btn-sm">Купити</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endfor %}
+{% else %}
+    <p class="text-muted text-center mt-5">Немає сеансів за вибраними критеріями.</p>
+{% endif %}
+</div>
+{% endblock %}

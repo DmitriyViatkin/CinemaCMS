@@ -1,0 +1,123 @@
+
+{% load static %}
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.min.css">
+    <script type="text/javascript" src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
+
+
+<table id="sessions-table" class="display" style="width:100%">
+    <thead>
+        <tr>
+            <th></th> <th>Кінотеатр</th>
+            <th>ID Залу</th>
+            <th>Назва</th>
+            <th>Фільм</th>
+            <th>Час сесії</th>
+            <th>Тривалість</th>
+            <th>Дата</th>
+        </tr>r
+    </thead>
+    <tbody>
+        </tbody>
+    </table>
+<H2>
+    xren
+</H2>
+
+<script>
+$(document).ready(function() {
+    $('#sessions-table').DataTable({
+        "processing": true,
+        "serverSide": true,
+        "ajax": "{% url 'ajax_sessions_data' %}", // Your AjaxDatatableView URL
+        "initComplete": function () {
+            // Clone the header row and insert it below the original one.
+            // This creates a dedicated row for filters.
+            $('#sessions-table thead tr')
+                .clone(true) // Clone with event handlers (if any)
+                .addClass('filters') // Add a class for easier styling
+                .appendTo('#sessions-table thead');
+
+            // Disable sorting on the cloned filter row, if needed (optional)
+            // If you want sorting only on the original header row, and not the filter row.
+            // This applies to the cloned row (filters) to prevent sorting when clicking on filter inputs.
+            $('#sessions-table thead .filters th').each(function () {
+                $(this).off('click.DT'); // Remove DataTables default click handler for sorting
+            });
+
+
+            this.api().columns().every(function () {
+                let column = this;
+                let colIdx = column.index(); // Get the index of the current column
+
+                // Find the corresponding <th> in the newly created 'filters' row.
+                // We target the 'filters' class to make sure we're adding to the correct row.
+                let headerCell = $('.filters th').eq(colIdx);
+                let title = $(column.header()).text(); // Get the original column title
+
+                // Check if the current column is the first empty one (<th></th>)
+                // If it is, you might not want a filter there, or you can add a generic one.
+                if (title === "") { // Or check for specific column index like colIdx === 0
+                    headerCell.html(''); // Keep it empty or add a placeholder
+                    return; // Skip adding a filter for this column
+                }
+
+                // --- Choose one of the following filter types ---
+
+                // Option 1: Text Input Filter (most common)
+                let input = $('<input type="text" placeholder="Пошук по ' + title + '" />')
+                    .appendTo(headerCell.empty()) // Clear the cell and append the input
+                    .on('keyup change clear', function () {
+                        if (column.search() !== this.value) {
+                            column.search(this.value).draw();
+                        }
+                    });
+
+                // Option 2: Select Dropdown Filter (uncomment and use instead of Option 1 if needed)
+                /*
+                let select = document.createElement('select');
+                select.add(new Option('', '')); // Add an empty option to clear filter
+                $(headerCell).empty().append(select);
+
+                $(select).on('change', function () {
+                    let val = $(this).val();
+                    // Use regex for exact match for select options: ^value$
+                    column.search(val ? '^' + val + '$' : '', true, false).draw();
+                });
+
+                // Populate select options. IMPORTANT for serverSide:
+                // This will only get unique values from the CURRENTLY LOADED data.
+                // For a full list of unique values across ALL data, you'll need
+                // a separate AJAX call to your backend.
+                column.data().unique().sort().each(function (d, j) {
+                    // Ensure 'd' is not null or undefined if coming from your data
+                    if (d !== null && d !== undefined) {
+                        select.add(new Option(d, d));
+                    }
+                });
+                */
+            });
+        }
+    });
+});
+</script>
+<style>
+/* Стилі для рядка фільтрів */
+#sessions-table thead .filters th {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    text-align: center; /* Центрувати вміст, якщо потрібно */
+}
+
+/* Стилі для полів вводу та випадаючих списків у фільтрах */
+#sessions-table thead .filters input,
+#sessions-table thead .filters select {
+    width: 100%;
+    box-sizing: border-box; /* Важливо для коректної ширини з padding */
+    padding: 3px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+</style>

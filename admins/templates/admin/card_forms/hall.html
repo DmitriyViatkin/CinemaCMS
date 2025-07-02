@@ -15,7 +15,7 @@
                 <td>{{ hall.title }}</td>
                 <td>{{ hall.date }}</td>
                 <td>
-                    <a href="{% url 'add_halls_edit' hall.id %}" class="btn btn-sm btn-primary"><i class="fas fa-pencil-alt"></i></a>
+                    <a href="{% url 'add_halls_edit' cinema_pk=hall.cinema.id halls_id=hall.id %}" class="btn btn-sm btn-primary"><i class="fas fa-pencil-alt"></i></a>
                     <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deleteHallModal{{ hall.id }}"><i class="fas fa-trash"></i></button>
 
                     <div class="modal fade" id="deleteHallModal{{ hall.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteHallModalLabel{{ hall.id }}" aria-hidden="true">

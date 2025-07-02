@@ -1,0 +1,38 @@
+
+{% load widget_tweaks %}
+
+                                <div class="form-group" style="display: flex; align-items: center; justify-content: space-between;">
+                                    <div>
+                                        {{ paige_form.phone_1.label_tag }}
+                                        <div>
+                                            {{ paige_form.phone_1_ru }}
+                                            {% for error in paige_form.phone_1_ru.errors %}
+                                                <div class="alert alert-danger">{{ error }}</div>
+                                            {% endfor %}
+                                            <br>
+                                                {{ paige_form.phone_2_ru }}
+                                            {% for error in paige_form.phone_2_ru.errors %}
+                                                <div class="alert alert-danger">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center" style="margin-left: 20px;">
+                                        <div class="form-group mb-0 mr-4">
+                                            <label for="{{ paige_form.is_active.id_for_label }}" class="mr-2">{{ paige_form.is_active.label }}</label>
+                                            {{ paige_form.is_active|add_class:"form-control" }}
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <label for ="{{  paige_form.SEO_text.label }}">SEO_текст </label>
+                                        {{ paige_form.SEO_text_ru }}
+                                        {% if paige_form.SEO_text_ru.help_text %}
+                                            <small class="form-text text-muted">{{ paige_form.SEO_text_ru.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in paige_form.SEO_text_ru.errors %}
+                                            <div class="alert alert-danger">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>

@@ -27,14 +27,14 @@ class Cinemas(models.Model):
 class Halls(models.Model):
     seo_block = models.OneToOneField(Block_SEO, on_delete=models.CASCADE, verbose_name="SEO блок")
     id = models.AutoField(primary_key=True)
+    scheme_hall = models.FileField(upload_to='scheme_hall/')
     title = models.CharField(max_length=255, verbose_name=_('Назва'))
     cinema = models.ForeignKey(Cinemas, on_delete=models.CASCADE, related_name='halls', verbose_name="Кинотеатр")
     description = models.TextField(verbose_name=_('Опис'))
     gallery = models.ForeignKey(Gallery, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Картинка')
     date = models.DateField(auto_now_add=True, verbose_name='Дата')
 
-    rows = models.PositiveIntegerField(verbose_name=_('Кількість рядів'), null=True, blank=True)
-    seats_row = models.PositiveIntegerField(verbose_name=_('Місць у ряду'), null=True, blank=True)
+
 
     def total_seats(self):
         """Общее количество мест в зале"""
@@ -53,7 +53,7 @@ class Sessions(models.Model):
 
     id = models.AutoField(primary_key=True)
     cinema = models.ForeignKey(Cinemas, on_delete=models.CASCADE, related_name='sessions', verbose_name="Кинотеатр")
-    hall_id = models.ForeignKey(Halls, on_delete=models.CASCADE, verbose_name= 'Зал')
+    hall_id = models.ForeignKey(Halls, on_delete=models.CASCADE,related_name='sessions', verbose_name= 'Зал')
     movie = models.ForeignKey(Movies, on_delete=models.SET_NULL, related_name='movie_sessions',null=True, blank=True)
 
     time_session = models.TimeField(verbose_name= 'Час сеансу')
@@ -68,29 +68,30 @@ class Sessions(models.Model):
 
 class Seats(models.Model):
     STATUS_CHOICES = [
-        ("S", "Куплене"),
-        ("F", "Вільне"),
-        ("N", "Не доступно")
+        ("S", _("Куплене")),
+        ("F", _("Вільне")),
+        ("N", _("Не доступно"))
     ]
 
     id = models.AutoField(primary_key=True)
 
-    number_row = models.IntegerField(verbose_name='Номер ряду')
-    seat = models.IntegerField(verbose_name='Номер місця')
-    date = models.DateField(auto_now_add=True, verbose_name='Дата')
-    status = models.CharField(max_length=12, choices=STATUS_CHOICES, default="F", verbose_name='Статус місця')
-    halls = models.ForeignKey(Halls, on_delete=models.CASCADE, verbose_name='Зал')
+    number_row = models.IntegerField(verbose_name=_('Номер ряду'))
+    seat = models.IntegerField(verbose_name=_('Номер місця'))
+    date = models.DateField(auto_now_add=True, verbose_name=_('Дата'))
+    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default="F", verbose_name=_('Статус місця'))
+    halls = models.ForeignKey('Halls', on_delete=models.CASCADE, related_name='seats_in_hall', verbose_name=_('Зал'))
 
-    is_vip = models.BooleanField(default=False, verbose_name='VIP')
-    price = models.DecimalField(max_digits=8, decimal_places=2, default=120.00, verbose_name='Ціна')
+    is_vip = models.BooleanField(default=False, verbose_name=_('VIP'))
+    price = models.DecimalField(max_digits=8, decimal_places=2, default=120.00, verbose_name=_('Ціна'))
+
+    class Meta:
+        unique_together = ('halls', 'number_row', 'seat')
+        verbose_name = _("Місце")
+        verbose_name_plural = _("Місця")
+        ordering = ['number_row', 'seat']
 
     def __str__(self):
         return f'ряд {self.number_row}, місце {self.seat}'
-
-    class Meta:
-        verbose_name = "Місце"
-        verbose_name_plural = "Місця"
-
 
 class Tickets(models.Model):
 
@@ -109,6 +110,6 @@ class Tickets(models.Model):
          verbose_name = "Квиток"
          verbose_name_plural = "Квитки"
          constraints = [
-                    # Гарантує, що комбінація session та seat унікальна в таблиці
+
                     UniqueConstraint(fields=['session', 'seat'], name='unique_ticket_session_seat')
                 ]

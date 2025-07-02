@@ -1,14 +1,145 @@
 from django import forms
 from main.models import Block_SEO, Gallery, Picture, MainPaiges
 from  movie.models import Movies
-from  users.models import User
+from  users.models import User ,Email_campaing, Tamplate_email
 from core.models import Cinemas, Halls, Sessions,Seats, Tickets
 from main.models import Banners, Cross_Banner, News, PaigesNews, Promotion, PaigesCinema, Contact
 from django.forms import inlineformset_factory, formset_factory, modelformset_factory
 from django.forms.widgets import HiddenInput
 from django.utils.translation import gettext_lazy as _
 
+class TemplateEmailForm(forms.ModelForm):
+    """
+    Форма для создания и редактирования шаблонов email, с загрузкой файла.
+    """
+    class Meta:
+        model = Tamplate_email
+        fields = ['template_file'] # Теперь используем 'template_file'
+        labels = {
+            'template_file': "Загрузить файл шаблона (HTML, TXT и т.д.)",
+        }
 
+
+
+class EmailSendForm(forms.Form):
+    users = forms.ModelMultipleChoiceField(
+        queryset=User.objects.filter(email__isnull=False).exclude(email=""),
+        widget=forms.CheckboxSelectMultiple,
+        label="Одержувачі"
+    )
+
+    html_file = forms.FileField(label="HTML шаблон листа (файл)", required=True)
+
+    def clean_html_file(self):
+        html_file = self.cleaned_data.get("html_file")
+        if html_file and not html_file.name.endswith('.html'):
+            raise forms.ValidationError("Файл повинен мати розширення .html")
+        return html_file
+
+class SellectUserForm(forms.ModelForm):
+
+        class Meta:
+            model = Email_campaing
+            fields = ['users']
+            # Здесь мы определяем виджеты
+            widgets = {
+                'users': forms.CheckboxSelectMultiple(attrs={'class': 'form-control'}),
+            }
+
+            labels = {
+                  'users': 'Выберите пользователей для кампании',
+              }
+
+
+class EmailCampaignForm(forms.ModelForm):
+    # !!! ЭТО КРИТИЧЕСКОЕ ИЗМЕНЕНИЕ !!!
+    # users теперь CharField, чтобы принимать строку "1,4" или ""
+    users = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput, # Поле должно быть скрытым
+        help_text="Список ID пользователей, разделенных запятыми."
+    )
+
+    recipient_mode = forms.ChoiceField(
+        choices=[
+            ('all', 'Всі користувачі'),
+            ('selected', 'Вибірково'),
+        ],
+        widget=forms.RadioSelect,
+        initial='all',
+        label='Виберіть отримувачів розсилки'
+    )
+
+    new_template_file = forms.FileField(
+        label="Загрузить НОВЫЙ файл шаблона (HTML, TXT и т.д.)",
+        required=False,
+        help_text="Загрузите файл для нового шаблона Email. Если выбрано, этот шаблон будет связан с кампанией."
+    )
+
+    class Meta:
+        model = Email_campaing
+        fields = ['new_template_file', 'template', 'status', 'users'] # Убедитесь, что здесь нет пробела после 'template'
+        labels = {
+            'status': "Статус кампании",
+            'template': "Выбрать существующий шаблон Email",
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['template'].queryset = Tamplate_email.objects.order_by('-id')
+
+        if not self.instance.pk:
+            self.fields['recipient_mode'].initial = 'all'
+        elif self.instance.users.exists():
+            self.fields['recipient_mode'].initial = 'selected'
+            # При редактировании, инициализируем скрытое поле 'users' для JS
+            initial_user_ids = list(self.instance.users.values_list('id', flat=True))
+            self.initial['users'] = ','.join(map(str, initial_user_ids))
+        else:
+            self.fields['recipient_mode'].initial = 'all'
+
+
+    def clean_users(self):
+        users_str = self.cleaned_data.get('users', '') # Получаем строку из hidden input
+        recipient_mode = self.data.get('recipient_mode') # Получаем режим выбора
+
+        if recipient_mode == 'all':
+            return [] # Возвращаем пустой список, так как все пользователи будут добавлены в views.py
+
+        # Если режим 'selected'
+        if users_str: # Если строка не пустая, парсим её
+            try:
+                user_ids = [int(uid.strip()) for uid in users_str.split(',') if uid.strip()]
+            except ValueError:
+                raise forms.ValidationError("Неверный формат ID пользователя. Ожидается список чисел через запятую.")
+
+            # Опционально: проверка на существование пользователей
+            existing_user_ids = User.objects.filter(id__in=user_ids).values_list('id', flat=True)
+            if len(set(user_ids)) != len(existing_user_ids):
+                invalid_ids = set(user_ids) - set(existing_user_ids)
+                raise forms.ValidationError(f"Некоторые выбранные ID пользователей недействительны или не существуют: {list(invalid_ids)}")
+
+            return user_ids # Возвращаем список ID
+        else:
+            # Если recipient_mode == 'selected', но users_str пуст
+            raise forms.ValidationError("Виберіть хоча б одного користувача для розсилки.")
+
+    def clean(self):
+        cleaned_data = super().clean()
+        existing_template = cleaned_data.get('template')
+        new_template_file = cleaned_data.get('new_template_file')
+
+        # Приоритет — файл
+        if new_template_file:
+            # Сбрасываем выбранный шаблон, чтобы использовать только файл
+            cleaned_data['template'] = None
+        elif not existing_template:
+            # Нет файла — требуем хотя бы выбранный шаблон
+            self.add_error(
+                'template',
+                "Пожалуйста, выберите существующий шаблон или загрузите новый файл."
+            )
+        return cleaned_data
 class ContactForm(forms.ModelForm):
     contact_picture = forms.ImageField(required=False, label="Лого")
     delete_contact_picture = forms.BooleanField(required=False, initial=False, widget=forms.HiddenInput())
@@ -84,21 +215,25 @@ class MainPaigesForm(forms.ModelForm):
     class Meta:
         model = MainPaiges
         exclude = ['id', 'seo_block', ]
+        fields = ['phone_1_uk' ,'phone_1_ru', 'phone_2_uk', 'phone_2_ru', 'SEO_text_uk', 'SEO_text_ru','is_active' ]
         labels = {
-            'phone_1': 'Телефон ',
-            'phone_2': ' ',
-            'SEO_text': 'SEO текст ',
+            'phone_1_uk': 'Телефон (укр)',
+            'phone_1_ru': 'Телефон (рус)',
+            'phone_2_uk': '',
+            'phone_2_ru': '',
+            'SEO_text_uk': 'SEO текст (укр)',
+            'SEO_text_ru': 'SEO текст (рус)',
         }
 
         widgets = {
-
-            'phone_1': forms.TextInput(attrs={'class': 'form-control phone-input'}),
-            'phone_2': forms.TextInput(attrs={'class': 'form-control phone-input'}),
-
-            'SEO_text': forms.Textarea(attrs={'class': 'form-control', 'rows': 6}),
+            'phone_1_uk': forms.TextInput(attrs={'class': 'form-control phone-input'}),
+            'phone_1_ru': forms.TextInput(attrs={'class': 'form-control phone-input'}),
+            'phone_2_uk': forms.TextInput(attrs={'class': 'form-control phone-input'}),
+            'phone_2_ru': forms.TextInput(attrs={'class': 'form-control phone-input'}),
+            'SEO_text_uk': forms.Textarea(attrs={'class': 'form-control', 'rows': 6}),
+            'SEO_text_ru': forms.Textarea(attrs={'class': 'form-control', 'rows': 6}),
             'is_active': forms.CheckboxInput(attrs={'data-bootstrap-switch': ''}),
         }
-
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -110,7 +245,7 @@ class PaigesCinemaForm(forms.ModelForm):
         model = PaigesCinema
         exclude = ['id', 'seo_block', 'gallery']
 
-        fields = '__all__'
+        fields = [ 'title_uk', 'description_uk', 'title_ru', 'description_ru','date' ,'is_active']
         widgets = {
             'is_active': forms.CheckboxInput(attrs={'data-bootstrap-switch': ''}),}
 
@@ -118,7 +253,7 @@ class PaigesCinemaForm(forms.ModelForm):
 class PromotionForm(forms.ModelForm):
     class Meta:
         model = Promotion
-        fields = ['title', 'description', 'url_video', 'date', 'is_active']
+        fields = ['title_uk', 'description_uk', 'title_ru', 'description_ru','url_video', 'date', 'is_active']
         labels = {
             'title':"Назва Акції",
             'description':"Опис",
@@ -139,7 +274,7 @@ class PaigesNewsForm(forms.ModelForm):
     class Meta:
         model=PaigesNews
 
-        fields = ['title', 'description', 'url', 'date', 'is_active']
+        fields = ['title_uk', 'description_uk', 'title_ru', 'description_ru','url', 'date', 'is_active']
         labels = {
             'title': _("Назва новини"),
             'description': _("Опис"),
@@ -340,22 +475,26 @@ class HallsForm(forms.ModelForm):
         model = Halls
 
         exclude = ['seo_block','date', 'gallery']
-
-        fields = [ 'title', 'cinema', 'description', 'rows', 'seats_row']
+        fields = [
+            'title_uk', 'title_ru',
+            'description_uk', 'description_ru',
+            'cinema',
+            'scheme_hall',
+             ]
         labels = {
+
             'title':_('Назва'),
             'cinema':_('Кінотеатр'),
+            'scheme_hall':_('Схема залу'),
             'description':_("Опис"),
-            'rows':_('Ряд'),
-            'seats_row':'_(Місце)'
-        }
 
+        }
 class CinemaForm(forms.ModelForm):
 
     class Meta:
         model = Cinemas
 
-        fields = ['title', 'description' , 'conditions', 'city',]
+        fields = ['title_uk', 'description_uk' , 'conditions_uk', 'city_uk','title_ru', 'description_ru' , 'conditions_ru', 'city_ru',]
         widgets = {
 
             'description': forms.Textarea(attrs={'class': 'form-control'}),
@@ -395,7 +534,7 @@ class MovieForm(forms.ModelForm):
     class Meta:
         model = Movies
 
-        fields = ['genre', 'title', 'url_trailer', 'description',
+        fields = ['genre', 'title_uk', 'description_uk','url_trailer', 'description_ru','title_ru',
                     'relise_date', 'age_limit', 'is_2d','is_3d','is_imax']
         labels = {
             'genre': _('Жанр:'),

@@ -33,6 +33,21 @@ class Movies(models.Model):
     is_imax = models.BooleanField(default=False, verbose_name='IMAX')
     gallery = models.ForeignKey(Gallery, on_delete=models.SET_NULL, null=True, blank=True,
                                 related_name='movies', verbose_name=_('Галерея зображень'))
+    price=models.IntegerField(verbose_name=_('Цена'), default=50 )
+
+    def __str__(self):
+        return self.title
+
+    def get_youtube_embed_url(self):
+
+        if self.url_trailer:
+
+            import re
+            match = re.search(r'(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})',                self.url_trailer)
+            if match:
+                video_id = match.group(1)
+                return f"https://www.youtube.com/embed/{video_id}"
+        return None
 
     def __str__(self):
         return self.title

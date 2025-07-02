@@ -1,0 +1,401 @@
+{% extends 'admin/index.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .email-block {
+        border: 2px solid #000;
+        padding: 20px;
+        width: 80%;
+        margin: 20px auto;
+        border-radius: 8px;
+        font-size: 15px;
+    }
+    .email-title {
+        text-align: center;
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+    .section {
+        margin-bottom: 20px;
+    }
+    .flex-row {
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+    }
+    .box {
+        border: 1px solid #ccc;
+        padding: 15px;
+        border-radius: 5px;
+        width: 100%;
+    }
+    .hint {
+        background-color: #ffffcc;
+        border: 1px dashed #aaa;
+        padding: 10px;
+        font-size: 14px;
+    }
+    .checkbox-list {
+        max-height: 350px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        padding: 10px;
+        background-color: #fafafa;
+    }
+    .btn {
+        padding: 8px 20px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+    .checkbox-item {
+        margin-bottom: 5px;
+    }
+</style>
+
+<div class="email-block">
+    <div class="email-title">E-mail</div>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+
+        <div class="section flex-row">
+            <div class="box" style="width: 300px;">
+                <label><input type="radio" name="recipient_mode" value="all" class="recipient-mode-radio" checked> Все пользователи на почту</label><br>
+                <label><input type="radio" name="recipient_mode" value="selected" class="recipient-mode-radio"> Выборочно</label>
+            </div>
+            <div class="box" id="user-select-block" style="display: none;">
+                <h4>Вибір користувачів для розсилки:</h4>
+        <div class="form-group">
+            <input type="text" id="user-search-input" class="form-control" placeholder="Пошук користувачів (ім'я ..)">
+        </div>
+                <input type="hidden" name="users" id="selected_users_input" value="">
+        <div class="table-responsive mt-3">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="select-all-users"></th>
+                        <th>ID</th>
+                        <th>Дата реєстрації</th>
+                        <th>День народження</th>
+                        <th>Email</th>
+                        <th>Телефон</th>
+                        <th>ПІБ</th>
+                        <th>Псевдонім</th>
+                        <th>Місто</th>
+
+                    </tr>
+                </thead>
+                <tbody id="user-table-body">
+                    </tbody>
+            </table>
+<ul id="user-pagination" class="pagination mt-3"></ul>
+                </div>
+            </div>
+        </div>
+
+
+
+
+        <div class="section flex-row">
+                        <div class="box" style="width: 50%;">
+                            {{ form.new_template_file.label_tag }}<br>
+                            {{ form.new_template_file }}
+                            {% if form.new_template_file.help_text %}
+                                <small>{{ form.new_template_file.help_text }}</small>
+                            {% endif %}
+                        </div>
+
+                           <div class="box" style="width: 50%;">
+                            <strong>Выберите один из последних шаблонов:</strong>
+                            <div class="checkbox-list">
+
+                            {% for template in templates %}
+                                <div class="checkbox-item">
+                                    <label>
+                                        <input type="radio" name="template" value="{{ template.id }}" onchange="displaySelectedTemplate(this)"
+                                        {% if forloop.first %}checked{% endif %}>
+                                        {{ template.template_file }}
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                </div>
+            </div>
+
+
+
+        <div class="section" style="display:none">
+            {{ form.status.label_tag }}<br>
+            {{ form.status }}
+        </div>
+        <div class='progress-wrapper'>
+            <div id='progress-bar' class='progress-bar' style="background-color: #68a9ef; width: 0%;">&nbsp;</div>
+        </div>
+        <div id="progress-bar-message">Waiting for progress to start...</div>
+
+
+        {% if form.non_field_errors %}
+            <div class="section errorlist">
+                {% for error in form.non_field_errors %}
+                    <p style="color: red;">{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="section" style="text-align: center;">
+            <button type="submit" class="btn btn-primary">Начать рассылку</button>
+        </div>
+    </form>
+</div>
+
+
+<script src="{% static 'celery_progress/celery_progress.js' %}"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+          var progressUrl = "{% url 'celery_progress:task_status' task_id %}";
+          CeleryProgressBar.initProgressBar(progressUrl);
+        });
+    document.addEventListener('DOMContentLoaded', function() {
+        const radios = document.querySelectorAll('input[name="recipient_mode"]');
+        const userBlock = document.getElementById('user-select-block');
+
+        const userSearchInput = document.getElementById('user-search-input');
+        const userTableBody = document.getElementById('user-table-body');
+        const userPagination = document.getElementById('user-pagination');
+        const selectedUsersInput = document.getElementById('selected_users_input');
+        const selectAllUsersCheckbox = document.getElementById('select-all-users');
+
+        const ajaxUserListUrl = "{% url 'user_list' %}";
+
+        let selectedUserIds = selectedUsersInput.value ? selectedUsersInput.value.split(',').map(Number) : [];
+        console.log("DEBUG JS: Initial selected user IDs (from hidden input value):", selectedUsersInput.value);
+        console.log("DEBUG JS: Initial selectedUserIds array:", selectedUserIds);
+
+
+
+        function loadUsers(page = 1, search = '') {
+            console.log(`DEBUG JS: Loading users for page: ${page}, search: "${search}"`);
+            const url = `${ajaxUserListUrl}?page=${page}&search=${search}`;
+            fetch(url)
+                .then(response => {
+                    console.log("DEBUG JS: Fetch response received.");
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("DEBUG JS: Users data received:", data);
+                    userTableBody.innerHTML = '';
+                    data.users.forEach(user => {
+                        const isSelected = selectedUserIds.includes(user.id);
+                        const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+
+                        const row = `
+                            <tr>
+                                <td><input type="checkbox" class="user-checkbox" data-user-id="${user.id}" ${isSelected ? 'checked' : ''}></td>
+                                <td>${user.id}</td>
+                                <td>${user.date_joined ? new Date(user.date_joined).toLocaleDateString() : 'N/A'}</td>
+                                <td>${user.date_of_birth ? new Date(user.date_of_birth).toLocaleDateString() : 'N/A'}</td>
+                                <td>${user.email || 'N/A'}</td>
+                                <td>${user.phone_number || 'N/A'}</td>
+                                <td>${fullName || 'N/A'}</td>
+                                <td>${user.username || 'N/A'}</td>
+                                <td>${user.city || 'N/A'}</td>
+                            </tr>
+                        `;
+                        userTableBody.innerHTML += row;
+                    });
+                    updatePagination(data.num_pages, data.current_page, data.has_previous, data.has_next, search);
+                    updateSelectAllCheckboxState();
+                    console.log("DEBUG JS: User table rendered. Current selectedUserIds:", selectedUserIds);
+                })
+                .catch(error => console.error('DEBUG JS: Error loading users:', error));
+        }
+
+
+        function updatePagination(numPages, currentPage, hasPrevious, hasNext, search) {
+            userPagination.innerHTML = '';
+
+            const prevClass = hasPrevious ? '' : 'disabled';
+            userPagination.innerHTML += `<li class="page-item ${prevClass}"><a class="page-link" href="#" data-page="${currentPage - 1}">Попередня</a></li>`;
+
+
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(numPages, currentPage + 2);
+
+            if (startPage > 1) {
+                userPagination.innerHTML += `<li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>`;
+                if (startPage > 2) {
+                    userPagination.innerHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+                }
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                const activeClass = i === currentPage ? 'active' : '';
+                userPagination.innerHTML += `<li class="page-item ${activeClass}"><a class="page-link" href="#" data-page="${i}">${i}</a></li>`;
+            }
+
+            if (endPage < numPages) {
+                if (endPage < numPages - 1) {
+                    userPagination.innerHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+                }
+                userPagination.innerHTML += `<li class="page-item"><a class="page-link" href="#" data-page="${numPages}">${numPages}</a></li>`;
+            }
+
+            // Кнопка "Следующая"
+            const nextClass = hasNext ? '' : 'disabled';
+            userPagination.innerHTML += `<li class="page-item ${nextClass}"><a class="page-link" href="#" data-page="${currentPage + 1}">Наступна</a></li>`;
+
+            userPagination.querySelectorAll('.page-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const page = parseInt(this.dataset.page);
+                    if (!isNaN(page) && page > 0 && page <= numPages) {
+                        loadUsers(page, search);
+                    }
+                });
+            });
+            console.log("DEBUG JS: Pagination updated.");
+        }
+
+
+        function updateSelectedUsersInput() {
+
+            selectedUsersInput.value = Array.from(new Set(selectedUserIds)).join(',');
+            console.log("DEBUG JS: Hidden input 'selected_users_input' updated to:", selectedUsersInput.value);
+            console.log("DEBUG JS: Current selectedUserIds array:", selectedUserIds);
+        }
+
+
+        function updateSelectAllCheckboxState() {
+            const allCheckboxes = userTableBody.querySelectorAll('.user-checkbox');
+            const checkedCheckboxes = userTableBody.querySelectorAll('.user-checkbox:checked');
+
+            if (allCheckboxes.length === 0) {
+                selectAllUsersCheckbox.checked = false;
+                selectAllUsersCheckbox.indeterminate = false;
+            } else if (checkedCheckboxes.length === allCheckboxes.length) {
+                selectAllUsersCheckbox.checked = true;
+                selectAllUsersCheckbox.indeterminate = false;
+            } else if (checkedCheckboxes.length > 0) {
+                selectAllUsersCheckbox.checked = false;
+                selectAllUsersCheckbox.indeterminate = true;
+            } else {
+                selectAllUsersCheckbox.checked = false;
+                selectAllUsersCheckbox.indeterminate = false;
+            }
+            console.log("DEBUG JS: 'Select All' checkbox state updated. All checkboxes on page:", allCheckboxes.length, "Checked:", checkedCheckboxes.length);
+        }
+
+
+        userTableBody.addEventListener('change', function(e) {
+            if (e.target.classList.contains('user-checkbox')) {
+                const userId = parseInt(e.target.dataset.userId);
+                console.log(`DEBUG JS: User checkbox changed. User ID: ${userId}, Checked: ${e.target.checked}`);
+
+                if (isNaN(userId)) {
+                    console.error("DEBUG JS ERROR: Invalid user ID from checkbox:", e.target.dataset.userId);
+                    return;
+                }
+
+                if (e.target.checked) {
+                    if (!selectedUserIds.includes(userId)) {
+                        selectedUserIds.push(userId);
+                        console.log("DEBUG JS: Added user ID:", userId, "New selectedUserIds:", selectedUserIds);
+                    }
+                } else {
+                    selectedUserIds = selectedUserIds.filter(id => id !== userId);
+                    console.log("DEBUG JS: Removed user ID:", userId, "New selectedUserIds:", selectedUserIds);
+                }
+                updateSelectedUsersInput();
+                updateSelectAllCheckboxState();
+            }
+        });
+
+
+        selectAllUsersCheckbox.addEventListener('change', function() {
+            const isChecked = this.checked;
+            console.log(`DEBUG JS: 'Select All' checkbox changed. Checked: ${isChecked}`);
+            userTableBody.querySelectorAll('.user-checkbox').forEach(checkbox => {
+                const userId = parseInt(checkbox.dataset.userId);
+                if (isNaN(userId)) {
+                    console.error("DEBUG JS ERROR: Invalid user ID from select-all checkbox:", checkbox.dataset.userId);
+                    return;
+                }
+
+                checkbox.checked = isChecked;
+
+                if (isChecked) {
+                    if (!selectedUserIds.includes(userId)) {
+                        selectedUserIds.push(userId);
+                    }
+                } else {
+                    selectedUserIds = selectedUserIds.filter(id => id !== userId);
+                }
+            });
+            console.log("DEBUG JS: selectedUserIds after 'Select All' action:", selectedUserIds);
+            updateSelectedUsersInput();
+            updateSelectAllCheckboxState();
+        });
+
+
+        let searchTimeout;
+        userSearchInput.addEventListener('input', function() {
+            const searchTerm = this.value;
+            console.log(`DEBUG JS: User search input changed. New term: "${searchTerm}"`);
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                loadUsers(1, searchTerm);
+            }, 300);
+        });
+
+
+        radios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                console.log(`DEBUG JS: Recipient mode changed to: "${this.value}"`);
+                if (this.value === 'selected') {
+                    userBlock.style.display = 'block';
+                    console.log("DEBUG JS: User selection block displayed.");
+                    loadUsers(1, userSearchInput.value);
+                } else {
+                    userBlock.style.display = 'none';
+                    console.log("DEBUG JS: User selection block hidden.");
+
+                    selectedUserIds = [];
+                    updateSelectedUsersInput();
+                    console.log("DEBUG JS: Cleared selected users because 'All users' mode was chosen.");
+                }
+            });
+        });
+
+
+        const initialSelectedMode = document.querySelector('input[name="recipient_mode"]:checked');
+        console.log("DEBUG JS: Page loaded. Initial selected recipient mode:", initialSelectedMode ? initialSelectedMode.value : 'None');
+
+        if (initialSelectedMode && initialSelectedMode.value === 'selected') {
+            userBlock.style.display = 'block';
+            console.log("DEBUG JS: Initial mode is 'selected', displaying user block and loading users.");
+            loadUsers(1, userSearchInput.value);
+        } else {
+            userBlock.style.display = 'none';
+            console.log("DEBUG JS: Initial mode is 'all' or 'None', hiding user block.");
+
+            selectedUserIds = [];
+            updateSelectedUsersInput();
+        }
+function displaySelectedTemplate(radio) {
+        const selectedTemplateInfo = document.getElementById('selectedTemplateInfo');
+        const templateFileName = radio.nextSibling ? radio.nextSibling.textContent.trim() : 'N/A';
+        selectedTemplateInfo.textContent = `${templateFileName} (ID: ${radio.value})`;
+    }
+
+    });
+
+
+</script>
+{% endblock %}

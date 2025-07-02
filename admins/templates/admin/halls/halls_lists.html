@@ -13,9 +13,9 @@
 
                         <div class="card-tools">
 
-                            <a href="{% url 'add_halls_create' %}" class="btn btn-success btn-sm">
-                                <i class="fas fa-plus"></i> Додати зал
-                            </a>
+                            <a href="{% url 'add_halls_edit' hall.cinema.id hall.id %}" class="btn btn-sm btn-primary">
+    <i class="fas fa-pencil-alt"></i>
+</a>
                         </div>
                     </div>
                     <div class="card-body">

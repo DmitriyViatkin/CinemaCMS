@@ -1,0 +1,28 @@
+{% load static %}
+{% load i18n %}
+
+                                        <div class="form-group flex-container">
+                                                    {{  paige_form.title_ru.label }}
+                                                    {{ paige_form.title_ru }}
+                                                    {% if paige_form.title_ru.help_text %}<small class="form-text text-muted">{{ paige_form.title_ru.help_text }}</small>{% endif %}
+                                                    {% for error in paige_form.title_ru.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+
+                                                    {{   paige_form.date.label_tag}}
+                                                    {{ paige_form.date }}
+                                                    {% if paige_form.date.help_text %}<small class="form-text text-muted">{{ paige_form.date.help_text }}</small>{% endif %}
+                                                    {% for error in paige_form.date.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+
+                                                    {% translate paige_form.is_active.label_tag %}
+                                                    {{ paige_form.is_active }}
+                                                    {% if paige_form.is_active.help_text %}<small class="form-text text-muted">{{ paige_form.gallery.help_text }}</small>{% endif %}
+                                                    {% for error in paige_form.is_active.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+
+                                                 </div>
+
+
+                                          <div class="form-group">
+                                                {% translate paige_form.description_ru.label_tag %}
+                                                {{ paige_form.description_ru }}
+                                                {% if paige_form.description_ru.help_text %}<small class="form-text text-muted">{{ paige_form.description_ru.help_text }}</small>{% endif %}
+                                                {% for error in paige_form.description_ru.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                                          </div>

@@ -1,0 +1,30 @@
+                            <div class="card-body">
+                                            <div class="form-group flex-container">
+                                                <label class="label-wrapper" for="{{  promotion_form.title.label }}">Назва</label>
+                                                {{ promotion_form.title_uk }}
+                                                {% if promotion_form.title_uk.help_text %}<small class="form-text text-muted">{{ promotion_form.title_uk.help_text }}</small>{% endif %}
+                                                {% for error in promotion_form.title_uk.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+
+
+                                                <label class="label-wrapper" for="{{ promotion_form.date.label }}"> Дата публікації </label>
+                                                {{ promotion_form.date }}
+                                                {% if promotion_form.date.help_text %}<small class="form-text text-muted">{{ promotion_form.date.help_text }}</small>{% endif %}
+                                                {% for error in promotion_form.date.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+
+                                                 <label class="label-wrapper" for="{{ promotion_form.is_active.label }}"> Показувати</label>
+                                                {{ promotion_form.is_active }}
+                                                {% if promotion_form.is_active.help_text %}<small class="form-text text-muted">{{ promotion_form.gallery.help_text }}</small>{% endif %}
+                                                {% for error in promotion_form.is_active.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                                            </div>
+
+                            </div>
+                            </div>
+
+                        <div class="card-body">
+                          <div class="form-group">
+                                <label class="label-wrapper" for="{{  promotion_form.description.label}}"> Опис </label>
+                                {{ promotion_form.description_uk }}
+                                {% if promotion_form.description_uk.help_text %}<small class="form-text text-muted">{{ news_form.description_uk.help_text }}</small>{% endif %}
+                                {% for error in promotion_form.description_uk.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                          </div>
+                        </div>

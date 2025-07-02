@@ -11,6 +11,6 @@
   <div class="card-body d-flex flex-column">
     <h5 class="card-title">{{ movie.title }}</h5>
     <p class="card-text">Прем'єра: {{ movie.relise_date|date:"d.m.Y" }}</p>
-    <a href="{% url 'movie_detail' movie_slug=movie.seo_block.seo_url %}" class="btn btn-outline-primary mt-auto">Детальніше</a>
+    <a href="{% url 'movie_detail' movie_id=movie.id %}" class="btn btn-primary">Детальніше</a>
   </div>
 </div>

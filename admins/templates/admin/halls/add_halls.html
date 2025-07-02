@@ -10,32 +10,141 @@
 
 {% block content %}
 
+<style>
+    /* Стилі для контейнера вкладок */
+    .tabs-navigation {
+        display: flex;
+        border-bottom: 1px solid #ddd;
+        margin-bottom: 20px;
+    }
 
+    /* Стилі для кнопок вкладок */
+    .tab-button {
+        background-color: #f1f1f1;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        padding: 10px 20px;
+        transition: 0.3s;
+        font-size: 17px;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+        margin-right: 2px; /* Невеликий відступ між кнопками */
+    }
+
+    /* Стилі при наведенні на кнопку вкладки */
+    .tab-button:hover {
+        background-color: #ddd;
+    }
+
+    /* Стилі для активної кнопки вкладки */
+    .tab-button.active {
+        background-color: #e0e0e0;
+        border-bottom: 3px solid #007bff; /* Колір виділення активної вкладки */
+        color: #007bff;
+    }
+
+    /* Стилі для вмісту вкладок */
+    .tab-pane {
+        display: none; /* За замовчуванням всі вкладки сховані */
+        padding: 20px 0;
+        border-top: none;
+    }
+
+    /* Стилі для активної вкладки */
+    .tab-pane.active {
+        display: block; /* Активна вкладка видима */
+    }
+
+    /* Загальні стилі для форм, винесені сюди */
+    .form-block {
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .field-row-aligned {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .label-wrapper {
+      min-width: 200px;
+      margin-right: 15px;
+      text-align: left;
+      font-weight: bold;
+    }
+
+    .input-wrapper {
+      flex-grow: 1;
+    }
+
+    .input-wrapper input,
+    .input-wrapper textarea,
+    .input-wrapper select {
+      width: 100%;
+      padding: 6px 10px;
+      border: 1px solid #aaa;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 1rem;
+    }
+    .form-group {
+    margin-bottom: 8px; /* або навіть менше */
+}
+
+    .tab-content-compact {
+    margin-bottom: 4px; /* або навіть 0 */
+    padding-bottom: 0;
+}
+    .card-body > .tab-content {
+    margin-top: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+    .tab-content {
+    margin-bottom: 4px;
+    padding-bottom: 0;
+}
+
+.tab-content + .card-body {
+    margin-top: 4px;
+    padding-top: 4px;
+}
+</style>
 
 <section class="content">
       <div class="container-fluid">
         <div class="row">
           <div class="col-md-12">
             <div class="card card-primary">
-                    <div class="card-header">  <div style="text-align: right; margin-bottom: 20px;">
-                        <form action="{% url 'set_language' %}" method="post">{% csrf_token %}
-                                                <input name="next" type="hidden" value="{{ redirect_to }}">
-                                                <select name="language">
-                                                    {% get_current_language as LANGUAGE_CODE %}
-                                                    {% get_available_languages as LANGUAGES %}
-                                                    {% get_language_info_list for LANGUAGES as languages %}
-                                                    {% for language in languages %}
-                                                        <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %}
-                                                                selected{% endif %}>
-                                                            {{ language.name_local }} ({{ language.code }})
-                                                        </option>
-                                                    {% endfor %}
-                                                </select>
-                                                <input type="submit" value="Go">
-                        </form>
+                    <div class="card-header">
+                        <div style="text-align: right; margin-bottom: 20px;">
+                            <form action="{% url 'set_language' %}" method="post">{% csrf_token %}
+                                                    <input name="next" type="hidden" value="{{ redirect_to }}">
+                                                    <select name="language" style="display: none;">
+                                                        {% get_current_language as LANGUAGE_CODE %}
+                                                        {% get_available_languages as LANGUAGES %}
+                                                        {% get_language_info_list for LANGUAGES as languages %}
+                                                        {% for language in languages %}
+                                                            <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %}
+                                                                    selected{% endif %}>
+                                                                {{ language.name_local }} ({{ language.code }})
+                                                            </option>
+                                                        {% endfor %}
+                                                    </select>
+                            </form>
+                        </div>
+                        <div class="tabs-navigation">
+                            <button type="button" class="tab-button active" data-tab-target="#ukrainianTab">
+                                Українська
+                            </button>
+                            <button type="button" class="tab-button" data-tab-target="#russianTab">
+                                Русский
+                            </button>
+                        </div>
+                        <h3 class="card-title">{% if halls %}{% translate 'Редагувати'%} {% else %} {% translate "Додати" %} {% endif %} Зал</h3> <br>
                     </div>
-                <h3 class="card-title">{% if halls %}{% translate 'Редагувати'%} {% else %} {% translate "Додати" %} {% endif %} Зал</h3> <br>
-              </div>
 
               <form method="post" enctype="multipart/form-data">
                   {% csrf_token %}
@@ -44,28 +153,64 @@
                   {% if block_seo_form.non_field_errors %}<div class="alert alert-danger">{{ block_seo_form.non_field_errors }}</div>{% endif %}
                   {% if gallery_form.non_field_errors %}<div class="alert alert-danger">{{ gallery_form.non_field_errors }}</div>{% endif %}
                   {% if picture_formset.non_form_errors %}<div class="alert alert-danger">{{ picture_formset.non_form_errors }}</div>{% endif %}
-
-                  <div class="card-body">
-
-                      {% include 'admin/card_forms/halls_form.html' with form=halls_form%}
-
-                      <br>
-
-                      {% include 'admin/card_forms/sheme_image.html' %}
-                      <br>
+                  {% if banner_form.errors %}<div class="alert alert-danger">{{ banner_form.errors }}</div>{% endif %} {# Додано виведення помилок для banner_form #}
 
 
-                      {% include 'admin/card_forms/banner_image.html' %}
-                      <br>
+                  <div class="tab-content tab-content-compact">
+                      <div id="ukrainianTab" class="tab-pane active">
+                          <div class="card-body">
+                              {# Українська версія полів #}
+                              {% include 'admin/card_forms/halls_form_uk.html' with form=halls_form %}
 
-                      <h3>{% translate 'Картинки галереї'%} </h3>
-                      {% include 'admin/card_forms/gallery_form.html' %}
+                          </div>
 
-                      <br>
+                      </div>
 
+                      <div id="russianTab" class="tab-pane">
+                          <div class="card-body">
+                              {# Російська версія полів #}
+                              {% include 'admin/card_forms/halls_form_ru.html' with form=halls_form %}
 
-                      {% include 'admin/card_forms/seo_form.html' with form=block_seo_form %}
+                          </div>
+                      </div>
+
                   </div>
+                  <br>
+                  <div class="card-body">
+                                <div class="card-body">
+                                          <div class="form-group">
+                                            {{ halls_form.cinema.label_tag }}
+                                            {{halls_form.cinema}}
+                                            {% if halls_form.cinema.help_text %}
+                                              <small class="form-text text-muted">{{ halls_form.cinema.help_text }}</small>
+                                            {% endif %}
+                                            {% for error in halls_form.cinema_uk.errors %}
+                                              <div class="alert alert-danger">{{ error }}</div>
+                                            {% endfor %}
+                                          </div>
+                                        </div>
+                      <div class="form-group">
+                            {{ halls_form.scheme_hall.label_tag }}
+                            {{ halls_form.scheme_hall }}
+                            {% if halls_form.scheme_hall.help_text %}
+                              <small class="form-text text-muted">{{halls_form.scheme_hall.help_text }}</small>
+                            {% endif %}
+                            {% for error in halls_form.scheme_hall.errors %}
+                              <div class="alert alert-danger">{{ error }}</div>
+                            {% endfor %}
+                          </div>
+                        </div>
+
+                      <div class="card-body">
+
+                              <br>
+                              {% include 'admin/card_forms/banner_image.html' %}
+                              <br>
+                              <h3>{% translate 'Картинки галереї (Українська)'%} </h3>
+                              {% include 'admin/card_forms/gallery_form.html' %}
+                              <br>
+                              <h3>SEO (Українська)</h3>
+                              {% include 'admin/card_forms/seo_form.html' with form=block_seo_form %}
 
                   <div class="card-footer">
                       <button type="submit" class="btn btn-primary">
@@ -83,8 +228,27 @@
 <script>
     const DEFAULT_IMAGE_URL = "{% static 'images/картинка.png' %}";
 </script>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>
+<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.13.2/themes/smoothness/jquery-ui.css">
+
+{# Ваш gallery.js - після всіх залежностей #}
 <script src="{% static 'js/gallery.js' %}"></script>
+
+{# JS для вкладок - тепер окремий файл #}
+<script src="{% static 'js/tab.js' %}"></script>
+
+
+{# Інші CSS та скрипти, які не залежать від jQuery UI / datetimepicker #}
 <link rel="stylesheet" href="{% static 'css/movie_css.css' %}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+
+
+
+
 
 {% endblock %}

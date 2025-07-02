@@ -1,7 +1,4 @@
-Добре, ось повний шаблон admin/paige_list/paige_lists.html вже з виправленою синтаксичною помилкою та всіма попередніми змінами:
 
-Оновлений шаблон admin/paige_list/paige_lists.html
-HTML
 
 {% extends 'admin/index.html' %}
 {% load static %}
@@ -24,17 +21,17 @@ HTML
                         </div>
                     </div>
                     <div class="card-body">
-                        <table id="unifiedPagesTable" class="table table-bordered table-hover"> {# Єдина таблиця #}
+                        <table id="unifiedPagesTable" class="table table-bordered table-hover">
                             <thead>
                                 <tr>
                                     <th>{% translate "Назва" %}</th>
                                     <th>{% translate "Дата створення" %}</th>
                                     <th>{% translate "Статус" %}</th>
-                                    <th>{% translate "Дії" %}</th> {# Повернуто стовпець "Дії" #}
+                                    <th>{% translate "Дії" %}</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {# --- Звичайні сторінки (PaigesCinema) --- #}
+
                                 {% for paige_item in paiges %}
                                 <tr>
                                     <td>{{ paige_item.title }}</td>
@@ -79,7 +76,7 @@ HTML
                                 </tr>
                                 {% endif %}
 
-                                {# --- Контактні дані (Contact) --- #}
+
                                 {% if contact %}
                                 <tr>
                                     <td><strong>{% translate "Контактні дані" %}</strong></td> {# Виділяємо назву #}
@@ -95,12 +92,12 @@ HTML
                                     <td><span class="badge badge-success">{% translate "ВКЛ" %}</span></td> {# Контактні дані завжди активні #}
                                     <td>
                                         <a href="{% url 'con' %}" class="btn btn-primary btn-sm">{% translate "Редагувати" %}</a>
-                                        {# Зазвичай контактні дані не видаляють #}
+
                                     </td>
                                 </tr>
                                 {% endif %}
 
-                                {# Якщо жодних даних не знайдено #}
+
                                 {% if not paiges and not main_paige and not contact %}
                                 <tr>
                                     <td colspan="4">{% translate "Не знайдено жодних сторінок або даних." %}</td>
@@ -109,7 +106,7 @@ HTML
                             </tbody>
                         </table>
 
-                        {# Пагінація залишається, оскільки вона застосовується лише до списку paiges #}
+
                         <div class="d-flex justify-content-center mt-3">
                             <ul class="pagination">
                                 {% if paiges.has_previous %}

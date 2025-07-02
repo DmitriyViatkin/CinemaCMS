@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Кинозалы</title>
+</head>
+<body>
+    <h1>Наши кинозалы</h1>
+
+
+    {% for hall in hall_list %}
+        <div>
+
+            <h2><a href="{% url 'hall_detail' hall_id=hall.id %}">{{ hall.title }}</a></h2>
+            <p>{{ hall.description }}</p>
+        </div>
+        <hr>
+    {% empty %}
+        <p>Кинозалов не найдено.</p>
+    {% endfor %}
+
+    <div class="pagination">
+        <span class="step-links">
+            {# Блок пагинации использует 'halls', что соответствует переменной итерации #}
+            {% if halls.has_previous %}
+                <a href="?page=1">&laquo; первая</a>
+                <a href="?page={{ halls.previous_page_number }}">предыдущая</a>
+            {% endif %}
+
+            <span class="current">
+                Страница {{ halls.number }} из {{ halls.paginator.num_pages }}.
+            </span>
+
+            {% if halls.has_next %}
+                <a href="?page={{ halls.next_page_number }}">следующая</a>
+                <a href="?page={{ halls.paginator.num_pages }}">последняя &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+
+</body>
+</html>

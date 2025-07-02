@@ -14,7 +14,16 @@
                 <div class="card card-primary">
                     <div class="card-header">
                         <h3 class="card-title">{% translate 'Додати сторінку' %} </h3>
-                    </div><div >{% include 'admin/card_forms/language.html' %}</div>
+                    </div>
+
+                    <div class="tabs-navigation">
+                            <button type="button" class="tab-button active" data-tab-target="#ukrainianTab">
+                                Українська
+                            </button>
+                            <button type="button" class="tab-button" data-tab-target="#russianTab">
+                                Русский
+                            </button>
+                        </div>
                     <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
 
@@ -37,36 +46,17 @@
 
                         <div class="card-body">
 
+                                    <div class="tab-content tab-content-compact">
+                                          <div id="ukrainianTab" class="tab-pane active">
 
-                                        <div class="card-body">
-                                                <div class="form-group flex-container">
-                                                    {{  paige_form.title.label }}
-                                                    {{ paige_form.title }}
-                                                    {% if paige_form.title.help_text %}<small class="form-text text-muted">{{ paige_form.title.help_text }}</small>{% endif %}
-                                                    {% for error in paige_form.title.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                                                  {% include 'admin/paige_list/paige_content/paige_content_uk.html'   %}
 
-                                                    {{   paige_form.date.label_tag}}
-                                                    {{ paige_form.date }}
-                                                    {% if paige_form.date.help_text %}<small class="form-text text-muted">{{ paige_form.date.help_text }}</small>{% endif %}
-                                                    {% for error in paige_form.date.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-
-                                                    {% translate paige_form.is_active.label_tag %}
-                                                    {{ paige_form.is_active }}
-                                                    {% if paige_form.is_active.help_text %}<small class="form-text text-muted">{{ paige_form.gallery.help_text }}</small>{% endif %}
-                                                    {% for error in paige_form.is_active.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-
-
-                                              </div>
-                                        </div>
-
-                                        <div class="card-body">
-                                          <div class="form-group">
-                                                {% translate paige_form.description.label_tag %}
-                                                {{ paige_form.description }}
-                                                {% if paige_form.description.help_text %}<small class="form-text text-muted">{{ paige_form.description.help_text }}</small>{% endif %}
-                                                {% for error in paige_form.description.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
                                           </div>
-                                        </div>
+                                            <div id="russianTab" class="tab-pane">
+                                                {% include 'admin/paige_list/paige_content/paige_content_ru.html'   %}
+
+                                          </div>
+                                    </div>
 
 
                             {% include 'admin/card_forms/main_image.html'  %}
@@ -94,7 +84,63 @@
     const DEFAULT_IMAGE_URL = "{% static 'images/картинка.png' %}";
 </script>
 <script src="{% static 'js/gallery.js' %}"></script>
+<script src="{% static 'js/tab.js' %}"></script>
 <style>
+    .phone-input {
+    width: 50%;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+}
+.tabs-navigation {
+        display: flex;
+        border-bottom: 1px solid #ddd;
+        margin-bottom: 20px;
+    }
+
+    /* Стилі для кнопок вкладок */
+    .tab-button {
+        background-color: #f1f1f1;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        padding: 10px 20px;
+        transition: 0.3s;
+        font-size: 17px;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+        margin-right: 2px; /* Невеликий відступ між кнопками */
+    }
+
+    /* Стилі при наведенні на кнопку вкладки */
+    .tab-button:hover {
+        background-color: #ddd;
+    }
+
+    /* Стилі для активної кнопки вкладки */
+    .tab-button.active {
+        background-color: #e0e0e0;
+        border-bottom: 3px solid #007bff; /* Колір виділення активної вкладки */
+        color: #007bff;
+    }
+
+    /* Стилі для вмісту вкладок */
+    .tab-pane {
+        display: none; /* За замовчуванням всі вкладки сховані */
+        padding: 20px 0;
+        border-top: none;
+    }
+
+    /* Стилі для активної вкладки */
+    .tab-pane.active {
+        display: block; /* Активна вкладка видима */
+    }
+
+    /* Загальні стилі для форм, винесені сюди */
+    .form-block {
+      width: 100%;
+      max-width: 100%;
+    }
+
     #id_title {
     width: 450px;
 }

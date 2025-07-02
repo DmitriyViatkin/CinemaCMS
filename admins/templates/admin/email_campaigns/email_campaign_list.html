@@ -1,0 +1,99 @@
+{% extends 'admin/index.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="card-title mb-0">{% translate "Список Email кампаній" %}</h3>
+                        <div class="card-tools">
+                            <a href="{% url 'email_campaign_create' %}" class="btn btn-success btn-sm">
+                                <i class="fas fa-plus"></i> {% translate "Створити кампанію" %}
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table id="campaignsTable" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>{% translate "Текст листа (фрагмент)" %}</th>
+                                    <th>{% translate "Користувачі" %}</th>
+                                    <th>{% translate "Статус" %}</th>
+                                    <th>{% translate "Дата створення" %}</th>
+                                    <th>{% translate "Дії" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for campaign in campaigns %}
+                                <tr>
+                                    <td>{{ campaign.id }}</td>
+                                    <td>{{ campaign.text|truncatechars:50 }}</td> {# Обрізаємо текст для таблиці #}
+                                    <td>
+                                        {% for user in campaign.users.all %}
+                                            <span class="badge badge-info">{{ user.username }}</span>
+                                        {% empty %}
+                                            <span class="badge badge-warning">{% translate "Немає користувачів" %}</span>
+                                        {% endfor %}
+                                    </td>
+                                    <td>
+                                        {% if campaign.status == 'sent' %}
+                                            <span class="badge badge-success">{% translate "Відправлено" %}</span>
+                                        {% else %}
+                                            <span class="badge badge-secondary">{% translate "Не відправлено" %}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ campaign.created_at|date:"d.m.Y H:i" }}</td>
+                                    <td>
+                                        <a href="{% url 'email_campaign_edit' campaign_id=campaign.pk %}" class="btn btn-primary btn-sm">{% translate "Редагувати" %}</a>
+                                        <a href="{% url 'email_campaign_delete' campaign_id=campaign.pk %}" class="btn btn-danger btn-sm">{% translate "Видалити" %}</a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6">{% translate "Список Email кампаній порожній." %}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                        {# Пагінація #}
+                        <div class="d-flex justify-content-center mt-3">
+                            <ul class="pagination">
+                                {% if campaigns.has_previous %}
+                                    <li class="page-item"><a class="page-link" href="?page=1">&laquo; {% translate "перша" %}</a></li>
+                                    <li class="page-item"><a class="page-link" href="?page={{ campaigns.previous_page_number }}">{% translate "попередня" %}</a></li>
+                                {% endif %}
+
+                                <li class="page-item active"><span class="page-link">{% translate "Сторінка" %} {{ campaigns.number }} {% translate "з" %} {{ campaigns.paginator.num_pages }}.</span></li>
+
+                                {% if campaigns.has_next %}
+                                    <li class="page-item"><a class="page-link" href="?page={{ campaigns.next_page_number }}">{% translate "наступна" %}</a></li>
+                                    <li class="page-item"><a class="page-link" href="?page={{ campaigns.paginator.num_pages }}">{% translate "остання" %} &raquo;</a></li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

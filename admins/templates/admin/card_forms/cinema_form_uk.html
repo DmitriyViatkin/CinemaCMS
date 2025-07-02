@@ -1,0 +1,25 @@
+{# admin/card_forms/cinema_form.html #}
+{% load static %}
+{% load i18n %}
+
+<div class="card-body form-block">
+  <div class="form-group field-row-aligned">
+    <label class="label-wrapper" for="{{   form.title_uk.label }}"> Назва </label>
+    <div class="input-wrapper">{{ form.title_uk }}</div>
+  </div>
+
+  <div class="form-group field-row-aligned">
+    <label class="label-wrapper" for="{{    form.description_uk.label }}"> Опис</label>
+    <div class="input-wrapper">{{ form.description_uk }}</div>
+  </div>
+
+  <div class="form-group field-row-aligned">
+    <label class="label-wrapper" for="{{   form.conditions_uk.label }}"> Умови </label>
+    <div class="input-wrapper">{{ form.conditions_uk }}</div>
+  </div>
+
+  <div class="form-group field-row-aligned">
+    <label class="label-wrapper" for="{{   form.city_uk.label }}"> Місто </label>
+    <div class="input-wrapper">{{ form.city_uk }}</div>
+  </div>
+</div>

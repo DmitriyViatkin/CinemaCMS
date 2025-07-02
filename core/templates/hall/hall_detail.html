@@ -1,0 +1,252 @@
+
+{% extends 'main/index1.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+
+    #hall-scheme-container {
+        margin-top: 20px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        overflow-x: auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 400px;
+
+
+        max-width: 800px;
+
+
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    #hall-scheme-container svg {
+        display: block;
+        max-width: 100%;
+        height: auto;
+    }
+
+
+
+</style>
+    <title>Деталі залу: {{ hall.title }}</title>
+
+
+
+    <h1>Зал: {{ hall.title }}</h1>
+    <p>Опис: {{ hall.description }}</p>
+
+
+    <h2>Схема залу</h2>
+    <div id="hall-scheme-container">
+        <p>Завантаження схеми залу...</p>
+    </div>
+
+    {% if hall.scheme_hall %}
+<script>
+    // loading and processing of the hall layout
+
+
+const schemeFileUrl = "{{ hall.scheme_hall.url }}";
+
+console.log("URL файла схемы зала:", schemeFileUrl);
+
+
+function loadAndRenderHallScheme(url) {
+
+    fetch(url)
+
+        .then(response => {
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return response.json();
+        })
+
+        .then(schemeData => {
+
+            console.log("Данные схемы зала загружены:", schemeData);
+
+            renderHallScheme(schemeData, 'hall-scheme-container');
+        })
+
+        .catch(error => {
+
+            console.error("Ошибка при загрузке или парсинге схемы зала:", error);
+
+            document.getElementById('hall-scheme-container').innerHTML =
+                '<p style="color: red;">Не удалось загрузить схему зала.</p>';
+        });
+}
+
+// Draw schemes hall
+
+
+function renderHallScheme(schemeData, containerId) {
+
+    const container = document.getElementById(containerId);
+
+    container.innerHTML = '';
+
+
+    if (!schemeData || !schemeData.rows || schemeData.rows.length === 0) {
+        container.innerHTML = '<p>Немає даних про ряди та місця в схемі залу.</p>';
+        return;
+    }
+
+
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+
+    svg.setAttribute("width", "100%");
+
+    svg.style.height = "auto";
+
+    svg.setAttribute("viewBox", "0 0 1200 800");
+
+    svg.style.border = "1px solid #ccc";
+    svg.style.backgroundColor = "#f9f9f9";
+
+
+    const seatSize = 40;
+    const seatSpacing = 15;
+    const rowSpacing = 60;
+    const startX = 50;
+    const startY = 50;
+
+
+    schemeData.rows.sort((a, b) => a.row_number - b.row_number);
+
+
+    let currentY = startY;
+
+
+    schemeData.rows.forEach(rowData => {
+        const rowNumber = rowData.row_number;
+        const seats = rowData.seats;
+
+
+        seats.sort((a, b) => a.seat_number - b.seat_number);
+
+
+        let currentX = startX;
+
+
+        const rowLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+
+        rowLabel.setAttribute("x", currentX - 30);
+
+        rowLabel.setAttribute("y", currentY + seatSize / 2);
+
+        rowLabel.setAttribute("dominant-baseline", "middle");
+
+        rowLabel.setAttribute("text-anchor", "end");
+
+        rowLabel.style.fontSize = "16px";
+
+        rowLabel.style.fontWeight = "bold";
+
+        rowLabel.textContent = `Ряд ${rowNumber}`;
+
+        svg.appendChild(rowLabel);
+
+
+        seats.forEach(seatData => {
+            const seatNumber = seatData.seat_number;
+            const isOccupied = seatData.is_occupied;
+
+
+            const seatElement = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+
+            seatElement.setAttribute("x", currentX);
+
+            seatElement.setAttribute("y", currentY);
+
+            seatElement.setAttribute("width", seatSize);
+
+            seatElement.setAttribute("height", seatSize);
+
+            seatElement.setAttribute("rx", 5);
+
+
+            let fillColor = isOccupied ? "#dc3545" : "#28a745";
+
+            let strokeColor = "#343a40";
+
+
+            seatElement.style.fill = fillColor;
+            seatElement.style.stroke = strokeColor;
+            seatElement.style.strokeWidth = "1px";
+            seatElement.style.cursor = "pointer";
+
+            seatElement.classList.add('seat');
+
+
+            const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+
+            title.textContent = `Ряд: ${rowNumber}, Место: ${seatNumber}\nСтатус: ${isOccupied ? 'Занято' : 'Свободно'}`;
+
+            seatElement.appendChild(title);
+
+
+            seatElement.addEventListener('click', () => {
+
+                alert(`Вы выбрали место: Ряд ${rowNumber}, Место ${seatNumber}, Статус: ${isOccupied ? 'Занято' : 'Свободно'}`);
+            });
+
+
+            svg.appendChild(seatElement);
+
+
+            const seatText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+
+            seatText.setAttribute("x", currentX + seatSize / 2);
+
+            seatText.setAttribute("y", currentY + seatSize / 2);
+
+            seatText.setAttribute("text-anchor", "middle");
+
+            seatText.setAttribute("dominant-baseline", "middle");
+
+            seatText.style.fontSize = "12px";
+
+            seatText.style.fill = "#fff";
+
+            seatText.style.pointerEvents = "none";
+
+            seatText.textContent = seatNumber;
+
+            svg.appendChild(seatText);
+
+
+            currentX += seatSize + seatSpacing;
+        });
+
+        currentY += seatSize + rowSpacing;
+    });
+
+
+    container.appendChild(svg);
+
+
+    const bbox = svg.getBBox();
+
+    svg.setAttribute("viewBox", `${bbox.x - startX} ${bbox.y - startY} ${bbox.width + 2*startX} ${bbox.height + 2*startY}`);
+
+    svg.style.height = "auto";
+}
+
+
+loadAndRenderHallScheme(schemeFileUrl);
+</script>
+    {% else %}
+    <p>Схема залу відсутня або не завантажена.</p>
+    {% endif %}
+
+{% endblock %}

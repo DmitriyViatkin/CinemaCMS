@@ -1,7 +1,7 @@
 from django.urls import path
 from . import views
 
-from .table import MovieListDate
+from .table import MovieListDate, user_list
 
 urlpatterns = [
 
@@ -21,8 +21,8 @@ urlpatterns = [
     path('cinema_lists/<int:pk>/delete/', views.delete_cinema, name='delete_cinema'),
 
     path('halls_lists/',views.halls_list, name='halls_lists'),
-    path('add_halls/add_halls_create/<int:cinema_pk>/ ', views.add_halls_create, name='add_halls_create'),
-    path('add_halls/<int:halls_id>/', views.add_halls_create ,name='add_halls_edit'),
+    path('add_halls/add_halls_create/<int:cinema_pk>/', views.add_halls_create, name='add_halls_create'),
+    path('add_halls/add_halls/<int:cinema_pk>/<int:halls_id>/', views.add_halls_create, name='add_halls_edit'),
     path('halls_lists/<int:pk>/delete/', views.delete_halls, name='delete_halls'),
 
     path('sessions_lists/',views.session_list, name='sessions_list'),
@@ -69,4 +69,10 @@ urlpatterns = [
     path('paige/main_paige/<int:paige_id>/edit/', views.main_paige, name='edit_main_paige'),
     path('paige/<int:paige_id>/edit/', views.paige_add, name='edit_paige'),
     path('paige/<int:paige_id>/delete_paige/', views.paige_delete, name='delete_paige'),
+
+    path('email_campaigns/create/', views.email_campaign_create, name='email_campaign_create'),
+    path('email_campaigns/<int:campaign_id>/edit/', views.email_campaign_create, name='email_campaign_edit'),
+    path('email_campaigns/<int:campaign_id>/delete/', views.email_campaign_delete, name='email_campaign_delete'),
+
+    path('ajax/users/', user_list, name='user_list')
 ]
