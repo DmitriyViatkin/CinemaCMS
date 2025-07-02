@@ -1,0 +1,50 @@
+
+
+{
+  "name": "Главный Зал",
+  "capacity": 250,
+  "rows": [
+    {
+      "row_number": 1,
+      "seats": [
+        {"seat_number": 1, "is_occupied": false},
+        {"seat_number": 2, "is_occupied": false},
+        {"seat_number": 3, "is_occupied": true},
+        {"seat_number": 4, "is_occupied": false},
+        {"seat_number": 5, "is_occupied": false}
+      ]
+    },
+    {
+      "row_number": 2,
+      "seats": [
+        {"seat_number": 1, "is_occupied": false},
+        {"seat_number": 2, "is_occupied": false},
+        {"seat_number": 3, "is_occupied": false},
+        {"seat_number": 4, "is_occupied": false},
+        {"seat_number": 5, "is_occupied": true},
+        {"seat_number": 6, "is_occupied": false}
+      ]
+    },
+    {
+      "row_number": 3,
+      "seats": [
+        {"seat_number": 1, "is_occupied": false},
+        {"seat_number": 2, "is_occupied": false},
+        {"seat_number": 3, "is_occupied": false},
+        {"seat_number": 4, "is_occupied": false},
+        {"seat_number": 5, "is_occupied": false},
+        {"seat_number": 6, "is_occupied": false},
+        {"seat_number": 7, "is_occupied": false}
+      ]
+    },
+    {
+      "row_number": 4,
+      "seats": [
+        {"seat_number": 1, "is_occupied": false},
+        {"seat_number": 2, "is_occupied": false},
+        {"seat_number": 3, "is_occupied": false},
+        {"seat_number": 4, "is_occupied": false}
+      ]
+    }
+  ]
+}

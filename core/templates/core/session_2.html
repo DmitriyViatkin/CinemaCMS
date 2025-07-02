@@ -109,7 +109,7 @@
                             {{ session.movie.title }}
                         </a>
                     </td>
-                    <td>{{ session.price }} грн</td>
+                    <td>{{ session.movie.price }} грн</td>
                     <td>
                         <a href="{% url 'buy_ticket' session.id %}" class="btn btn-success btn-sm">Купити</a>
                     </td>

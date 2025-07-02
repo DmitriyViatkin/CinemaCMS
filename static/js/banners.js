@@ -26,8 +26,7 @@
                 }
             });
         }
-// Обробник для завантаження зображення крос-банера
-        // Обробник для завантаження зображення крос-банера
+
         $('#id_cross_banner-image').on('change', function() {
             const file = this.files[0];
             const previewImage = $('#preview-img'); // Знаходимо існуючий елемент preview-img
