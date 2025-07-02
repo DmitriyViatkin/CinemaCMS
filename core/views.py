@@ -7,8 +7,10 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 import json
 from django.db.models import Prefetch
-
-
+from collections import defaultdict
+from movie.models import Movies
+import locale
+from django.db.models import Q
 
 
 def cinema_list(request):
@@ -32,11 +34,60 @@ def cinema_detail(request, cinema_slug):
     halls = cinema.halls.all()
     context = {'cinema': cinema, 'main_picture': main_picture,'halls': halls}
     return render(request, 'core/cinema_detail.html', context)
-
+locale.setlocale(locale.LC_TIME, 'uk_UA.UTF-8')
 def session_list(request):
-    sessions = Sessions.objects.select_related('hall_id', 'movie')
+    # --- Отримуємо GET-параметри ---
+    date_filter = request.GET.get('date')
+    cinema_filter = request.GET.get('cinema')
+    movie_id_filter = request.GET.get('movie')  # уникай перезапису змінної `movie_filter`
+
+    is_2d = request.GET.get('is_2d') == '1'
+    is_3d = request.GET.get('is_3d') == '1'
+    is_imax = request.GET.get('is_imax') == '1'
+
+    # --- Базовий queryset ---
+    sessions = Sessions.objects.select_related('hall_id__cinema', 'movie').all()
+
+    # --- Основна фільтрація ---
+    if date_filter:
+        sessions = sessions.filter(date__date=date_filter)
+    if cinema_filter:
+        sessions = sessions.filter(hall_id__cinema__id=cinema_filter)
+    if movie_id_filter:
+        sessions = sessions.filter(movie__id=movie_id_filter)
+
+    # --- Фільтр формату фільму ---
+    format_filter = Q()
+    if is_2d:
+        format_filter &= Q(movie__is_2d=True)
+    if is_3d:
+        format_filter &= Q(movie__is_3d=True)
+    if is_imax:
+        format_filter &= Q(movie__is_imax=True)
+
+    if format_filter:
+        sessions = sessions.filter(format_filter)
+
+    # --- Групування вже після фільтрації ---
+    grouped_sessions = defaultdict(list)
+    for session in sessions.order_by('date'):
+        day_name = session.date.strftime('%A')
+        date_str = session.date.strftime('%d.%m.%Y')
+        grouped_sessions[(day_name.capitalize(), date_str)].append(session)
+
+    # --- Контекст ---
     context = {
-        'sessions': sessions
+        'grouped_sessions': dict(grouped_sessions),
+        'cinemas': Cinemas.objects.all(),
+        'movies': Movies.objects.all(),
+        'selected_date': date_filter,
+        'selected_cinema': cinema_filter,
+        'selected_movie': movie_id_filter,
+        'filter': {
+            'is_2d': is_2d,
+            'is_3d': is_3d,
+            'is_imax': is_imax,
+        },
     }
     return render(request, 'core/session_2.html', context)
 

@@ -89,7 +89,7 @@
 
     </div>
 </form>
-
+ {{ session.cinema.title|default:"Неизвестно" }}
   {% if sessions %}
   <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
     {% for session in sessions %}
@@ -99,9 +99,9 @@
 
     <table class="table table-sm table-borderless mb-3" style="width: 50%;">
       <tbody>
-      <tr>
-          <th> {{ session.time_session|time:"H:i" }}  </th>
-          <th> {% if session.movie %}
+      <tr><th>{{ session.cinema.title|default:"Неизвестно" }}</th>
+          <th> {{ session.time_session|time:"H:i" }}
+          {% if session.movie %}
         {% if session.movie.is_2d %}2D{% endif %}
         {% if session.movie.is_3d %} {% if session.movie.is_2d %}, {% endif %}3D{% endif %}
         {% if session.movie.is_imax %} {% if session.movie.is_2d or session.movie.is_3d %}, {% endif %}IMAX{% endif %}
