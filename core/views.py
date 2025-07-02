@@ -263,7 +263,7 @@ def process_ticket_purchase(request, session_id):
                     movie=session.movie,
                     seat=seat,
                     profile=request.user,
-                    halls=session.hall
+                    halls=session.hall_id
                 )
                 purchased_tickets_count += 1
             except Exception as e:
