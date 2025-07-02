@@ -1,3 +1,18 @@
 venv/
 .env
 media
+
+# Other common temporary files
+*.log
+.DS_Store
+
+# Python compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+
+
+# IDE specific files (for PyCharm)
+.idea/
