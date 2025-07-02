@@ -76,3 +76,24 @@ def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
 
+def get_unique_cinemas(request):
+    cinemas = list(
+        Sessions.objects.values_list('cinema__title', flat=True).distinct().order_by('cinema__title')
+    )
+    print(cinemas)
+    return JsonResponse({"values": cinemas})
+
+def get_unique_movie(request):
+    # Исправлено: имя поля внешнего ключа в модели Sessions - 'movie' (без 's')
+    # Исправлено: два подчеркивания для lookup `__`
+    movies = list(
+        Sessions.objects.values_list('movie__title', flat=True).distinct().order_by('movie__title')
+    )
+    return JsonResponse({"values": movies})
+
+def get_unique_hall(request):
+    # Исправлено: имя поля внешнего ключа в модели Sessions - 'hall_id'
+    halls = list(
+        Sessions.objects.values_list('hall_id__title', flat=True).distinct().order_by('hall_id__title')
+    )
+    return JsonResponse({"values": halls})

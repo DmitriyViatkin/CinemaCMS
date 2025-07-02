@@ -477,7 +477,7 @@ def delete_movie(request, pk):
 
 @staff_member_required
 def cinema_list(request):
-    cinemas_list = Cinemas.objects.select_related('gallery').prefetch_related(
+    cinemas_list = Cinemas.objects.select_related('gallery','seo_block' ).prefetch_related(
         Prefetch(
             'gallery__pictures',
             queryset=Picture.objects.filter(image_type='logo'),
@@ -536,12 +536,8 @@ def add_cinema_create(request, cinema_id=None):
                                                                                 prefix='pictures'   )
 
 
-        if (block_seo_form.is_valid() and
-                cinema_form.is_valid() and
-                gallery_form.is_valid() and
-                picture_formset.is_valid() and
-                banner_form.is_valid() and
-                logo_form.is_valid()):
+        if (block_seo_form.is_valid() and  cinema_form.is_valid() and gallery_form.is_valid() and
+                picture_formset.is_valid()  and     banner_form.is_valid() and    logo_form.is_valid()):
 
 
             block_seo = block_seo_form.save()
@@ -1732,9 +1728,9 @@ def  paige_add (request, paige_id=None):
     })
 
 @staff_member_required
-def  paige_delete(request, news_id):
-    news = get_object_or_404(PaigesNews, pk=news_id)
+def  paige_delete(request, paige_id):
+    news = get_object_or_404(PaigesCinema, pk=paige_id)
     if request.method=='POST':
         news.delete()
 
-    return redirect('news')
+    return redirect('paige')
