@@ -5,8 +5,9 @@ from django.db.models import Prefetch
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from datetime import date, timedelta
 from django.utils.timezone import now
-
-
+from core.models import Sessions, Cinemas
+from django.db.models import Q
+from collections import defaultdict
 # Create your views here.
 def movie_list(request):
     movies_list = Movies.objects.all().select_related('gallery').order_by('title')
@@ -35,20 +36,52 @@ def movie_detail(request, movie_id):
     movie = get_object_or_404(
         Movies.objects.select_related('seo_block', 'gallery')
               .prefetch_related(
-                  Prefetch('gallery__pictures'),
-                  'movie_sessions' # Make sure 'movie_sessions' is the correct related_name for Sessions
+                  Prefetch('gallery__pictures')
               ),
 
         id=movie_id
     )
+    sessions = Sessions.objects.filter(movie=movie).order_by('date', 'time_session')
+    selected_city = request.GET.get('city')
+    if selected_city:
 
+        sessions = sessions.filter(cinema__city=selected_city)
+
+    is_2d = request.GET.get('is_2d') == '1'
+    is_3d = request.GET.get('is_3d') == '1'
+    is_imax = request.GET.get('is_imax') == '1'
+
+    movie_filter = Q()
+    if is_2d:
+        movie_filter &= Q(movie__is_2d=True)
+    if is_3d:
+        movie_filter &= Q(movie__is_3d=True)
+    if is_imax:
+        movie_filter &= Q(movie__is_imax=True)
+
+    if movie_filter:
+        sessions = sessions.filter(movie_filter)
+
+    all_cities = Cinemas.objects.values_list('city', flat=True).distinct().order_by('city')
+    sessions_by_cinema = defaultdict(list)
+    for session in  sessions:
+        sessions_by_cinema[session.cinema].append(session)
     main_picture = movie.gallery.pictures.filter(image_type="main_picture").first() if movie.gallery else None
-
+    print()
+    print(sessions_by_cinema)
     context = {
         'movie': movie,
         'main_picture': main_picture,
         'gallery_pictures': movie.gallery.pictures.all() if movie.gallery else [],
-        'sessions': movie.movie_sessions.all()
+        'sessions':  sessions ,
+        'all_cities': all_cities,
+        'selected_city': selected_city,
+        'filter': {
+            'is_2d': is_2d,
+            'is_3d': is_3d,
+            'is_imax': is_imax,},
+
+        'sessions_by_cinema': sessions_by_cinema,
     }
     return render(request, 'movie/movie_detail.html', context)
 
