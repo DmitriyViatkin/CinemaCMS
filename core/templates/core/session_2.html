@@ -52,7 +52,7 @@
     </div>
 
     <div class="col-auto">
-        <select name="cinema" class="form-select" onchange="this.form.submit()">
+        <select name="cinema" class="form-select" onchange="this.form.submit()"> {# <-- ДОБАВЛЕНО onchange="this.form.submit()" ЗДЕСЬ #}
             <option value="">Всі кінотеатри</option>
             {% for cinema in cinemas %}
                 <option value="{{ cinema.id }}" {% if cinema.id|stringformat:"s" == selected_cinema %}selected{% endif %}>
@@ -63,8 +63,9 @@
     </div>
 
     <div class="col-auto">
-        <select name="hall" class="form-select" onchange="this.form.submit()">
+        <select name="hall" class="form-select" onchange="this.form.submit()"> {# Добавлено onchange="this.form.submit()" для отправки формы при изменении зала #}
             <option value="">Всі зали</option>
+            {# Перебираем только те 'halls', которые уже отфильтрованы представлением #}
             {% for hall in halls %}
                 <option value="{{ hall.id }}" {% if hall.id|stringformat:"s" == selected_hall %}selected{% endif %}>
                     {{ hall.title }}
@@ -83,9 +84,8 @@
             {% endfor %}
         </select>
     </div>
-
-
 </form>
+
 <div style="width: 80%; margin-left: 10%;">
 {% if grouped_sessions %}
     {% for day_info, sessions in grouped_sessions.items %}
@@ -94,7 +94,7 @@
         <table class="table table-bordered table-striped"  style="width: 50%;" >
             <thead>
                 <tr>
-                    <th class="col-time">Дата і час</th> {# Задаємо ширину для кожного заголовка #}
+                    <th class="col-time">Дата і час</th>
                     <th class="col-movie">Фільм</th>
                     <th class="col-price">Ціна</th>
                     <th class="col-action">Дія</th>
@@ -109,7 +109,7 @@
                             {{ session.movie.title }}
                         </a>
                     </td>
-                    <td>{{ session.price }} грн</td>
+                    <td>{{ session.movie.price }} грн</td>
                     <td>
                         <a href="{% url 'buy_ticket' session.id %}" class="btn btn-success btn-sm">Купити</a>
                     </td>

@@ -1,0 +1,242 @@
+
+.form-group.field-row-aligned {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.form-group.field-row-aligned .label-wrapper {
+    min-width: 150px;
+    text-align: right;
+    margin-right: 15px;
+}
+
+
+.form-group.field-row-aligned .label-wrapper.align-self-start {
+    align-self: flex-start;
+}
+
+.form-group.field-row-aligned .input-wrapper {
+    flex-grow: 1;
+}
+
+
+.form-group.field-row-aligned .input-wrapper input[type="text"],
+.form-group.field-row-aligned .input-wrapper input[type="url"],
+.form-group.field-row-aligned .input-wrapper input[type="number"],
+.form-group.field-row-aligned .input-wrapper textarea,
+.form-group.field-row-aligned .input-wrapper select,
+.form-group.field-row-aligned .input-wrapper .input-group,
+.form-control {
+    width: 80%;
+    box-sizing: border-box;
+}
+
+
+.d-flex.flex-wrap.justify-content-between {
+    gap: 20px;
+}
+
+
+.d-flex.flex-wrap.justify-content-between .form-group.flex-item {
+    flex: 1 1 calc(25.333% - 20px);
+    min-width: 280px;
+    box-sizing: border-box;
+    margin-bottom: 0;
+}
+
+
+.form-group.flex-item .field-row .input-wrapper {
+    flex-grow: 1;
+    max-width: 300px;
+
+}
+
+
+.form-group.flex-item .field-row .input-wrapper select {
+    max-width: 300px;
+
+}
+
+
+.form-group.field-row-aligned .input-wrapper.d-flex {
+    align-items: center;
+}
+
+.form-check {
+    display: flex;
+    align-items: center;
+
+    padding-left: 0;
+}
+
+.form-check-input {
+
+    position: static;
+    margin-top: 0;
+    margin-left: .5rem;
+    margin-right: .5rem;
+    flex-shrink: 0;
+}
+
+.form-check-label {
+    margin-bottom: 0;
+}
+
+.seo-form-layout {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+
+.card-footer.text-center {
+    padding: 1.25rem;
+    text-align: center;
+}
+
+
+.card-body h4 {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    margin-top: 30px;
+}
+
+
+label[for="id_for_label_for_hidden_field_id"] {
+    display: none;
+}
+
+
+.card-header .card-title {
+    margin-left: 0;
+}
+
+
+#pictures-formset {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 15px;
+    width: 100%;
+}
+
+.gallery-image-form {
+    flex: 1 1 calc(30% - 15px);
+    max-width: calc(20% - 15px);
+    box-sizing: border-box;
+    position: relative;
+}
+
+
+.image-preview-container {
+    position: relative;
+    max-width: 100%;
+    height: auto;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #ddd;
+    padding: 5px;
+    background-color: #f8f8f8;
+}
+
+
+.image-preview-container img {
+    width: 250px;
+    height: auto;
+    max-height: 350px;
+    object-fit: contain;
+    display: block;
+}
+
+
+.remove-item-cross {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: rgba(220, 53, 69, 0.9);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    line-height: 1;
+    z-index: 10;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: background-color 0.2s ease;
+}
+
+.remove-item-cross:hover {
+    background-color: rgba(220, 53, 69, 1);
+}
+
+.remove-item-cross i {
+    font-size: 14px;
+}
+
+.delete-checkbox-hidden-field {
+    display: none;
+    visibility: hidden;
+    height: 0;
+    width: 0;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    line-height: 0;
+    font-size: 0;
+}
+
+input[type="checkbox"][name$="-DELETE"] {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+
+label[for$="-DELETE"] {
+    display: none !important;
+}
+.remove-image-cross i {
+    font-size: 14px;
+}
+
+
+.d-flex.justify-content-between.align-items-center.flex-wrap {
+
+    margin-bottom: 15px;
+}
+
+
+.flex-field-item {
+
+    flex-basis: 33%;
+}
+
+.flex-field-item .label-wrapper {
+
+    flex-shrink: 0;
+    text-align: right;
+    margin-right: 5px;
+
+}
+
+.flex-field-item .input-wrapper {
+    flex-grow: 1;
+}
+
+
+.flex-field-item .input-wrapper select,
+.flex-field-item .input-wrapper input[type="text"],
+.flex-field-item .input-wrapper input[type="date"] {
+    width: 80%;
+    box-sizing: border-box;
+}
+

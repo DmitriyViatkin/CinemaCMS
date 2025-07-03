@@ -54,11 +54,21 @@ INSTALLED_APPS = [
     'widget_tweaks',
     'debug_toolbar',
     'celery_progress',
-'django_celery_results'
+    'django_celery_results',
+    'channels',
 
 
 
 ]
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
+ASGI_APPLICATION = 'cinewave.asgi.application'
 
 MIDDLEWARE = [
 

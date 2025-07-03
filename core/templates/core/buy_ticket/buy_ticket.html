@@ -4,117 +4,306 @@
 {% block title %}Купить билет на сеанс{% endblock %}
 
 {% block content %}
-<style>
-    #hall-scheme-container {
-        overflow-x: auto;
-        border: 1px solid #ddd;
-        padding: 10px;
-        background-color: #fcfcfc;
-    }
-
-    .seat-icon {
-        display: inline-block;
-        width: 20px;
-        height: 20px;
-        border: 1px solid #ccc;
-        border-radius: 3px;
-        vertical-align: middle;
-        margin-right: 5px;
-    }
-    .seat-icon.free { background-color: #28a745; border-color: #1e7e34; }
-    .seat-icon.occupied { background-color: #dc3545; border-color: #bd2130; }
-    .seat-icon.selected { background-color: #007bff; border-color: #0056b3; }
-    .seat-icon.unavailable { background-color: #6c757d; border-color: #5a6268; }
-    .seat-icon.vip { border-color: gold; box-shadow: 0 0 3px gold; }
-
-    /* SVG-specific styles for seats */
-    .seat.svg-seat {
-        transition: fill 0.2s ease-in-out, stroke 0.2s ease-in-out;
-    }
-    .seat.svg-seat.free {
-        fill: #28a745; /* Green */
-        stroke: #1e7e34;
-    }
-    .seat.svg-seat.occupied {
-        fill: #dc3545; /* Red */
-        stroke: #bd2130;
-        cursor: not-allowed !important;
-    }
-    .seat.svg-seat.unavailable {
-        fill: #6c757d; /* Grey */
-        stroke: #5a6268;
-        cursor: not-allowed !important;
-        opacity: 0.7; /* Make unavailable seats slightly transparent */
-    }
-    .seat.svg-seat.selected {
-        fill: #007bff; /* Blue */
-        stroke: #0056b3;
-    }
-    .seat.svg-seat.vip {
-        stroke: gold;
-        stroke-width: 2px;
-        filter: drop-shadow(0 0 3px gold);
-    }
-    .seat-text {
-        pointer-events: none;
-        fill: #fff; /* Ensure text is white */
-    }
-</style>
+<link rel="stylesheet" href="{% static 'css/buy_ticket.css' %}">
 <div class="container mt-4">
     <h2>Покупка билетов на сеанс</h2>
+    <div id="top_baner">
+    {% if hall_picture %}
+        <div class="hall-scheme-image">
+            <img src="{{ hall_picture }}" alt="Схема зала {{ hall_title }}" style="max-width: 100%; height: auto; margin-top: 20px;">
+        </div>
+    {% else %}
+        <p>Изображение схемы зала отсутствует.</p>
+    {% endif %}
+</div>
+    <div class="d-flex align-items-start">  {# Главный контейнер: постер слева, контент справа #}
 
-    <div class="card mb-4">
-        <div class="card-header">
-            Детали сеанса
-        </div>
-        <div class="card-body">
-            <p><strong>Фильм:</strong> {{ movie_title }}</p>
-            <p><strong>Кинотеатр:</strong> {{ cinema_title }}</p>
-            <p><strong>Зал:</strong> {{ hall_title }}</p>
-            <p><strong>Дата:</strong> {{ session_date|date:"d M Y" }}</p>
-            <p><strong>Время:</strong> {{ session_time|time:"H:i" }}</p>
-        </div>
+    {# Слева — постер #}
+    <div class="p-3">
+        {% if movie_picture %}
+            <img src="{{ movie_picture }}" alt="Постер фильма {{ movie_title }}" class="img-fluid" style="max-width: 200px;">
+        {% else %}
+            <p>Изображение фильма отсутствует.</p>
+        {% endif %}
     </div>
 
-    <div class="card mb-4">
-        <div class="card-header">
+    {# Справа — контейнер с деталями и формой #}
+    <div class="d-flex flex-column flex-grow-1 justify-content-between p-3">
+        <div class="card-body d-flex flex-wrap align-items-center gap-3">
+
+    <p class="mb-0"><strong>Фильм</strong>{{ movie_title }}</strong></p>
+    <p class="mb-0"><strong>Цена:</strong> {{ movie_price }}</p>
+    <p class="mb-0"><strong>Зал:</strong> {{ hall_title }}</p>
+    <p class="mb-0"><strong>Дата:</strong> {{ session_date|date:"d M Y" }}</p>
+    <p class="mb-0"><strong>Время:</strong> {{ session_time|time:"H:i" }}</p>
+
+</div>
+         {% if user_tickets %}
+            <div class="user-tickets-info p-3 ms-4 me-4 border rounded bg-light"> {# Добавим отступы, рамку, фон #}
+                <h5>Ваши билеты на этот сеанс:</h5>
+                <ul class="list-unstyled">
+                    {% for ticket in user_tickets %}
+                        <li>Ряд {{ ticket.seat.number_row }}, Место {{ ticket.seat.seat }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+  <div class="d-flex align-items-center justify-content-start">
+
+        <div class="mb-3 me-4">
+            <p class="mb-0">Выбрано мест: <span id="selected-seats-count">0</span></p>
+            <p class="mb-0">Общая стоимость: <span id="total-price">0.00</span> грн</p>
+        </div>
+</div>
+
+    </div>
+
+</div>
+
+    <div class="card mb-4" >
+        <div class="card-header" >
             Схема зала: {{ hall_title }}
         </div>
-        <div class="card-body">
-            {# Контейнер для SVG-схемы зала #}
+        <div class="card-body"  >
+
             <div id="hall-scheme-container" class="mt-4">
                 <p>Загрузка схемы зала...</p>
             </div>
+ <form id="ticket-purchase-form" action="{% url 'process_ticket_purchase' session.id %}" method="post" class="mt-4">
+    {% csrf_token %}
+    <input type="hidden" name="selected_seats" id="selected-seats-input">
 
-            <div class="seat-legend mt-3 mb-3">
-                <span class="seat-icon free"></span> Свободно
-                <span class="seat-icon occupied"></span> Занято
-                <span class="seat-icon selected"></span> Выбрано
-                <span class="seat-icon unavailable"></span> Недоступно
-                <span class="seat-icon vip"></span> VIP
-            </div>
 
-            <hr>
 
-            <form id="ticket-purchase-form" action="{% url 'process_ticket_purchase' session.id %}" method="post" class="mt-4">
-                {% csrf_token %}
-                <input type="hidden" name="selected_seats" id="selected-seats-input">
-                <div class="mb-3">
-                    <p>Выбрано мест: <span id="selected-seats-count">0</span></p>
-                    <p>Общая стоимость: <span id="total-price">0.00</span> грн</p>
-                </div>
-                <button type="submit" class="btn btn-primary" id="purchase-button" disabled>Купить билеты</button>
-            </form>
+
+        <button type="submit" class="btn btn-primary" id="purchase-button" disabled>Купить билеты</button>
+
+</form>
         </div>
     </div>
 </div>
 <script>
-    // Теперь передаем только данные о местах из БД
-    window.GLOBAL_CURRENT_SEAT_STATUS_DATA = {{ seat_rows_current_status_json|safe }};
+window.GLOBAL_CURRENT_SEAT_STATUS_DATA = {{ seat_rows_current_status_json|safe }};
+window.USER_TICKETS_SEAT_IDS = {{ user_tickets_seat_ids|default:'[]'|safe }};
 
-    console.log("Template: Global current status data set (from DB).");
+console.log("Template: Global current status data set (from DB).");
+console.log("User tickets seats IDs:", window.USER_TICKETS_SEAT_IDS);
+
+const sessionId = {{session.id}};
+const socket = new WebSocket(
+    'ws://' + window.location.host + `/ws/seats/${sessionId}/`
+);
+
+socket.onmessage = function(e) {
+    const data = JSON.parse(e.data);
+    const takenSeats = data.taken_seats;
+
+    takenSeats.forEach(seatId => {
+        const seatEl = document.querySelector(`[data-seat-id="${seatId}"]`);
+        if (seatEl) {
+            seatEl.classList.remove('free', 'selected');
+            seatEl.classList.add('occupied');
+            seatEl.disabled = true;
+            seatEl.dataset.status = 'S';
+
+
+            const seatIdNum = parseInt(seatId, 10);
+            let seatFound = false;
+            window.GLOBAL_CURRENT_SEAT_STATUS_DATA.forEach(row => {
+                row.seats.forEach(seat => {
+                    if (seat.id === seatIdNum) {
+                        seat.status = 'S';
+                        seatFound = true;
+                    }
+                });
+            });
+        }
+    });
+}
+socket.onopen = function(e) { console.log("WebSocket connected"); }
+socket.onclose = function(e) { console.log("WebSocket closed"); }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const currentSeatStatusData = window.GLOBAL_CURRENT_SEAT_STATUS_DATA;
+    const userSelectedSeatIds = window.USER_TICKETS_SEAT_IDS.map(String);
+
+    console.log("Данные о текущем статусе мест из Django (hallScheme.js):", currentSeatStatusData);
+    console.log("Выбранные пользователем места:", userSelectedSeatIds);
+
+    const hallSchemeContainer = document.getElementById('hall-scheme-container');
+    const selectedSeatsInput = document.getElementById('selected-seats-input');
+    const selectedSeatsCountSpan = document.getElementById('selected-seats-count');
+    const totalPriceSpan = document.getElementById('total-price');
+    const purchaseButton = document.getElementById('purchase-button');
+
+    let selectedSeats = [];
+    let totalPrice = 0;
+
+    function renderHallScheme(schemeData, containerId) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+
+        if (!schemeData || schemeData.length === 0) {
+            container.innerHTML = '<p>Нет данных о рядах и местах для отображения схемы зала.</p>';
+            return;
+        }
+
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("width", "100%");
+        svg.style.height = "auto";
+        svg.style.border = "1px solid #ccc";
+        svg.style.backgroundColor = "#f9f9f9";
+
+        const seatSize = 40;
+        const seatSpacing = 15;
+        const rowSpacing = 60;
+        const startX = 70;
+        const startY = 50;
+
+        let currentY = startY;
+        let maxX = 0;
+
+        schemeData.sort((a, b) => a.row_number - b.row_number);
+
+        schemeData.forEach(rowData => {
+            const rowNumber = rowData.row_number;
+            const seats = rowData.seats;
+            seats.sort((a, b) => a.seat_number - b.seat_number);
+
+            let currentX = startX;
+
+            const rowLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            rowLabel.setAttribute("x", startX - 10);
+            rowLabel.setAttribute("y", currentY + seatSize / 2);
+            rowLabel.setAttribute("dominant-baseline", "middle");
+            rowLabel.setAttribute("text-anchor", "end");
+            rowLabel.style.fontSize = "16px";
+            rowLabel.style.fontWeight = "bold";
+            rowLabel.textContent = `Ряд ${rowNumber}`;
+            svg.appendChild(rowLabel);
+
+            seats.forEach(seatData => {
+                const seatId = seatData.id;
+                const seatNumber = seatData.seat_number;
+                const status = seatData.status;
+                const isVip = seatData.is_vip;
+                const price = seatData.price;
+
+                const seatElement = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                seatElement.setAttribute("x", currentX);
+                seatElement.setAttribute("y", currentY);
+                seatElement.setAttribute("width", seatSize);
+                seatElement.setAttribute("height", seatSize);
+                seatElement.setAttribute("rx", 5);
+
+                seatElement.classList.add('seat', 'svg-seat');
+
+                if (status === 'F') seatElement.classList.add('free');
+                else if (status === 'S') seatElement.classList.add('occupied');
+                else seatElement.classList.add('unavailable');
+                if (isVip) seatElement.classList.add('vip');
+
+                if (seatId) {
+                    seatElement.dataset.seatId = seatId;
+                    seatElement.dataset.row = rowNumber;
+                    seatElement.dataset.seat = seatNumber;
+                    seatElement.dataset.price = price;
+                    seatElement.dataset.status = status;
+
+
+                    if (userSelectedSeatIds.includes(seatId.toString()) && status === 'F') {
+                        seatElement.classList.add('selected');
+                        selectedSeats.push(seatId.toString());
+                        totalPrice += parseFloat(price) || 0;
+                    }
+                } else {
+                    seatElement.dataset.status = 'N';
+                }
+
+                const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+                title.textContent = `Ряд: ${rowNumber}, Место: ${seatNumber}\nСтатус: ${
+                    status === 'F' ? 'Свободно' : (status === 'S' ? 'Занято' : 'Недоступно')
+                }\nЦена: ${price !== undefined ? price + ' грн' : 'N/A'}`;
+                seatElement.appendChild(title);
+
+                seatElement.addEventListener('click', () => {
+                    if (seatId && status === 'F') {
+                        const currentSeatId = seatElement.dataset.seatId;
+                        const currentSeatPrice = parseFloat(seatElement.dataset.price);
+
+                        if (seatElement.classList.contains('selected')) {
+                            seatElement.classList.remove('selected');
+                            selectedSeats = selectedSeats.filter(id => id !== currentSeatId);
+                            totalPrice -= currentSeatPrice;
+                        } else {
+                            seatElement.classList.add('selected');
+                            selectedSeats.push(currentSeatId);
+                            totalPrice += currentSeatPrice;
+                        }
+                        updateSelectionDisplay();
+                    } else if (!seatId) {
+                        alert('Это место не определено в системе (нет ID в БД) и не может быть выбрано.');
+                    } else {
+                        alert(`Место Ряд ${rowNumber}, Место ${seatNumber} уже занято или недоступно.`);
+                    }
+                });
+
+                svg.appendChild(seatElement);
+
+                const seatText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                seatText.setAttribute("x", currentX + seatSize / 2);
+                seatText.setAttribute("y", currentY + seatSize / 2);
+                seatText.setAttribute("text-anchor", "middle");
+                seatText.setAttribute("dominant-baseline", "middle");
+                seatText.style.fontSize = "12px";
+                seatText.style.fill = "#fff";
+                seatText.style.pointerEvents = "none";
+                seatText.textContent = seatNumber;
+                svg.appendChild(seatText);
+
+                currentX += seatSize + seatSpacing;
+            });
+
+            if (currentX > maxX) maxX = currentX;
+            currentY += seatSize + rowSpacing;
+        });
+
+        container.appendChild(svg);
+
+        const finalWidth = maxX + startX;
+        const finalHeight = currentY + startY;
+        svg.setAttribute("viewBox", `0 0 ${finalWidth} ${finalHeight}`);
+        svg.setAttribute("width", finalWidth);
+        svg.setAttribute("height", finalHeight);
+        svg.style.width = "100%";
+    }
+
+    function updateSelectionDisplay() {
+        selectedSeatsCountSpan.textContent = selectedSeats.length;
+        totalPriceSpan.textContent = totalPrice.toFixed(2);
+        selectedSeatsInput.value = JSON.stringify(selectedSeats);
+
+        purchaseButton.disabled = selectedSeats.length === 0;
+
+        document.querySelectorAll('.seat.svg-seat').forEach(seatElement => {
+            const seatId = seatElement.dataset.seatId;
+            if (seatId && selectedSeats.includes(seatId.toString())) {
+                seatElement.classList.add('selected');
+            } else if (seatElement.classList.contains('selected') && !selectedSeats.includes(seatId.toString())) {
+                seatElement.classList.remove('selected');
+            }
+        });
+    }
+
+    if (currentSeatStatusData && currentSeatStatusData.length > 0) {
+        renderHallScheme(currentSeatStatusData, 'hall-scheme-container');
+        updateSelectionDisplay();
+    } else {
+        hallSchemeContainer.innerHTML = '<p>Нет данных о местах для отображения схемы зала.</p>';
+    }
+});
 </script>
-<script src="{% static 'js/hallScheme.js' %}"></script>
+
 {% endblock %}
 
 
