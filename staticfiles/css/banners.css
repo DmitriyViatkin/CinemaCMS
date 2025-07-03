@@ -1,0 +1,157 @@
+.upload-btn input[type="file"] {
+        display: none;
+    }
+.banner-wrapper {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 20px;
+    margin: auto;
+}
+
+.banner-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.banners-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.banner-unit {
+    width: 180px;
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+    position: relative;
+}
+
+.image-block {
+    position: relative;
+    margin-bottom: 5px;
+}
+
+.preview {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    border: 1px dashed #ccc;
+}
+
+.upload-btn input[type="file"] {
+    display: none;
+}
+
+.upload-btn span {
+    display: inline-block;
+    background-color: #eee;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+.remove-banner-btn {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.8em;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.input-group {
+    margin-bottom: 5px;
+}
+
+.input-group label {
+    display: block;
+    font-size: 0.9em;
+}
+
+.add-photo-btn {
+    margin-top: 10px;
+}
+
+.global-controls {
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+}
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  background-color: #ccc;
+  transition: .4s;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 20px;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+input:checked + .slider {
+  background-color: #2196F3;
+}
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+input:checked + .slider:before {
+  -webkit-transform: translateX(20px);
+  -ms-transform: translateX(20px);
+  transform: translateX(20px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 20px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+.save-btn {
+    padding: 8px 15px;
+    font-size: 1em;
+}
+    .banner-unit .input-group input[type="text"],
+.banner-unit .input-group input[type="url"] {
+    width: 100%; /* Займають всю доступну ширину батьківського блоку */
+    box-sizing: border-box; /* Враховувати padding та border у загальній ширині */
+    overflow: hidden; /* Приховувати вміст, що виходить за межі */
+    white-space: nowrap; /* Заборонити перенесення на новий рядок */
+    text-overflow: ellipsis; /* Відображати багатокрапку для обрізаного тексту */
+}

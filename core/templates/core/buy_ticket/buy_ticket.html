@@ -83,12 +83,227 @@
     </div>
 </div>
 <script>
+window.GLOBAL_CURRENT_SEAT_STATUS_DATA = {{ seat_rows_current_status_json|safe }};
+window.USER_TICKETS_SEAT_IDS = {{ user_tickets_seat_ids|default:'[]'|safe }};
 
-    window.GLOBAL_CURRENT_SEAT_STATUS_DATA = {{ seat_rows_current_status_json|safe }};
+console.log("Template: Global current status data set (from DB).");
+console.log("User tickets seats IDs:", window.USER_TICKETS_SEAT_IDS);
 
-    console.log("Template: Global current status data set (from DB).");
+const sessionId = {{session.id}};
+const socket = new WebSocket(
+    'ws://' + window.location.host + `/ws/seats/${sessionId}/`
+);
+
+socket.onmessage = function(e) {
+    const data = JSON.parse(e.data);
+    const takenSeats = data.taken_seats;
+
+    takenSeats.forEach(seatId => {
+        const seatEl = document.querySelector(`[data-seat-id="${seatId}"]`);
+        if (seatEl) {
+            seatEl.classList.remove('free', 'selected');
+            seatEl.classList.add('occupied');
+            seatEl.disabled = true;
+            seatEl.dataset.status = 'S';
+
+
+            const seatIdNum = parseInt(seatId, 10);
+            let seatFound = false;
+            window.GLOBAL_CURRENT_SEAT_STATUS_DATA.forEach(row => {
+                row.seats.forEach(seat => {
+                    if (seat.id === seatIdNum) {
+                        seat.status = 'S';
+                        seatFound = true;
+                    }
+                });
+            });
+        }
+    });
+}
+socket.onopen = function(e) { console.log("WebSocket connected"); }
+socket.onclose = function(e) { console.log("WebSocket closed"); }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const currentSeatStatusData = window.GLOBAL_CURRENT_SEAT_STATUS_DATA;
+    const userSelectedSeatIds = window.USER_TICKETS_SEAT_IDS.map(String);
+
+    console.log("Данные о текущем статусе мест из Django (hallScheme.js):", currentSeatStatusData);
+    console.log("Выбранные пользователем места:", userSelectedSeatIds);
+
+    const hallSchemeContainer = document.getElementById('hall-scheme-container');
+    const selectedSeatsInput = document.getElementById('selected-seats-input');
+    const selectedSeatsCountSpan = document.getElementById('selected-seats-count');
+    const totalPriceSpan = document.getElementById('total-price');
+    const purchaseButton = document.getElementById('purchase-button');
+
+    let selectedSeats = [];
+    let totalPrice = 0;
+
+    function renderHallScheme(schemeData, containerId) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+
+        if (!schemeData || schemeData.length === 0) {
+            container.innerHTML = '<p>Нет данных о рядах и местах для отображения схемы зала.</p>';
+            return;
+        }
+
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("width", "100%");
+        svg.style.height = "auto";
+        svg.style.border = "1px solid #ccc";
+        svg.style.backgroundColor = "#f9f9f9";
+
+        const seatSize = 40;
+        const seatSpacing = 15;
+        const rowSpacing = 60;
+        const startX = 70;
+        const startY = 50;
+
+        let currentY = startY;
+        let maxX = 0;
+
+        schemeData.sort((a, b) => a.row_number - b.row_number);
+
+        schemeData.forEach(rowData => {
+            const rowNumber = rowData.row_number;
+            const seats = rowData.seats;
+            seats.sort((a, b) => a.seat_number - b.seat_number);
+
+            let currentX = startX;
+
+            const rowLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            rowLabel.setAttribute("x", startX - 10);
+            rowLabel.setAttribute("y", currentY + seatSize / 2);
+            rowLabel.setAttribute("dominant-baseline", "middle");
+            rowLabel.setAttribute("text-anchor", "end");
+            rowLabel.style.fontSize = "16px";
+            rowLabel.style.fontWeight = "bold";
+            rowLabel.textContent = `Ряд ${rowNumber}`;
+            svg.appendChild(rowLabel);
+
+            seats.forEach(seatData => {
+                const seatId = seatData.id;
+                const seatNumber = seatData.seat_number;
+                const status = seatData.status;
+                const isVip = seatData.is_vip;
+                const price = seatData.price;
+
+                const seatElement = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                seatElement.setAttribute("x", currentX);
+                seatElement.setAttribute("y", currentY);
+                seatElement.setAttribute("width", seatSize);
+                seatElement.setAttribute("height", seatSize);
+                seatElement.setAttribute("rx", 5);
+
+                seatElement.classList.add('seat', 'svg-seat');
+
+                if (status === 'F') seatElement.classList.add('free');
+                else if (status === 'S') seatElement.classList.add('occupied');
+                else seatElement.classList.add('unavailable');
+                if (isVip) seatElement.classList.add('vip');
+
+                if (seatId) {
+                    seatElement.dataset.seatId = seatId;
+                    seatElement.dataset.row = rowNumber;
+                    seatElement.dataset.seat = seatNumber;
+                    seatElement.dataset.price = price;
+                    seatElement.dataset.status = status;
+
+
+                    if (userSelectedSeatIds.includes(seatId.toString()) && status === 'F') {
+                        seatElement.classList.add('selected');
+                        selectedSeats.push(seatId.toString());
+                        totalPrice += parseFloat(price) || 0;
+                    }
+                } else {
+                    seatElement.dataset.status = 'N';
+                }
+
+                const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+                title.textContent = `Ряд: ${rowNumber}, Место: ${seatNumber}\nСтатус: ${
+                    status === 'F' ? 'Свободно' : (status === 'S' ? 'Занято' : 'Недоступно')
+                }\nЦена: ${price !== undefined ? price + ' грн' : 'N/A'}`;
+                seatElement.appendChild(title);
+
+                seatElement.addEventListener('click', () => {
+                    if (seatId && status === 'F') {
+                        const currentSeatId = seatElement.dataset.seatId;
+                        const currentSeatPrice = parseFloat(seatElement.dataset.price);
+
+                        if (seatElement.classList.contains('selected')) {
+                            seatElement.classList.remove('selected');
+                            selectedSeats = selectedSeats.filter(id => id !== currentSeatId);
+                            totalPrice -= currentSeatPrice;
+                        } else {
+                            seatElement.classList.add('selected');
+                            selectedSeats.push(currentSeatId);
+                            totalPrice += currentSeatPrice;
+                        }
+                        updateSelectionDisplay();
+                    } else if (!seatId) {
+                        alert('Это место не определено в системе (нет ID в БД) и не может быть выбрано.');
+                    } else {
+                        alert(`Место Ряд ${rowNumber}, Место ${seatNumber} уже занято или недоступно.`);
+                    }
+                });
+
+                svg.appendChild(seatElement);
+
+                const seatText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                seatText.setAttribute("x", currentX + seatSize / 2);
+                seatText.setAttribute("y", currentY + seatSize / 2);
+                seatText.setAttribute("text-anchor", "middle");
+                seatText.setAttribute("dominant-baseline", "middle");
+                seatText.style.fontSize = "12px";
+                seatText.style.fill = "#fff";
+                seatText.style.pointerEvents = "none";
+                seatText.textContent = seatNumber;
+                svg.appendChild(seatText);
+
+                currentX += seatSize + seatSpacing;
+            });
+
+            if (currentX > maxX) maxX = currentX;
+            currentY += seatSize + rowSpacing;
+        });
+
+        container.appendChild(svg);
+
+        const finalWidth = maxX + startX;
+        const finalHeight = currentY + startY;
+        svg.setAttribute("viewBox", `0 0 ${finalWidth} ${finalHeight}`);
+        svg.setAttribute("width", finalWidth);
+        svg.setAttribute("height", finalHeight);
+        svg.style.width = "100%";
+    }
+
+    function updateSelectionDisplay() {
+        selectedSeatsCountSpan.textContent = selectedSeats.length;
+        totalPriceSpan.textContent = totalPrice.toFixed(2);
+        selectedSeatsInput.value = JSON.stringify(selectedSeats);
+
+        purchaseButton.disabled = selectedSeats.length === 0;
+
+        document.querySelectorAll('.seat.svg-seat').forEach(seatElement => {
+            const seatId = seatElement.dataset.seatId;
+            if (seatId && selectedSeats.includes(seatId.toString())) {
+                seatElement.classList.add('selected');
+            } else if (seatElement.classList.contains('selected') && !selectedSeats.includes(seatId.toString())) {
+                seatElement.classList.remove('selected');
+            }
+        });
+    }
+
+    if (currentSeatStatusData && currentSeatStatusData.length > 0) {
+        renderHallScheme(currentSeatStatusData, 'hall-scheme-container');
+        updateSelectionDisplay();
+    } else {
+        hallSchemeContainer.innerHTML = '<p>Нет данных о местах для отображения схемы зала.</p>';
+    }
+});
 </script>
-<script src="{% static 'js/hallScheme.js' %}"></script>
+
 {% endblock %}
 
 

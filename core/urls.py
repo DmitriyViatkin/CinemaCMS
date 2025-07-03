@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from .ajax_views import SessionsAjaxView, get_unique_movie, get_unique_cinemas, get_unique_hall
+from . import consumers
 
 urlpatterns = [
 
@@ -25,4 +26,7 @@ urlpatterns = [
     path('nique_movies/', get_unique_movie, name='unique_movies'),
 
 
+]
+websocket_urlpatterns = [
+    path('ws/seats/<int:session_id>/', consumers.SeatConsumer.as_asgi()),
 ]

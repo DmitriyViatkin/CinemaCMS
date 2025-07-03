@@ -11,7 +11,8 @@ from collections import defaultdict
 from movie.models import Movies
 import locale
 from django.db.models import Q
-
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 def cinema_list(request):
     cinemas_list = Cinemas.objects.select_related('gallery','seo_block').prefetch_related(
@@ -39,7 +40,8 @@ def session_list(request):
     # --- Отримуємо GET-параметри ---
     date_filter = request.GET.get('date')
     cinema_filter = request.GET.get('cinema')
-    movie_id_filter = request.GET.get('movie')  # уникай перезапису змінної `movie_filter`
+    hall_filter = request.GET.get('hall')
+    movie_id_filter = request.GET.get('movie')
 
     is_2d = request.GET.get('is_2d') == '1'
     is_3d = request.GET.get('is_3d') == '1'
@@ -50,9 +52,11 @@ def session_list(request):
 
     # --- Основна фільтрація ---
     if date_filter:
-        sessions = sessions.filter(date__date=date_filter)
+        sessions = sessions.filter(date=date_filter)
     if cinema_filter:
         sessions = sessions.filter(hall_id__cinema__id=cinema_filter)
+    if hall_filter:
+        sessions = sessions.filter(hall_id__id=hall_filter)
     if movie_id_filter:
         sessions = sessions.filter(movie__id=movie_id_filter)
 
@@ -75,6 +79,22 @@ def session_list(request):
         date_str = session.date.strftime('%d.%m.%Y')
         grouped_sessions[(day_name.capitalize(), date_str)].append(session)
 
+        # --- Фильтрация залов на основе выбранного кинотеатра ---
+        # Получаем все кинотеатры для первого выпадающего списка
+    all_cinemas = Cinemas.objects.all()
+
+    # Получаем залы. Если кинотеатр выбран, фильтруем залы по этому кинотеатру.
+    # В противном случае, получаем пустой QuerySet для залов.
+    if cinema_filter:
+        try:
+            # Фильтруем залы по ID выбранного кинотеатра
+            halls_for_dropdown = Halls.objects.filter(cinema__id=cinema_filter).order_by('title')
+        except ValueError:
+            halls_for_dropdown = Halls.objects.none()  # Если cinema_filter не является действительным ID
+    else:
+        # Если кинотеатр не выбран, залы не отображаются
+        halls_for_dropdown = Halls.objects.none()
+
     # --- Контекст ---
     context = {
         'grouped_sessions': dict(grouped_sessions),
@@ -83,6 +103,8 @@ def session_list(request):
         'selected_date': date_filter,
         'selected_cinema': cinema_filter,
         'selected_movie': movie_id_filter,
+        'selected_hall': hall_filter,
+        'halls': halls_for_dropdown,
         'filter': {
             'is_2d': is_2d,
             'is_3d': is_3d,
@@ -145,7 +167,7 @@ def buy_ticket_view(request, session_id):
     booked_seat_ids = Tickets.objects.filter(session=session).values_list('seat__id', flat=True)
 
     user_booked_seat_ids = []
-    user_tickets_for_session = [] # <--- НОВОЕ: Список билетов пользователя для этого сеанса
+    user_tickets_for_session = [] #
     if request.user.is_authenticated:
         # Получаем объекты билетов, а не только ID, чтобы иметь доступ к информации о месте
         user_tickets_for_session = Tickets.objects.filter(session=session, profile=request.user).select_related('seat').order_by('seat__number_row', 'seat__seat')
@@ -266,6 +288,13 @@ def process_ticket_purchase(request, session_id):
                     halls=session.hall_id
                 )
                 purchased_tickets_count += 1
+                channel_layer = get_channel_layer()
+                async_to_sync(channel_layer.group_send)(
+                    f"session_{session_id}",
+                    {
+                        'type': 'update_seats'
+                    }
+                )
             except Exception as e:
                 failed_seats_info.append(f"Ошибка при создании билета для места ID {seat_id}: {e}")
                 print(f"Ошибка при обработке места {seat_id}: {e}")
