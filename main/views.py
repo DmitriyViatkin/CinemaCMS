@@ -7,11 +7,26 @@ from django.db.models import Prefetch
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 def index(request):
-
+    cross_banner_obj = Cross_Banner.objects.select_related('gallery').prefetch_related(
+        Prefetch(
+            'gallery__pictures',
+            queryset=Picture.objects.filter(image_type='gallery'),  # Убедитесь, что это правильный тип изображения
+            to_attr='cross_banner_pictures'  # Этот атрибут будет на объекте gallery
+        )
+    ).first()
+    print ("Cring",cross_banner_obj)
+    cross_banner_background_url = None
+    # Проверяем наличие cross_banner_obj, затем его gallery,
+    # и затем наличие 'cross_banner_pictures' НА ОБЪЕКТЕ GALLERY
+    if cross_banner_obj and cross_banner_obj.gallery and cross_banner_obj.gallery.cross_banner_pictures:
+        cross_banner_background_url = cross_banner_obj.gallery.cross_banner_pictures[0].image.url
+        print(f"URL для фонового кросс-баннера: {cross_banner_background_url}")
+    else:
+        print("Кросс-баннер не найден, или у него нет галереи/изображений.")
     banners = Banners.objects.select_related('gallery').prefetch_related(
         Prefetch(
             'gallery__pictures',
-            queryset=Picture.objects.filter(image_type='gallery'),
+            queryset=Picture.objects.filter(image_type='main_picture'),
             to_attr='banner_pictures'
         )
     )
@@ -69,6 +84,7 @@ def index(request):
         item.main_picture = item.gallery.main_pictures[0] if item.gallery and item.gallery.main_pictures else None
 
     return render(request, 'main/index1.html', {
+        'cross_banner_background_url': cross_banner_background_url,
         'banners': banners,
         'movies': movies,
         'coming_soon': coming_soon,
@@ -180,6 +196,7 @@ def promotion_detail(request, slug):
     gallery_pictures = promotion.gallery.pictures.filter(image_type='gallery') if promotion.gallery else []
 
     return render(request, 'main/promotion_detail.html', {
+
         'promotion': promotion,
         'main_picture': main_picture,
         'gallery_pictures': gallery_pictures

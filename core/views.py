@@ -13,7 +13,7 @@ import locale
 from django.db.models import Q
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
-
+from datetime import date
 def cinema_list(request):
     cinemas_list = Cinemas.objects.select_related('gallery','seo_block').prefetch_related(
         Prefetch(
@@ -35,6 +35,9 @@ def cinema_detail(request, cinema_slug):
     halls = cinema.halls.all()
     context = {'cinema': cinema, 'main_picture': main_picture,'halls': halls}
     return render(request, 'core/cinema_detail.html', context)
+
+
+
 locale.setlocale(locale.LC_TIME, 'uk_UA.UTF-8')
 def session_list(request):
     # --- Отримуємо GET-параметри ---
@@ -48,7 +51,7 @@ def session_list(request):
     is_imax = request.GET.get('is_imax') == '1'
 
     # --- Базовий queryset ---
-    sessions = Sessions.objects.select_related('hall_id__cinema', 'movie').all()
+    sessions = Sessions.objects.select_related('hall_id__cinema', 'movie').filter(date__gte=date.today())
 
     # --- Основна фільтрація ---
     if date_filter:

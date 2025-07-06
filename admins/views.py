@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Count
 from django.utils import timezone
+from django.views.generic.list import ListView
 from movie.models import Movies
 from users.models import User,Email_campaing,Tamplate_email
-
+from django.utils.decorators import method_decorator
 from django.db.models import Prefetch
 
 from main.models import Gallery, Banners, Cross_Banner, News, PaigesNews, Promotion, PaigesCinema, MainPaiges, Contact, Block_SEO
@@ -815,8 +816,21 @@ def delete_halls(request, pk):
 
     return redirect('add_cinema_edit', cinema_id=cinema_id)
 
-@staff_member_required
-def session_list(request):
+@method_decorator(staff_member_required, name='dispatch')
+class Session_Lists(ListView):
+
+    model = Sessions
+    template_name = 'admin/session/sessions_list.html'
+    context_object_name = 'sessions'
+    paginate_by = 50
+    def get_queryset(self):
+        queryset  = super().get_queryset()
+        return queryset
+    def get_context_data( self,   **kwargs  ):
+        context= super().get_context_data(**kwargs)
+        return context
+
+def session_list2(request):
     session_list = Sessions.objects.all()
 
     paginator = Paginator(session_list, 10)
@@ -1129,8 +1143,20 @@ def delete_banners(request, banners_id):
 
      return redirect('banners')
 
-@staff_member_required
-def user_list(request):
+@method_decorator(staff_member_required, name='dispatch')
+class User_List_generic(ListView):
+    model=User
+    paginate_by = 50
+    context_object_name = 'users'
+    template_name = 'admin/user/user_lists.html'
+    def get_queryset(self):
+        queryset=super().get_queryset()
+        return queryset
+    def get_context_data( self, **kwargs ):
+        context=super().get_context_data(**kwargs)
+        return context
+
+def user_list2(request):
 
     user_list_all = User.objects.all()
     paginator = Paginator(user_list_all, 10)
