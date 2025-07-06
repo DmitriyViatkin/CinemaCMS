@@ -35,7 +35,7 @@
           <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
 
-            {# Общие ошибки формы (не ошибки полей) #}
+
             {% if cinema_form.non_field_errors %}<div class="alert alert-danger">{{ cinema_form.non_field_errors }}</div>{% endif %}
             {% if block_seo_form.non_field_errors %}<div class="alert alert-danger">{{ block_seo_form.non_field_errors }}</div>{% endif %}
             {% if gallery_form.non_field_errors %}<div class="alert alert-danger">{{ gallery_form.non_field_errors }}</div>{% endif %}
@@ -88,7 +88,7 @@
 <script>
     const DEFAULT_IMAGE_URL = "{% static 'images/картинка.png' %}";
 </script>
-<script src="{% static 'js/gallery.js' %}"></script>
+
 <script>
         // static/js/tabs.js
 document.addEventListener('DOMContentLoaded', function() {

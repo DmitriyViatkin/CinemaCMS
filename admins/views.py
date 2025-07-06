@@ -500,7 +500,6 @@ def add_cinema_create(request, cinema_id=None):
     current_main_picture_object = None
     current_logo_picture_object = None
 
-
     if cinema_id:
         cinema_instance = get_object_or_404(Cinemas, pk=cinema_id)
         block_seo_instance = cinema_instance.seo_block
@@ -512,81 +511,74 @@ def add_cinema_create(request, cinema_id=None):
             cinema_instance.gallery = gallery_instance
             cinema_instance.save()
 
-
         if gallery_instance:
             current_main_picture_object = gallery_instance.pictures.filter(image_type='main_picture').first()
             current_logo_picture_object = gallery_instance.pictures.filter(image_type='logo').first()
 
-
-    if request.method=='POST':
+    if request.method == 'POST':
         block_seo_form = BlockSEOForm(request.POST, instance=block_seo_instance)
         cinema_form = CinemaForm(request.POST, instance=cinema_instance)
         gallery_form = GalleryForm(request.POST, instance=gallery_instance)
 
-        banner_form = PictureForm(request.POST, request.FILES, instance=current_main_picture_object,
-                                                                                 prefix='banner_form')
-        logo_form = PictureForm(request.POST, request.FILES, instance=current_logo_picture_object,
-                                                                                prefix='logo_form')
-
+        banner_form = PictureForm(request.POST, request.FILES, instance=current_main_picture_object, prefix='banner_form')
+        logo_form = PictureForm(request.POST, request.FILES, instance=current_logo_picture_object, prefix='logo_form')
 
         picture_queryset_for_formset = Picture.objects.none()
         if gallery_instance:
-            picture_queryset_for_formset = gallery_instance.pictures.filter(image_type='gallery_image').order_by('pk')
+            picture_queryset_for_formset = gallery_instance.pictures.exclude(
+                image_type__in=['main_picture', 'logo']
+            ).order_by('pk')
 
-        picture_formset = PictureFormSet(request.POST,  request.FILES,   queryset=picture_queryset_for_formset,
-                                                                                prefix='pictures'   )
+        picture_formset = PictureFormSet(
+            request.POST, request.FILES,
+            queryset=picture_queryset_for_formset,
+            prefix='pictures'
+        )
 
-
-        if (block_seo_form.is_valid() and  cinema_form.is_valid() and gallery_form.is_valid() and
-                picture_formset.is_valid()  and     banner_form.is_valid() and    logo_form.is_valid()):
-
+        if (block_seo_form.is_valid() and cinema_form.is_valid() and gallery_form.is_valid() and
+                picture_formset.is_valid() and banner_form.is_valid() and logo_form.is_valid()):
 
             block_seo = block_seo_form.save()
             gallery = gallery_form.save()
-
 
             cinema = cinema_form.save(commit=False)
             cinema.seo_block = block_seo
             cinema.gallery = gallery
             cinema.save()
 
+            # Обробка банера
             if banner_form.cleaned_data.get('image'):
                 banner_picture = banner_form.save(commit=False)
                 banner_picture.gallery = gallery
                 banner_picture.image_type = 'main_picture'
                 banner_picture.save()
-
-                if current_main_picture_object and current_main_picture_object.pk!=banner_picture.pk:
+                if current_main_picture_object and current_main_picture_object.pk != banner_picture.pk:
                     current_main_picture_object.delete()
             elif banner_form.cleaned_data.get('DELETE') and current_main_picture_object:
                 current_main_picture_object.delete()
 
-
+            # Обробка лого
             if logo_form.cleaned_data.get('image'):
                 logo_picture = logo_form.save(commit=False)
                 logo_picture.gallery = gallery
                 logo_picture.image_type = 'logo'
                 logo_picture.save()
-
-                if current_logo_picture_object and current_logo_picture_object.pk!=logo_picture.pk:
+                if current_logo_picture_object and current_logo_picture_object.pk != logo_picture.pk:
                     current_logo_picture_object.delete()
             elif logo_form.cleaned_data.get('DELETE') and current_logo_picture_object:
                 current_logo_picture_object.delete()
 
-
+            # Збереження formset
             instances_gallery = picture_formset.save(commit=False)
             for pic_instance in instances_gallery:
-
                 if not pic_instance.pk:
                     pic_instance.gallery = gallery
                     if not pic_instance.image_type:
                         pic_instance.image_type = 'gallery_image'
                 pic_instance.save()
 
-
             for picture_to_delete in picture_formset.deleted_objects:
                 picture_to_delete.delete()
-
 
             return redirect('cinema_lists')
 
@@ -607,28 +599,33 @@ def add_cinema_create(request, cinema_id=None):
                 'banner_form': banner_form,
                 'logo_form': logo_form,
                 'cinema': cinema_instance,
-                'halls_list': halls_list,
+                'halls': halls,
                 'is_edit': cinema_instance is not None,
             })
-
 
     else:
         block_seo_form = BlockSEOForm(instance=block_seo_instance)
         cinema_form = CinemaForm(instance=cinema_instance)
         gallery_form = GalleryForm(instance=gallery_instance)
 
-
         picture_queryset_for_formset = Picture.objects.none()
         if gallery_instance:
-            picture_queryset_for_formset = gallery_instance.pictures.filter(image_type='gallery_image').order_by('pk')
+            picture_queryset_for_formset = gallery_instance.pictures.exclude(
+                image_type__in=['main_picture', 'logo']
+            ).order_by('pk')
 
-        picture_formset = PictureFormSet( queryset=picture_queryset_for_formset, prefix='pictures'     )
+        picture_formset = PictureFormSet(queryset=picture_queryset_for_formset, prefix='pictures')
 
-        banner_form = PictureForm( instance=current_main_picture_object, prefix='banner_form',
-                                                        initial={'image_type': 'main_picture'}     )
-
-        logo_form = PictureForm(instance=current_logo_picture_object,     prefix='logo_form',
-                                                                      initial={'image_type': 'logo'}        )
+        banner_form = PictureForm(
+            instance=current_main_picture_object,
+            prefix='banner_form',
+            initial={'image_type': 'main_picture'}
+        )
+        logo_form = PictureForm(
+            instance=current_logo_picture_object,
+            prefix='logo_form',
+            initial={'image_type': 'logo'}
+        )
 
     return render(request, 'admin/cinema/add_cinema.html', {
         'block_seo_form': block_seo_form,

@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 import os
 
-from django.conf.global_settings import MEDIA_ROOT
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -162,7 +162,7 @@ INTERNAL_IPS = [
 ]
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
-MEDIA_URL = '/media/'
+
 
 STATIC_URL = '/static/'
 LOCALE_PATHS = (
@@ -173,6 +173,8 @@ MODELTRANSLATION_TRANSLATION_REGISTRY = "cinewave.translation"
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
+MEDIA_URL = '/media/'
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587

@@ -1,13 +1,11 @@
 {% load static %}
 {% load i18n %}
+
 {{ picture_formset.management_form }}
-
-
 
 <div id="pictures-formset">
     {% for form in picture_formset %}
         <div class="gallery-image-form border p-3 mb-3" data-exists="true" data-form-type="gallery">
-
             {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
 
             <div class="form-group field-row-aligned">
@@ -19,14 +17,15 @@
                             <img src="{% static 'images/картинка.png' %}" alt="Изображение не загружено">
                         {% endif %}
 
-                        <button type="button" class="btn btn-danger btn-sm remove-item-cross" title="Видалити зображення" style="display: none;">
+                        <button type="button" class="btn btn-danger btn-sm remove-item-cross" title="Видалити зображення"
+                                {% if not form.image.value %}style="display: none;"{% endif %}> {# Только показывать, если есть загруженное изображение #}
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
 
                     <div class="custom-file-input-wrapper">
-                        {{form.image}}
-                        <label class="btn btn-secondary custom-file-button">{% translate "Додати" %} </label>
+                        {{ form.image }}
+                        <label class="btn btn-secondary custom-file-button">{% translate "Додати" %}</label>
                     </div>
 
                     {% if form.errors.image %}
@@ -35,14 +34,14 @@
                 </div>
             </div>
 
-            <button type="button" class="btn btn-light btn-sm remove-gallery-btn mt-2" style="display :none" > {% translate "Видалити" %}</button>
+            <button type="button" class="btn btn-light btn-sm remove-gallery-btn mt-2"> {% translate "Видалити" %}</button>
 
-             {{ form.id }}
+            {{ form.id }}
             {{ form.image_type }}
             {{ form.gallery }}
-            <div class="delete-checkbox-hidden-field" style="display :none">
-    {{ form.DELETE }}
-</div>
+            <div class="delete-checkbox-hidden-field visually-hidden">
+                {{ form.DELETE }}
+            </div>
         </div>
     {% endfor %}
 </div>
@@ -51,31 +50,387 @@
 
 <div id="empty-form" style="display: none;">
     <div class="gallery-image-form border p-3 mb-3" data-exists="false" data-form-type="gallery">
-
         <div class="form-group field-row-aligned">
             <div class="input-wrapper flex-grow-1 d-flex flex-column align-items-center">
                 <div class="image-preview-container">
                     <img src="{% static 'images/картинка.png' %}" alt="Изображение не загружено">
-
                     <button type="button" class="btn btn-danger btn-sm remove-item-cross" title="Видалити зображення" style="display: none;">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
-
                 <div class="custom-file-input-wrapper">
-                    {{picture_formset.empty_form.image}}
+                    {{ picture_formset.empty_form.image }}
                     <label class="btn btn-secondary custom-file-button"> {% translate "Додати" %}</label>
                 </div>
             </div>
         </div>
-
-        <button type="button" class="btn btn-light btn-sm remove-gallery-btn mt-2" style="display :none"> {% translate "Видалити" %} </button>
-
-         {{ picture_formset.empty_form.id }}
+        <button type="button" class="btn btn-light btn-sm remove-gallery-btn mt-2"> {% translate "Видалити" %}</button>
+        {{ picture_formset.empty_form.id }}
         {{ picture_formset.empty_form.image_type }}
         {{ picture_formset.empty_form.gallery }}
-        <div class="delete-checkbox-hidden-field" style="display :none">
+        <div class="delete-checkbox-hidden-field visually-hidden"> {# Скрываем, как и другие #}
             {{ picture_formset.empty_form.DELETE }}
         </div>
     </div>
 </div>
+
+<script>
+   document.addEventListener('DOMContentLoaded', function() {
+
+    // --- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ И КОНСТАНТЫ ---
+    const DEFAULT_IMAGE_URL = "{% static 'images/картинка.png' %}";
+    const TOTAL_FORMS_INPUT = document.querySelector('#id_pictures-TOTAL_FORMS');
+    // INITIAL_FORMS_INPUT и MAX_NUM_FORMS_INPUT используются Django и не изменяются JS
+    // const INITIAL_FORMS_INPUT = document.querySelector('#id_pictures-INITIAL_FORMS');
+    // const MAX_NUM_FORMS_INPUT = document.querySelector('#id_pictures-MAX_NUM_FORMS');
+
+
+    // --- ФУНКЦИИ-ПОМОЩНИКИ ---
+
+    /**
+     * Обновляет превью изображения и видимость крестика "удалить".
+     * @param {HTMLInputElement} fileInput - Элемент input type="file".
+     * @param {HTMLElement} previewContainer - Контейнер для img и кнопки крестика.
+     * @param {number} maxWidth - Максимальная ширина для предпросмотра.
+     * @param {number} maxHeight - Максимальная высота для предпросмотра.
+     */
+    function previewImage(fileInput, previewContainer, maxWidth, maxHeight) {
+        const imgElement = previewContainer.querySelector('img');
+        const removeCrossBtn = previewContainer.querySelector('.remove-item-cross');
+
+        if (fileInput.files && fileInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imgElement.src = e.target.result;
+                imgElement.style.maxWidth = maxWidth + 'px';
+                imgElement.style.maxHeight = maxHeight + 'px';
+                if (removeCrossBtn) {
+                    removeCrossBtn.style.display = 'block'; // Показываем крестик, если файл выбран
+                }
+            };
+            reader.readAsDataURL(fileInput.files[0]);
+        } else {
+            imgElement.src = DEFAULT_IMAGE_URL; // Сбрасываем на дефолтную заглушку
+            imgElement.style.maxWidth = maxWidth + 'px';
+            imgElement.style.maxHeight = maxHeight + 'px';
+            if (removeCrossBtn) {
+                removeCrossBtn.style.display = 'none'; // Скрываем крестик, если нет файла
+            }
+        }
+    }
+
+    /**
+     * Обновляет индексы полей формы (id, name, for) в формсете.
+     * @param {HTMLElement} formElement - Элемент формы для обновления.
+     * @param {number} newIndex - Новый индекс.
+     */
+    function updateFormIndices(formElement, newIndex) {
+        formElement.querySelectorAll('[id*="pictures-"], [name*="pictures-"], [for*="pictures-"]').forEach(node => {
+            let id = node.getAttribute('id');
+            let name = node.getAttribute('name');
+            let htmlFor = node.getAttribute('for');
+
+            const regex = /(pictures-)(\d+|__prefix__)(-\w+)/; // regex для поиска префикса и индекса
+
+            if (id && regex.test(id)) {
+                node.setAttribute('id', id.replace(regex, `$1${newIndex}$3`));
+            }
+            if (name && regex.test(name)) {
+                node.setAttribute('name', name.replace(regex, `$1${newIndex}$3`));
+            }
+            if (htmlFor && regex.test(htmlFor)) {
+                node.setAttribute('for', htmlFor.replace(regex, `$1${newIndex}$3`));
+            }
+        });
+    }
+
+    /**
+     * Скрывает специфичные поля формы, если они не нужны для отображения пользователю.
+     * @param {HTMLElement} form - Элемент формы.
+     */
+    function hideFormsetHiddenFields(form) {
+        const fieldsToHide = ['id', 'image_type', 'gallery', 'DELETE'];
+        fieldsToHide.forEach(fieldName => {
+            const field = form.querySelector(`[id$="-${fieldName}"]`);
+            if (field) {
+                // Используем closest, чтобы найти ближайшего родителя с классом form-group или обертки, если есть
+                const parent = field.closest('.form-group') || field.parentElement;
+                if (parent) {
+                    parent.classList.add('visually-hidden');
+                } else {
+                    field.classList.add('visually-hidden');
+                }
+            }
+        });
+        // Убедитесь, что 'image_type' установлен на 'gallery' для новых форм, если это форма галереи
+        const imageTypeInput = form.querySelector('[name$="-image_type"]');
+        if (imageTypeInput && form.dataset.formType === 'gallery' && form.dataset.exists === "false") {
+            imageTypeInput.value = 'gallery'; // Использовать 'gallery_image' как в views.py
+        }
+    }
+
+    /**
+     * Инициализирует логику для одной формы изображения (как для gallery, так и для main/logo).
+     * @param {HTMLElement} formContainer - Контейнер формы (например, .gallery-image-form).
+     * @param {string} formPrefix - Префикс формы (например, 'pictures' для формсета, или 'main_picture_form' для отдельной формы).
+     */
+    function initializeImageForm(formContainer, formPrefix) {
+        if (!formContainer) return; // Защита от отсутствия элемента
+
+        const fileInput = formContainer.querySelector('input[type="file"]');
+        const previewContainer = formContainer.querySelector('.image-preview-container');
+        const customFileButton = formContainer.querySelector('.custom-file-button');
+        const removeCrossBtn = previewContainer ? previewContainer.querySelector('.remove-item-cross') : null;
+        const deleteCheckbox = formContainer.querySelector(`input[type="checkbox"][name$="${formPrefix}-DELETE"]`); // Для одиночных форм
+
+        // Инициализация превью при загрузке страницы
+        if (previewContainer) {
+            const imgElement = previewContainer.querySelector('img');
+            // Если изображение загружено (не дефолтная заглушка) и крестик есть, показываем его
+            if (imgElement && imgElement.src !== DEFAULT_IMAGE_URL && removeCrossBtn) {
+                removeCrossBtn.style.display = 'block';
+            } else if (removeCrossBtn) {
+                removeCrossBtn.style.display = 'none'; // Скрываем крестик, если нет изображения
+            }
+        }
+
+
+        if (fileInput) {
+            fileInput.addEventListener('change', function() {
+                previewImage(this, previewContainer, 100, 100);
+                if (deleteCheckbox) deleteCheckbox.checked = false; // Отменяем удаление, если файл перезагружен
+            });
+        }
+
+        if (customFileButton) {
+            customFileButton.addEventListener('click', function() {
+                fileInput.click();
+            });
+        }
+
+        if (removeCrossBtn) {
+            removeCrossBtn.addEventListener('click', function(event) {
+                event.preventDefault();
+                if (fileInput) fileInput.value = ''; // Сброс выбранного файла
+                previewImage(fileInput, previewContainer, 100, 100); // Обновить превью на дефолтную заглушку
+                if (deleteCheckbox) deleteCheckbox.checked = true; // Отмечаем DELETE для отправки
+                // Для одиночных форм:
+                if (formPrefix !== 'pictures' && removeCrossBtn) {
+                    removeCrossBtn.style.display = 'none'; // Для main/logo, скрываем крестик, если нет картинки
+                }
+            });
+        }
+
+        // Скрываем служебные поля
+        hideFormsetHiddenFields(formContainer);
+        // Дополнительно для logo/main_picture, устанавливаем image_type
+        if (formPrefix === 'main_picture' || formPrefix === 'logo') {
+            const imageTypeInput = formContainer.querySelector('[name$="-image_type"]');
+            if (imageTypeInput) {
+                imageTypeInput.value = (formPrefix === 'main_picture') ? 'main_picture' : 'logo';
+            }
+        }
+    }
+
+
+    // --- ОСНОВНАЯ ЛОГИКА DOMContentLoaded ---
+
+    // Инициализация для отдельных форм (main_picture, logo).
+    const mainPictureForm = document.querySelector('.main-picture-form');
+    if (mainPictureForm) initializeImageForm(mainPictureForm, 'main_picture_form'); // Префикс должен совпадать с тем, что в Django
+
+    const logoForm = document.querySelector('.logo-form-container'); // Или .logo-picture-form, если у вас такой класс
+    if (logoForm) initializeImageForm(logoForm, 'logo_form'); // Префикс должен совпадать с тем, что в Django
+
+    const hallSchemeForm = document.querySelector('.hall-scheme-container');
+    if (hallSchemeForm) initializeImageForm(hallSchemeForm, 'hall_scheme_form'); // Префикс 'hall_scheme_form' если используется
+
+
+    const addPictureFormButton = document.getElementById('add-picture-form');
+    const picturesFormsetContainer = document.getElementById('pictures-formset');
+
+    const emptyFormTemplateWrapper = document.getElementById('empty-form');
+    let emptyFormTemplate = null;
+    if (emptyFormTemplateWrapper) {
+        emptyFormTemplate = emptyFormTemplateWrapper.querySelector('.gallery-image-form').cloneNode(true); // Клонируем сразу для удобства
+        emptyFormTemplate.remove(); // Удаляем клонированный элемент из DOM шаблона
+    }
+
+    if (!emptyFormTemplate) {
+        console.error("Empty form template for gallery not found! Check #empty-form structure.");
+    }
+
+    /**
+     * Обновляет значение TOTAL_FORMS в management_form.
+     * ЭТО КЛЮЧЕВАЯ ФУНКЦИЯ ДЛЯ КОРРЕКТНОЙ РАБОТЫ ФОРМСЕТА.
+     * Она должна отражать ОБЩЕЕ количество форм (видимых и скрытых, но не удаленных)
+     * присутствующих в DOM.
+     */
+    const updateActualFormCount = () => {
+        // Получаем все формы формсета, независимо от их видимости
+        const allForms = picturesFormsetContainer.querySelectorAll('.gallery-image-form');
+        if (TOTAL_FORMS_INPUT) {
+            TOTAL_FORMS_INPUT.value = allForms.length;
+        }
+
+        // Переиндексируем ВСЕ формы в DOM
+        allForms.forEach((form, index) => {
+            updateFormIndices(form, index);
+            // Если форма скрыта и помечена на удаление, убедимся, что DELETE-флаг установлен.
+            // Это важно после переиндексации, чтобы флаг DELETE был привязан к новому индексу.
+            const deleteCheckbox = form.querySelector('input[type="checkbox"][name$="-DELETE"]');
+            if (form.style.display === 'none' && deleteCheckbox) {
+                deleteCheckbox.checked = true;
+            }
+        });
+    };
+
+
+    /**
+     * Инициализирует логику для формсета галереи.
+     * @param {HTMLElement} form - Элемент формы из формсета.
+     */
+    const initializeGalleryForm = (form) => {
+        const fileInput = form.querySelector('input[type="file"]');
+        const previewContainer = form.querySelector('.image-preview-container');
+        const customFileButton = form.querySelector('.custom-file-button');
+        const removeCrossBtn = previewContainer ? previewContainer.querySelector('.remove-item-cross') : null;
+        const removeFullBtn = form.querySelector('.remove-gallery-btn'); // Кнопка "Удалить" для всей формы
+        const deleteCheckbox = form.querySelector('input[type="checkbox"][name$="-DELETE"]');
+
+
+        // Инициализация превью при загрузке страницы
+        if (previewContainer) {
+            const imgElement = previewContainer.querySelector('img');
+            if (imgElement && imgElement.src !== DEFAULT_IMAGE_URL && removeCrossBtn) {
+                removeCrossBtn.style.display = 'block';
+            } else if (removeCrossBtn) {
+                removeCrossBtn.style.display = 'none'; // Скрываем крестик, если нет изображения
+            }
+        }
+
+
+        if (fileInput) {
+            fileInput.addEventListener('change', function() {
+                previewImage(this, previewContainer, 100, 100);
+                if (deleteCheckbox) deleteCheckbox.checked = false; // Отменяем удаление, если файл перезагружен
+            });
+        }
+
+        if (customFileButton) {
+            customFileButton.addEventListener('click', function() {
+                fileInput.click();
+            });
+        }
+
+        // Обработка кнопки удаления (крестик)
+        if (removeCrossBtn) {
+            removeCrossBtn.addEventListener('click', function(event) {
+                event.preventDefault();
+                if (fileInput) fileInput.value = ''; // Очищаем input[file]
+                previewImage(fileInput, previewContainer, 100, 100); // Возвращаем заглушку и скрываем крестик
+                if (deleteCheckbox) deleteCheckbox.checked = true; // Отмечаем DELETE
+                form.style.display = 'none'; // Скрываем форму
+
+                // После скрытия формы вызываем updateActualFormCount,
+                // которая также выполнит переиндексацию всех оставшихся форм
+                updateActualFormCount();
+            });
+        }
+
+        // Обработка кнопки "Удалить" для всей формы (скрывает форму)
+        if (removeFullBtn) {
+            removeFullBtn.addEventListener('click', function(event) {
+                event.preventDefault();
+                if (deleteCheckbox) deleteCheckbox.checked = true; // Отмечаем DELETE
+                form.style.display = 'none'; // Скрываем форму
+
+                // После скрытия формы вызываем updateActualFormCount,
+                // которая также выполнит переиндексацию всех оставшихся форм
+                updateActualFormCount();
+            });
+        }
+
+        // Скрываем служебные поля формы галереи
+        hideFormsetHiddenFields(form);
+    };
+
+
+    // Инициализация существующих форм галереи при загрузке страницы
+    if (picturesFormsetContainer) {
+        picturesFormsetContainer.querySelectorAll('.gallery-image-form').forEach(form => {
+            const deleteCheckbox = form.querySelector('input[type="checkbox"][name$="-DELETE"]');
+            if (deleteCheckbox && deleteCheckbox.checked) {
+                form.style.display = 'none'; // Скрываем формы, помеченные на удаление
+            }
+            initializeGalleryForm(form);
+        });
+        updateActualFormCount(); // Первичная полная индексация всех форм
+    }
+
+    // Обработчик кнопки "Добавить еще одно изображение"
+    if (addPictureFormButton) {
+        addPictureFormButton.addEventListener('click', function() {
+            if (!emptyFormTemplate) {
+                console.error("Empty form template is missing. Cannot add new form.");
+                return;
+            }
+
+            // Новый индекс - это текущее ОБЩЕЕ количество форм в DOM
+            const newIndex = picturesFormsetContainer.querySelectorAll('.gallery-image-form').length;
+
+            const newForm = emptyFormTemplate.cloneNode(true);
+            newForm.style.display = ''; // Сделать видимой
+            newForm.dataset.exists = "false"; // Помечаем как новую форму
+            newForm.classList.remove('visually-hidden'); // Убираем скрытие, если оно было в шаблоне
+
+            updateFormIndices(newForm, newIndex); // Обновляем индексы для новой формы
+
+            // Очистка полей новой формы
+            newForm.querySelectorAll('input:not([type="hidden"]):not([type="checkbox"]), select, textarea').forEach(input => {
+                if (input.tagName === 'SELECT') {
+                    input.selectedIndex = 0;
+                } else {
+                    input.value = '';
+                }
+            });
+
+            // Сброс чекбокса DELETE и установка типа изображения
+            const newDeleteCheckbox = newForm.querySelector('input[type="checkbox"][name$="-DELETE"]');
+            if (newDeleteCheckbox) newDeleteCheckbox.checked = false;
+
+            const newImageTypeInput = newForm.querySelector('[name$="-image_type"]');
+            if (newImageTypeInput) newImageTypeInput.value = 'gallery';
+
+            // Сброс превью изображения на дефолтную заглушку и скрытие крестика
+            const newFormPreviewImg = newForm.querySelector('.image-preview-container img');
+            const newFormRemoveCrossBtn = newForm.querySelector('.image-preview-container .remove-item-cross');
+            if (newFormPreviewImg) newFormPreviewImg.src = DEFAULT_IMAGE_URL;
+            if (newFormRemoveCrossBtn) newFormRemoveCrossBtn.style.display = 'none';
+
+            picturesFormsetContainer.appendChild(newForm); // Добавляем новую форму в DOM
+            initializeGalleryForm(newForm); // Инициализируем логику для новой формы
+            updateActualFormCount(); // Обновляем общее количество форм (и переиндексируем все)
+        });
+    }
+
+    // Скрываем поля из пустого шаблона формы
+    // emptyFormTemplate уже был клонирован и удален, так что этот блок не нужен для его скрытия в DOM
+    // Если вы хотите, чтобы сам HTML-шаблон (div#empty-form) был скрыт, это нужно делать в CSS или HTML.
+
+
+    // --- ИНИЦИАЛИЗАЦИЯ JQUERY ПЛАГИНОВ (если они должны быть внутри DOMContentLoaded) ---
+    if (typeof jQuery !== 'undefined') {
+        $(function () {
+            $('#reservationdatetime').datetimepicker({ icons: { time: 'far fa-clock' } });
+            $('#reservation').daterangepicker({ singleDatePicker: true, showDropdowns: true, locale: { format: 'MM/DD/YYYY' } });
+            $('#timepicker').datetimepicker({ format: 'LT' });
+            $('input[data-bootstrap-switch]').each(function(){
+                $(this).bootstrapSwitch('state', $(this).prop('checked'));
+            });
+        });
+    } else {
+        console.warn("jQuery is not loaded. Skipping jQuery plugin initialization.");
+    }
+});
+</script>

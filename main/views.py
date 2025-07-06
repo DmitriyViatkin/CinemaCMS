@@ -10,11 +10,11 @@ def index(request):
     cross_banner_obj = Cross_Banner.objects.select_related('gallery').prefetch_related(
         Prefetch(
             'gallery__pictures',
-            queryset=Picture.objects.filter(image_type='gallery'),  # Убедитесь, что это правильный тип изображения
-            to_attr='cross_banner_pictures'  # Этот атрибут будет на объекте gallery
+            queryset=Picture.objects.filter(image_type='gallery'),
+            to_attr='cross_banner_pictures'
         )
     ).first()
-    print ("Cring",cross_banner_obj)
+
     cross_banner_background_url = None
     # Проверяем наличие cross_banner_obj, затем его gallery,
     # и затем наличие 'cross_banner_pictures' НА ОБЪЕКТЕ GALLERY
@@ -32,7 +32,7 @@ def index(request):
     )
 
 
-    print(f"Загальна кількість банерів: {len(banners)}")
+
 
     for banner in banners:
         if banner.gallery:

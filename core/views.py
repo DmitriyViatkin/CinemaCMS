@@ -14,7 +14,7 @@ from django.db.models import Q
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from datetime import date
-
+from django.utils import timezone
 
 
 
@@ -34,13 +34,55 @@ def cinema_list(request):
     return render(request, 'core/cinema_list.html', {'cinemas': cinemas})
 
 def cinema_detail(request, cinema_slug):
-    cinema = get_object_or_404(Cinemas, seo_block__seo_url=cinema_slug)
-    main_picture = cinema.gallery.pictures.filter(image_type="main_picture").first() if hasattr(cinema,
-                                                                                                'gallery') and cinema.gallery else None
-    halls = cinema.halls.all()
-    context = {'cinema': cinema, 'main_picture': main_picture,'halls': halls}
-    return render(request, 'core/cinema_detail.html', context)
+    all_gallery_pictures_prefetch = Prefetch(
+        'gallery__pictures',
+        queryset=Picture.objects.all(),
+        to_attr='all_gallery_images'
+    )
 
+    halls_prefetch = Prefetch(
+        'halls',
+        queryset=Halls.objects.all().order_by('title'),
+        to_attr='prefetched_halls'
+    )
+    cinema = get_object_or_404(
+        Cinemas.objects.select_related('seo_block', 'gallery')
+                       .prefetch_related(all_gallery_pictures_prefetch, halls_prefetch),
+        seo_block__seo_url=cinema_slug
+    )
+
+    main_picture = None
+    logo_picture = None
+    gallery_pictures_list = []
+
+    if cinema.gallery and hasattr(cinema.gallery, 'all_gallery_images'):
+        for pic in cinema.gallery.all_gallery_images:
+            if pic.image_type == 'main_picture':
+                main_picture = pic
+
+            elif pic.image_type == 'logo':
+                logo_picture = pic
+
+            elif pic.image_type == 'gallery':
+                gallery_pictures_list.append(pic)
+
+
+
+    today = timezone.localdate()
+
+    today_sessions = Sessions.objects.filter(cinema=cinema,date=today).select_related('movie').order_by('time_session')
+
+    halls = cinema.prefetched_halls
+
+    context = {
+        'cinema': cinema,
+        'main_picture': main_picture,
+        'logo_picture': logo_picture,
+        'halls': halls ,
+        'today_sessions': today_sessions ,
+        'gallery_pictures_list': list(gallery_pictures_list )
+    }
+    return render(request, 'core/cinema_detail.html', context)
 
 
 locale.setlocale(locale.LC_TIME, 'uk_UA.UTF-8')
@@ -100,7 +142,7 @@ def session_list(request):
         except ValueError:
             halls_for_dropdown = Halls.objects.none()  # Если cinema_filter не является действительным ID
     else:
-        # Если кинотеатр не выбран, залы не отображаются
+
         halls_for_dropdown = Halls.objects.none()
 
     # --- Контекст ---
