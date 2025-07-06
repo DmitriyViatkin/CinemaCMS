@@ -14,12 +14,17 @@ from django.db.models import Q
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from datetime import date
+
+
+
+
+
 def cinema_list(request):
     cinemas_list = Cinemas.objects.select_related('gallery','seo_block').prefetch_related(
         Prefetch(
             'gallery__pictures',
-            queryset=Picture.objects.filter(image_type='logo'),
-            to_attr='logos'
+            queryset=Picture.objects.filter(image_type='main_picture'),
+            to_attr='main_picture'
         )
     ).order_by('title')
     paginator = Paginator(cinemas_list, 10)
