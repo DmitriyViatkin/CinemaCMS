@@ -84,6 +84,49 @@ def cinema_detail(request, cinema_slug):
     }
     return render(request, 'core/cinema_detail.html', context)
 
+def hall_detail(request, hall_id):
+    # Префетч для галереи зала (если у Hall есть своя галерея)
+    all_gallery_pictures_prefetch = Prefetch(
+        'gallery__pictures',
+        queryset=Picture.objects.all(), # Можно сузить, если нужно, например, .filter(is_active=True)
+        to_attr='all_gallery_images'
+    )
+
+    # Получаем конкретный зал по hall_id
+    # Убираем prefetch_related('halls'), так как Halls не имеет атрибута 'halls'
+    hall = get_object_or_404(
+        Halls.objects.select_related('seo_block', 'gallery')
+                     .prefetch_related(all_gallery_pictures_prefetch), # Убрали halls_prefetch
+        pk=hall_id
+    )
+
+    main_picture = None
+
+    gallery_pictures_list = []
+
+    # Обработка изображений галереи зала
+    if hall.gallery and hasattr(hall.gallery, 'all_gallery_images'):
+        for pic in hall.gallery.all_gallery_images:
+            if pic.image_type == 'main_picture': # Если у зала есть "главная" картинка
+                main_picture = pic
+            elif pic.image_type == 'logo': # Если у зала есть "лого"
+                logo_picture = pic
+            elif pic.image_type == 'gallery':
+                gallery_pictures_list.append(pic)
+
+
+    print  (gallery_pictures_list),
+    context = {
+        'hall': hall,
+        'main_picture': main_picture,
+
+        'gallery_pictures_list': list( gallery_pictures_list ),
+
+    }
+
+    return render(request, 'hall/hall_detail.html', context)
+
+
 
 locale.setlocale(locale.LC_TIME, 'uk_UA.UTF-8')
 def session_list(request):
@@ -179,12 +222,7 @@ def hall_list(request):
     context = {'hall_list': hall_list}
     return render(request, 'hall/hall_list.html', context)
 
-def hall_detail(request, hall_id):
 
-    hall = get_object_or_404(Halls, pk=hall_id)
-
-    context = {'hall': hall}
-    return render(request, 'hall/hall_detail.html', context)
 
 
 def buy_ticket_view(request, session_id):
