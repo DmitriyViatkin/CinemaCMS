@@ -125,13 +125,20 @@ def paiges_cinema_detail(request, slug):
     })
 
 def paiges_news_list(request):
+    banners = Banners.objects.select_related('gallery').prefetch_related(
+        Prefetch(
+            'gallery__pictures',
+            queryset=Picture.objects.filter(image_type='main_picture'),
+            to_attr='banner_pictures'
+        )
+    )
     news = PaigesNews.objects.filter(is_active=True).select_related('gallery').prefetch_related(
         Prefetch('gallery__pictures', queryset=Picture.objects.filter(image_type='main_picture'))
     ).order_by('-date')[:5]
 
     for item in news:
         item.main_picture = item.gallery.pictures.first() if item.gallery else None
-    return render(request, 'main/paiges_news_list.html', {'news': news})
+    return render(request, 'main/paiges_news_list.html', {'banners': banners,'news': news})
 
 
 
@@ -156,7 +163,14 @@ def paiges_news_detail(request, slug):
     })
 
 def promotions_list(request):
-    promotions_list = Promotion.objects.select_related('gallery').prefetch_related(
+    banners = Banners.objects.select_related('gallery').prefetch_related(
+        Prefetch(
+            'gallery__pictures',
+            queryset=Picture.objects.filter(image_type='main_picture'),
+            to_attr='banner_pictures'
+        )
+    )
+    promotions_list = Promotion.objects.select_related('gallery','seo_block').prefetch_related(
         Prefetch(
             'gallery__pictures',
             queryset=Picture.objects.filter(image_type='main_picture'),
@@ -181,9 +195,9 @@ def promotions_list(request):
         promotions = paginator.page(1)
     except EmptyPage:
         promotions = paginator.page(paginator.num_pages)
+    print(banners)
 
-
-    return render(request, 'main/action.html', {'promotions': promotions})
+    return render(request, 'main/action.html', {'banners': banners,'promotions': promotions})
 
 
 
@@ -196,7 +210,7 @@ def promotion_detail(request, slug):
     )
 
     promotion = get_object_or_404(
-        Promotion.objects.select_related('gallery').prefetch_related(all_gallery_pictures_prefetch),
+        Promotion.objects.select_related('gallery','seo_block').prefetch_related(all_gallery_pictures_prefetch),
         seo_block__seo_url=slug
     )
 
