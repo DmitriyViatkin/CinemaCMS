@@ -1118,20 +1118,7 @@ class User_List_generic(ListView):
         context=super().get_context_data(**kwargs)
         return context
 
-def user_list2(request):
 
-    user_list_all = User.objects.all()
-    paginator = Paginator(user_list_all, 10)
-    page_number = request.GET.get('page')
-
-    try:
-        users_page = paginator.page(page_number)
-    except PageNotAnInteger:
-        users_page = paginator.page(1)
-    except EmptyPage:
-        users_page = paginator.page(paginator.num_pages)
-    context = {'users': users_page}
-    return render(request, 'admin/user/user_lists.html', context)
 
 @staff_member_required
 def add_user(request, user_id=None):

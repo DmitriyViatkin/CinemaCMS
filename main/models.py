@@ -148,6 +148,20 @@ class PaigesNews(models.Model):
     def __str__(self):
         return self.title
 
+    def get_youtube_embed_url(self):
+        """Преобразует стандартный URL YouTube в URL для встраивания."""
+        if self.url:
+
+            match = re.search(
+                r'(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=|embed\/|v\/|)([\w-]{11})',
+                self.url
+            )
+            if match:
+                video_id = match.group(1)
+                # *** ЭТО КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: Используйте стандартный embed URL ***
+                return f"https://www.youtube.com/embed/{video_id}"
+        return None
+
     class Meta:
         verbose_name = 'Сторінка Новини'
         verbose_name_plural = 'Сторінки Новин'

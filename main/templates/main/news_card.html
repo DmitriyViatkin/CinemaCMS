@@ -1,24 +1,19 @@
-
 {# news_card.html #}
 <div class="col">
-  <div class="card h-100">
+  {# Added bg-dark, text-white, and rounded for aesthetics #}
+  <div class="card h-100 bg-dark text-white rounded shadow-sm">
     {% if news.main_picture %}
       <img src="{{ news.main_picture.image.url }}" class="card-img-top" alt="{{ news.title }}" style="height: 250px; object-fit: cover;">
     {% else %}
-      <div class="d-flex align-items-center justify-content-center" style="height: 250px; background-color: #e9ecef;">
-        <span class="text-muted">Зображення відсутнє</span>
+      <div class="d-flex align-items-center justify-content-center" style="height: 250px; background-color: #333;"> {# Changed placeholder background to a dark gray #}
+        <span class="text-white-50">Зображення відсутнє</span> {# Changed text color for placeholder #}
       </div>
     {% endif %}
     <div class="card-body d-flex flex-column">
-      <h5 class="card-title">{{ news.title }}</h5>
+      <h5 class="card-title"><a href="{% url 'main:paiges_news_detail' news.seo_block.seo_url %}" class="btn btn-primary mt-auto"> {{ news.title }} </a> </h5>
       <p class="card-text">{{ news.description|truncatewords:25 }}</p>
-      {% if news.seo_block and news.seo_block.seo_url %}
-        <a href="{% url 'main:paiges_news_detail' news.seo_block.seo_url %}" class="btn btn-secondary mt-auto">Читати далі</a>
-      {% else %}
-        <a href="#" class="btn btn-secondary disabled mt-auto">URL недоступний</a>
-      {% endif %}
     </div>
-    <div class="card-footer text-muted">
+    <div class="card-footer text-muted border-top border-secondary">
       {{ news.date|date:"d.m.Y" }}
     </div>
   </div>
