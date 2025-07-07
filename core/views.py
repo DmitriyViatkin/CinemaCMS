@@ -10,6 +10,7 @@ import json
 from django.db.models import Prefetch
 from collections import defaultdict
 from movie.models import Movies
+from main.models import Banners
 import locale
 from django.db.models import Q
 from channels.layers import get_channel_layer
@@ -21,6 +22,14 @@ from datetime import date
 
 
 def cinema_list(request):
+    banners = Banners.objects.select_related('gallery').prefetch_related(
+        Prefetch(
+            'gallery__pictures',
+            queryset=Picture.objects.filter(image_type='main_picture'),
+            to_attr='banner_pictures'
+        )
+    )
+
     cinemas_list = Cinemas.objects.select_related('gallery','seo_block').prefetch_related(
         Prefetch(
             'gallery__pictures',
@@ -32,7 +41,7 @@ def cinema_list(request):
     page_number = request.GET.get('page')
     cinemas = paginator.get_page(page_number)
 
-    return render(request, 'core/cinema_list.html', {'cinemas': cinemas})
+    return render(request, 'core/cinema_list.html', {'banners': banners,'cinemas': cinemas})
 
 def cinema_detail(request, cinema_slug):
     all_gallery_pictures_prefetch = Prefetch(

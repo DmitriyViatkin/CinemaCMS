@@ -94,34 +94,36 @@ def index(request):
 
 
 def paiges_cinema_detail(request, slug):
-    print(f"Отримано slug: {slug}")
-    try:
-        page = get_object_or_404(PaigesCinema, seo_block__seo_url=slug, is_active=True)
-        print(f"Знайдено об'єкт PaigesCinema: {page}")
-        # ... інший код
-    except Exception as e:
-        print(f"Помилка при отриманні об'єкта: {e}")
-        page = None  # Щоб уникнути помилок у шаблоні, якщо об'єкт не знайдено
 
-    gallery_pictures = []
+
+
+    cinema_page = get_object_or_404(
+        PaigesCinema.objects.select_related('gallery', 'seo_block').prefetch_related(
+            Prefetch(
+                'gallery__pictures',
+                queryset=Picture.objects.all(), # Вы можете добавить .order_by('order') если у Picture есть поле order
+                to_attr='all_related_pictures'
+            )
+        ),
+        seo_block__seo_url=slug,
+        is_active=True # Добавляем фильтр is_active, если он важен
+    )
+
     main_picture = None
+    gallery_pictures_list = []
 
-    if page and hasattr(page, 'paiges_cinema_gallery') and page.paiges_cinema_gallery:
-        gallery = page.paiges_cinema_gallery
-        gallery_pictures = gallery.pictures_in_gallery.filter(image_type='gallery')
-        main_picture = gallery.pictures_in_gallery.filter(image_type='main_picture').first()
-        print(f"Знайдено зображень галереї: {gallery_pictures.count()}")
-        if main_picture:
-            print(f"Знайдено головне зображення: {main_picture.image.url}")
-        else:
-            print("Головне зображення не знайдено.")
-    else:
-        print("Галерея не знайдена або не існує.")
+    # Проверяем, существует ли галерея и есть ли связанные изображения
+    if cinema_page.gallery and hasattr(cinema_page.gallery, 'all_related_pictures'):
+        for pic in cinema_page.gallery.all_related_pictures:
+            if pic.image_type == 'main_picture':
+                main_picture = pic
+            elif pic.image_type == 'gallery':
+                gallery_pictures_list.append(pic) # ИСПРАВЛЕНИЕ: Добавляем картинку в список
 
     return render(request, 'main/paiges_cinema_detail.html', {
-        'page': page,
+        'page': cinema_page, # Передаем объект PaigesCinema под более ясным именем
         'main_picture': main_picture,
-        'gallery_pictures': gallery_pictures
+        'gallery_pictures': gallery_pictures_list
     })
 
 def paiges_news_list(request):
@@ -167,8 +169,7 @@ def paiges_news_detail(request, slug):
                 main_picture = pic
             elif pic.image_type == 'gallery':
                 gallery_pictures_list.append(pic)
-    print("еее")
-    print( paige_news)
+
     return render(request, 'main/paiges_news_detail.html', {
         'paige_news': paige_news,
         'main_picture': main_picture,
