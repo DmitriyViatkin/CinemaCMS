@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Count
 from django.utils import timezone
+from django.views.generic.list import ListView
 from movie.models import Movies
 from users.models import User,Email_campaing,Tamplate_email
-
+from django.utils.decorators import method_decorator
 from django.db.models import Prefetch
 
 from main.models import Gallery, Banners, Cross_Banner, News, PaigesNews, Promotion, PaigesCinema, MainPaiges, Contact, Block_SEO
@@ -499,7 +500,6 @@ def add_cinema_create(request, cinema_id=None):
     current_main_picture_object = None
     current_logo_picture_object = None
 
-
     if cinema_id:
         cinema_instance = get_object_or_404(Cinemas, pk=cinema_id)
         block_seo_instance = cinema_instance.seo_block
@@ -511,81 +511,74 @@ def add_cinema_create(request, cinema_id=None):
             cinema_instance.gallery = gallery_instance
             cinema_instance.save()
 
-
         if gallery_instance:
             current_main_picture_object = gallery_instance.pictures.filter(image_type='main_picture').first()
             current_logo_picture_object = gallery_instance.pictures.filter(image_type='logo').first()
 
-
-    if request.method=='POST':
+    if request.method == 'POST':
         block_seo_form = BlockSEOForm(request.POST, instance=block_seo_instance)
         cinema_form = CinemaForm(request.POST, instance=cinema_instance)
         gallery_form = GalleryForm(request.POST, instance=gallery_instance)
 
-        banner_form = PictureForm(request.POST, request.FILES, instance=current_main_picture_object,
-                                                                                 prefix='banner_form')
-        logo_form = PictureForm(request.POST, request.FILES, instance=current_logo_picture_object,
-                                                                                prefix='logo_form')
-
+        banner_form = PictureForm(request.POST, request.FILES, instance=current_main_picture_object, prefix='banner_form')
+        logo_form = PictureForm(request.POST, request.FILES, instance=current_logo_picture_object, prefix='logo_form')
 
         picture_queryset_for_formset = Picture.objects.none()
         if gallery_instance:
-            picture_queryset_for_formset = gallery_instance.pictures.filter(image_type='gallery_image').order_by('pk')
+            picture_queryset_for_formset = gallery_instance.pictures.exclude(
+                image_type__in=['main_picture', 'logo']
+            ).order_by('pk')
 
-        picture_formset = PictureFormSet(request.POST,  request.FILES,   queryset=picture_queryset_for_formset,
-                                                                                prefix='pictures'   )
+        picture_formset = PictureFormSet(
+            request.POST, request.FILES,
+            queryset=picture_queryset_for_formset,
+            prefix='pictures'
+        )
 
-
-        if (block_seo_form.is_valid() and  cinema_form.is_valid() and gallery_form.is_valid() and
-                picture_formset.is_valid()  and     banner_form.is_valid() and    logo_form.is_valid()):
-
+        if (block_seo_form.is_valid() and cinema_form.is_valid() and gallery_form.is_valid() and
+                picture_formset.is_valid() and banner_form.is_valid() and logo_form.is_valid()):
 
             block_seo = block_seo_form.save()
             gallery = gallery_form.save()
-
 
             cinema = cinema_form.save(commit=False)
             cinema.seo_block = block_seo
             cinema.gallery = gallery
             cinema.save()
 
+            # Обробка банера
             if banner_form.cleaned_data.get('image'):
                 banner_picture = banner_form.save(commit=False)
                 banner_picture.gallery = gallery
                 banner_picture.image_type = 'main_picture'
                 banner_picture.save()
-
-                if current_main_picture_object and current_main_picture_object.pk!=banner_picture.pk:
+                if current_main_picture_object and current_main_picture_object.pk != banner_picture.pk:
                     current_main_picture_object.delete()
             elif banner_form.cleaned_data.get('DELETE') and current_main_picture_object:
                 current_main_picture_object.delete()
 
-
+            # Обробка лого
             if logo_form.cleaned_data.get('image'):
                 logo_picture = logo_form.save(commit=False)
                 logo_picture.gallery = gallery
                 logo_picture.image_type = 'logo'
                 logo_picture.save()
-
-                if current_logo_picture_object and current_logo_picture_object.pk!=logo_picture.pk:
+                if current_logo_picture_object and current_logo_picture_object.pk != logo_picture.pk:
                     current_logo_picture_object.delete()
             elif logo_form.cleaned_data.get('DELETE') and current_logo_picture_object:
                 current_logo_picture_object.delete()
 
-
+            # Збереження formset
             instances_gallery = picture_formset.save(commit=False)
             for pic_instance in instances_gallery:
-
                 if not pic_instance.pk:
                     pic_instance.gallery = gallery
                     if not pic_instance.image_type:
                         pic_instance.image_type = 'gallery_image'
                 pic_instance.save()
 
-
             for picture_to_delete in picture_formset.deleted_objects:
                 picture_to_delete.delete()
-
 
             return redirect('cinema_lists')
 
@@ -606,28 +599,33 @@ def add_cinema_create(request, cinema_id=None):
                 'banner_form': banner_form,
                 'logo_form': logo_form,
                 'cinema': cinema_instance,
-                'halls_list': halls_list,
+                'halls': halls,
                 'is_edit': cinema_instance is not None,
             })
-
 
     else:
         block_seo_form = BlockSEOForm(instance=block_seo_instance)
         cinema_form = CinemaForm(instance=cinema_instance)
         gallery_form = GalleryForm(instance=gallery_instance)
 
-
         picture_queryset_for_formset = Picture.objects.none()
         if gallery_instance:
-            picture_queryset_for_formset = gallery_instance.pictures.filter(image_type='gallery_image').order_by('pk')
+            picture_queryset_for_formset = gallery_instance.pictures.exclude(
+                image_type__in=['main_picture', 'logo']
+            ).order_by('pk')
 
-        picture_formset = PictureFormSet( queryset=picture_queryset_for_formset, prefix='pictures'     )
+        picture_formset = PictureFormSet(queryset=picture_queryset_for_formset, prefix='pictures')
 
-        banner_form = PictureForm( instance=current_main_picture_object, prefix='banner_form',
-                                                        initial={'image_type': 'main_picture'}     )
-
-        logo_form = PictureForm(instance=current_logo_picture_object,     prefix='logo_form',
-                                                                      initial={'image_type': 'logo'}        )
+        banner_form = PictureForm(
+            instance=current_main_picture_object,
+            prefix='banner_form',
+            initial={'image_type': 'main_picture'}
+        )
+        logo_form = PictureForm(
+            instance=current_logo_picture_object,
+            prefix='logo_form',
+            initial={'image_type': 'logo'}
+        )
 
     return render(request, 'admin/cinema/add_cinema.html', {
         'block_seo_form': block_seo_form,
@@ -667,16 +665,11 @@ def halls_list(request):
 
 @staff_member_required
 def add_halls_create(request, cinema_pk, halls_id=None):
-
     cinema_instance = get_object_or_404(Cinemas, pk=cinema_pk)
-
     halls_instance = None
     block_seo_instance = None
     gallery_instance = None
-
     current_main_picture_object = None
-
-
 
     if halls_id:
         halls_instance = get_object_or_404(Halls, pk=halls_id, cinema=cinema_instance)
@@ -686,39 +679,34 @@ def add_halls_create(request, cinema_pk, halls_id=None):
         if gallery_instance is None:
             gallery_instance = Gallery.objects.create()
             halls_instance.gallery = gallery_instance
-            halls_instance.save() # Сохраняем, чтобы привязать галерею к залу
+            halls_instance.save()
 
-        if gallery_instance:
-            current_main_picture_object = gallery_instance.pictures.filter(image_type='main_picture').first()
-
-
+        current_main_picture_object = gallery_instance.pictures.filter(
+            image_type='main_picture'
+        ).first()
 
     if request.method == 'POST':
-
         block_seo_form = BlockSEOForm(request.POST, instance=block_seo_instance)
-
         halls_form = HallsForm(request.POST, request.FILES, instance=halls_instance)
         gallery_form = GalleryForm(request.POST, instance=gallery_instance)
+        banner_form = PictureForm(
+            request.POST, request.FILES,
+            instance=current_main_picture_object,
+            prefix='banner_form'
+        )
 
-        banner_form = PictureForm(request.POST, request.FILES, instance=current_main_picture_object,
-            prefix='banner_form')
-
-
-        # Загружаем существующие галерейные изображения для формсета
-        picture_queryset_for_formset = Picture.objects.none()
-        if gallery_instance:
-            picture_queryset_for_formset = gallery_instance.pictures.filter(image_type='gallery_image').order_by('pk')
-
-        picture_formset = PictureFormSet(request.POST, request.FILES, queryset=picture_queryset_for_formset,
-            prefix='pictures')
+        # УВАГА: У POST НЕ ПЕРЕДАЄМО queryset
+        picture_formset = PictureFormSet(
+            request.POST, request.FILES,
+            prefix='pictures'
+        )
 
         if (block_seo_form.is_valid() and
-                halls_form.is_valid() and
-                gallery_form.is_valid() and
-                picture_formset.is_valid() and
-                banner_form.is_valid() ):
-
-
+            halls_form.is_valid() and
+            gallery_form.is_valid() and
+            picture_formset.is_valid() and
+            banner_form.is_valid()
+        ):
             block_seo = block_seo_form.save()
             gallery = gallery_form.save()
 
@@ -728,7 +716,7 @@ def add_halls_create(request, cinema_pk, halls_id=None):
             halls.cinema = cinema_instance
             halls.save()
 
-
+            # Обробка головного зображення (банера)
             if banner_form.cleaned_data.get('image'):
                 banner_picture = banner_form.save(commit=False)
                 banner_picture.gallery = gallery
@@ -737,12 +725,11 @@ def add_halls_create(request, cinema_pk, halls_id=None):
 
                 if current_main_picture_object and current_main_picture_object.pk != banner_picture.pk:
                     current_main_picture_object.delete()
+
             elif banner_form.cleaned_data.get('DELETE') and current_main_picture_object:
                 current_main_picture_object.delete()
 
-
-
-
+            # Обробка formset (галерея)
             instances_gallery = picture_formset.save(commit=False)
             for pic_instance in instances_gallery:
                 if not pic_instance.pk:
@@ -753,32 +740,15 @@ def add_halls_create(request, cinema_pk, halls_id=None):
 
             for picture_to_delete in picture_formset.deleted_objects:
                 picture_to_delete.delete()
-            # --- Конец логики сохранения картинок и формсетов ---
 
             return redirect('add_cinema_edit', cinema_id=cinema_pk)
-
         else:
-            print("Ошибка валидации форм")
-
+            print("❌ Помилка валідації форм:")
             print("block_seo_form.errors:", block_seo_form.errors)
             print("halls_form.errors:", halls_form.errors)
-            print(halls_form)
             print("gallery_form.errors:", gallery_form.errors)
             print("picture_formset.errors:", picture_formset.errors)
             print("banner_form.errors:", banner_form.errors)
-
-
-            return render(request, 'admin/halls/add_halls.html', {
-                'block_seo_form': block_seo_form,
-                'halls_form': halls_form,
-                'gallery_form': gallery_form,
-                'picture_formset': picture_formset,
-                'banner_form': banner_form,
-
-                'halls': halls_instance,
-                'cinema': cinema_instance,
-                'is_edit': halls_instance is not None,
-            })
 
     else:
         block_seo_form = BlockSEOForm(instance=block_seo_instance)
@@ -787,13 +757,20 @@ def add_halls_create(request, cinema_pk, halls_id=None):
 
         picture_queryset_for_formset = Picture.objects.none()
         if gallery_instance:
-            picture_queryset_for_formset = gallery_instance.pictures.filter(image_type='gallery_image').order_by('pk')
+            picture_queryset_for_formset = gallery_instance.pictures.filter(
+                image_type__in=['gallery_image', 'gallery']
+            ).order_by('pk')
 
-        picture_formset = PictureFormSet(queryset=picture_queryset_for_formset, prefix='pictures')
+        picture_formset = PictureFormSet(
+            queryset=picture_queryset_for_formset,
+            prefix='pictures'
+        )
 
-        banner_form = PictureForm(instance=current_main_picture_object, prefix='banner_form',
-            initial={'image_type': 'main_picture'})
-
+        banner_form = PictureForm(
+            instance=current_main_picture_object,
+            prefix='banner_form',
+            initial={'image_type': 'main_picture'}
+        )
 
     return render(request, 'admin/halls/add_halls.html', {
         'block_seo_form': block_seo_form,
@@ -801,7 +778,6 @@ def add_halls_create(request, cinema_pk, halls_id=None):
         'gallery_form': gallery_form,
         'picture_formset': picture_formset,
         'banner_form': banner_form,
-
         'halls': halls_instance,
         'cinema': cinema_instance,
         'is_edit': halls_instance is not None,
@@ -815,21 +791,21 @@ def delete_halls(request, pk):
 
     return redirect('add_cinema_edit', cinema_id=cinema_id)
 
-@staff_member_required
-def session_list(request):
-    session_list = Sessions.objects.all()
+@method_decorator(staff_member_required, name='dispatch')
+class Session_Lists(ListView):
 
-    paginator = Paginator(session_list, 10)
-    page = request.GET.get('page')
-    try:
-        sessions = paginator.page(page)
-    except PageNotAnInteger:
-        sessions = paginator.page(1)
-    except EmptyPage:
-        sessions = paginator.page(paginator.num_pages)
+    model = Sessions
+    template_name = 'admin/session/sessions_list.html'
+    context_object_name = 'sessions'
+    paginate_by = 50
+    def get_queryset(self):
+        queryset  = super().get_queryset()
+        return queryset
+    def get_context_data( self,   **kwargs  ):
+        context= super().get_context_data(**kwargs)
+        return context
 
-    context = {'sessions': sessions}
-    return render(request, 'admin/session/sessions_list.html', context)
+
 
 @staff_member_required
 def add_edit_session(request, session_id=None):
@@ -1129,8 +1105,20 @@ def delete_banners(request, banners_id):
 
      return redirect('banners')
 
-@staff_member_required
-def user_list(request):
+@method_decorator(staff_member_required, name='dispatch')
+class User_List_generic(ListView):
+    model=User
+    paginate_by = 50
+    context_object_name = 'users'
+    template_name = 'admin/user/user_lists.html'
+    def get_queryset(self):
+        queryset=super().get_queryset()
+        return queryset
+    def get_context_data( self, **kwargs ):
+        context=super().get_context_data(**kwargs)
+        return context
+
+def user_list2(request):
 
     user_list_all = User.objects.all()
     paginator = Paginator(user_list_all, 10)
@@ -1367,64 +1355,64 @@ def promotion_paige(request):
     return render(request, 'admin/promotion/promotion_list.html', context)
 
 @staff_member_required
-def  promotion_paige_add(request, promotion_id=None):
+def promotion_paige_add(request, promotion_id=None):
     promotion_instance = None
     block_seo_instance = None
     gallery_instance = None
-
     current_main_picture_object = None
 
+    # Отримання існуючої акції
     if promotion_id:
-        promotion_instance = get_object_or_404(PaigesNews, pk=promotion_id)
+        promotion_instance = get_object_or_404(Promotion, pk=promotion_id)
         block_seo_instance = promotion_instance.seo_block
         gallery_instance = promotion_instance.gallery
 
-        if gallery_instance is None:
-            gallery_instance = Gallery.objects.create()
+    # Створення галереї, якщо відсутня
+    if not gallery_instance:
+        gallery_instance = Gallery.objects.create()
+        if promotion_instance:
             promotion_instance.gallery = gallery_instance
             promotion_instance.save()
 
+    # Отримання головного зображення
+    current_main_picture_object = gallery_instance.pictures.filter(image_type='main_picture').first()
 
-        current_main_picture_object = gallery_instance.pictures.filter(image_type='main_picture').first()
-
-
-    if gallery_instance is None:
-        gallery_instance = Gallery.objects.create()  # Создаем новую галерею
-
-
-    if request.method=='POST':
+    if request.method == 'POST':
         block_seo_form = BlockSEOForm(request.POST, instance=block_seo_instance)
         promotion_form = PromotionForm(request.POST, instance=promotion_instance)
         gallery_form = GalleryForm(request.POST, instance=gallery_instance)
 
+        picture_queryset = gallery_instance.pictures.exclude(pk=current_main_picture_object.pk) if current_main_picture_object else gallery_instance.pictures.all()
 
         picture_formset = PictureFormSet(
             request.POST,
             request.FILES,
-            queryset=Picture.objects.filter(gallery=gallery_instance).exclude(pk=current_main_picture_object.pk)
-            if current_main_picture_object else Picture.objects.filter(gallery=gallery_instance),
-            prefix='pictures', initial=[{'image_type': 'gallery_image'}]
+            queryset=picture_queryset,
+            prefix='pictures'
         )
 
-        main_picture_form = PictureForm(request.POST, request.FILES, instance=current_main_picture_object,
-                                        prefix='main_picture_form')
+        main_picture_form = PictureForm(
+            request.POST,
+            request.FILES,
+            instance=current_main_picture_object,
+            prefix='main_picture_form'
+        )
 
-
+        # Встановлюємо image_type вручну, якщо не передано
         if f'{main_picture_form.prefix}-image_type' not in request.POST:
             main_picture_form.data = main_picture_form.data.copy()
             main_picture_form.data[f'{main_picture_form.prefix}-image_type'] = 'main_picture'
 
+        # Прив'язуємо галерею, якщо не передано
         if f'{main_picture_form.prefix}-gallery' not in request.POST and gallery_instance.pk:
             main_picture_form.data = main_picture_form.data.copy()
             main_picture_form.data[f'{main_picture_form.prefix}-gallery'] = gallery_instance.pk
 
-
-
         if (block_seo_form.is_valid() and
-                promotion_form.is_valid() and
-                gallery_form.is_valid() and
-                picture_formset.is_valid() and
-                main_picture_form.is_valid()):
+            promotion_form.is_valid() and
+            gallery_form.is_valid() and
+            picture_formset.is_valid() and
+            main_picture_form.is_valid()):
 
             block_seo_saved = block_seo_form.save()
             gallery_saved = gallery_form.save()
@@ -1434,20 +1422,19 @@ def  promotion_paige_add(request, promotion_id=None):
             promotion_saved.gallery = gallery_saved
             promotion_saved.save()
 
-
+            # Збереження головного зображення
             if main_picture_form.cleaned_data.get('image'):
                 main_picture_saved = main_picture_form.save(commit=False)
                 main_picture_saved.gallery = gallery_saved
                 main_picture_saved.image_type = 'main_picture'
                 main_picture_saved.save()
 
-                if current_main_picture_object and current_main_picture_object.pk!=main_picture_saved.pk:
+                if current_main_picture_object and current_main_picture_object.pk != main_picture_saved.pk:
                     current_main_picture_object.delete()
-
             elif main_picture_form.cleaned_data.get('DELETE') and current_main_picture_object:
                 current_main_picture_object.delete()
 
-
+            # Збереження решти зображень
             instances = picture_formset.save(commit=False)
             for picture in instances:
                 if not picture.pk:
@@ -1456,41 +1443,28 @@ def  promotion_paige_add(request, promotion_id=None):
                         picture.image_type = 'gallery_image'
                 picture.save()
 
-
             for picture in picture_formset.deleted_objects:
                 picture.delete()
 
             return redirect('promotion')
 
         else:
-
-            print("Ошибка валидации форм")
-            print("block_seo_form.errors:", block_seo_form.errors)
-            print("Promotion_form.errors:", promotion_form.errors)
-            print("gallery_form.errors:", gallery_form.errors)
-            print("picture_formset.errors:", picture_formset.errors)
-            print("main_picture_form.errors:", main_picture_form.errors)
-
-            return render(request, 'admin/promotion/add_promotion.html', {
-                'block_seo_form': block_seo_form,
-                'promotion_form': promotion_form,
-                'gallery_form': gallery_form,
-                'picture_formset': picture_formset,
-                'main_picture_form': main_picture_form,
-                'promotion': promotion_instance,
-                'is_edit': promotion_instance is not None,
-            })
-
+            print("Помилки валідації:")
+            print("block_seo_form:", block_seo_form.errors)
+            print("promotion_form:", promotion_form.errors)
+            print("gallery_form:", gallery_form.errors)
+            print("picture_formset:", picture_formset.errors)
+            print("main_picture_form:", main_picture_form.errors)
 
     else:
         block_seo_form = BlockSEOForm(instance=block_seo_instance)
         promotion_form = PromotionForm(instance=promotion_instance)
         gallery_form = GalleryForm(instance=gallery_instance)
 
+        picture_queryset = gallery_instance.pictures.exclude(pk=current_main_picture_object.pk) if current_main_picture_object else gallery_instance.pictures.all()
 
         picture_formset = PictureFormSet(
-            queryset=Picture.objects.filter(gallery=gallery_instance).exclude(pk=current_main_picture_object.pk)
-            if current_main_picture_object else Picture.objects.filter(gallery=gallery_instance),
+            queryset=picture_queryset,
             prefix='pictures'
         )
 
@@ -1509,7 +1483,6 @@ def  promotion_paige_add(request, promotion_id=None):
         'promotion': promotion_instance,
         'is_edit': promotion_instance is not None,
     })
-
 
 @staff_member_required
 def promotion_paige_delete(request, promotion_id):

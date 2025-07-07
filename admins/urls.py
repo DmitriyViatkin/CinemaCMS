@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import User_List_generic, Session_Lists
 
 from .table import MovieListDate, user_list
 
@@ -25,7 +26,8 @@ urlpatterns = [
     path('add_halls/add_halls/<int:cinema_pk>/<int:halls_id>/', views.add_halls_create, name='add_halls_edit'),
     path('halls_lists/<int:pk>/delete/', views.delete_halls, name='delete_halls'),
 
-    path('sessions_lists/',views.session_list, name='sessions_list'),
+    path('sessions_lists/',Session_Lists.as_view(), name='sessions_list'),
+    #path('sessions_lists/',views.session_list, name='sessions_list'),
     path('add_sessions/add_sessions', views.add_edit_session, name='add_sessions'),
     path('add_sessions/<int:session_id>/', views.add_edit_session,name='add_sessions_edit'),
     path('sessions_lists/<int:pk>/delete/', views.delete_sessions, name='delete_sessions'),
@@ -46,10 +48,11 @@ urlpatterns = [
     path('banners/<int:banners_id>/delete_banners/', views.delete_banners, name='delete_banners'),
 
 
-    path('user/', views.user_list, name='users'),
+
     path('user/add_user', views.add_user, name='add_users'),
     path('user/<int:user_id>/edit/', views.add_user, name='edit_users'),
     path('user/<int:user_id>/delete_user/', views.delete_user, name='delete_user'),
+    path('user/', User_List_generic.as_view(), name='users'),
 
     path('news/', views.news_paige, name='news'),
     path('news/add_news', views.news_paige_add, name='add_news'),
@@ -74,5 +77,5 @@ urlpatterns = [
     path('email_campaigns/<int:campaign_id>/edit/', views.email_campaign_create, name='email_campaign_edit'),
     path('email_campaigns/<int:campaign_id>/delete/', views.email_campaign_delete, name='email_campaign_delete'),
 
-    path('ajax/users/', user_list, name='user_list')
+    path('ajax/users/', user_list, name='user_list'),
 ]

@@ -1,3 +1,4 @@
+from dateutil.utils import today
 from django.shortcuts import render, get_object_or_404
 from .models import Cinemas, Sessions, Halls, Seats, Tickets
 from django.http import HttpResponseRedirect
@@ -13,13 +14,18 @@ import locale
 from django.db.models import Q
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from datetime import date, datetime
+from django.utils import timezone
+from datetime import date
+
+
 
 def cinema_list(request):
     cinemas_list = Cinemas.objects.select_related('gallery','seo_block').prefetch_related(
         Prefetch(
             'gallery__pictures',
-            queryset=Picture.objects.filter(image_type='logo'),
-            to_attr='logos'
+            queryset=Picture.objects.filter(image_type='main_picture'),
+            to_attr='main_picture'
         )
     ).order_by('title')
     paginator = Paginator(cinemas_list, 10)
@@ -29,12 +35,96 @@ def cinema_list(request):
     return render(request, 'core/cinema_list.html', {'cinemas': cinemas})
 
 def cinema_detail(request, cinema_slug):
-    cinema = get_object_or_404(Cinemas, seo_block__seo_url=cinema_slug)
-    main_picture = cinema.gallery.pictures.filter(image_type="main_picture").first() if hasattr(cinema,
-                                                                                                'gallery') and cinema.gallery else None
-    halls = cinema.halls.all()
-    context = {'cinema': cinema, 'main_picture': main_picture,'halls': halls}
+    all_gallery_pictures_prefetch = Prefetch(
+        'gallery__pictures',
+        queryset=Picture.objects.all(),
+        to_attr='all_gallery_images'
+    )
+
+    halls_prefetch = Prefetch(
+        'halls',
+        queryset=Halls.objects.all().order_by('title'),
+        to_attr='prefetched_halls'
+    )
+    cinema = get_object_or_404(
+        Cinemas.objects.select_related('seo_block', 'gallery')
+                       .prefetch_related(all_gallery_pictures_prefetch, halls_prefetch),
+        seo_block__seo_url=cinema_slug
+    )
+
+    main_picture = None
+    logo_picture = None
+    gallery_pictures_list = []
+
+    if cinema.gallery and hasattr(cinema.gallery, 'all_gallery_images'):
+        for pic in cinema.gallery.all_gallery_images:
+            if pic.image_type == 'main_picture':
+                main_picture = pic
+
+            elif pic.image_type == 'logo':
+                logo_picture = pic
+
+            elif pic.image_type == 'gallery':
+                gallery_pictures_list.append(pic)
+
+
+
+    today = timezone.localdate()
+
+    today_sessions = Sessions.objects.filter(cinema=cinema,date=today).select_related('movie').order_by('time_session')
+
+    halls = cinema.prefetched_halls
+
+    context = {
+        'cinema': cinema,
+        'main_picture': main_picture,
+        'logo_picture': logo_picture,
+        'halls': halls ,
+        'today_sessions': today_sessions ,
+        'gallery_pictures_list': list(gallery_pictures_list )
+    }
     return render(request, 'core/cinema_detail.html', context)
+
+def hall_detail(request, hall_id):
+    today = date.today()
+
+    all_gallery_pictures_prefetch = Prefetch(
+        'gallery__pictures',
+        queryset=Picture.objects.all(),
+        to_attr='all_gallery_images'
+    )
+
+    hall = get_object_or_404(
+        Halls.objects.select_related('seo_block', 'gallery')
+                     .prefetch_related(all_gallery_pictures_prefetch),
+        pk=hall_id
+    )
+
+    main_picture = None
+    gallery_pictures_list = []
+
+    if hall.gallery and hasattr(hall.gallery, 'all_gallery_images'):
+        for pic in hall.gallery.all_gallery_images:
+            if pic.image_type == 'main_picture':
+                main_picture = pic
+            elif pic.image_type == 'logo':
+                logo_picture = pic
+            elif pic.image_type == 'gallery':
+                gallery_pictures_list.append(pic)
+
+    hall_sessions = Sessions.objects.filter(hall_id=hall.id, date__gte=today).select_related('movie').order_by('date', 'time_session')
+
+    context = {
+        'hall': hall,
+        'main_picture': main_picture,
+        'hall_sessions': hall_sessions,
+        'gallery_pictures_list': gallery_pictures_list,
+    }
+
+    return render(request, 'hall/hall_detail.html', context)
+
+
+
 locale.setlocale(locale.LC_TIME, 'uk_UA.UTF-8')
 def session_list(request):
     # --- Отримуємо GET-параметри ---
@@ -48,7 +138,7 @@ def session_list(request):
     is_imax = request.GET.get('is_imax') == '1'
 
     # --- Базовий queryset ---
-    sessions = Sessions.objects.select_related('hall_id__cinema', 'movie').all()
+    sessions = Sessions.objects.select_related('hall_id__cinema', 'movie').filter(date__gte=date.today())
 
     # --- Основна фільтрація ---
     if date_filter:
@@ -92,7 +182,7 @@ def session_list(request):
         except ValueError:
             halls_for_dropdown = Halls.objects.none()  # Если cinema_filter не является действительным ID
     else:
-        # Если кинотеатр не выбран, залы не отображаются
+
         halls_for_dropdown = Halls.objects.none()
 
     # --- Контекст ---
@@ -129,12 +219,7 @@ def hall_list(request):
     context = {'hall_list': hall_list}
     return render(request, 'hall/hall_list.html', context)
 
-def hall_detail(request, hall_id):
 
-    hall = get_object_or_404(Halls, pk=hall_id)
-
-    context = {'hall': hall}
-    return render(request, 'hall/hall_detail.html', context)
 
 
 def buy_ticket_view(request, session_id):

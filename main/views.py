@@ -7,17 +7,32 @@ from django.db.models import Prefetch
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 def index(request):
-
-    banners = Banners.objects.select_related('gallery').prefetch_related(
+    cross_banner_obj = Cross_Banner.objects.select_related('gallery').prefetch_related(
         Prefetch(
             'gallery__pictures',
             queryset=Picture.objects.filter(image_type='gallery'),
+            to_attr='cross_banner_pictures'
+        )
+    ).first()
+
+    cross_banner_background_url = None
+    # Проверяем наличие cross_banner_obj, затем его gallery,
+    # и затем наличие 'cross_banner_pictures' НА ОБЪЕКТЕ GALLERY
+    if cross_banner_obj and cross_banner_obj.gallery and cross_banner_obj.gallery.cross_banner_pictures:
+        cross_banner_background_url = cross_banner_obj.gallery.cross_banner_pictures[0].image.url
+        print(f"URL для фонового кросс-баннера: {cross_banner_background_url}")
+    else:
+        print("Кросс-баннер не найден, или у него нет галереи/изображений.")
+    banners = Banners.objects.select_related('gallery').prefetch_related(
+        Prefetch(
+            'gallery__pictures',
+            queryset=Picture.objects.filter(image_type='main_picture'),
             to_attr='banner_pictures'
         )
     )
 
 
-    print(f"Загальна кількість банерів: {len(banners)}")
+
 
     for banner in banners:
         if banner.gallery:
@@ -69,6 +84,7 @@ def index(request):
         item.main_picture = item.gallery.main_pictures[0] if item.gallery and item.gallery.main_pictures else None
 
     return render(request, 'main/index1.html', {
+        'cross_banner_background_url': cross_banner_background_url,
         'banners': banners,
         'movies': movies,
         'coming_soon': coming_soon,
@@ -170,17 +186,36 @@ def promotions_list(request):
     return render(request, 'main/action.html', {'promotions': promotions})
 
 
+
 def promotion_detail(request, slug):
-    promotion = get_object_or_404(Promotion.objects.select_related('gallery'), seo_block__seo_url=slug)
 
-    # Перевірка на наявність головного зображення
-    main_picture = promotion.gallery.pictures.filter(image_type='main_picture').first() if promotion.gallery else None
+    all_gallery_pictures_prefetch = Prefetch(
+        'gallery__pictures',
+        queryset=Picture.objects.all(),
+        to_attr='all_related_pictures'
+    )
 
-    # Отримання всіх зображень галереї
-    gallery_pictures = promotion.gallery.pictures.filter(image_type='gallery') if promotion.gallery else []
+    promotion = get_object_or_404(
+        Promotion.objects.select_related('gallery').prefetch_related(all_gallery_pictures_prefetch),
+        seo_block__seo_url=slug
+    )
+
+    main_picture = None
+    gallery_pictures_list = []
+
+
+
+    if promotion.gallery and hasattr(promotion.gallery, 'all_related_pictures'):
+        for pic in promotion.gallery.all_related_pictures:
+            if pic.image_type == 'main_picture':
+                main_picture = pic
+
+            elif pic.image_type == 'gallery':
+                gallery_pictures_list.append(pic)
 
     return render(request, 'main/promotion_detail.html', {
         'promotion': promotion,
         'main_picture': main_picture,
-        'gallery_pictures': gallery_pictures
+        'gallery_pictures_list':list( gallery_pictures_list),
+
     })

@@ -3,17 +3,14 @@
 {% load static %} {# Завантажуємо статичні файли, якщо потрібні #}
 
 {% block title %}
-
     {{ movie.seo_block.title_seo|default:movie.title }} - Деталі фільму
 {% endblock %}
 
 {% block meta_keywords %}
-
     {{ movie.seo_block.seo_keywords|default:'' }}{% if movie.seo_block.seo_keywords %},{% endif %}
 {% endblock %}
 
 {% block meta_description %}
-
     {{ movie.seo_block.seo_description|default:'' }}.
 {% endblock %}
 
@@ -26,6 +23,7 @@
         height: 0;
         overflow: hidden;
         max-width: 90%;
+        margin: 0 auto; /* Центрування відео-контейнера */
         background: #000; /* Чорний фон, поки відео не завантажиться */
     }
 
@@ -37,105 +35,235 @@
         height: 100%;
         border: 0;
     }
+
+    /* Стилі для карток сеансів */
+    .session-card {
+        width: 100%; /* Картки займають 100% ширини в колонці */
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .session-card .card-body {
+        padding: 15px;
+    }
+
+    .session-card h5 {
+        margin-bottom: 10px;
+        color: #333;
+    }
+
+    .session-card p {
+        margin-bottom: 5px;
+        font-size: 0.95rem;
+    }
+
+    .session-card .btn {
+        margin-top: 10px;
+        width: 100%;
+    }
+    .card-body {
+    width: 250px; /* Приклад: ширина 250 пікселів */
+    /* Можете також додати інші стилі, як padding, margin тощо */
+    padding: 15px; /* Зазвичай бажано залишити padding */
+}
+
+    table {
+        width: 90%;
+        border-collapse: collapse;
+        margin-top: 0px;
+        border: 1px solid #ccc;
+    }
+    th, td {
+         border: 1px solid black;
+        padding: 0px;
+        text-align: left;
+    }
+    th {
+        border: 1px solid black;
+        background-color: #f2f2f2;
+    }
+    /* Style for the clickable row */
+    tbody a {
+        display: table-row; /* Makes the anchor behave like a table row */
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    tbody a:hover {
+        background-color: #f9f9f9;
+    }
+.selected-card {
+    border: 2px solid #28a745; /* Зелена рамка */
+    background-color: #f0fff0; /* Світло-зелений фон */
+}
+.btn-outline-primary:focus,
+.btn-outline-primary.active:focus, /* For when an active button is focused */
+.btn-outline-primary:active,      /* For when a button is being clicked */
+.date-filter-btn:focus,
+.date-filter-btn.active:focus,
+.date-filter-btn:active {
+    outline: none !important; /* Removes the blue outline */
+    box-shadow: none !important; /* Removes Bootstrap's default focus shadow */
+    /*
+       Optional: Add an alternative visual indicator for focus,
+       e.g., a darker background or a subtle border change
+    */
+    /* background-color: #e0f0ff !important; /* Example: slightly change background on focus */
+    /* border-color: #0056b3 !important; /* Example: slightly darker border on focus */
+}
+
+/* Ensure the background color doesn't change unexpectedly on click/focus if it's already active */
+.btn-outline-primary.active {
+    /* Ensure the active button's background remains as defined by Bootstrap */
+    background-color: #007bff; /* Bootstrap's primary blue */
+    color: #fff; /* White text */
+    border-color:  #343a40 ;}
+
 </style>
     <div class="container mt-4">
-         {% if movie.url_trailer %}
+        {# Блок трейлера фільму #}
+        {% if movie.url_trailer %}
+            <div class="video-responsive mb-4"> {# Контейнер для адаптивного відео #}
+                <iframe
+                    src="{{ movie.get_youtube_embed_url }}"
+                    title="Офіційний трейлер фільму: {{ movie.title }}"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin"
+                    allowfullscreen
+                ></iframe>
+            </div>
+        {% endif %}
 
-                   <div class="video-responsive"> {# Контейнер для адаптивного відео #}
-                        <iframe
-                            src="{{ movie.get_youtube_embed_url }}" {# Використовуємо embed-URL #}
-                            title="Офіційний трейлер фільму: {{ movie.title }}" {# Більш описовий заголовок #}
-                            frameborder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                            referrerpolicy="strict-origin-when-cross-origin"
-                            allowfullscreen
-                        ></iframe>
+        {# Форма фільтрів сеансів #}
+        <form id="filtersForm" method="get" class="mb-4">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label for="city_filter" class="form-label">Фільтрувати по місту:</label>
+                    <select name="city" id="city_filter" class="form-select">
+                        <option value="">Всі міста</option>
+                        {% for city_name in all_cities %}
+                            <option value="{{ city_name }}" {% if selected_city == city_name %}selected{% endif %}>
+                                {{ city_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-6 d-flex align-items-center gap-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="is_2d" value="1"
+                               id="filter2D" {% if filter.is_2d %}checked{% endif %}>
+                        <label class="form-check-label" for="filter2D">2D</label>
                     </div>
-         {% endif %}
-         <form id="filtersForm" method="get" class="mb-4">
-    <div class="row g-3 align-items-end">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="is_3d" value="1"
+                               id="filter3D" {% if filter.is_3d %}checked{% endif %}>
+                        <label class="form-check-label" for="filter3D">3D</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="is_imax" value="1"
+                               id="filterIMAX" {% if filter.is_imax %}checked{% endif %}>
+                        <label class="form-check-label" for="filterIMAX">IMAX</label>
+                    </div>
+                </div>
+            </div>
+            <div>
+          <div class="btn-group mb-4" role="group" aria-label="Фільтр за датою">
+              <a href="."
+                 class="btn btn-outline-primary date-filter-btn {% if not selected_date %}active{% endif %}">
+                <span class="top-line">Все</span>
+                <span class="bottom-line"></span>
+              </a>
 
-        <!-- Фильтр по городу -->
-        <div class="col-md-4">
-            <label for="city_filter" class="form-label">Фильтровать по городу:</label>
-            <select name="city" id="city_filter" class="form-select">
-                <option value="">Все города</option>
-                {% for city_name in all_cities %}
-                    <option value="{{ city_name }}" {% if selected_city == city_name %}selected{% endif %}>
-                        {{ city_name }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
+              {% for day in available_dates %}
+                <a href="?date={{ day|date:"Y-m-d" }}"
+                   class="btn btn-outline-primary date-filter-btn {% if selected_date|stringformat:"s" == day|stringformat:"s" %}active{% endif %}">
+                   <table class="date-button-table">
+                    <tr>
+                      <td class="top-row">{{ day|date:"d" }} <span class="day-of-week">{{ day|date:"D" }}</span></td>
+                    </tr>
+                    <tr>
+                      <td class="bottom-row">{{ day|date:"F" }}</td>
+                    </tr>
+                  </table>
+                </a>
+              {% endfor %}
+            </div>
+        </form>
 
-        <!-- Фильтры по формату -->
-       <div class="col-md-6 d-flex align-items-center gap-4">
-    <div class="form-check">
-        <input class="form-check-input" type="checkbox" name="is_2d" value="1"
-               id="filter2D" {% if filter.is_2d %}checked{% endif %}>
-        <label class="form-check-label" for="filter2D">2D</label>
-    </div>
-    <div class="form-check">
-        <input class="form-check-input" type="checkbox" name="is_3d" value="1"
-               id="filter3D" {% if filter.is_3d %}checked{% endif %}>
-        <label class="form-check-label" for="filter3D">3D</label>
-    </div>
-    <div class="form-check">
-        <input class="form-check-input" type="checkbox" name="is_imax" value="1"
-               id="filterIMAX" {% if filter.is_imax %}checked{% endif %}>
-        <label class="form-check-label" for="filterIMAX">IMAX</label>
-    </div>
-</div>
+        {# Відображення сеансів #}
+        <h2>Заплановані сеанси</h2>
+        {% if sessions_by_cinema %}
+          {% for cinema_id, sessions in sessions_by_cinema.items %}
+            {% with cinema=sessions.0.cinema %}
+              <div class="d-flex align-items-center mb-3 cinema-block">
+                <div class="me-4 text-nowrap">
+                  <h3>{{ cinema.title }} </h3>
+                    <h4>({{ cinema.city  }})</h4>
 
-    </div>
-</form>
- {{ session.cinema.title|default:"Неизвестно" }}
-  {% if sessions %}
-  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-    {% for session in sessions %}
-      <div class="card h-50" style="width:20%;">
-  <div class="card-body d-flex flex-column justify-content-between">
+                </div>
+                <div class="d-flex flex-wrap gap-2 flex-grow-1">
+                   {% for session in sessions %}
+                     <div >
+                        <div class="card h-100 session-card" data-session-id="{{ session.id }}">
+                                <table>
 
+                                    <tbody>
 
-    <table class="table table-sm table-borderless mb-3" style="width: 50%;">
-      <tbody>
-      <tr><th>{{ session.cinema.title|default:"Неизвестно" }}</th>
-          <th> {{ session.time_session|time:"H:i" }}
-          {% if session.movie %}
-        {% if session.movie.is_2d %}2D{% endif %}
-        {% if session.movie.is_3d %} {% if session.movie.is_2d %}, {% endif %}3D{% endif %}
-        {% if session.movie.is_imax %} {% if session.movie.is_2d or session.movie.is_3d %}, {% endif %}IMAX{% endif %}
-      {% else %}
-        Неизвестно
-      {% endif %}</th>
-      </tr>
+                                            <tr>
+                                                <td>
+                                                    <div class="card-body">
+                                                        <p>
+                                                            <strong>Час:</strong> {{ session.time_session|time:"H:i" }}
+                                                            <strong>Формат:</strong>
+                                                            {% if session.movie %}
+                                                                {% if session.movie.is_2d %}2D{% endif %}
+                                                                {% if session.movie.is_2d and session.movie.is_3d %}
+                                                                    ,
+                                                                {% elif session.movie.is_2d and session.movie.is_imax and not session.movie.is_3d %}
+                                                                    ,
+                                                                {% endif %}
 
-        <tr>
-          <th scope="row">Зал:</th>
-          <td>{{ session.hall_id.title|default:"Неизвестно" }}</td>
-        </tr>
-        <tr>
-          <th scope="row">Дата:</th>
-          <td>{{ session.date|date:"d.m.Y" }}</td>
-        </tr>
-      </tbody>
-    </table>
+                                                                {% if session.movie.is_3d %}3D{% endif %}
+                                                                {% if session.movie.is_3d and session.movie.is_imax %}
+                                                                    ,
+                                                                {% endif %}
 
-    <a href="{% url 'buy_ticket' session_id=session.id %}" class="btn btn-success mt-auto w-100">
-      Купить билет
-    </a>
-  </div>
-</div>
-    {% endfor %}
-  </div>
-{% else %}
-  <p class="alert alert-info">На данный момент нет запланированных сеансов для этого фильма.</p>
-{% endif %}
-        <div class="row">
+                                                                {% if session.movie.is_imax %}IMAX{% endif %}
+                                                            {% else %}
+                                                                Невідомо
+                                                            {% endif %}
+                                                        </p>
+                                                        <p>
+                                                            <strong>Зал:</strong> {{ session.hall_id.title|default:"Невідомий зал" }}
+                                                            <strong>Дата:</strong> {{ session.date|date:"d/m/Y" }}
+                                                        </p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+
+                                    </tbody>
+                                </table>
+
+                       </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endwith %}
+          {% endfor %}
+        {% else %}
+          <p class="alert alert-info">На даний момент немає запланованих сеансів для цього фільму за вибраними критеріями.</p>
+        {% endif %}
+
+        <div class="row mt-5">
             <div class="col-md-4">
-
+                {# Відображаємо головне зображення, якщо воно існує #}
                 {% if main_picture %}
-                    {# Відображаємо головне зображення, якщо воно існує #}
                     <img src="{{ main_picture.image.url }}" alt="{{ movie.title }}" class="img-fluid rounded shadow-sm">
                 {% else %}
                     {# Повідомлення, якщо головне зображення відсутнє #}
@@ -146,6 +274,9 @@
             </div>
 
             <div class="col-md-8">
+               <div class="mt-4"> {# Можете обернуть в div для стилізації #}
+    <button type="button" class="btn btn-success" id="global-buy-ticket-btn">Купити квиток</button>
+</div>
                 {# Назва фільму #}
                 <h1>{{ movie.title }}</h1>
                 {# Опис з SEO блоку, використовуємо movie #}
@@ -153,20 +284,15 @@
 
                 {# Інформація про фільм #}
                 <ul class="list-unstyled">
-
-                    <li><strong>Жанр:</strong> {{ movie.get_genre_display }}</li>
+                    <li><strong>Жанр:</strong> {{ movie.get_genre_display }}
                     <li><strong>Тип відео:</strong> {{ movie.get_video_type_display }}</li>
                     <li><strong>Дата прокату:</strong> {{ movie.relise_date|date:"d.m.Y" }}</li>
                     <li><strong>Вікова категорія:</strong> {{ movie.age_limit }}+</li>
                     <li><strong>Додано:</strong> {{ movie.date|date:"d.m.Y" }}</li>
                 </ul>
 
-                {# Посилання на трейлер #}
-
-
                 <div class="mt-4">
                     <h2>Опис</h2>
-
                     <p>{{ movie.description|default:''|linebreaksbr }}</p>
                 </div>
             </div>
@@ -174,38 +300,74 @@
 
         {# Галерея зображень #}
         <h2 class="mt-5">Галерея</h2>
-        <div class="row"> {# Предполагаем, что .col-md-4 находятся внутри .row #}
-    {% for picture in movie.gallery.pictures.all %}
-        {# Проверяем тип изображения #}
-        {% if picture.image_type == 'gallery' %} {# <--- ВОТ ГДЕ ИЗМЕНЕНИЕ #}
-            <div class="col-md-4 mb-3">
-                <div class="card">
-                    <img src="{{ picture.image.url }}" class="card-img-top" alt="{{ picture.alter_txt|default:'Зображення галереї' }}">
-                    <div class="card-body">
-                        <p class="card-text"><small class="text-muted">{{ picture.alter_txt|default:'' }}</small></p>
+        <div class="row">
+            {% for picture in movie.gallery.pictures.all %}
+                {# Проверяем тип изображения #}
+                {% if picture.image_type == 'gallery' %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100"> {# Додаємо h-100 для однакової висоти карток #}
+                            <img src="{{ picture.image.url }}" class="card-img-top" alt="{{ picture.alter_txt|default:'Зображення галереї' }}">
+                            <div class="card-body">
+                                <p class="card-text"><small class="text-muted">{{ picture.alter_txt|default:'' }}</small></p>
+                            </div>
+                        </div>
                     </div>
+                {% endif %}
+            {% empty %}
+                <div class="col-12">
+                    <p>Галерея пуста або немає зображень типу "галерея".</p>
                 </div>
-            </div>
-        {% endif %} {# Закрываем if #}
-    {% empty %}
-        <p>Галерея пуста или нет изображений типа "галерея".</p>
-    {% endfor %}
-</div>
-
-
-
+            {% endfor %}
+        </div>
     </div>
+
 <script>
-
-  document.getElementById('city_filter').addEventListener('change', function () {
-    document.getElementById('filtersForm').submit();
-  });
-
-  document.querySelectorAll('#filtersForm input[type="checkbox"]').forEach(input => {
-    input.addEventListener('change', () => {
-      document.getElementById('filtersForm').submit();
+    // Автоматична відправка форми при зміні фільтрів
+    document.getElementById('city_filter').addEventListener('change', function () {
+        document.getElementById('filtersForm').submit();
     });
-  });
+
+    document.querySelectorAll('#filtersForm input[type="checkbox"]').forEach(input => {
+        input.addEventListener('change', () => {
+            document.getElementById('filtersForm').submit();
+        });
+    });
+
+    // Wait until the entire HTML document is loaded before running the script
+document.addEventListener('DOMContentLoaded', function () {
+        let selectedSessionId = null; // Хранит ID выбранного сеанса
+
+        // 1. Обработка клика по карточке сеанса (выбор сеанса)
+        const sessionCards = document.querySelectorAll('.session-card');
+        sessionCards.forEach(card => {
+            card.style.cursor = 'pointer';
+
+            card.addEventListener('click', function () {
+
+                sessionCards.forEach(c => c.classList.remove('selected-card'));
+
+
+                this.classList.add('selected-card');
+
+
+                selectedSessionId = this.dataset.sessionId;
+
+                console.log('Выбран сеанс ID:', selectedSessionId);
+        });
+
+        // 2. Обработка клика по ГЛОБАЛЬНОЙ кнопке "Купити квиток"
+        const globalBuyButton = document.getElementById('global-buy-ticket-btn');
+        if (globalBuyButton) { // Проверяем, что кнопка существует
+            globalBuyButton.addEventListener('click', function () {
+                if (selectedSessionId) {
+
+                    window.location.href = `/cinemas/sessions/${selectedSessionId}/buy/`;
+                } else {
+                    alert("Будь ласка, оберіть сеанс, натиснувши на одну з карток, перед покупкою квитка.");
+                }
+            });
+        }
+    });
 
 </script>
 {% endblock %}

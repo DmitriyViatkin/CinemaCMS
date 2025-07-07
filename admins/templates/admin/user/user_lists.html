@@ -1,69 +1,104 @@
 {% extends 'admin/index.html' %}
 
 {% block title %}Список користувачів{% endblock %}
+
 {% block content %}
 <section class="content">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h3 class="card-title mb-0">Список користувачів</h3>
-                        <div class="card-tools">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
 
-                            <a href="{% url 'add_users' %}" class="btn btn-success btn-sm">
-                                <i class="fas fa-plus"></i> Додати користувача
-                            </a>
-                        </div>
-                    </div>
-                    <div class="card-body">
-
-                        <table id="usersTable" class="table table-bordered table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Ім'я користувача</th>
-                                    <th>Email</th>
-                                    <th>Ім'я</th>
-                                    <th>Прізвище</th>
-                                    <th>Місто</th>
-                                    <th>Дата реєстрації</th>
-                                    <th>Дії</th>
-                                </tr>
-                            </thead>
-
-                                {% for user in users %}
-                                <tr>
-                                    <td>{{ user.username }}</td>
-                                    <td>{{ user.email }}</td>
-                                    <td>{{ user.first_name }}</td>
-                                    <td>{{ user.last_name }}</td>
-                                    <td>{{ user.city }}</td>
-                                    <td>{{ user.date_joined|date:"d.m.Y" }}</td>
-                                    <td>
-
-                                       <a href="{% url 'edit_users' user.pk %}" class="btn btn-primary btn-sm">Редагувати</a>
-                                   <form action="{% url 'delete_user' user_id=user.pk %}" method="post" style="display:inline;">
-                                            {% csrf_token %} {# Обов'язково для POST-форм у Django #}
-                                            {# Кнопка, яка відправляє форму при натисканні #}
-                                            <button type="submit" class="btn btn-danger btn-sm"
-                                                    onclick="return confirm('Ви впевнені, що хочете видалити користувача {{ user.username }}?');">
-                                                Видалити
-                                            </button>
-                                   </form>
-                                    </td>
-                                </tr>
-                                {% empty %}
-
-                                <tr>
-                                      <td colspan="7">Список користувачів порожній.</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    </div>
-                </div>
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="card-title mb-0">Список користувачів</h3>
+            <div class="card-tools">
+              <a href="{% url 'add_users' %}" class="btn btn-success btn-sm">
+                <i class="fas fa-plus"></i> Додати користувача
+              </a>
             </div>
+          </div>
+
+          <div class="card-body">
+            <table class="table table-bordered table-hover">
+              <thead>
+                <tr>
+                  <th>Ім'я користувача</th>
+                  <th>Email</th>
+                  <th>Ім'я</th>
+                  <th>Прізвище</th>
+                  <th>Місто</th>
+                  <th>Дата реєстрації</th>
+                  <th>Дії</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for user in users %}
+                  <tr>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.first_name }}</td>
+                    <td>{{ user.last_name }}</td>
+                    <td>{{ user.city|default:"—" }}</td>
+                    <td>{{ user.date_joined|date:"d.m.Y" }}</td>
+                    <td>
+                      <a href="{% url 'edit_users' user.pk %}" class="btn btn-primary btn-sm">Редагувати</a>
+                      <form action="{% url 'delete_user' user.pk %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm"
+                          onclick="return confirm('Ви впевнені, що хочете видалити користувача {{ user.username }}?');">
+                          Видалити
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="7" class="text-center">Список користувачів порожній.</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+
+            <!-- Пагінація -->
+            {% if is_paginated %}
+              <nav>
+                <ul class="pagination justify-content-center mt-4">
+                  {% if page_obj.has_previous %}
+                    <li class="page-item">
+                      <a class="page-link" href="?page={{ page_obj.previous_page_number }}">« Назад</a>
+                    </li>
+                  {% else %}
+                    <li class="page-item disabled">
+                      <span class="page-link">« Назад</span>
+                    </li>
+                  {% endif %}
+
+                  {% for i in paginator.page_range %}
+                    {% if page_obj.number == i %}
+                      <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                    {% elif i > page_obj.number|add:-3 and i < page_obj.number|add:3 %}
+                      <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                    {% endif %}
+                  {% endfor %}
+
+                  {% if page_obj.has_next %}
+                    <li class="page-item">
+                      <a class="page-link" href="?page={{ page_obj.next_page_number }}">Вперед »</a>
+                    </li>
+                  {% else %}
+                    <li class="page-item disabled">
+                      <span class="page-link">Вперед »</span>
+                    </li>
+                  {% endif %}
+                </ul>
+              </nav>
+            {% endif %}
+
+          </div>
         </div>
-    </section>
+
+      </div>
+    </div>
+  </div>
+</section>
 {% endblock %}

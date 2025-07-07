@@ -3,11 +3,12 @@ from .models import Movies
 from main.models import Picture
 from django.db.models import Prefetch
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from django.utils.timezone import now
 from core.models import Sessions, Cinemas
 from django.db.models import Q
 from collections import defaultdict
+
 # Create your views here.
 def movie_list(request):
     movies_list = Movies.objects.all().select_related('gallery').order_by('title')
@@ -30,22 +31,32 @@ def movie_list(request):
     context = {'movies': movies}
     return render(request, 'movie/movies_list.html', context)
 
-
-
 def movie_detail(request, movie_id):
     movie = get_object_or_404(
         Movies.objects.select_related('seo_block', 'gallery')
               .prefetch_related(
                   Prefetch('gallery__pictures')
               ),
-
         id=movie_id
     )
-    sessions = Sessions.objects.filter(movie=movie).order_by('date', 'time_session')
+
+    today = date.today()
+
+    sessions = Sessions.objects.filter(movie=movie, date__gte=today).order_by('date', 'time_session')
+    # Тільки сеанси з датою >= сьогоднішня
+
     selected_city = request.GET.get('city')
     if selected_city:
-
         sessions = sessions.filter(cinema__city=selected_city)
+
+    selected_date_str = request.GET.get('date')
+    selected_date = None
+    if selected_date_str:
+        try:
+            selected_date = datetime.strptime(selected_date_str, "%Y-%m-%d").date()
+            sessions = sessions.filter(date=selected_date)
+        except ValueError:
+            pass
 
     is_2d = request.GET.get('is_2d') == '1'
     is_3d = request.GET.get('is_3d') == '1'
@@ -62,28 +73,41 @@ def movie_detail(request, movie_id):
     if movie_filter:
         sessions = sessions.filter(movie_filter)
 
+    # Фільтруємо available_dates, щоб показати тільки дати з сьогоднішнього дня і далі
+    available_dates = (
+        Sessions.objects.filter(movie=movie, date__gte=today)
+        .values_list('date', flat=True)
+        .distinct()
+        .order_by('date')
+    )
+
     all_cities = Cinemas.objects.values_list('city', flat=True).distinct().order_by('city')
     sessions_by_cinema = defaultdict(list)
-    for session in  sessions:
-        sessions_by_cinema[session.cinema].append(session)
+
+    for session in sessions:
+        sessions_by_cinema[session.cinema.id].append(session)
+
     main_picture = movie.gallery.pictures.filter(image_type="main_picture").first() if movie.gallery else None
-    print()
-    print(sessions_by_cinema)
+
     context = {
         'movie': movie,
         'main_picture': main_picture,
         'gallery_pictures': movie.gallery.pictures.all() if movie.gallery else [],
-        'sessions':  sessions ,
+        'sessions': sessions,
         'all_cities': all_cities,
         'selected_city': selected_city,
+        'selected_date': selected_date,
+        'available_dates': available_dates,
         'filter': {
             'is_2d': is_2d,
             'is_3d': is_3d,
-            'is_imax': is_imax,},
-
-        'sessions_by_cinema': sessions_by_cinema,
+            'is_imax': is_imax,
+        },
+        'sessions_by_cinema': dict(sessions_by_cinema),
     }
     return render(request, 'movie/movie_detail.html', context)
+
+
 
 def movie_soon(request):
     next_30_days = now() + timedelta(days=30)

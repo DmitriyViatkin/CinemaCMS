@@ -49,7 +49,7 @@
                         <div class="tab-content tab-content-compact">
                             <div id="ukrainianTab" class="tab-pane active">
                               <div class="card-body">
-
+                            TODO:вынести дату и чекбокс показывать за форму с ссмеными полями
                               {% include 'admin/card_forms/promotion/promotion_uk.html' with form=halls_form %}
                               </div>
                             </div>
@@ -71,6 +71,7 @@
                                 {% for error in promotion_form.url_video.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
                           </div>
                         </div>
+                            {% include 'admin/card_forms/main_image.html'  %}
                             <h3>{% translate  "Картинки галереї" %}</h3>
                            {% include 'admin/card_forms/gallery_form.html'  %}
 
@@ -122,8 +123,7 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>
 <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.13.2/themes/smoothness/jquery-ui.css">
 
-{# Ваш gallery.js - після всіх залежностей #}
-<script src="{% static 'js/gallery.js' %}"></script>
+
 
 {# JS для вкладок - тепер окремий файл #}
 <script src="{% static 'js/tab.js' %}"></script>

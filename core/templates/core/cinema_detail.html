@@ -1,43 +1,180 @@
 {% extends 'main/index1.html' %}
-
+{% load static %}
 {% block title %}{{ cinema.title }}{% endblock %}
 
 {% block content %}
-    <h1>{{ cinema.title }}</h1>
+
+ <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://getbootstrap.com/docs/5.3/assets/css/docs.css" rel="stylesheet">
+    <title>Bootstrap Example</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<style>
+    /* Контейнер для логотипа и текста */
+.cinema-header-info {
+    display: flex;
+    align-items: flex-start; /* Вирівнювання по верху */
+    gap: 20px; /* Відступ між елементами */
+    margin-bottom: 20px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 15px;
+    flex-wrap: wrap; /* Дозволяє елементам переноситися на нову строку */
+}
+
+/* Стили для логотипа (без изменений) */
+.cinema-logo-container {
+    flex-shrink: 0;
+}
+.cinema-logo {
+    max-width: 150px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Новий контейнер, який містить текстовий блок та обгортку для таблиць */
+.cinema-info-columns {
+    display: flex; /* Робимо його Flex-контейнером */
+    flex-grow: 1; /* Дозволяє займати весь доступний простір після логотипу */
+    flex-wrap: wrap; /* Дозволяє колонкам переноситися на нову строку на маленьких екранах */
+    gap: 20px; /* Відступ між текстовим блоком та таблицями */
+}
+
+/* Контейнер для тексту (опис, умови) */
+.cinema-text-info {
+    flex-grow: 3; /* Дозволяє розширюватися */
+    flex-basis: 0; /* Дозволяє flex-grow працювати краще */
+    min-width: 350px; /* Мінімальна ширина для текстового блоку */
+}
+.cinema-text-info p {
+    margin-bottom: 5px;
+}
+
+/* Обгортка для двох таблиць (зали та сеанси) */
+.cinema-tables-wrapper {
+    display: flex;
+    flex-direction: column; /* Розташовуємо дочірні елементи (таблиці) у колонку */
+    flex-grow: 1; /* Дозволяє займати доступний простір поруч з текстовим блоком */
+    flex-basis: 0;
+    min-width: 100px; /* Мінімальна ширина для обгортки таблиць */
+}
+
+/* Стили для обгорток таблиц (теперь они внутри cinema-tables-wrapper) */
+.cinema-halls-table,
+.cinema-sessions-table {
+    margin-bottom: 20px; /* Відступ між таблицями */
+}
+
+/* Стиль для самих таблиць */
+.cinema-halls-table table,
+.cinema-sessions-table table {
+    width: 50%; /* Таблиця займає всю ширину свого контейнера */
+}
+
+</style>
+
 
     {% if main_picture %}
-        <div>
-            <img src="{{ main_picture.image.url }}" alt="{{ main_picture.alter_txt }}" style="max-width: 300px;">
-        </div>
+         <img src="{{ main_picture.image.url }}" alt="Cinema {{ cinema.title }}" style="width: 70%; height: 30%; display: block;margin: 0 auto;">
+    {% else %}
+        <p>Что-то пошло не так (главное изображение отсутствует).</p>
     {% endif %}
 
-    <p><strong>Місто:</strong> {{ cinema.city }}</p>
-    <p><strong>Опис:</strong> {{ cinema.description }}</p>
-    <p><strong>Умови:</strong> {{ cinema.conditions }}</p>
 
-    <h2>Галерея</h2>
-    {% if cinema.gallery %}
-        {% with cinema.gallery.pictures.all as pictures %}
-            {% for picture in pictures %}
-                {% if picture.image_type == 'gallery' %}
-                    <div style="display: inline-block; margin: 10px;">
-                        <img src="{{ picture.image.url }}" alt="{{ picture.alter_txt }}" style="max-width: 200px;">
-                    </div>
+   <div class="cinema-header-info">
+    <div class="cinema-logo-container">
+        {% if logo_picture %}
+
+             <img src="{{ logo_picture.image.url }}" alt="Логотип {{ cinema.title }}" class="cinema-logo">
+        {% else %}
+
+            <p>Логотип отсутствует.</p>
+        {% endif %}
+    </div> <h1>{{ cinema.title }}</h1>
+<div class="button-center-container">
+    <button type="button" class="btn btn-primary" id="scheduleButton">Расписание кинотеатра</button>
+</div>
+
+</div>
+         <div class="cinema-header-info">
+             <div class="cinema-info-columns">
+
+        {# Ця обгортка тепер буде ЗЛІВА #}
+        <div class="cinema-tables-wrapper">
+            <div class="cinema-halls-table">
+                <h2>Доступні зали</h2>
+                {% if halls %}
+                    <table class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Назва залу</th>
+                            </tr>
+                        </thead>
+                       <tbody>
+                            {% for hall in halls %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'hall_detail' hall_id=hall.id %}">{{ hall.title }}</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                       </tbody>
+                    </table>
+                {% else %}
+                    <p>Зали не знайдено.</p>
                 {% endif %}
-            {% endfor %}
-        {% endwith %}
-    {% else %}
-        <p>Галерея відсутня.</p>
-    {% endif %}
+            </div>
 
-    <h2>Зали</h2>
-    {% if halls %}
-        <ul>
-            {% for hall in halls %}
-                <li>{{ hall.name }}</li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>Немає залів для цього кінотеатру.</p>
-    {% endif %}
+            <div class="cinema-sessions-table">
+                <h2>Доступні сеанси</h2>
+                {% if today_sessions %}
+                    <table class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Сеанс</th>
+                                <th>Час</th>
+                            </tr>
+                        </thead>
+                       <tbody>
+                             {% for session in today_sessions %}
+                            <tr>
+                                <td> <a href="{% url 'buy_ticket' session_id=session.id %}">{{ session.movie.title }}</a> </td>
+                                <td>{{ session.time_session|time:"H:i" }}</td>
+                            </tr>
+                            {% endfor %}
+                       </tbody>
+                    </table>
+                {% else %}
+                    <p>Сеансів не знайдено.</p>
+                {% endif %}
+            </div>
+        </div>
+
+
+        <div class="cinema-text-info">
+            <p><strong>Місто:</strong> {{ cinema.city }}</p>
+            <p><strong>Опис:</strong> {{ cinema.description }}</p>
+            <p><strong>Умови:</strong> {{ cinema.conditions }}</p>
+        </div>
+    </div>
+
+
+</div>
+
+
+{% include 'core/banner.html' %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const scheduleButton = document.getElementById('scheduleButton');
+        if (scheduleButton) {
+            scheduleButton.addEventListener('click', function() {
+                // Замените на реальный URL
+                window.location.href = "{% url 'session_list'   %}";
+            });
+        }
+    });
+</script>
 {% endblock %}

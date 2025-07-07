@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-
+import re
 
 class Block_SEO(models.Model):
     id = models.AutoField(primary_key=True)
@@ -221,6 +221,21 @@ class Promotion(models.Model):
     def __str__(self):
         return self.title
 
+    def get_youtube_embed_url(self):
+        """Преобразует стандартный URL YouTube в URL для встраивания."""
+        if self.url_video:
+            # Регулярное выражение для извлечения ID видео из различных форматов URL YouTube
+            # Примеры:
+            # https://www.youtube.com/watch?v=dQw4w9WgXcQ
+            # https://youtu.be/dQw4w9WgXcQ
+            # https://www.youtube.com/embed/dQw4w9WgXcQ
+            match = re.search(
+                r'(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=|embed\/|v\/|)([\w-]{11})',
+                self.url_video)
+            if match:
+                video_id = match.group(1)
+                return f"https://www.youtube.com/embed/{video_id}"
+        return None
     class Meta:
         verbose_name = 'Акція'
         verbose_name_plural = 'Акції'

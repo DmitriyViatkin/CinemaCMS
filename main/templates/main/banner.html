@@ -1,0 +1,92 @@
+  <!-- Банер (карусель) -->
+ <style>
+
+/* Стили для основной обертки карусели */
+#carouselExampleCaptions {
+    max-width: 900px; /* Максимальная ширина карусели, например 900 пикселей */
+    margin-left: auto;   /* Автоматический левый отступ для центрирования */
+    margin-right: auto;  /* Автоматический правый отступ для центрирования */
+    /* Вы можете добавить отступы сверху/снизу, если нужно: */
+    /* margin-top: 20px; */
+    /* margin-bottom: 20px; */
+}
+
+/* Медиа-запросы для адаптивности карусели */
+@media (max-width: 900px) { /* Когда ширина экрана меньше или равна 900px */
+    #carouselExampleCaptions {
+        max-width: 100%; /* Карусель будет занимать всю доступную ширину */
+    }
+}
+@media (min-width: 768px) { /* Для планшетов и десктопов */
+    /* Здесь можно увеличить высоту, если нужно, как в ваших текущих стилях */
+}
+@media (min-width: 1200px) { /* Для больших десктопов */
+    /* Здесь также можно задать высоту */
+}
+
+
+/* Стили для каждого слайда карусели */
+.carousel-item {
+    height: 350px; /* Фиксированная высота для каждого слайда */
+    overflow: hidden; /* Обрезаем содержимое, выходящее за пределы */
+}
+
+/* Стили для изображения внутри слайда */
+.carousel-img {
+    width: 100%;  /* Изображение занимает 100% ширины своего родителя (.carousel-item) */
+    height: 100%; /* Изображение занимает 100% высоты своего родителя */
+    object-fit: cover; /* Обрезает изображение так, чтобы оно полностью покрывало область, сохраняя пропорции */
+    display: block; /* Убедимся, что это блочный элемент */
+}
+
+/* Медиа-запросы для адаптивности высоты слайдов */
+@media (min-width: 768px) {
+    .carousel-item {
+        height: 450px; /* Увеличиваем высоту на планшетах и десктопах */
+    }
+}
+@media (min-width: 1200px) {
+    .carousel-item {
+        height: 550px; /* Еще больше высота на больших десктопах */
+    }
+}
+</style>
+<div id="carouselExampleCaptions" class="carousel slide" data-bs-ride="carousel" data-bs-interval="{{ scroll_interval|default:5000 }}" data-bs-wrap="true">
+  <div class="carousel-indicators">
+      {% for banner in banners %}
+        {% for picture in banner.pictures %}
+          {% with index=forloop.parentloop.counter0|add:forloop.counter0 %}
+            <button type="button"
+                    data-bs-target="#carouselExampleCaptions"
+                    data-bs-slide-to="{{ index }}"
+                    {% if forloop.parentloop.first and forloop.first %}class="active" aria-current="true"{% endif %}
+                    aria-label="Слайд {{ forloop.parentloop.counter }}-{{ forloop.counter }}">
+            </button>
+          {% endwith %}
+        {% endfor %}
+      {% endfor %}
+    </div>
+
+    <div class="carousel-inner">
+    {% for banner in banners %}
+      {% for picture in banner.pictures %}
+        <div class="carousel-item {% if forloop.parentloop.first and forloop.first %}active{% endif %}">
+          <img src="{{ picture.image.url }}" class="carousel-img" alt="{{ picture.alter_txt }}"> {# <-- ИСПОЛЬЗУЕМ КЛАСС #}
+          <div class="carousel-caption d-none d-md-block">
+            <h5>{{ banner.text }}</h5>
+            <p>{{ banner.type }}</p>
+          </div>
+        </div>
+      {% endfor %}
+    {% endfor %}
+  </div>
+
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Назад</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Вперед</span>
+    </button>
+</div>
