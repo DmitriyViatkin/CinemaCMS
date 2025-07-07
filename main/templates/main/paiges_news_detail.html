@@ -1,36 +1,167 @@
-{% extends 'main/index1.html' %}
 
-{% block title %}{{ news.title }}{% endblock %}
+
+{% extends 'main/index1.html' %}
+{% load static %}
+{% load i18n %}
 
 {% block content %}
-  <div class="container py-4">
-    <h1 class="mb-4 text-center">{{ news.title }}</h1>
+<title>{{ paige_news.title }} - {% translate "Новость" %}</title>
 
-    {% if news.main_picture %}
-      <div class="text-center mb-4">
-        <img src="{{ news.main_picture.image.url }}" alt="{{ news.title }}"
-             class="img-fluid rounded shadow-sm" style="max-height: 400px; object-fit: cover; width: 100%;">
-      </div>
-    {% endif %}
+<style>
+    /* ... (Ваши существующие стили для .video-responsive, .promotion-main-image, .promotion-content, .promotion-layout-container, .promotion-image-wrapper, .promotion-text-content и медиа-запросы) ... */
 
-    <div class="mb-5">
-      <div class="p-3 bg-light rounded shadow-sm">
-        {{ news.description|linebreaks }}
-      </div>
+    /* НОВЫЕ СТИЛИ: Применяем темный фон и светлый текст только к блоку с изображением/текстом */
+    .promotion-layout-container {
+        background-color: #1a1a1a; /* Черный фон для этого блока */
+        color: #f0f0f0; /* Светлый текст по умолчанию для этого блока, теперь будет переопределен для детей */
+        padding: 30px; /* Добавим внутренние отступы для красоты */
+        border-radius: 10px; /* Скругленные углы для блока */
+        box-shadow: 0 5px 15px rgba(0,0,0,0.5); /* Более выраженная тень для выделения */
+
+        display: flex; /* Делаем контейнер Flex-контейнером */
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 30px;
+        max-width: 1000px;
+        margin: 20px auto;
+    }
+
+    /* Убедитесь, что заголовки и параграфы внутри этого блока теперь красные */
+    .promotion-layout-container h1,
+    .promotion-layout-container h2,
+    .promotion-layout-container h3,
+    .promotion-layout-container h4,
+    .promotion-layout-container h5,
+    .promotion-layout-container h6 {
+        color: #ffffff; /* Чисто красный для заголовков в этом блоке */
+    }
+
+    .promotion-layout-container p {
+        color: #ffffff; /* Более светлый красный для параграфов в этом блоке */
+    }
+
+    /* Если есть muted текст внутри этого блока */
+    .promotion-layout-container .text-muted {
+        color: #ff6666 !important; /* Светлее красный для muted текста */
+    }
+
+    /* Ссылки внутри этого блока */
+    .promotion-layout-container a {
+        color: #ff9999; /* Очень светлый красный для ссылок, чтобы был виден */
+    }
+
+    /* Изменения в макете изображений и текста */
+    .promotion-image-wrapper {
+        flex: 0 0 40%;
+        max-width: 400px;
+    }
+
+    .promotion-main-image {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3); /* Тень для изображения */
+    }
+
+    .promotion-text-content {
+        flex: 1;
+        min-width: 300px;
+    }
+
+    /* Адаптивность для маленьких экранов */
+    @media (max-width: 768px) {
+        .promotion-layout-container {
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            padding: 20px; /* Немного уменьшим отступы на мобильных */
+        }
+
+        .promotion-image-wrapper {
+            flex: 0 0 80%;
+            max-width: 500px;
+        }
+
+        .promotion-text-content {
+            width: 100%;
+            min-width: unset;
+            text-align: center;
+        }
+        .promotion-text-content h1 {
+            text-align: center;
+        }
+    }
+
+
+    /* Убедитесь, что .video-responsive имеет max-width и margin: auto для центрирования */
+    .video-responsive {
+        overflow: hidden;
+        padding-bottom:43%;
+        position: relative;
+        height: 0;
+        margin-bottom: 20px;
+        max-width: 1000px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .video-responsive iframe {
+        left: 0;
+        top: 0;
+        height: 90%;
+        width: 100%;
+        position: absolute;
+    }
+
+    /* Остальные стили для галереи и баннера могут оставаться без изменений */
+    .img-fluid.rounded.shadow-sm {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3) !important;
+    }
+
+</style>
+
+<div class="container mt-4"> {# ГЛАВНЫЙ КОНТЕЙНЕР СТРАНИЦЫ #}
+
+    {# Блок видео-трейлера #}
+    {% if paige_news.url %}
+
+
+    <div class="video-responsive">
+        <iframe
+            src="{{ paige_news.get_youtube_embed_url }}"
+            title="Видео: {{ paige_news.title }}"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allowfullscreen
+        ></iframe>
+    </div>
+{% endif %}
+
+
+    <div class="promotion-layout-container">
+        {# Блок основного изображения акции (Левая колонка) #}
+        <div class="promotion-image-wrapper">
+            {% if main_picture %}
+                <img src="{{ main_picture.image.url }}" alt="Основное изображение акции {{ paige_news.title }}" class="promotion-main-image">
+            {% else %}
+                <p class="text-center text-muted">{% translate "Главное изображение акции отсутствует." %}</p>
+            {% endif %}
+        </div>
+
+        {# Блок заголовка и описания (Правая колонка) #}
+        <div class="promotion-text-content">
+            <h1>{{ paige_news.title }}</h1>
+            <p>{{ paige_news.description }}</p>
+        </div>
     </div>
 
-    {% if news.gallery.pictures.all %}
-      <h2 class="mb-4 text-center">Галерея</h2>
-      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
-        {% for picture in news.gallery.pictures.all %}
-          <div class="col">
-            <div class="card h-100 shadow-sm">
-              <img src="{{ picture.image.url }}" alt="{{ picture.alter_txt|default:'Зображення' }}"
-                   class="card-img-top" style="height: 220px; object-fit: cover;">
-            </div>
-          </div>
-        {% endfor %}
-      </div>
-    {% endif %}
-  </div>
+
+
+
+    {# Блок для баннера   #}
+    {% include 'core/banner.html' %}
+
+</div>
 {% endblock %}

@@ -33,7 +33,7 @@ class Movies(models.Model):
     is_imax = models.BooleanField(default=False, verbose_name='IMAX')
     gallery = models.ForeignKey(Gallery, on_delete=models.SET_NULL, null=True, blank=True,
                                 related_name='movies', verbose_name=_('Галерея зображень'))
-    price=models.IntegerField(verbose_name=_('Цена'), default=50 )
+
 
     def __str__(self):
         return self.title

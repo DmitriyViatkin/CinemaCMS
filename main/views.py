@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from .models import PaigesCinema, Banners, Cross_Banner,PaigesNews, Picture, Promotion
+from .models import PaigesCinema, Banners, Cross_Banner,PaigesNews, Picture, Promotion,News
 from django.utils.timezone import now
 from datetime import timedelta
 from movie.models import Movies
@@ -143,23 +143,36 @@ def paiges_news_list(request):
 
 
 def paiges_news_detail(request, slug):
-    # Отримуємо одну новину за допомогою slug
-    news = get_object_or_404(PaigesNews.objects.select_related('gallery').prefetch_related(
-        Prefetch(
-            'gallery__pictures',
-            queryset=Picture.objects.filter(image_type='main_picture'),
-            to_attr='main_picture_list'
-        )
-    ).filter(is_active=True), seo_block__seo_url=slug)
 
 
-    if news.gallery and hasattr(news.gallery, 'main_picture_list'):
-        news.main_picture = news.gallery.main_picture_list[0] if news.gallery.main_picture_list else None
-    else:
-        news.main_picture = None
+    all_gallery_pictures_prefetch = Prefetch(
+        'gallery__pictures',
+        queryset=Picture.objects.all(),
+        to_attr='all_related_pictures'
+    )
 
+    paige_news = get_object_or_404(
+
+        PaigesNews.objects.select_related('gallery', 'seo_block').prefetch_related(all_gallery_pictures_prefetch),
+        seo_block__seo_url=slug
+    )
+
+    main_picture = None
+    gallery_pictures_list = []
+
+
+    if paige_news.gallery and hasattr(paige_news.gallery, 'all_related_pictures'):
+        for pic in paige_news.gallery.all_related_pictures:
+            if pic.image_type == 'main_picture':
+                main_picture = pic
+            elif pic.image_type == 'gallery':
+                gallery_pictures_list.append(pic)
+    print("еее")
+    print( paige_news)
     return render(request, 'main/paiges_news_detail.html', {
-        'news': news,
+        'paige_news': paige_news,
+        'main_picture': main_picture,
+        'gallery_pictures_list': list(gallery_pictures_list),
     })
 
 def promotions_list(request):
@@ -176,7 +189,7 @@ def promotions_list(request):
             queryset=Picture.objects.filter(image_type='main_picture'),
             to_attr='main_picture_list'
         )
-    ).order_by('-date') # <--- CHANGED FROM 'date_publication' TO 'date'
+    ).order_by('-date')
 
 
     for promo in promotions_list:
