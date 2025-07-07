@@ -12,30 +12,30 @@
         background-color: #f8f9fa;
         border: 1px solid #dee2e6;
         border-radius: 8px;
-        overflow-x: auto; /* Позволяет прокрутку по горизонтали, если схема широкая */
+        overflow-x: auto;
         display: flex;
         justify-content: center;
         align-items: center;
-        min-height: 400px; /* Минимальная высота для контейнера */
-        max-width: 800px; /* Максимальная ширина, чтобы центрировать */
+        min-height: 400px;
+        max-width: 800px;
         margin-left: auto;
         margin-right: auto;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Добавляем небольшую тень */
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
     #hall-scheme-container svg {
-        display: block; /* Убедимся, что SVG - блочный элемент */
-        max-width: 100%; /* SVG будет занимать всю доступную ширину контейнера */
-        height: auto; /* Сохранение пропорций */
+        display: block;
+        max-width: 100%;
+        height: auto;
     }
 
-    /* Стили для карусели - перемещены сюда из banner.html */
+    /* Стили для карусели */
     #carouselExample {
-        max-width: 900px; /* Максимальная ширина карусели для десктопов */
-        margin: 20px auto;   /* Центрируем и добавляем отступы сверху/снизу */
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Добавляем небольшую тень для лучшего вида */
-        border-radius: 8px; /* Немного скругляем углы */
-        overflow: hidden; /* Убедимся, что тень и скругления не обрезаны */
+        max-width: 900px;
+        margin: 20px auto;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        border-radius: 8px;
+        overflow: hidden;
     }
 
     @media (max-width: 991.98px) {
@@ -74,161 +74,245 @@
     .carousel-control-next {
         width: 10%;
     }
+
+    /* Styles for the new layout structure */
+    .hall-content-wrapper {
+        display: flex;
+        flex-wrap: wrap; /* Allows wrapping on smaller screens */
+        gap: 30px; /* Space between the two columns */
+        max-width: 1200px;
+        margin: 20px auto; /* Center the wrapper */
+        padding: 0 15px; /* Add some horizontal padding */
+    }
+
+    .hall-sessions-column {
+        flex: 1; /* Takes available space */
+        min-width: 300px; /* Minimum width before wrapping */
+        background-color: transparent;
+
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .hall-details-column {
+        flex: 2; /* Takes more space, e.g., twice as much as sessions */
+        min-width: 450px; /* Minimum width before wrapping */
+    }
+
+    .hall-sessions-column table {
+        width: 100%;
+         background-color: #f8f9fa;/* Make session table full width of its column */
+    }
+
+    /* Styles for the main picture */
+    .main-hall-picture {
+        width: 70%;
+        height: auto; /* Maintain aspect ratio */
+        display: block;
+        margin: 20px auto; /* Center the image */
+        max-width: 800px; /* Limit max size */
+        border-radius: 8px; /* Slightly rounded corners */
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    @media (max-width: 767.98px) {
+        .main-hall-picture {
+            width: 100%;
+            border-radius: 0;
+        }
+        .hall-details-column,
+        .hall-sessions-column {
+            min-width: unset; /* Remove min-width on small screens */
+            flex-basis: 100%; /* Make them full width */
+        }
+        .hall-content-wrapper {
+            gap: 15px; /* Smaller gap on small screens */
+        }
+    }
+
 </style>
-{% if main_picture %}
-         <img src="{{ main_picture.image.url }}" alt="Hall{{ hall.title }}" style="width: 70%; height: 30%; display: block;margin: 0 auto;">
+
+    {% if main_picture %}
+        <img src="{{ main_picture.image.url }}" alt="Hall {{ hall.title }}" class="main-hall-picture">
     {% else %}
-        <p>Что-то пошло не так (главное изображение отсутствует).</p>
+        <p class="text-center text-muted">Что-то пошло не так (главное изображение отсутствует).</p>
     {% endif %}
 
-    <h1>Зал: {{ hall.title }}</h1>
-    <p>Опис: {{ hall.description }}</p>
+    <div class="hall-content-wrapper">
+        {# Колонка для сеансов   #}
+        <div class="hall-sessions-column">
+            <h2>Доступні сеанси</h2>
+            {% if hall_sessions %}
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Сеанс</th>
+                            <th>Час</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for session in hall_sessions %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'buy_ticket' session_id=session.id %}">{{ session.movie.title }}</a>
+                            </td>
+                            <td>{{ session.time_session|time:"H:i" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>Наразі немає запланованих сеансів для цього залу.</p>
+            {% endif %}
+            <a href="{% url 'session_list' %}" class="btn btn-warning" role="button">
+                Розклад всіх сеансів
+            </a>
+        </div>
 
-    <h2>Схема залу</h2>
-    <div id="hall-scheme-container">
-        <p>Завантаження схеми залу...</p>
-    </div>
+        {# Колонка для описания зала и схемы (справа) #}
+        <div class="hall-details-column">
+            <h1>Зал: {{ hall.title }}</h1>
+            <p>Опис: {{ hall.description }}</p>
 
-    {% if hall.scheme_hall %}
-    <script>
-        // Загрузка и обработка схемы зала
-        const schemeFileUrl = "{{ hall.scheme_hall.url }}";
-        console.log("URL файла схемы зала:", schemeFileUrl);
+            <h2>Схема залу</h2>
+            <div id="hall-scheme-container">
+                <p>Завантаження схеми залу...</p>
+            </div>
 
-        function loadAndRenderHallScheme(url) {
-            fetch(url)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+            {% if hall.scheme_hall %}
+            <script>
+                // Загрузка и обработка схемы зала
+                const schemeFileUrl = "{{ hall.scheme_hall.url }}";
+                console.log("URL файла схемы зала:", schemeFileUrl);
+
+                function loadAndRenderHallScheme(url) {
+                    fetch(url)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(schemeData => {
+                            console.log("Данные схемы зала загружены:", schemeData);
+                            renderHallScheme(schemeData, 'hall-scheme-container');
+                        })
+                        .catch(error => {
+                            console.error("Ошибка при загрузке или парсинге схемы зала:", error);
+                            document.getElementById('hall-scheme-container').innerHTML =
+                                '<p style="color: red;">Не удалось загрузить схему зала.</p>';
+                        });
+                }
+
+                // Отрисовка схемы зала
+                function renderHallScheme(schemeData, containerId) {
+                    const container = document.getElementById(containerId);
+                    container.innerHTML = ''; // Очищаем сообщение "Загрузка..."
+
+                    if (!schemeData || !schemeData.rows || schemeData.rows.length === 0) {
+                        container.innerHTML = '<p>Немає даних про ряди та місця в схемі залу.</p>';
+                        return;
                     }
-                    return response.json();
-                })
-                .then(schemeData => {
-                    console.log("Данные схемы зала загружены:", schemeData);
-                    renderHallScheme(schemeData, 'hall-scheme-container');
-                })
-                .catch(error => {
-                    console.error("Ошибка при загрузке или парсинге схемы зала:", error);
-                    document.getElementById('hall-scheme-container').innerHTML =
-                        '<p style="color: red;">Не удалось загрузить схему зала.</p>';
-                });
-        }
 
-        // Отрисовка схемы зала
-        function renderHallScheme(schemeData, containerId) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = ''; // Очищаем сообщение "Загрузка..."
+                    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                    svg.setAttribute("width", "100%");
+                    svg.style.height = "auto";
+                    svg.setAttribute("viewBox", "0 0 1200 800"); // Начальный viewBox
+                    svg.style.border = "1px solid #ccc";
+                    svg.style.backgroundColor = "#f9f9f9";
 
-            if (!schemeData || !schemeData.rows || schemeData.rows.length === 0) {
-                container.innerHTML = '<p>Немає даних про ряди та місця в схемі залу.</p>';
-                return;
-            }
+                    const seatSize = 40;
+                    const seatSpacing = 15;
+                    const rowSpacing = 60;
+                    const startX = 50;
+                    const startY = 50;
 
-            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-            svg.setAttribute("width", "100%");
-            svg.style.height = "auto"; // Высота будет регулироваться viewBox
-            // Задаём базовый viewBox, который будет скорректирован после отрисовки
-            svg.setAttribute("viewBox", "0 0 1200 800");
-            svg.style.border = "1px solid #ccc";
-            svg.style.backgroundColor = "#f9f9f9";
+                    schemeData.rows.sort((a, b) => a.row_number - b.row_number);
 
-            const seatSize = 40;
-            const seatSpacing = 15;
-            const rowSpacing = 60;
-            const startX = 50;
-            const startY = 50;
+                    let currentY = startY;
 
-            // Сортировка рядов и мест для правильного отображения
-            schemeData.rows.sort((a, b) => a.row_number - b.row_number);
+                    schemeData.rows.forEach(rowData => {
+                        const rowNumber = rowData.row_number;
+                        const seats = rowData.seats;
 
-            let currentY = startY;
+                        seats.sort((a, b) => a.seat_number - b.seat_number);
 
-            schemeData.rows.forEach(rowData => {
-                const rowNumber = rowData.row_number;
-                const seats = rowData.seats;
+                        let currentX = startX;
 
-                seats.sort((a, b) => a.seat_number - b.seat_number);
+                        const rowLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                        rowLabel.setAttribute("x", currentX - 30);
+                        rowLabel.setAttribute("y", currentY + seatSize / 2);
+                        rowLabel.setAttribute("dominant-baseline", "middle");
+                        rowLabel.setAttribute("text-anchor", "end");
+                        rowLabel.style.fontSize = "16px";
+                        rowLabel.style.fontWeight = "bold";
+                        rowLabel.textContent = `Ряд ${rowNumber}`;
+                        svg.appendChild(rowLabel);
 
-                let currentX = startX;
+                        seats.forEach(seatData => {
+                            const seatNumber = seatData.seat_number;
+                            const isOccupied = seatData.is_occupied;
 
-                // Метка ряда
-                const rowLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                rowLabel.setAttribute("x", currentX - 30);
-                rowLabel.setAttribute("y", currentY + seatSize / 2);
-                rowLabel.setAttribute("dominant-baseline", "middle");
-                rowLabel.setAttribute("text-anchor", "end");
-                rowLabel.style.fontSize = "16px";
-                rowLabel.style.fontWeight = "bold";
-                rowLabel.textContent = `Ряд ${rowNumber}`;
-                svg.appendChild(rowLabel);
+                            const seatElement = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                            seatElement.setAttribute("x", currentX);
+                            seatElement.setAttribute("y", currentY);
+                            seatElement.setAttribute("width", seatSize);
+                            seatElement.setAttribute("height", seatSize);
+                            seatElement.setAttribute("rx", 5);
 
-                seats.forEach(seatData => {
-                    const seatNumber = seatData.seat_number;
-                    const isOccupied = seatData.is_occupied; // Предполагаем, что это поле есть
+                            let fillColor = isOccupied ? "#dc3545" : "#28a745";
+                            let strokeColor = "#343a40";
 
-                    const seatElement = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-                    seatElement.setAttribute("x", currentX);
-                    seatElement.setAttribute("y", currentY);
-                    seatElement.setAttribute("width", seatSize);
-                    seatElement.setAttribute("height", seatSize);
-                    seatElement.setAttribute("rx", 5); // Скругленные углы
+                            seatElement.style.fill = fillColor;
+                            seatElement.style.stroke = strokeColor;
+                            seatElement.style.strokeWidth = "1px";
+                            seatElement.style.cursor = "pointer";
+                            seatElement.classList.add('seat');
 
-                    let fillColor = isOccupied ? "#dc3545" : "#28a745"; // Красный для занятых, зеленый для свободных
-                    let strokeColor = "#343a40";
+                            const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+                            title.textContent = `Ряд: ${rowNumber}, Место: ${seatNumber}\nСтатус: ${isOccupied ? 'Занято' : 'Свободно'}`;
+                            seatElement.appendChild(title);
 
-                    seatElement.style.fill = fillColor;
-                    seatElement.style.stroke = strokeColor;
-                    seatElement.style.strokeWidth = "1px";
-                    seatElement.style.cursor = "pointer"; // Курсор в виде указателя
-                    seatElement.classList.add('seat'); // Для будущих стилей или JS
+                            seatElement.addEventListener('click', () => {
+                                alert(`Вы выбрали место: Ряд ${rowNumber}, Место ${seatNumber}, Статус: ${isOccupied ? 'Занято' : 'Свободно'}`);
+                            });
 
-                    // Тултип с информацией о месте
-                    const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
-                    title.textContent = `Ряд: ${rowNumber}, Место: ${seatNumber}\nСтатус: ${isOccupied ? 'Занято' : 'Свободно'}`;
-                    seatElement.appendChild(title);
+                            svg.appendChild(seatElement);
 
-                    // Обработчик клика на место
-                    seatElement.addEventListener('click', () => {
-                        alert(`Вы выбрали место: Ряд ${rowNumber}, Место ${seatNumber}, Статус: ${isOccupied ? 'Занято' : 'Свободно'}`);
+                            const seatText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                            seatText.setAttribute("x", currentX + seatSize / 2);
+                            seatText.setAttribute("y", currentY + seatSize / 2);
+                            seatText.setAttribute("text-anchor", "middle");
+                            seatText.setAttribute("dominant-baseline", "middle");
+                            seatText.style.fontSize = "12px";
+                            seatText.style.fill = "#fff";
+                            seatText.style.pointerEvents = "none";
+                            seatText.textContent = seatNumber;
+                            svg.appendChild(seatText);
+
+                            currentX += seatSize + seatSpacing;
+                        });
+                        currentY += seatSize + rowSpacing;
                     });
 
-                    svg.appendChild(seatElement);
+                    container.appendChild(svg);
 
-                    // Номер места
-                    const seatText = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                    seatText.setAttribute("x", currentX + seatSize / 2);
-                    seatText.setAttribute("y", currentY + seatSize / 2);
-                    seatText.setAttribute("text-anchor", "middle");
-                    seatText.setAttribute("dominant-baseline", "middle");
-                    seatText.style.fontSize = "12px";
-                    seatText.style.fill = "#fff"; // Белый текст
-                    seatText.style.pointerEvents = "none"; // Чтобы клик проходил на rect
-                    seatText.textContent = seatNumber;
-                    svg.appendChild(seatText);
+                    const bbox = svg.getBBox();
+                    const padding = 50;
+                    svg.setAttribute("viewBox", `${bbox.x - padding} ${bbox.y - padding} ${bbox.width + 2 * padding} ${bbox.height + 2 * padding}`);
+                    svg.style.width = "100%";
+                }
 
-                    currentX += seatSize + seatSpacing;
-                });
-                currentY += seatSize + rowSpacing;
-            });
+                loadAndRenderHallScheme(schemeFileUrl);
+            </script>
+            {% else %}
+            <p>Схема залу відсутня або не завантажена.</p>
+            {% endif %}
+        </div>
+    </div>
 
-            container.appendChild(svg);
-
-            // Автоматическая подстройка viewBox после отрисовки всех элементов
-            const bbox = svg.getBBox();
-            // Добавляем отступы вокруг содержимого
-            const padding = 50;
-            svg.setAttribute("viewBox", `${bbox.x - padding} ${bbox.y - padding} ${bbox.width + 2 * padding} ${bbox.height + 2 * padding}`);
-            // Убеждаемся, что SVG занимает полную ширину контейнера
-            svg.style.width = "100%";
-        }
-
-        // Запускаем загрузку и отрисовку схемы
-        loadAndRenderHallScheme(schemeFileUrl);
-    </script>
-    {% else %}
-    <p>Схема залу відсутня або не завантажена.</p>
-    {% endif %}
-
+    {# Баннер всегда в самом низу #}
     {% include 'core/banner.html' %}
 
 {% endblock content %}

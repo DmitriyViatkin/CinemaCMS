@@ -805,20 +805,7 @@ class Session_Lists(ListView):
         context= super().get_context_data(**kwargs)
         return context
 
-def session_list2(request):
-    session_list = Sessions.objects.all()
 
-    paginator = Paginator(session_list, 10)
-    page = request.GET.get('page')
-    try:
-        sessions = paginator.page(page)
-    except PageNotAnInteger:
-        sessions = paginator.page(1)
-    except EmptyPage:
-        sessions = paginator.page(paginator.num_pages)
-
-    context = {'sessions': sessions}
-    return render(request, 'admin/session/sessions_list.html', context)
 
 @staff_member_required
 def add_edit_session(request, session_id=None):
@@ -1368,64 +1355,64 @@ def promotion_paige(request):
     return render(request, 'admin/promotion/promotion_list.html', context)
 
 @staff_member_required
-def  promotion_paige_add(request, promotion_id=None):
+def promotion_paige_add(request, promotion_id=None):
     promotion_instance = None
     block_seo_instance = None
     gallery_instance = None
-
     current_main_picture_object = None
 
+    # Отримання існуючої акції
     if promotion_id:
-        promotion_instance = get_object_or_404(PaigesNews, pk=promotion_id)
+        promotion_instance = get_object_or_404(Promotion, pk=promotion_id)
         block_seo_instance = promotion_instance.seo_block
         gallery_instance = promotion_instance.gallery
 
-        if gallery_instance is None:
-            gallery_instance = Gallery.objects.create()
+    # Створення галереї, якщо відсутня
+    if not gallery_instance:
+        gallery_instance = Gallery.objects.create()
+        if promotion_instance:
             promotion_instance.gallery = gallery_instance
             promotion_instance.save()
 
+    # Отримання головного зображення
+    current_main_picture_object = gallery_instance.pictures.filter(image_type='main_picture').first()
 
-        current_main_picture_object = gallery_instance.pictures.filter(image_type='main_picture').first()
-
-
-    if gallery_instance is None:
-        gallery_instance = Gallery.objects.create()  # Создаем новую галерею
-
-
-    if request.method=='POST':
+    if request.method == 'POST':
         block_seo_form = BlockSEOForm(request.POST, instance=block_seo_instance)
         promotion_form = PromotionForm(request.POST, instance=promotion_instance)
         gallery_form = GalleryForm(request.POST, instance=gallery_instance)
 
+        picture_queryset = gallery_instance.pictures.exclude(pk=current_main_picture_object.pk) if current_main_picture_object else gallery_instance.pictures.all()
 
         picture_formset = PictureFormSet(
             request.POST,
             request.FILES,
-            queryset=Picture.objects.filter(gallery=gallery_instance).exclude(pk=current_main_picture_object.pk)
-            if current_main_picture_object else Picture.objects.filter(gallery=gallery_instance),
-            prefix='pictures', initial=[{'image_type': 'gallery_image'}]
+            queryset=picture_queryset,
+            prefix='pictures'
         )
 
-        main_picture_form = PictureForm(request.POST, request.FILES, instance=current_main_picture_object,
-                                        prefix='main_picture_form')
+        main_picture_form = PictureForm(
+            request.POST,
+            request.FILES,
+            instance=current_main_picture_object,
+            prefix='main_picture_form'
+        )
 
-
+        # Встановлюємо image_type вручну, якщо не передано
         if f'{main_picture_form.prefix}-image_type' not in request.POST:
             main_picture_form.data = main_picture_form.data.copy()
             main_picture_form.data[f'{main_picture_form.prefix}-image_type'] = 'main_picture'
 
+        # Прив'язуємо галерею, якщо не передано
         if f'{main_picture_form.prefix}-gallery' not in request.POST and gallery_instance.pk:
             main_picture_form.data = main_picture_form.data.copy()
             main_picture_form.data[f'{main_picture_form.prefix}-gallery'] = gallery_instance.pk
 
-
-
         if (block_seo_form.is_valid() and
-                promotion_form.is_valid() and
-                gallery_form.is_valid() and
-                picture_formset.is_valid() and
-                main_picture_form.is_valid()):
+            promotion_form.is_valid() and
+            gallery_form.is_valid() and
+            picture_formset.is_valid() and
+            main_picture_form.is_valid()):
 
             block_seo_saved = block_seo_form.save()
             gallery_saved = gallery_form.save()
@@ -1435,20 +1422,19 @@ def  promotion_paige_add(request, promotion_id=None):
             promotion_saved.gallery = gallery_saved
             promotion_saved.save()
 
-
+            # Збереження головного зображення
             if main_picture_form.cleaned_data.get('image'):
                 main_picture_saved = main_picture_form.save(commit=False)
                 main_picture_saved.gallery = gallery_saved
                 main_picture_saved.image_type = 'main_picture'
                 main_picture_saved.save()
 
-                if current_main_picture_object and current_main_picture_object.pk!=main_picture_saved.pk:
+                if current_main_picture_object and current_main_picture_object.pk != main_picture_saved.pk:
                     current_main_picture_object.delete()
-
             elif main_picture_form.cleaned_data.get('DELETE') and current_main_picture_object:
                 current_main_picture_object.delete()
 
-
+            # Збереження решти зображень
             instances = picture_formset.save(commit=False)
             for picture in instances:
                 if not picture.pk:
@@ -1457,41 +1443,28 @@ def  promotion_paige_add(request, promotion_id=None):
                         picture.image_type = 'gallery_image'
                 picture.save()
 
-
             for picture in picture_formset.deleted_objects:
                 picture.delete()
 
             return redirect('promotion')
 
         else:
-
-            print("Ошибка валидации форм")
-            print("block_seo_form.errors:", block_seo_form.errors)
-            print("Promotion_form.errors:", promotion_form.errors)
-            print("gallery_form.errors:", gallery_form.errors)
-            print("picture_formset.errors:", picture_formset.errors)
-            print("main_picture_form.errors:", main_picture_form.errors)
-
-            return render(request, 'admin/promotion/add_promotion.html', {
-                'block_seo_form': block_seo_form,
-                'promotion_form': promotion_form,
-                'gallery_form': gallery_form,
-                'picture_formset': picture_formset,
-                'main_picture_form': main_picture_form,
-                'promotion': promotion_instance,
-                'is_edit': promotion_instance is not None,
-            })
-
+            print("Помилки валідації:")
+            print("block_seo_form:", block_seo_form.errors)
+            print("promotion_form:", promotion_form.errors)
+            print("gallery_form:", gallery_form.errors)
+            print("picture_formset:", picture_formset.errors)
+            print("main_picture_form:", main_picture_form.errors)
 
     else:
         block_seo_form = BlockSEOForm(instance=block_seo_instance)
         promotion_form = PromotionForm(instance=promotion_instance)
         gallery_form = GalleryForm(instance=gallery_instance)
 
+        picture_queryset = gallery_instance.pictures.exclude(pk=current_main_picture_object.pk) if current_main_picture_object else gallery_instance.pictures.all()
 
         picture_formset = PictureFormSet(
-            queryset=Picture.objects.filter(gallery=gallery_instance).exclude(pk=current_main_picture_object.pk)
-            if current_main_picture_object else Picture.objects.filter(gallery=gallery_instance),
+            queryset=picture_queryset,
             prefix='pictures'
         )
 
@@ -1510,7 +1483,6 @@ def  promotion_paige_add(request, promotion_id=None):
         'promotion': promotion_instance,
         'is_edit': promotion_instance is not None,
     })
-
 
 @staff_member_required
 def promotion_paige_delete(request, promotion_id):

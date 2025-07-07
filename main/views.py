@@ -186,18 +186,36 @@ def promotions_list(request):
     return render(request, 'main/action.html', {'promotions': promotions})
 
 
+
 def promotion_detail(request, slug):
-    promotion = get_object_or_404(Promotion.objects.select_related('gallery'), seo_block__seo_url=slug)
 
-    # Перевірка на наявність головного зображення
-    main_picture = promotion.gallery.pictures.filter(image_type='main_picture').first() if promotion.gallery else None
+    all_gallery_pictures_prefetch = Prefetch(
+        'gallery__pictures',
+        queryset=Picture.objects.all(),
+        to_attr='all_related_pictures'
+    )
 
-    # Отримання всіх зображень галереї
-    gallery_pictures = promotion.gallery.pictures.filter(image_type='gallery') if promotion.gallery else []
+    promotion = get_object_or_404(
+        Promotion.objects.select_related('gallery').prefetch_related(all_gallery_pictures_prefetch),
+        seo_block__seo_url=slug
+    )
+
+    main_picture = None
+    gallery_pictures_list = []
+
+
+
+    if promotion.gallery and hasattr(promotion.gallery, 'all_related_pictures'):
+        for pic in promotion.gallery.all_related_pictures:
+            if pic.image_type == 'main_picture':
+                main_picture = pic
+
+            elif pic.image_type == 'gallery':
+                gallery_pictures_list.append(pic)
 
     return render(request, 'main/promotion_detail.html', {
-
         'promotion': promotion,
         'main_picture': main_picture,
-        'gallery_pictures': gallery_pictures
+        'gallery_pictures_list':list( gallery_pictures_list),
+
     })

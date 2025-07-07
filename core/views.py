@@ -1,3 +1,4 @@
+from dateutil.utils import today
 from django.shortcuts import render, get_object_or_404
 from .models import Cinemas, Sessions, Halls, Seats, Tickets
 from django.http import HttpResponseRedirect
@@ -13,9 +14,9 @@ import locale
 from django.db.models import Q
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
-from datetime import date
+from datetime import date, datetime
 from django.utils import timezone
-
+from datetime import date
 
 
 
@@ -85,43 +86,39 @@ def cinema_detail(request, cinema_slug):
     return render(request, 'core/cinema_detail.html', context)
 
 def hall_detail(request, hall_id):
-    # Префетч для галереи зала (если у Hall есть своя галерея)
+    today = date.today()
+
     all_gallery_pictures_prefetch = Prefetch(
         'gallery__pictures',
-        queryset=Picture.objects.all(), # Можно сузить, если нужно, например, .filter(is_active=True)
+        queryset=Picture.objects.all(),
         to_attr='all_gallery_images'
     )
 
-    # Получаем конкретный зал по hall_id
-    # Убираем prefetch_related('halls'), так как Halls не имеет атрибута 'halls'
     hall = get_object_or_404(
         Halls.objects.select_related('seo_block', 'gallery')
-                     .prefetch_related(all_gallery_pictures_prefetch), # Убрали halls_prefetch
+                     .prefetch_related(all_gallery_pictures_prefetch),
         pk=hall_id
     )
 
     main_picture = None
-
     gallery_pictures_list = []
 
-    # Обработка изображений галереи зала
     if hall.gallery and hasattr(hall.gallery, 'all_gallery_images'):
         for pic in hall.gallery.all_gallery_images:
-            if pic.image_type == 'main_picture': # Если у зала есть "главная" картинка
+            if pic.image_type == 'main_picture':
                 main_picture = pic
-            elif pic.image_type == 'logo': # Если у зала есть "лого"
+            elif pic.image_type == 'logo':
                 logo_picture = pic
             elif pic.image_type == 'gallery':
                 gallery_pictures_list.append(pic)
 
+    hall_sessions = Sessions.objects.filter(hall_id=hall.id, date__gte=today).select_related('movie').order_by('date', 'time_session')
 
-    print  (gallery_pictures_list),
     context = {
         'hall': hall,
         'main_picture': main_picture,
-
-        'gallery_pictures_list': list( gallery_pictures_list ),
-
+        'hall_sessions': hall_sessions,
+        'gallery_pictures_list': gallery_pictures_list,
     }
 
     return render(request, 'hall/hall_detail.html', context)

@@ -1,5 +1,5 @@
 {% load static %}
-{% for field in main_picture_form %} {# <-- Используем main_picture_form #}
+{% for field in main_picture_form %}
     {% if field.name == 'image' %}
         <div class="form-group field-row-aligned main-picture-container" style="display: flex; align-items: center; gap: 15px;">
             <label style="min-width: 120px;">Главная картинка</label> {# <-- Хардкодим метку для единообразия #}

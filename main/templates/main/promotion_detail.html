@@ -1,0 +1,167 @@
+
+
+{% extends 'main/index1.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block content %}
+<title>{{ promotion.title }} - {% translate "Акция" %}</title>
+
+<style>
+    /* ... (Ваши существующие стили для .video-responsive, .promotion-main-image, .promotion-content, .promotion-layout-container, .promotion-image-wrapper, .promotion-text-content и медиа-запросы) ... */
+
+    /* НОВЫЕ СТИЛИ: Применяем темный фон и светлый текст только к блоку с изображением/текстом */
+    .promotion-layout-container {
+        background-color: #1a1a1a; /* Черный фон для этого блока */
+        color: #f0f0f0; /* Светлый текст по умолчанию для этого блока */
+        padding: 30px; /* Добавим внутренние отступы для красоты */
+        border-radius: 10px; /* Скругленные углы для блока */
+        box-shadow: 0 5px 15px rgba(0,0,0,0.5); /* Более выраженная тень для выделения */
+
+        display: flex; /* Делаем контейнер Flex-контейнером */
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 30px;
+        max-width: 1000px;
+        margin: 20px auto;
+        /* padding: 0 15px; /* Убираем, так как теперь есть padding выше */
+    }
+
+    /* Убедитесь, что заголовки и параграфы внутри этого блока тоже белые */
+    .promotion-layout-container h1,
+    .promotion-layout-container h2,
+    .promotion-layout-container h3,
+    .promotion-layout-container h4,
+    .promotion-layout-container h5,
+    .promotion-layout-container h6 {
+        color: #ffffff; /* Чисто белый для заголовков в этом блоке */
+    }
+
+    .promotion-layout-container p {
+        color: #e0e0e0; /* Светлый серый для параграфов в этом блоке */
+    }
+
+    /* Если есть muted текст внутри этого блока */
+    .promotion-layout-container .text-muted {
+        color: #cccccc !important; /* Убедимся, что он виден */
+    }
+
+    /* Ссылки внутри этого блока */
+    .promotion-layout-container a {
+        color: #87ceeb; /* Голубой для ссылок, хорошо виден на темном */
+    }
+
+    /* Изменения в макете изображений и текста */
+    .promotion-image-wrapper {
+        flex: 0 0 40%;
+        max-width: 400px;
+    }
+
+    .promotion-main-image {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3); /* Тень для изображения */
+    }
+
+    .promotion-text-content {
+        flex: 1;
+        min-width: 300px;
+    }
+
+    /* Адаптивность для маленьких экранов */
+    @media (max-width: 768px) {
+        .promotion-layout-container {
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            padding: 20px; /* Немного уменьшим отступы на мобильных */
+        }
+
+        .promotion-image-wrapper {
+            flex: 0 0 80%;
+            max-width: 500px;
+        }
+
+        .promotion-text-content {
+            width: 100%;
+            min-width: unset;
+            text-align: center;
+        }
+        .promotion-text-content h1 {
+            text-align: center;
+        }
+    }
+
+
+    /* Убедитесь, что .video-responsive имеет max-width и margin: auto для центрирования */
+    .video-responsive {
+        overflow: hidden;
+        padding-bottom:43%;
+        position: relative;
+        height: 0;
+        margin-bottom: 20px;
+        max-width: 1000px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .video-responsive iframe {
+        left: 0;
+        top: 0;
+        height: 90%;
+        width: 100%;
+        position: absolute;
+    }
+
+    /* Остальные стили для галереи и баннера могут оставаться без изменений */
+    .img-fluid.rounded.shadow-sm {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3) !important;
+    }
+
+</style>
+
+<div class="container mt-4"> {# ГЛАВНЫЙ КОНТЕЙНЕР СТРАНИЦЫ #}
+
+    {# Блок видео-трейлера #}
+    {% if promotion.url_video %}
+        <h2 class="text-center mb-3">{% translate "Видео к акции" %}</h2>
+        <div class="video-responsive">
+            <iframe
+                src="{{ promotion.get_youtube_embed_url }}"
+                title="Видео: {{ promotion.title }}"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerpolicy="strict-origin-when-cross-origin"
+                allowfullscreen
+            ></iframe>
+        </div>
+    {% endif %}
+
+
+    <div class="promotion-layout-container">
+        {# Блок основного изображения акции (Левая колонка) #}
+        <div class="promotion-image-wrapper">
+            {% if main_picture %}
+                <img src="{{ main_picture.image.url }}" alt="Основное изображение акции {{ promotion.title }}" class="promotion-main-image">
+            {% else %}
+                <p class="text-center text-muted">{% translate "Главное изображение акции отсутствует." %}</p>
+            {% endif %}
+        </div>
+
+        {# Блок заголовка и описания (Правая колонка) #}
+        <div class="promotion-text-content">
+            <h1>{{ promotion.title }}</h1>
+            <p>{{ promotion.description }}</p>
+        </div>
+    </div>
+
+    {# Секция галереи   #}
+
+
+    {# Блок для баннера (ОСТАЕТСЯ В СВЕТЛЫХ ТОНАХ) #}
+    {% include 'core/banner.html' %}
+
+</div>{# Конец ГЛАВНОГО .container #}
+{% endblock %}
