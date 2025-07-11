@@ -238,11 +238,7 @@ class Promotion(models.Model):
     def get_youtube_embed_url(self):
         """Преобразует стандартный URL YouTube в URL для встраивания."""
         if self.url_video:
-            # Регулярное выражение для извлечения ID видео из различных форматов URL YouTube
-            # Примеры:
-            # https://www.youtube.com/watch?v=dQw4w9WgXcQ
-            # https://youtu.be/dQw4w9WgXcQ
-            # https://www.youtube.com/embed/dQw4w9WgXcQ
+
             match = re.search(
                 r'(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=|embed\/|v\/|)([\w-]{11})',
                 self.url_video)

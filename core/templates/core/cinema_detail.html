@@ -1,5 +1,6 @@
 {% extends 'main/index1.html' %}
 {% load static %}
+{% load i18n %}
 {% block title %}{{ cinema.title }}{% endblock %}
 
 {% block content %}
@@ -93,23 +94,23 @@
             <p>Логотип отсутствует.</p>
         {% endif %}
     </div> <h1>{{ cinema.title }}</h1>
-<div class="button-center-container">
-    <button type="button" class="btn btn-primary" id="scheduleButton">Расписание кинотеатра</button>
+<div class="button-center-container text-center my-3">
+    <a href="{% url 'session_list' %}?cinema={{ cinema.id }}" class="btn btn-primary">{% trans "Розклад кінотеатру" %} </a>
 </div>
 
 </div>
          <div class="cinema-header-info">
              <div class="cinema-info-columns">
 
-        {# Ця обгортка тепер буде ЗЛІВА #}
+
         <div class="cinema-tables-wrapper">
             <div class="cinema-halls-table">
-                <h2>Доступні зали</h2>
+                <h2>{% trans  "Доступні зали" %} </h2>
                 {% if halls %}
                     <table class="table table-striped table-bordered">
                         <thead>
                             <tr>
-                                <th>Назва залу</th>
+                                <th>{% trans "Назва залу" %}</th>
                             </tr>
                         </thead>
                        <tbody>
@@ -123,18 +124,18 @@
                        </tbody>
                     </table>
                 {% else %}
-                    <p>Зали не знайдено.</p>
+                    <p>{% trans "Зали не знайдено." %} </p>
                 {% endif %}
             </div>
 
             <div class="cinema-sessions-table">
-                <h2>Доступні сеанси</h2>
+                <h2>{% trans "Доступні сеанси" %} </h2>
                 {% if today_sessions %}
                     <table class="table table-striped table-bordered">
                         <thead>
                             <tr>
-                                <th>Сеанс</th>
-                                <th>Час</th>
+                                <th>{% trans "Сеанс" %}</th>
+                                <th>{% trans "Час" %} </th>
                             </tr>
                         </thead>
                        <tbody>
@@ -147,16 +148,16 @@
                        </tbody>
                     </table>
                 {% else %}
-                    <p>Сеансів не знайдено.</p>
+                    <p>{% trans "Сеансів не знайдено." %}</p>
                 {% endif %}
             </div>
         </div>
 
 
         <div class="cinema-text-info">
-            <p><strong>Місто:</strong> {{ cinema.city }}</p>
-            <p><strong>Опис:</strong> {{ cinema.description }}</p>
-            <p><strong>Умови:</strong> {{ cinema.conditions }}</p>
+            <p><strong>{% trans "Місто:" %}</strong> {{ cinema.city }}</p>
+            <p><strong>{% trans "Опис:" %}</strong> {{ cinema.description }}</p>
+            <p><strong>{% trans "Умови:" %}</strong> {{ cinema.conditions }}</p>
         </div>
     </div>
 
@@ -167,12 +168,23 @@
 {% include 'core/banner.html' %}
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+
+      document.addEventListener('DOMContentLoaded', function() {
         const scheduleButton = document.getElementById('scheduleButton');
-        if (scheduleButton) {
-            scheduleButton.addEventListener('click', function() {
-                // Замените на реальный URL
-                window.location.href = "{% url 'session_list'   %}";
+        const cinemaSelect = document.getElementById('cinema-select');
+
+        if (scheduleButton && cinemaSelect) {
+            scheduleButton.addEventListener('click', function(event) {
+                event.preventDefault(); // Prevent default form submission if you want to control it with JS
+
+                const selectedCinemaId = cinemaSelect.value;
+                // If you submit the form naturally, the 'action' and 'method' attributes handle it.
+                // If you want JS to handle it:
+                if (selectedCinemaId) {
+                    window.location.href = "{% url 'session_list' %}" + "?cinema=" + selectedCinemaId;
+                } else {
+                    window.location.href = "{% url 'session_list' %}"; // Go to unfiltered if nothing selected
+                }
             });
         }
     });

@@ -55,7 +55,7 @@ class Sessions(models.Model):
     cinema = models.ForeignKey(Cinemas, on_delete=models.CASCADE, related_name='sessions', verbose_name="Кинотеатр")
     hall_id = models.ForeignKey(Halls, on_delete=models.CASCADE,related_name='sessions', verbose_name= 'Зал')
     movie = models.ForeignKey(Movies, on_delete=models.SET_NULL, related_name='movie_sessions',null=True, blank=True)
-
+    price = models.PositiveIntegerField(default= 55, verbose_name= 'Цена')
     time_session = models.TimeField(verbose_name= 'Час сеансу')
     duration = models.TimeField(verbose_name= 'Тривалість')
     date = models.DateField(verbose_name= 'Дата')
@@ -82,7 +82,7 @@ class Seats(models.Model):
     halls = models.ForeignKey('Halls', on_delete=models.CASCADE, related_name='seats_in_hall', verbose_name=_('Зал'))
 
     is_vip = models.BooleanField(default=False, verbose_name=_('VIP'))
-    price = models.DecimalField(max_digits=8, decimal_places=2, default=120.00, verbose_name=_('Ціна'))
+    price = models.DecimalField(null=True,max_digits=8, decimal_places=2, default=120.00, verbose_name=_('Ціна'))
 
     class Meta:
         unique_together = ('halls', 'number_row', 'seat')

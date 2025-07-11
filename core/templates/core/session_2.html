@@ -1,5 +1,6 @@
 {% extends 'main/index1.html' %}
 {% load static %}
+{% load i18n %}
 
 {% block content %}
 <style>
@@ -28,7 +29,7 @@
     }
 </style>
 
-<h1 class="text-center my-4">Розклад сеансів</h1>
+<h1 class="text-center my-4">{% trans "Розклад сеансів" %}</h1>
 <form method="get" class="row g-2 align-items-center mb-4" style="width: 80%; margin-left: 10%;">
     <div class="col-auto form-check">
         <input class="form-check-input" type="checkbox" name="is_2d" value="1" id="filter2D" onchange="this.form.submit()"
@@ -52,7 +53,7 @@
     </div>
 
     <div class="col-auto">
-        <select name="cinema" class="form-select" onchange="this.form.submit()"> {# <-- ДОБАВЛЕНО onchange="this.form.submit()" ЗДЕСЬ #}
+        <select name="cinema" class="form-select" onchange="this.form.submit()">
             <option value="">Всі кінотеатри</option>
             {% for cinema in cinemas %}
                 <option value="{{ cinema.id }}" {% if cinema.id|stringformat:"s" == selected_cinema %}selected{% endif %}>
@@ -63,9 +64,9 @@
     </div>
 
     <div class="col-auto">
-        <select name="hall" class="form-select" onchange="this.form.submit()"> {# Добавлено onchange="this.form.submit()" для отправки формы при изменении зала #}
-            <option value="">Всі зали</option>
-            {# Перебираем только те 'halls', которые уже отфильтрованы представлением #}
+        <select name="hall" class="form-select" onchange="this.form.submit()">
+            <option value="">{% trans "Всі зали" %}</option>
+
             {% for hall in halls %}
                 <option value="{{ hall.id }}" {% if hall.id|stringformat:"s" == selected_hall %}selected{% endif %}>
                     {{ hall.title }}
@@ -94,10 +95,10 @@
         <table class="table table-bordered table-striped"  style="width: 50%;" >
             <thead>
                 <tr>
-                    <th class="col-time">Дата і час</th>
-                    <th class="col-movie">Фільм</th>
-                    <th class="col-price">Ціна</th>
-                    <th class="col-action">Дія</th>
+                    <th class="col-time">{% trans " Час" %}</th>
+                    <th class="col-movie">{% trans "Фільм" %}</th>
+                    <th class="col-price">{% trans "Ціна" %}</th>
+                    <th class="col-action">{% trans "Дія" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -109,9 +110,9 @@
                             {{ session.movie.title }}
                         </a>
                     </td>
-                    <td>{{ session.movie.price }} грн</td>
+                    <td>{{ session.price }} грн</td>
                     <td>
-                        <a href="{% url 'buy_ticket' session.id %}" class="btn btn-success btn-sm">Купити</a>
+                        <a href="{% url 'buy_ticket' session.id %}" class="btn btn-success btn-sm">{% trans "Купити" %}</a>
                     </td>
                 </tr>
                 {% endfor %}
@@ -119,7 +120,7 @@
         </table>
     {% endfor %}
 {% else %}
-    <p class="text-muted text-center mt-5">Немає сеансів за вибраними критеріями.</p>
+    <p class="text-muted text-center mt-5">{% trans "Немає сеансів за вибраними критеріями." %}</p>
 {% endif %}
 </div>
 {% endblock %}

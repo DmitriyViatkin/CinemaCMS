@@ -10,7 +10,8 @@ from core.models import Halls, Seats # Убедитесь, что импорты
 def process_hall_scheme_from_file_only(sender, instance, created, **kwargs):
     print(f"--- Сигнал process_hall_scheme_from_file_only: HALL ID {instance.id}, created: {created} ---")
 
-
+    # ВАЖНО: Мы всегда удаляем старые места при изменении схемы зала
+    # Это гарантирует, что схема будет полностью перезаписана
     instance.seats_in_hall.all().delete()
     print(f"--- Удалены существующие места для зала ID {instance.id} ---")
 
@@ -65,21 +66,21 @@ def _create_seats_from_json_dict(hall_instance, scheme_dict):
                 print(f"Предупреждение: В JSON-схеме для зала '{hall_instance.title}' в месте отсутствует 'seat_number': {seat_data}")
                 continue
 
-            is_vip = seat_data.get('is_vip', False)
-            price = seat_data.get('price', 120.00)
-
-            if is_vip and price == 120.00:
-                price = 200.00
 
             seats_to_create.append(
-                Seats( # Убедитесь, что это ваша модель Seats
+                Seats(
                     halls=hall_instance, # Убедитесь, что поле ForeignKey в Seats называется 'halls'
                     number_row=row_number,
                     seat=seat_number,
-                    date=date.today(), # Возможно, здесь нужна дата показа, а не текущая
-                    status=seat_data.get('status', 'F'),
-                    is_vip=is_vip,
-                    price=price,
+                    date=date.today(), # Важно: здесь 'date' - это дата создания записи о месте.
+                                       # Для сеансов дата будет браться из Session.date.
+                                       # Если Seats.date используется для привязки к конкретной дате показа,
+                                       # то эту логику нужно будет пересмотреть.
+                                       # Сейчас это просто дата создания места в зале.
+                    status=seat_data.get('status', 'F'), # Статус по умолчанию 'F' (Free)
+                    is_vip=seat_data.get('is_vip', False), # is_vip все еще берется из схемы, это свойство места
+                    # --- УДАЛЕНО: Поле price больше не заполняется здесь ---
+                    price=None, # Устанавливаем явно None, чтобы база данных использовала default или allow_null=True
                 )
             )
     if seats_to_create:

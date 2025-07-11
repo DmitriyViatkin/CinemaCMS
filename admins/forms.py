@@ -146,17 +146,20 @@ class ContactForm(forms.ModelForm):
 
     class Meta:
         model = Contact
-        fields = ['title', 'address', 'latitude', 'longitude', 'phone_number',]
+
+        fields = ['title', 'address', 'latitude', 'longitude', 'phone_number', 'gallery']
         widgets = {
-            'longitude': HiddenInput(),
+            'latitude': forms.TextInput(attrs={'class': 'form-control'}),
+            'longitude': forms.TextInput(attrs={'class': 'form-control'}),
             'gallery': HiddenInput(),
             'title': forms.TextInput(attrs={'class': 'form-control'}),
-            'address': forms.Textarea(attrs={'cols': '50', 'rows': '10', 'class': 'form-control'}),
+            'address': forms.Textarea(attrs={'cols': '10', 'rows': '5', 'class': 'form-control'}),
             'phone_number': forms.TextInput(attrs={'class': 'form-control phone-input'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
         self.fields['latitude'].required = False
         self.fields['longitude'].required = False
         self.fields['gallery'].required = False
@@ -175,7 +178,6 @@ class ContactForm(forms.ModelForm):
         if isinstance(gallery_data, str) and not gallery_data:
             return None
         return gallery_data
-
     def save(self, commit=True):
         contact = super().save(commit=False)
 

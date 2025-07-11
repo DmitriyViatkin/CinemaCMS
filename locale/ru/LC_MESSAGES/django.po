@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-12 20:11+0300\n"
+"POT-Creation-Date: 2025-07-11 11:42+0300\n"
 "PO-Revision-Date: 2025-06-12 17:16+0300\n"
 "Last-Translator: YOUR NAME <YOUR_EMAIL@example.com>\n"
 "Language-Team: Russian <ru@li.org>\n"
@@ -19,99 +19,100 @@ msgstr ""
 "n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || "
 "(n%100>=11 && n%100<=14)? 2 : 3);\n"
 
-#: admins/forms.py:144
-
+#: admins/forms.py:281
 msgid "Назва новини"
-msgstr "Добавить новость"
+msgstr "Название новости"
 
-#: admins/forms.py:145 admins/forms.py:348 core/models.py:13 core/models.py:32
-#: main/models.py:141 main/models.py:176 main/models.py:216 movie/models.py:26
+#: admins/forms.py:282 admins/forms.py:491 core/models.py:13 core/models.py:33
+#: main/models.py:141 main/models.py:190 main/models.py:230 movie/models.py:26
 msgid "Опис"
 msgstr "Описание"
 
-#: admins/forms.py:146
+#: admins/forms.py:283
 msgid "Посилання на відео"
 msgstr "Ссылка на видео"
 
-#: admins/forms.py:147 main/models.py:143 main/models.py:218
+#: admins/forms.py:284 main/models.py:143 main/models.py:232
 msgid "Дата публікації"
 msgstr "Дата публикации"
 
-#: admins/forms.py:148
+#: admins/forms.py:285
 msgid "Вкл"
 msgstr "Вкл"
 
-#: admins/forms.py:346 admins/templates/admin/card_forms/hall.html:7
-#: core/models.py:12 core/models.py:30 main/models.py:138 main/models.py:174
-#: movie/models.py:24
+#: admins/forms.py:488 admins/templates/admin/card_forms/hall.html:7
+#: admins/templates/admin/paige_list/paige_lists.html:27 core/models.py:12
+#: core/models.py:31 main/models.py:138 main/models.py:188 movie/models.py:24
 msgid "Назва"
 msgstr "Название"
 
-#: admins/forms.py:347
-
+#: admins/forms.py:489
 msgid "Кінотеатр"
-msgstr "кинотеатр"
+msgstr "Кинотеатр"
 
-#: admins/forms.py:349
-msgid "Ряд"
-msgstr "Ряд"
+#: admins/forms.py:490
+msgid "Схема залу"
+msgstr "Схема зала"
 
-#: admins/forms.py:401
+#: admins/forms.py:542
 msgid "Жанр:"
 msgstr "Жанр:"
 
-#: admins/forms.py:402
-
+#: admins/forms.py:543
 msgid "Назва:"
-msgstr "Название"
+msgstr "Название:"
 
-#: admins/forms.py:403
-
+#: admins/forms.py:544
 msgid "URL трейлера:"
-msgstr "URL трейлера"
+msgstr "URL трейлера:"
 
-#: admins/forms.py:404
-
+#: admins/forms.py:545 core/templates/core/cinema_detail.html:159
 msgid "Опис:"
-msgstr "Описание"
+msgstr "Описание:"
 
-#: admins/forms.py:406
-#, fuzzy
-#| msgid "Дата проката"
+#: admins/forms.py:547
 msgid "Дата проката:"
-msgstr "Дата проката"
+msgstr "Дата проката:"
 
-#: admins/forms.py:407
-
+#: admins/forms.py:548
 msgid "Вікова категорія:"
-msgstr "Возрастная категория"
+msgstr "Возрастная категория:"
 
-#: admins/templates/admin/card_forms/gallery_form.html:29
-#: admins/templates/admin/card_forms/gallery_form.html:67
+#: admins/templates/admin/card_forms/gallery_form.html:28
+#: admins/templates/admin/card_forms/gallery_form.html:63
 #: admins/templates/admin/cinema/add_cinema.html:22
-#: admins/templates/admin/halls/add_halls.html:37
+#: admins/templates/admin/cinema/add_cinema.html:32
+#: admins/templates/admin/halls/add_halls.html:146
 msgid "Додати"
 msgstr "Добавить"
 
-#: admins/templates/admin/card_forms/gallery_form.html:38
-#: admins/templates/admin/card_forms/gallery_form.html:72
+#: admins/templates/admin/card_forms/gallery_form.html:37
+#: admins/templates/admin/card_forms/gallery_form.html:67
 #: admins/templates/admin/card_forms/hall.html:35
+#: admins/templates/admin/email_campaigns/email_campaign_confirm_delete.html:21
+#: admins/templates/admin/email_campaigns/email_campaign_list.html:66
+#: admins/templates/admin/paige_list/paige_lists.html:52
 msgid "Видалити"
 msgstr "Удалить"
 
-#: admins/templates/admin/card_forms/gallery_form.html:50
+#: admins/templates/admin/card_forms/gallery_form.html:49
 msgid "Додати ще одне зображення"
 msgstr "Добавить ещё одно изображение"
 
 #: admins/templates/admin/card_forms/hall.html:8
+#: admins/templates/admin/email_campaigns/email_campaign_list.html:40
+#: admins/templates/admin/paige_list/paige_lists.html:28
 msgid "Дата створення"
 msgstr "Дата создания"
 
 #: admins/templates/admin/card_forms/hall.html:9
+#: admins/templates/admin/email_campaigns/email_campaign_list.html:41
+#: admins/templates/admin/paige_list/paige_lists.html:30
 msgid "Дії"
 msgstr "Действия"
 
 #: admins/templates/admin/card_forms/hall.html:25
+#: admins/templates/admin/email_campaigns/email_campaign_confirm_delete.html:14
 msgid "Підтвердження видалення"
 msgstr "Подтверждение удаления"
 
@@ -120,14 +121,16 @@ msgid "Ви впевнені, що хочете видалити зал"
 msgstr "Вы уверены, что хотите удалить зал"
 
 #: admins/templates/admin/card_forms/hall.html:34
+#: admins/templates/admin/email_campaigns/email_campaign_confirm_delete.html:22
 msgid "Скасувати"
 msgstr "Отменить"
 
 #: admins/templates/admin/card_forms/hall.html:44
 msgid "Для цього кінотеатру ще не додано жодного залу."
-msgstr "Для этого кинотеатра пока не добавлено ни одного зала."
+msgstr "Для этого кинотеатра ещё не добавлено ни одного зала."
 
 #: admins/templates/admin/card_forms/logo_card.html:6
+#: admins/templates/admin/card_forms/logo_card_ru.html:6
 msgid "Логотип"
 msgstr "Логотип"
 
@@ -153,7 +156,12 @@ msgid "Додати новий кінотеатр"
 msgstr "Добавить новый кинотеатр"
 
 #: admins/templates/admin/cinema/add_cinema.html:22
-#: admins/templates/admin/halls/add_halls.html:37
+#: admins/templates/admin/cinema/add_cinema.html:32
+#: admins/templates/admin/email_campaigns/email_campaign_list.html:65
+#: admins/templates/admin/halls/add_halls.html:146
+#: admins/templates/admin/paige_list/paige_lists.html:47
+#: admins/templates/admin/paige_list/paige_lists.html:73
+#: admins/templates/admin/paige_list/paige_lists.html:94
 msgid "Редагувати"
 msgstr "Редактировать"
 
@@ -161,46 +169,120 @@ msgstr "Редактировать"
 msgid "кінотеатр"
 msgstr "кинотеатр"
 
-#: admins/templates/admin/cinema/add_cinema.html:53
-msgid "Інформація про кінотеатр"
-msgstr "Информация о кинотеатре"
-
-#: admins/templates/admin/cinema/add_cinema.html:64
-#: admins/templates/admin/halls/add_halls.html:61
-#: admins/templates/admin/movies_lists/add_movies.html:188
-#: admins/templates/admin/news_paige/add_news.html:82
-#: admins/templates/admin/promotion/add_promotion.html:87
+#: admins/templates/admin/cinema/add_cinema.html:65
+#: admins/templates/admin/movies_lists/add_movies.html:185
+#: admins/templates/admin/news_paige/add_news.html:76
+#: admins/templates/admin/promotion/add_promotion.html:75
 msgid "Картинки галереї"
 msgstr "Картинки галереи"
 
-#: admins/templates/admin/cinema/add_cinema.html:69
+#: admins/templates/admin/cinema/add_cinema.html:70
 msgid "Додати зал"
 msgstr "Добавить зал"
 
-#: admins/templates/admin/cinema/add_cinema.html:78
-#: admins/templates/admin/halls/add_halls.html:72
+#: admins/templates/admin/cinema/add_cinema.html:79
+#: admins/templates/admin/halls/add_halls.html:217
 msgid "Оновити"
 msgstr "Обновить"
 
-#: admins/templates/admin/cinema/add_cinema.html:78
-#: admins/templates/admin/movies_lists/add_movies.html:196
-#: admins/templates/admin/news_paige/add_news.html:87
-#: admins/templates/admin/paige_list/add_paige.html:80
-#: admins/templates/admin/promotion/add_promotion.html:93
+#: admins/templates/admin/cinema/add_cinema.html:79
+#: admins/templates/admin/movies_lists/add_movies.html:193
+#: admins/templates/admin/news_paige/add_news.html:81
+#: admins/templates/admin/paige_list/add_paige.html:70
+#: admins/templates/admin/promotion/add_promotion.html:81
 msgid "Створити"
 msgstr "Создать"
+
+#: admins/templates/admin/email_campaigns/email_campaign_confirm_delete.html:17
+msgid "Ви впевнені, що хочете видалити Email кампанію"
+msgstr "Вы уверены, что хотите удалить Email кампанию"
+
+#: admins/templates/admin/email_campaigns/email_campaign_confirm_delete.html:18
+msgid "Текст:"
+msgstr "Текст:"
+
+#: admins/templates/admin/email_campaigns/email_campaign_list.html:25
+msgid "Список Email кампаній"
+msgstr "Список Email кампаний"
+
+#: admins/templates/admin/email_campaigns/email_campaign_list.html:28
+msgid "Створити кампанію"
+msgstr "Создать кампанию"
+
+#: admins/templates/admin/email_campaigns/email_campaign_list.html:37
+msgid "Текст листа (фрагмент)"
+msgstr "Текст письма (фрагмент)"
+
+#: admins/templates/admin/email_campaigns/email_campaign_list.html:38
+msgid "Користувачі"
+msgstr "Пользователи"
+
+#: admins/templates/admin/email_campaigns/email_campaign_list.html:39
+#: admins/templates/admin/paige_list/paige_lists.html:29
+msgid "Статус"
+msgstr "Статус"
+
+#: admins/templates/admin/email_campaigns/email_campaign_list.html:53
+msgid "Немає користувачів"
+msgstr "Нет пользователей"
+
+#: admins/templates/admin/email_campaigns/email_campaign_list.html:58
+msgid "Відправлено"
+msgstr "Отправлено"
+
+#: admins/templates/admin/email_campaigns/email_campaign_list.html:60
+msgid "Не відправлено"
+msgstr "Не отправлено"
+
+#: admins/templates/admin/email_campaigns/email_campaign_list.html:71
+msgid "Список Email кампаній порожній."
+msgstr "Список Email кампаний пуст."
+
+#: admins/templates/admin/email_campaigns/email_campaign_list.html:81
+#: admins/templates/admin/paige_list/paige_lists.html:113
+msgid "перша"
+msgstr "первая"
+
+#: admins/templates/admin/email_campaigns/email_campaign_list.html:82
+#: admins/templates/admin/paige_list/paige_lists.html:114
+msgid "попередня"
+msgstr "предыдущая"
+
+#: admins/templates/admin/email_campaigns/email_campaign_list.html:85
+#: admins/templates/admin/paige_list/paige_lists.html:117
+msgid "Сторінка"
+msgstr "Страница"
+
+#: admins/templates/admin/email_campaigns/email_campaign_list.html:85
+#: admins/templates/admin/paige_list/paige_lists.html:117
+msgid "з"
+msgstr "из"
+
+#: admins/templates/admin/email_campaigns/email_campaign_list.html:88
+#: admins/templates/admin/paige_list/paige_lists.html:120
+msgid "наступна"
+msgstr "следующая"
+
+#: admins/templates/admin/email_campaigns/email_campaign_list.html:89
+#: admins/templates/admin/paige_list/paige_lists.html:121
+msgid "остання"
+msgstr "последняя"
 
 #: admins/templates/admin/halls/add_halls.html:7
 msgid "Редагувати зал"
 msgstr "Редактировать зал"
 
+#: admins/templates/admin/halls/add_halls.html:209
+msgid "Картинки галереї (Українська)"
+msgstr "Картинки галереи (Украинский)"
+
 #: admins/templates/admin/movies_lists/add_movies.html:16
 msgid "Додати фільм"
-msgstr "Добавить Фильм"
+msgstr "Добавить фильм"
 
-#: admins/templates/admin/movies_lists/add_movies.html:84
+#: admins/templates/admin/movies_lists/add_movies.html:81
 msgid "Формати:"
-msgstr "Форматы"
+msgstr "Форматы:"
 
 #: admins/templates/admin/news_paige/add_news.html:4
 #: admins/templates/admin/news_paige/add_news.html:17
@@ -208,24 +290,54 @@ msgid "Додати новину"
 msgstr "Добавить новость"
 
 #: admins/templates/admin/paige_list/add_paige.html:16
-
+#: admins/templates/admin/paige_list/paige_lists.html:19
 msgid "Додати сторінку"
 msgstr "Добавить страницу"
 
-#: admins/templates/admin/paige_list/add_paige.html:74
+#: admins/templates/admin/paige_list/add_paige.html:64
 msgid "Картинки галереї "
 msgstr "Картинки галереи"
+
+#: admins/templates/admin/paige_list/paige_lists.html:16
+msgid "Управління сторінками та даними сайту"
+msgstr "Управление страницами и данными сайта"
+
+#: admins/templates/admin/paige_list/paige_lists.html:41
+#: admins/templates/admin/paige_list/paige_lists.html:71
+#: admins/templates/admin/paige_list/paige_lists.html:92
+msgid "ВКЛ"
+msgstr "ВКЛ"
+
+#: admins/templates/admin/paige_list/paige_lists.html:43
+msgid "ВЫКЛ"
+msgstr "ВЫКЛ"
+
+#: admins/templates/admin/paige_list/paige_lists.html:51
+msgid "Ви впевнені, що хочете видалити сторінку"
+msgstr "Вы уверены, что хотите удалить страницу"
+
+#: admins/templates/admin/paige_list/paige_lists.html:62
+msgid "Головна сторінка"
+msgstr "Главная страница"
+
+#: admins/templates/admin/paige_list/paige_lists.html:82
+msgid "Контактні дані"
+msgstr "Контактные данные"
+
+#: admins/templates/admin/paige_list/paige_lists.html:103
+msgid "Не знайдено жодних сторінок або даних."
+msgstr "Не найдено ни одной страницы или данных."
 
 #: admins/templates/admin/promotion/add_promotion.html:5
 #: admins/templates/admin/promotion/add_promotion.html:17
 msgid "Додати Акцію"
 msgstr "Добавить Акцию"
 
-#: cinewave/settings.py:145
+#: cinewave/settings.py:157
 msgid "Русский"
 msgstr "Русский"
 
-#: cinewave/settings.py:146
+#: cinewave/settings.py:158
 msgid "Українська"
 msgstr "Украинский"
 
@@ -237,37 +349,301 @@ msgstr "Условия"
 msgid "Місто"
 msgstr "Город"
 
-#: core/models.py:36
-msgid "Кількість рядів"
-msgstr "Количество рядов"
+#: core/models.py:71
+msgid "Куплене"
+msgstr "Куплено"
 
-#: core/models.py:37
-msgid "Місць у ряду"
-msgstr "Мест в ряду"
+#: core/models.py:72
+msgid "Вільне"
+msgstr "Свободно"
+
+#: core/models.py:73
+msgid "Не доступно"
+msgstr "Недоступно"
+
+#: core/models.py:78
+msgid "Номер ряду"
+msgstr "Номер ряда"
+
+#: core/models.py:79
+msgid "Номер місця"
+msgstr "Номер места"
+
+#: core/models.py:80
+msgid "Дата"
+msgstr "Дата"
+
+#: core/models.py:81
+msgid "Статус місця"
+msgstr "Статус места"
+
+#: core/models.py:82
+msgid "Зал"
+msgstr "Зал"
+
+#: core/models.py:84
+msgid "VIP"
+msgstr "VIP"
+
+#: core/models.py:85 core/templates/core/session_2.html:100
+msgid "Ціна"
+msgstr "Цена"
+
+#: core/models.py:89
+msgid "Місце"
+msgstr "Место"
+
+#: core/models.py:90
+msgid "Місця"
+msgstr "Места"
+
+#: core/templates/core/buy_ticket/buy_ticket.html:46
+msgid "Покупка билетов на сеанс"
+msgstr "Покупка билетов на сеанс"
+
+#: core/templates/core/buy_ticket/buy_ticket.html:53
+msgid "Схема залу відсутня"
+msgstr "Схема зала отсутствует"
+
+#: core/templates/core/buy_ticket/buy_ticket.html:61
+msgid "Зображення вільму відсутне "
+msgstr "Изображение фильма отсутствует"
+
+#: core/templates/core/buy_ticket/buy_ticket.html:66
+msgid " Фильм:"
+msgstr " Фильм:"
+
+#: core/templates/core/buy_ticket/buy_ticket.html:67
+msgid "Цена:"
+msgstr "Цена:"
+
+#: core/templates/core/buy_ticket/buy_ticket.html:68
+msgid "Зал:"
+msgstr "Зал:"
+
+#: core/templates/core/buy_ticket/buy_ticket.html:69
+msgid "Дата:"
+msgstr "Дата:"
+
+#: core/templates/core/buy_ticket/buy_ticket.html:70
+msgid "Время:"
+msgstr "Время:"
+
+#: core/templates/core/buy_ticket/buy_ticket.html:84
+msgid "Схема залу:"
+msgstr "Схема зала:"
+
+#: core/templates/core/buy_ticket/buy_ticket.html:88
+msgid " Загрузка схемы зала..."
+msgstr " Загрузка схемы зала..."
+
+#: core/templates/core/buy_ticket/buy_ticket.html:93
+msgid "Купити квиток"
+msgstr "Купить билет"
+
+#: core/templates/core/cinema_card.html:7
+msgid "Головне зображення відсутнє"
+msgstr "Главное изображение отсутствует"
+
+#: core/templates/core/cinema_detail.html:98
+msgid "Розклад кінотеатру"
+msgstr "Расписание кинотеатра"
+
+#: core/templates/core/cinema_detail.html:108
+msgid "Доступні зали"
+msgstr "Доступные залы"
+
+#: core/templates/core/cinema_detail.html:113
+msgid "Назва залу"
+msgstr "Название зала"
+
+#: core/templates/core/cinema_detail.html:127
+msgid "Зали не знайдено."
+msgstr "Залы не найдены."
+
+#: core/templates/core/cinema_detail.html:132
+msgid "Доступні сеанси"
+msgstr "Доступные сеансы"
+
+#: core/templates/core/cinema_detail.html:137
+msgid "Сеанс"
+msgstr "Сеанс"
+
+#: core/templates/core/cinema_detail.html:138
+msgid "Час"
+msgstr "Время"
+
+#: core/templates/core/cinema_detail.html:151
+msgid "Сеансів не знайдено."
+msgstr "Сеансов не найдено."
+
+#: core/templates/core/cinema_detail.html:158
+msgid "Місто:"
+msgstr "Город:"
+
+#: core/templates/core/cinema_detail.html:160
+#, fuzzy
+#| msgid "Умови"
+msgid "Умови:"
+msgstr "Условия"
+
+#: core/templates/core/session_2.html:32
+msgid "Розклад сеансів"
+msgstr "Расписание сеансов"
+
+#: core/templates/core/session_2.html:68
+msgid "Всі зали"
+msgstr "Все залы"
+
+#: core/templates/core/session_2.html:98
+msgid " Час"
+msgstr ""
+
+#: core/templates/core/session_2.html:99
+msgid "Фільм"
+msgstr "Фильм"
+
+#: core/templates/core/session_2.html:101
+msgid "Дія"
+msgstr "Действие"
+
+#: core/templates/core/session_2.html:115
+msgid "Купити"
+msgstr "Купить"
+
+#: core/templates/core/session_2.html:123
+msgid "Немає сеансів за вибраними критеріями."
+msgstr "Нет сеансов по выбранным критериям."
 
 #: main/models.py:142
 msgid "URL адреса "
 msgstr "URL-адрес"
 
-#: main/models.py:146 main/models.py:163 main/models.py:178 main/models.py:219
+#: main/models.py:146 main/models.py:177 main/models.py:192 main/models.py:233
 msgid "Показ"
 msgstr "Показ"
 
-#: main/models.py:160
+#: main/models.py:174
 msgid "СЕО текст "
 msgstr "SEO-текст"
 
-#: main/models.py:161 main/models.py:162
+#: main/models.py:175 main/models.py:176
 msgid "Телефон"
 msgstr "Телефон"
 
-#: main/models.py:175 main/models.py:215
+#: main/models.py:189 main/models.py:229
 msgid "Картинка"
 msgstr "Изображение"
 
-#: main/models.py:213
+#: main/models.py:227
 msgid "Опис "
 msgstr "Описание"
+
+#: main/templates/main/contact_paige.html:7 main/templates/main/navbar.html:53
+msgid "Контакти"
+msgstr "Контакты"
+
+#: main/templates/main/contact_paige.html:8
+msgid "Повний список контактів наших кінотеатрів."
+msgstr "Полный список контактов наших кинотеатров."
+
+#: main/templates/main/contact_paige.html:10
+msgid "Наші Контакти"
+msgstr "Наши Контакты"
+
+#: main/templates/main/contact_paige.html:11
+msgid "Знайдіть контактні дані всіх наших кінотеатрів."
+msgstr "Найдите контактные данные всех наших кинотеатров."
+
+#: main/templates/main/contact_paige.html:141
+msgid "Наші контактні дані"
+msgstr "Наши контактные данные"
+
+#: main/templates/main/contact_paige.html:153
+msgid "Адрес:"
+msgstr "Адрес:"
+
+#: main/templates/main/contact_paige.html:154
+msgid "Бронирование билетов:"
+msgstr "Бронирование билетов:"
+
+#: main/templates/main/contact_paige.html:158
+msgid "Главное изображение"
+msgstr "Главное изображение"
+
+#: main/templates/main/contact_paige.html:177
+msgid "Координаты для карты отсутствуют для"
+msgstr "Координаты для карты отсутствуют для"
+
+#: main/templates/main/contact_paige.html:185
+msgid "Информация о контактах пока отсутствует."
+msgstr "Информация о контактах пока отсутствует."
+
+#: main/templates/main/contact_paige.html:186
+msgid "Пожалуйста, добавьте контактные данные через административную панель."
+msgstr "Пожалуйста, добавьте контактные данные через административную панель."
+
+#: main/templates/main/navbar.html:25
+msgid "Афіша"
+msgstr "Афиша"
+
+#: main/templates/main/navbar.html:28
+msgid "Кінотеатри"
+msgstr "Кинотеатры"
+
+#: main/templates/main/navbar.html:31
+msgid "Розклад"
+msgstr "Расписание"
+
+#: main/templates/main/navbar.html:34
+msgid "Незабаром"
+msgstr "Скоро"
+
+#: main/templates/main/navbar.html:37
+msgid "Акції"
+msgstr "Акции"
+
+#: main/templates/main/navbar.html:47
+msgid "Новини"
+msgstr "Новости"
+
+#: main/templates/main/navbar.html:48
+msgid "Кафе-Бар"
+msgstr "Кафе-Бар"
+
+#: main/templates/main/navbar.html:49
+msgid "Реклама"
+msgstr "Реклама"
+
+#: main/templates/main/navbar.html:52
+msgid "Дитяча кімната"
+msgstr "Детская комната"
+
+#: main/templates/main/navbar.html:78
+msgid "Кабінет"
+msgstr "Кабинет"
+
+#: main/templates/main/news_card.html:11
+#: movie/templates/movie/movie_card.html:9
+msgid "Зображення відсутнє"
+msgstr "Изображение отсутствует"
+
+#: main/templates/main/paiges_news_detail.html:8
+msgid "Новость"
+msgstr "Новость"
+
+#: main/templates/main/paiges_news_detail.html:149
+#: main/templates/main/promotion_detail.html:149
+msgid "Главное изображение акции отсутствует."
+msgstr "Главное изображение акции отсутствует."
+
+#: main/templates/main/promotion_detail.html:8
+msgid "Акция"
+msgstr "Акция"
+
+#: main/templates/main/promotion_detail.html:129
+msgid "Видео к акции"
+msgstr "Видео к акции"
 
 #: movie/models.py:25
 msgid "URL трейлера"
@@ -288,3 +664,41 @@ msgstr "Дата создания записи"
 #: movie/models.py:35
 msgid "Галерея зображень"
 msgstr "Галерея изображений"
+
+#: movie/templates/movie/movie_card.html:14
+msgid "Детальніше"
+msgstr "Подробнее"
+
+#: movie/templates/movie/movie_detail.html:216
+msgid "Час:"
+msgstr "Время:"
+
+#: movie/templates/movie/movie_detail.html:217
+msgid "Формат:"
+msgstr "Формат:"
+
+#: movie/templates/movie/movie_detail.html:255
+msgid ""
+"На даний момент немає запланованих сеансів для цього фільму за вибраними "
+"критеріями."
+msgstr ""
+"На данный момент нет запланированных сеансов для этого фильма по выбранным "
+"критериям."
+
+#: movie/templates/movie/movie_detail.html:297
+msgid "Картинки та постери"
+msgstr "Картинки и постеры"
+
+#: movie/templates/movie/movie_detail.html:313
+msgid "Галерея пуста або немає зображень типу \"галерея\"."
+msgstr "Галерея пуста или нет изображений типа \"галерея\"."
+
+# The following lines were commented out duplicates. Ensure they are not present elsewhere in the file.
+#~ msgid "Ряд"
+#~ msgstr "Ряд"
+
+#~ msgid "Інформація про кінотеатр"
+#~ msgstr "Информация о кинотеатре"
+
+#~ msgid "Кількість рядів"
+#~ msgstr "Количество рядов"

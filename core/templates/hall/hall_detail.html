@@ -5,6 +5,13 @@
 <title>Деталі залу: {{ hall.title }}</title>
 
 <style>
+    .seat.free {
+    fill: #28a745; /* Зеленый */
+}
+.seat.occupied {
+    fill: #dc3545; /* Красный */
+    cursor: not-allowed;
+}
     /* Стили для схемы зала */
     #hall-scheme-container {
         margin-top: 20px;
@@ -164,11 +171,12 @@
                 </table>
             {% else %}
                 <p>Наразі немає запланованих сеансів для цього залу.</p>
+           <div class="button-center-container text-center my-3">
+    <a href="{% url 'session_list' %}?cinema={{ hall.cinema.id }}&hall={{ hall.id }}" class="btn btn-primary">Розклад кінотеатру</a>
+</div>
             {% endif %}
-            <a href="{% url 'session_list' %}" class="btn btn-warning" role="button">
-                Розклад всіх сеансів
-            </a>
         </div>
+    </div>
 
         {# Колонка для описания зала и схемы (справа) #}
         <div class="hall-details-column">
@@ -181,131 +189,251 @@
             </div>
 
             {% if hall.scheme_hall %}
-            <script>
-                // Загрузка и обработка схемы зала
-                const schemeFileUrl = "{{ hall.scheme_hall.url }}";
-                console.log("URL файла схемы зала:", schemeFileUrl);
+           Хорошо, давайте адаптируем этот JavaScript-код для отрисовки схемы зала с центрированием мест и использованием классов CSS для статусов мест, как мы это делали ранее.
 
-                function loadAndRenderHallScheme(url) {
-                    fetch(url)
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error(`HTTP error! status: ${response.status}`);
-                            }
-                            return response.json();
-                        })
-                        .then(schemeData => {
-                            console.log("Данные схемы зала загружены:", schemeData);
-                            renderHallScheme(schemeData, 'hall-scheme-container');
-                        })
-                        .catch(error => {
-                            console.error("Ошибка при загрузке или парсинге схемы зала:", error);
-                            document.getElementById('hall-scheme-container').innerHTML =
-                                '<p style="color: red;">Не удалось загрузить схему зала.</p>';
-                        });
+Ваш текущий код здесь загружает схему зала из файла JSON (hall.scheme_hall.url), а не из window.GLOBAL_CURRENT_SEAT_STATUS_DATA. Это важно, так как структура данных, вероятно, отличается. В этом коде schemeData имеет rows и внутри seats есть is_occupied.
+
+Я учту это и внесу следующие изменения:
+
+Центрирование мест: Реализую логику, которая динамически рассчитывает startX для каждого ряда.
+
+CSS-классы для статусов: Вместо прямого присвоения fillColor буду использовать классы free, occupied, user-ticket, unavailable, selected, vip, как в предыдущей версии.
+
+Обработка is_occupied и is_vip: Буду использовать эти данные из JSON-файла.
+
+Обработка выбора мест: Добавлю базовую логику выбора мест (выделение синим) и обновление общего количества/цены (хотя цена здесь не передается, оставим место для нее).
+
+Tooltip: Восстановлю подсказку для места.
+
+Обновлённый JavaScript для отрисовки схемы зала
+JavaScript
+
+<script>
+    // Глобальные переменные для данных о билетах пользователя (если они нужны здесь)
+    // В текущей схеме данных из файла JSON (scheme_hall.url) нет user_tickets_seat_ids.
+    // Если вам нужна эта информация, ее нужно будет передать в шаблон через Django контекст
+    // и использовать здесь (как в предыдущих итерациях кода).
+    // Для этого примера я пока оставлю ее закомментированной или с пустым массивом.
+    window.USER_TICKETS_SEAT_IDS = []; // Если нет данных из Django, оставить пустым или получить отдельно.
+    // Если hall.scheme_hall.url предоставляет схему с полной информацией о статусах мест
+    // (включая занятые другими, или занятые пользователем), то текущая загрузка из JSON
+    // будет источником истины.
+
+    // Загрузка и обработка схемы зала
+    const schemeFileUrl = "{{ hall.scheme_hall.url }}";
+    console.log("URL файла схемы зала:", schemeFileUrl);
+
+    // Вспомогательные переменные для управления выбором мест, как в buy_ticket.html
+    let selectedSeats = [];
+    let totalPrice = 0; // В этом контексте цена не передается с файлом схемы.
+                        // Если она нужна, ее нужно передать из Django-контекста.
+    const sessionPricePerSeat = 0; // Placeholder. Если нужна цена, она должна быть передана.
+
+    function loadAndRenderHallScheme(url) {
+        fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(schemeData => {
+                console.log("Данные схемы зала загружены:", schemeData);
+                // Передаем schemeData напрямую, так как она уже в нужном формате
+                renderHallScheme(schemeData, 'hall-scheme-container');
+                // Если есть элементы для отображения выбранных мест/цены, обновите их
+                // updateSelectionDisplay();
+            })
+            .catch(error => {
+                console.error("Ошибка при загрузке или парсинге схемы зала:", error);
+                document.getElementById('hall-scheme-container').innerHTML =
+                    '<p style="color: red;">Не вдалося завантажити схему залу.</p>';
+            });
+    }
+
+    /**
+     * Renders the hall scheme using SVG elements.
+     * @param {Object} schemeData - Data object containing 'rows' array with seat information.
+     * @param {string} containerId - The ID of the HTML element to render the SVG into.
+     */
+    function renderHallScheme(schemeData, containerId) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = ''; // Clear previous content
+
+        // Check if data is valid and has rows
+        if (!schemeData || !schemeData.rows || schemeData.rows.length === 0) {
+            container.innerHTML = '<p>Немає даних про ряди та місця для відображення схеми залу.</p>';
+            return;
+        }
+
+        const svgNS = "http://www.w3.org/2000/svg";
+        const svg = document.createElementNS(svgNS, "svg");
+        svg.setAttribute("width", "100%"); // SVG will take 100% width of its container
+        svg.style.height = "auto";
+        svg.style.border = "1px solid #ccc";
+        svg.style.backgroundColor = "#f9f9f9";
+
+        // Constants for seat and row layout
+        const seatSize = 40;
+        const seatSpacing = 15;
+        const rowSpacing = 60;
+        const initialY = 50; // Starting Y position for the first row
+        const rowLabelOffset = 70; // Space for the "Ряд N" label on the left
+
+        let currentY = initialY;
+        let maxX = 0; // Tracks the maximum X coordinate reached by any seat, for viewBox calculation
+
+        // Sort rows by number to ensure correct rendering order
+        schemeData.rows.sort((a, b) => a.row_number - b.row_number);
+
+        // Get the actual width of the container to calculate centering
+        const containerWidth = container.offsetWidth;
+
+        schemeData.rows.forEach(rowData => {
+            const rowNumber = rowData.row_number;
+            const seats = rowData.seats;
+            // Sort seats within each row by seat number
+            seats.sort((a, b) => a.seat_number - b.seat_number);
+
+            const numSeatsInRow = seats.length;
+            // Calculate the total width occupied by seats in the current row
+            const currentRowOccupiedWidth = numSeatsInRow * seatSize + (numSeatsInRow > 0 ? (numSeatsInRow - 1) * seatSpacing : 0);
+
+            // Calculate the starting X position for the current row to center it.
+            // Ensure there's always enough space for the row label.
+            const actualStartX = Math.max(rowLabelOffset, (containerWidth - currentRowOccupiedWidth) / 2);
+
+            // Create and append the row label (e.g., "Ряд 1")
+            const rowLabel = document.createElementNS(svgNS, "text");
+            rowLabel.setAttribute("x", actualStartX - 10); // Position to the left of the first seat
+            rowLabel.setAttribute("y", currentY + seatSize / 2);
+            rowLabel.setAttribute("text-anchor", "end"); // Align text to the right of its x-coordinate
+            rowLabel.setAttribute("dominant-baseline", "middle");
+            rowLabel.textContent = `Ряд ${rowNumber}`;
+            rowLabel.style.fontSize = "16px";
+            rowLabel.style.fontWeight = "bold";
+            svg.appendChild(rowLabel);
+
+            let currentX = actualStartX; // Start drawing seats from this calculated X position
+
+            seats.forEach(seatData => {
+                const seatId = seatData.id; // Assume seatData has an 'id'
+                const seatNumber = seatData.seat_number;
+                const isOccupied = seatData.is_occupied; // From the JSON file
+                const isVip = seatData.is_vip || false; // Assume 'is_vip' or default to false
+                const seatPrice = parseFloat(seatData.price || sessionPricePerSeat); // Use seat price from file or default
+
+                // Create the SVG rectangle for the seat
+                const seatEl = document.createElementNS(svgNS, "rect");
+                seatEl.setAttribute("x", currentX);
+                seatEl.setAttribute("y", currentY);
+                seatEl.setAttribute("width", seatSize);
+                seatEl.setAttribute("height", seatSize);
+                seatEl.setAttribute("rx", 5); // Rounded corners
+                seatEl.classList.add('seat', 'svg-seat');
+
+                const seatIdStr = String(seatId); // Convert ID to string for consistency
+
+                // Apply initial status classes based on data from the JSON file
+                // Note: user_tickets_seat_ids is currently empty in this snippet.
+                // If you want to show user's bought tickets here, you need to pass that data.
+                if (window.USER_TICKETS_SEAT_IDS.includes(seatIdStr)) {
+                    seatEl.classList.add('user-ticket');
+                    seatEl.dataset.status = 'U'; // User's already bought ticket
+                    seatEl.style.cursor = 'default';
+                } else if (isOccupied) { // Use is_occupied from the JSON file
+                    seatEl.classList.add('occupied');
+                    seatEl.dataset.status = 'S'; // Sold/Occupied by others
+                    seatEl.style.cursor = 'not-allowed';
+                } else {
+                    seatEl.classList.add('free');
+                    seatEl.dataset.status = 'F'; // Free/Available
+                    seatEl.style.cursor = 'pointer';
                 }
 
-                // Отрисовка схемы зала
-                function renderHallScheme(schemeData, containerId) {
-                    const container = document.getElementById(containerId);
-                    container.innerHTML = ''; // Очищаем сообщение "Загрузка..."
+                // Add VIP class if applicable
+                if (isVip) seatEl.classList.add('vip');
 
-                    if (!schemeData || !schemeData.rows || schemeData.rows.length === 0) {
-                        container.innerHTML = '<p>Немає даних про ряди та місця в схемі залу.</p>';
-                        return;
+                // Store seat data in dataset for easy access
+                seatEl.dataset.seatId = seatId;
+                seatEl.dataset.row = rowNumber;
+                seatEl.dataset.seat = seatNumber;
+                seatEl.dataset.price = seatPrice; // Store price for selection logic
+
+                // Add click event listener for seat selection (basic selection here)
+                seatEl.addEventListener('click', () => {
+                    const currentSeatIdStr = String(seatEl.dataset.seatId);
+                    const currentStatus = seatEl.dataset.status;
+                    const clickedSeatPrice = parseFloat(seatEl.dataset.price);
+
+                    // Allow selection only if the seat is free and not already bought by the user
+                    if (currentStatus === 'F' && !window.USER_TICKETS_SEAT_IDS.includes(currentSeatIdStr)) {
+                        if (selectedSeats.includes(currentSeatIdStr)) {
+                            // Deselect seat
+                            seatEl.classList.remove('selected');
+                            seatEl.classList.add('free'); // Revert to free class
+                            selectedSeats = selectedSeats.filter(id => id !== currentSeatIdStr);
+                            totalPrice -= clickedSeatPrice;
+                        } else {
+                            // Select seat
+                            seatEl.classList.add('selected');
+                            seatEl.classList.remove('free'); // Remove free class
+                            selectedSeats.push(currentSeatIdStr);
+                            totalPrice += clickedSeatPrice;
+                        }
+                        // If you have selection display elements (count, total price), update them here
+                        // updateSelectionDisplay();
+                        console.log(`Выбрано: ${selectedSeats.length} мест, Общая цена: ${totalPrice.toFixed(2)}`);
+                    } else {
+                        console.log(`Место Ряд ${rowNumber}, Место ${seatNumber} недоступно для выбора. Статус: ${currentStatus}`);
+                        alert(`Место Ряд ${rowNumber}, Место ${seatNumber} ${currentStatus === 'U' ? 'уже ваше' : 'занято'}.`);
                     }
+                });
 
-                    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-                    svg.setAttribute("width", "100%");
-                    svg.style.height = "auto";
-                    svg.setAttribute("viewBox", "0 0 1200 800"); // Начальный viewBox
-                    svg.style.border = "1px solid #ccc";
-                    svg.style.backgroundColor = "#f9f9f9";
+                // Create and append the seat number text
+                const seatText = document.createElementNS(svgNS, "text");
+                seatText.setAttribute("x", currentX + seatSize / 2);
+                seatText.setAttribute("y", currentY + seatSize / 2);
+                seatText.setAttribute("text-anchor", "middle");
+                seatText.setAttribute("dominant-baseline", "middle");
+                seatText.style.fontSize = "12px";
+                seatText.style.fill = "#fff";
+                seatText.style.pointerEvents = "none"; // Allow clicks to pass through to the rect
+                seatText.textContent = seatNumber;
 
-                    const seatSize = 40;
-                    const seatSpacing = 15;
-                    const rowSpacing = 60;
-                    const startX = 50;
-                    const startY = 50;
+                // Add a tooltip for seat details on hover
+                const tooltip = document.createElementNS(svgNS, "title");
+                tooltip.textContent = `Ряд: ${rowNumber}, Место: ${seatNumber}\nСтатус: ${isOccupied ? 'Занято' : 'Свободно'}\nЦена: ${seatPrice.toFixed(2)} грн`;
+                seatEl.appendChild(tooltip);
 
-                    schemeData.rows.sort((a, b) => a.row_number - b.row_number);
+                // Append seat elements to SVG
+                svg.appendChild(seatEl);
+                svg.appendChild(seatText);
 
-                    let currentY = startY;
+                currentX += seatSize + seatSpacing; // Move X for the next seat
+            });
 
-                    schemeData.rows.forEach(rowData => {
-                        const rowNumber = rowData.row_number;
-                        const seats = rowData.seats;
+            // Update maxX to ensure the SVG's viewBox accommodates all rows
+            const rowTotalWidth = actualStartX + currentRowOccupiedWidth;
+            if (rowTotalWidth > maxX) maxX = rowTotalWidth;
 
-                        seats.sort((a, b) => a.seat_number - b.seat_number);
+            currentY += seatSize + rowSpacing; // Move Y for the next row
+        });
 
-                        let currentX = startX;
+        // Calculate final SVG dimensions for the viewBox and set height
+        const finalWidth = maxX + rowLabelOffset + 20; // Add some padding on the right
+        const finalHeight = currentY + initialY + 20; // Add some padding at the bottom
+        svg.setAttribute("viewBox", `0 0 ${finalWidth} ${finalHeight}`);
+        svg.setAttribute("height", finalHeight); // Set a fixed height based on content
+        // Width is already set to 100% via style attribute above
 
-                        const rowLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                        rowLabel.setAttribute("x", currentX - 30);
-                        rowLabel.setAttribute("y", currentY + seatSize / 2);
-                        rowLabel.setAttribute("dominant-baseline", "middle");
-                        rowLabel.setAttribute("text-anchor", "end");
-                        rowLabel.style.fontSize = "16px";
-                        rowLabel.style.fontWeight = "bold";
-                        rowLabel.textContent = `Ряд ${rowNumber}`;
-                        svg.appendChild(rowLabel);
+        container.appendChild(svg); // Add the complete SVG to the container
+    }
 
-                        seats.forEach(seatData => {
-                            const seatNumber = seatData.seat_number;
-                            const isOccupied = seatData.is_occupied;
+    // Запускаем загрузку и отрисовку схемы зала при загрузке страницы
+    loadAndRenderHallScheme(schemeFileUrl);
+</script>
 
-                            const seatElement = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-                            seatElement.setAttribute("x", currentX);
-                            seatElement.setAttribute("y", currentY);
-                            seatElement.setAttribute("width", seatSize);
-                            seatElement.setAttribute("height", seatSize);
-                            seatElement.setAttribute("rx", 5);
-
-                            let fillColor = isOccupied ? "#dc3545" : "#28a745";
-                            let strokeColor = "#343a40";
-
-                            seatElement.style.fill = fillColor;
-                            seatElement.style.stroke = strokeColor;
-                            seatElement.style.strokeWidth = "1px";
-                            seatElement.style.cursor = "pointer";
-                            seatElement.classList.add('seat');
-
-                            const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
-                            title.textContent = `Ряд: ${rowNumber}, Место: ${seatNumber}\nСтатус: ${isOccupied ? 'Занято' : 'Свободно'}`;
-                            seatElement.appendChild(title);
-
-                            seatElement.addEventListener('click', () => {
-                                alert(`Вы выбрали место: Ряд ${rowNumber}, Место ${seatNumber}, Статус: ${isOccupied ? 'Занято' : 'Свободно'}`);
-                            });
-
-                            svg.appendChild(seatElement);
-
-                            const seatText = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                            seatText.setAttribute("x", currentX + seatSize / 2);
-                            seatText.setAttribute("y", currentY + seatSize / 2);
-                            seatText.setAttribute("text-anchor", "middle");
-                            seatText.setAttribute("dominant-baseline", "middle");
-                            seatText.style.fontSize = "12px";
-                            seatText.style.fill = "#fff";
-                            seatText.style.pointerEvents = "none";
-                            seatText.textContent = seatNumber;
-                            svg.appendChild(seatText);
-
-                            currentX += seatSize + seatSpacing;
-                        });
-                        currentY += seatSize + rowSpacing;
-                    });
-
-                    container.appendChild(svg);
-
-                    const bbox = svg.getBBox();
-                    const padding = 50;
-                    svg.setAttribute("viewBox", `${bbox.x - padding} ${bbox.y - padding} ${bbox.width + 2 * padding} ${bbox.height + 2 * padding}`);
-                    svg.style.width = "100%";
-                }
-
-                loadAndRenderHallScheme(schemeFileUrl);
-            </script>
             {% else %}
             <p>Схема залу відсутня або не завантажена.</p>
             {% endif %}

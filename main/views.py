@@ -1,10 +1,68 @@
 from django.shortcuts import render, get_object_or_404
-from .models import PaigesCinema, Banners, Cross_Banner,PaigesNews, Picture, Promotion,News
+from .models import PaigesCinema, Banners, Cross_Banner,PaigesNews, Picture, Promotion,News,Contact
 from django.utils.timezone import now
 from datetime import timedelta
 from movie.models import Movies
 from django.db.models import Prefetch
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
+
+
+def contact_paige (request):
+    banners = Banners.objects.select_related('gallery').prefetch_related(
+        Prefetch(
+            'gallery__pictures',
+            queryset=Picture.objects.filter(image_type='main_picture'),
+            to_attr='banner_pictures'
+        )
+    )
+    contacts = Contact.objects.select_related('gallery', 'seo_block').prefetch_related(
+        Prefetch(
+            'gallery__pictures',
+            queryset=Picture.objects.all(),
+            to_attr='all_gallery_images'
+        )
+    ).all()
+
+
+    contacts_data = []
+
+    for contact_item in contacts:  # Проходимо по кожному контакту
+        main_picture = None
+        logo_picture = None
+        gallery_pictures_list = []
+
+        if contact_item.gallery and hasattr(contact_item.gallery, 'all_gallery_images'):
+            for pic in contact_item.gallery.all_gallery_images:
+                if pic.image_type == 'main_picture':
+                    main_picture = pic
+                elif pic.image_type == 'logo':
+                    logo_picture = pic
+                elif pic.image_type == 'gallery':
+                    gallery_pictures_list.append(pic)
+
+
+        contacts_data.append({
+            'contact': contact_item,
+            'main_picture': main_picture,
+            'logo_picture': logo_picture,
+            'gallery_pictures_list': gallery_pictures_list,  # Якщо знадобиться вивести галерею
+        })
+
+    page_seo_data = None
+    if contacts.exists() and contacts.first().seo_block:
+        page_seo_data = contacts.first().seo_block  # This line is correct, it gets a single Block_SEO object
+    else:
+        # This 'else' block doesn't set page_seo_data, so it could remain None
+        pass
+
+    print (page_seo_data)
+    context={
+       'contacts_data': contacts_data,
+       'banners': banners,
+        'page_seo_data': page_seo_data,
+    }
+    return render(request, 'main/contact_paige.html', context)
 
 def index(request):
     cross_banner_obj = Cross_Banner.objects.select_related('gallery').prefetch_related(
@@ -16,8 +74,7 @@ def index(request):
     ).first()
 
     cross_banner_background_url = None
-    # Проверяем наличие cross_banner_obj, затем его gallery,
-    # и затем наличие 'cross_banner_pictures' НА ОБЪЕКТЕ GALLERY
+
     if cross_banner_obj and cross_banner_obj.gallery and cross_banner_obj.gallery.cross_banner_pictures:
         cross_banner_background_url = cross_banner_obj.gallery.cross_banner_pictures[0].image.url
         print(f"URL для фонового кросс-баннера: {cross_banner_background_url}")

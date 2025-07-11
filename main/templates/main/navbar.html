@@ -1,4 +1,5 @@
 {# navbar.html #}
+{% load i18n %}
 {% load static %}
 
 <!-- Навбар -->
@@ -21,19 +22,19 @@
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
         <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="{% url 'movies_list' %}">Афіша</a>
+          <a class="nav-link active" aria-current="page" href="{% url 'movies_list' %}">{% trans "Афіша" %}</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'cinema_list' %}">Кінотеатри</a>
+          <a class="nav-link" href="{% url 'cinema_list' %}">{% trans "Кінотеатри" %}</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'session_list' %}">Розклад</a>
+          <a class="nav-link" href="{% url 'session_list' %}">{% trans "Розклад" %}</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'movies_soon' %}">Незабаром</a>
+          <a class="nav-link" href="{% url 'movies_soon' %}">{% trans "Незабаром" %}</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'main:promotions_list' %}">Акції</a>
+          <a class="nav-link" href="{% url 'main:promotions_list' %}">{% trans "Акції" %}</a>
         </li>
 
 
@@ -43,21 +44,38 @@
             Про CineWave
           </a>
           <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <li><a class="dropdown-item" href="{% url 'main:paiges_news_list' %}">Новини</a></li>
-            <li><a class="dropdown-item" href="{% url 'main:paiges_cinema_detail' slug='kafe-bar' %}">Кафе-Бар</a></li>
-            <li><a class="dropdown-item" href="{% url 'main:paiges_cinema_detail' slug='promotion' %}">Реклама</a></li>
+            <li><a class="dropdown-item" href="{% url 'main:paiges_news_list' %}"> {% trans "Новини"  %}</a></li>
+            <li><a class="dropdown-item" href="{% url 'main:paiges_cinema_detail' slug='kafe-bar' %}">{% trans "Кафе-Бар" %}</a></li>
+            <li><a class="dropdown-item" href="{% url 'main:paiges_cinema_detail' slug='promotion' %}">{% trans "Реклама"%}</a></li>
             <li><a class="dropdown-item" href="#">VIP зал</a></li>
             <li><a class="dropdown-item" href="#">Мобільні додатки</a></li>
-            <li><a class="dropdown-item" href="{% url 'main:paiges_cinema_detail' slug='chaild_room' %}">Дитяча кімната</a></li>
-            <li><a class="dropdown-item" href="#">Контакти</a></li>
+            <li><a class="dropdown-item" href="{% url 'main:paiges_cinema_detail' slug='chaild_room' %}">{% trans "Дитяча кімната" %}</a></li>
+            <li><a class="dropdown-item" href="{% url 'main:contact_paige' %}">{% trans "Контакти" %}</a></li>
           </ul>
         </li>
 
       </ul>
+      <li>
+        <form action="{% url 'set_language' %}" method="post">{% csrf_token %}
+                        <input name="next" type="hidden" value="{{ redirect_to }}">
+                        <select name="language">
+                            {% get_current_language as LANGUAGE_CODE %}
+                            {% get_available_languages as LANGUAGES %}
+                            {% get_language_info_list for LANGUAGES as languages %}
+                            {% for language in languages %}
+                                <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %}
+                                        selected{% endif %}>
+                                    {{ language.name_local }} ({{ language.code }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <input type="submit" value="Go">
+                    </form>
+      </li>
 
       <!-- Кнопка Кабинет справа -->
       <div class="d-flex">
-        <a href="{% url 'profile' %}" class="btn btn-primary">Кабінет</a>
+        <a href="{% url 'profile' %}" class="btn btn-primary">{% trans "Кабінет" %} </a>
       </div>
     </div>
 
