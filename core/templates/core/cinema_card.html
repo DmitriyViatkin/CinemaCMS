@@ -1,14 +1,15 @@
 {# cinema_card.html #}
+{% load i18n %}
 <div class="card h-100">
     {% if cinema.gallery.main_picture.0 %}
     <img src="{{ cinema.gallery.main_picture.0.image.url }}" alt="Cinema {{ cinema.title }}">
     {% else %}
-        <p>Головне зображення відсутнє</p>
+        <p>{% trans "Головне зображення відсутнє" %}</p>
     {% endif %}
 
   <div class="card-body d-flex flex-column">
 
-    <a href="{% url 'cinema_detail' cinema.seo_block.seo_url %}" class="btn btn-primary mt-auto">  {{ cinema.title }}  </a>
+    <a href="{% url 'cinema_detail' cinema.seo_block.seo_url %}" class="btn btn-primary mt-auto">    {{ cinema.title }}   </a>
   </div>
 
 

@@ -53,14 +53,25 @@
                         </div>
                     </div>
 
+                      {# Latitude field - now explicitly a visible TextInput #}
                     <div class="form-group row">
                         <label for="{{ form.latitude.id_for_label }}" class="col-sm-3 col-form-label">{{ form.latitude.label }}</label>
                         <div class="col-sm-9">
-                            {{ form.latitude|add_class:"form-control" }}
+                            {{ form.latitude }} {# No need for add_class, widget already has it #}
                             {% for error in form.latitude.errors %}
                                 <div class="alert alert-danger">{{ error }}</div>
                             {% endfor %}
-                            {{ form.longitude }}
+                        </div>
+                    </div>
+
+                    {# Longitude field - now explicitly a visible TextInput #}
+                    <div class="form-group row">
+                        <label for="{{ form.longitude.id_for_label }}" class="col-sm-3 col-form-label">{{ form.longitude.label }}</label>
+                        <div class="col-sm-9">
+                            {{ form.longitude }} {# No need for add_class, widget already has it #}
+                            {% for error in form.longitude.errors %}
+                                <div class="alert alert-danger">{{ error }}</div>
+                            {% endfor %}
                         </div>
                     </div>
 

@@ -1,19 +1,14 @@
 {% extends 'main/index1.html' %}
+{% load static %}
+{% load i18n %}
 
-{% load static %} {# Завантажуємо статичні файли, якщо потрібні #}
 
-{% block title %}
-    {{ movie.seo_block.title_seo|default:movie.title }} - Деталі фільму
+
+{% block seo_meta %}
+    <title>{{ movie.seo_block.title_seo|default:movie.title }} - Деталі фільму</title>
+    <meta name="keywords" content="{{ movie.seo_block.seo_keywords|default:'' }}{% if movie.seo_block.seo_keywords %},{% endif %}">
+    <meta name="description" content="{{ movie.seo_block.seo_description|default:'' }}.">
 {% endblock %}
-
-{% block meta_keywords %}
-    {{ movie.seo_block.seo_keywords|default:'' }}{% if movie.seo_block.seo_keywords %},{% endif %}
-{% endblock %}
-
-{% block meta_description %}
-    {{ movie.seo_block.seo_description|default:'' }}.
-{% endblock %}
-
 {% block content %}
 <style>
     /* Адаптивні стилі для відео-контейнера */
@@ -196,7 +191,7 @@
         </form>
 
         {# Відображення сеансів #}
-        <h2>Заплановані сеанси</h2>
+        <h2>Розклад сеансів кінотеатру</h2>
         {% if sessions_by_cinema %}
           {% for cinema_id, sessions in sessions_by_cinema.items %}
             {% with cinema=sessions.0.cinema %}
@@ -218,8 +213,8 @@
                                                 <td>
                                                     <div class="card-body">
                                                         <p>
-                                                            <strong>Час:</strong> {{ session.time_session|time:"H:i" }}
-                                                            <strong>Формат:</strong>
+                                                            <strong>{% trans "Час:" %}</strong> {{ session.time_session|time:"H:i" }}
+                                                            <strong>{% trans "Формат:" %}</strong>
                                                             {% if session.movie %}
                                                                 {% if session.movie.is_2d %}2D{% endif %}
                                                                 {% if session.movie.is_2d and session.movie.is_3d %}
@@ -257,12 +252,12 @@
             {% endwith %}
           {% endfor %}
         {% else %}
-          <p class="alert alert-info">На даний момент немає запланованих сеансів для цього фільму за вибраними критеріями.</p>
+          <p class="alert alert-info">{% trans "На даний момент немає запланованих сеансів для цього фільму за вибраними критеріями." %}</p>
         {% endif %}
 
         <div class="row mt-5">
             <div class="col-md-4">
-                {# Відображаємо головне зображення, якщо воно існує #}
+
                 {% if main_picture %}
                     <img src="{{ main_picture.image.url }}" alt="{{ movie.title }}" class="img-fluid rounded shadow-sm">
                 {% else %}
@@ -274,12 +269,12 @@
             </div>
 
             <div class="col-md-8">
-               <div class="mt-4"> {# Можете обернуть в div для стилізації #}
+               <div class="mt-4">
     <button type="button" class="btn btn-success" id="global-buy-ticket-btn">Купити квиток</button>
 </div>
-                {# Назва фільму #}
+
                 <h1>{{ movie.title }}</h1>
-                {# Опис з SEO блоку, використовуємо movie #}
+
                 <p class="lead">{{ movie.seo_block.seo_text|default:''|linebreaksbr }}</p>
 
                 {# Інформація про фільм #}
@@ -298,14 +293,14 @@
             </div>
         </div>
 
-        {# Галерея зображень #}
-        <h2 class="mt-5">Галерея</h2>
+
+        <h2 class="mt-5">{% trans "Картинки та постери" %}</h2>
         <div class="row">
             {% for picture in movie.gallery.pictures.all %}
-                {# Проверяем тип изображения #}
+
                 {% if picture.image_type == 'gallery' %}
                     <div class="col-md-4 mb-3">
-                        <div class="card h-100"> {# Додаємо h-100 для однакової висоти карток #}
+                        <div class="card h-100">
                             <img src="{{ picture.image.url }}" class="card-img-top" alt="{{ picture.alter_txt|default:'Зображення галереї' }}">
                             <div class="card-body">
                                 <p class="card-text"><small class="text-muted">{{ picture.alter_txt|default:'' }}</small></p>
@@ -315,59 +310,40 @@
                 {% endif %}
             {% empty %}
                 <div class="col-12">
-                    <p>Галерея пуста або немає зображень типу "галерея".</p>
+                    <p>{% trans 'Галерея пуста або немає зображень типу "галерея".' %}</p>
                 </div>
             {% endfor %}
         </div>
     </div>
 
 <script>
-    // Автоматична відправка форми при зміні фільтрів
-    document.getElementById('city_filter').addEventListener('change', function () {
-        document.getElementById('filtersForm').submit();
-    });
-
-    document.querySelectorAll('#filtersForm input[type="checkbox"]').forEach(input => {
-        input.addEventListener('change', () => {
-            document.getElementById('filtersForm').submit();
-        });
-    });
-
-    // Wait until the entire HTML document is loaded before running the script
 document.addEventListener('DOMContentLoaded', function () {
-        let selectedSessionId = null; // Хранит ID выбранного сеанса
+    let selectedSessionId = null;
 
-        // 1. Обработка клика по карточке сеанса (выбор сеанса)
-        const sessionCards = document.querySelectorAll('.session-card');
-        sessionCards.forEach(card => {
-            card.style.cursor = 'pointer';
+    const sessionCards = document.querySelectorAll('.session-card');
+    const globalBuyButton = document.getElementById('global-buy-ticket-btn');
 
-            card.addEventListener('click', function () {
-
-                sessionCards.forEach(c => c.classList.remove('selected-card'));
-
-
-                this.classList.add('selected-card');
-
-
-                selectedSessionId = this.dataset.sessionId;
-
-                console.log('Выбран сеанс ID:', selectedSessionId);
+    // Клік по сеансу
+    sessionCards.forEach(card => {
+        card.style.cursor = 'pointer';
+        card.addEventListener('click', function () {
+            sessionCards.forEach(c => c.classList.remove('selected-card'));
+            this.classList.add('selected-card');
+            selectedSessionId = this.dataset.sessionId;
+            console.log('Обраний сеанс ID:', selectedSessionId);
         });
-
-        // 2. Обработка клика по ГЛОБАЛЬНОЙ кнопке "Купити квиток"
-        const globalBuyButton = document.getElementById('global-buy-ticket-btn');
-        if (globalBuyButton) { // Проверяем, что кнопка существует
-            globalBuyButton.addEventListener('click', function () {
-                if (selectedSessionId) {
-
-                    window.location.href = `/cinemas/sessions/${selectedSessionId}/buy/`;
-                } else {
-                    alert("Будь ласка, оберіть сеанс, натиснувши на одну з карток, перед покупкою квитка.");
-                }
-            });
-        }
     });
 
+    // Клік по кнопці "Купити квиток"
+    if (globalBuyButton) {
+        globalBuyButton.addEventListener('click', function () {
+            if (selectedSessionId) {
+                window.location.href = `/cinemas/sessions/${selectedSessionId}/buy/`;
+            } else {
+                alert("Будь ласка, оберіть сеанс, натиснувши на одну з карток, перед покупкою квитка.");
+            }
+        });
+    }
+});
 </script>
 {% endblock %}

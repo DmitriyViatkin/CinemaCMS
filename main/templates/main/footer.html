@@ -1,0 +1,179 @@
+<style>
+    /* In your CSS file (e.g., style.css) */
+
+.footer-wrapper {
+    background-color: #ffffff; /* White background */
+    padding-top: 50px; /* Add some padding above the footer content, adjust as needed */
+    padding-bottom: 30px; /* Add some padding below the copyright, adjust as needed */
+    /* You might want to add a top border or shadow for separation from content above */
+    border-top: 1px solid #eee; /* Light gray border at the top */
+    /* box-shadow: 0 -2px 5px rgba(0,0,0,0.05); /* Subtle shadow if desired */
+}
+
+/* Ensure the footer sections inside are also transparent or adapt */
+footer {
+    background-color: transparent; /* Make sure the footer itself doesn't have a conflicting background */
+}
+.w3layouts_social_list {
+    display: flex; /* Делаем контейнер флекс-контейнером */
+    list-style: none; /* Убираем маркеры списка */
+    padding: 0; /* Убираем внутренние отступы списка */
+    margin: 0; /* Убираем внешние отступы списка */
+    justify-content: flex-start; /* Выравнивает элементы по началу контейнера */
+    /* Вы можете использовать другие значения:
+       justify-content: center;   /* Для выравнивания по центру */
+       justify-content: space-around; /* Для равномерного распределения с отступами */
+       justify-content: space-between; /* Для равномерного распределения без отступов по краям */
+    */
+    align-items: center; /* Выравнивает элементы по центру по вертикали (если иконки разной высоты) */
+}
+
+.w3layouts_social_list li {
+    margin-right: 15px; /* Добавляем отступ между иконками, adjust as needed */
+    /* Если это последняя иконка, можно убрать правый отступ: */
+    /* &:last-child {
+        margin-right: 0;
+    } */
+}
+
+/* Стиль для самих ссылок, если нужно */
+.w3layouts_social_list a {
+    display: block; /* Делаем ссылки блочными для лучшего контроля над размерами и отступами */
+    width: 40px; /* Пример: фиксированная ширина */
+    height: 40px; /* Пример: фиксированная высота */
+    border-radius: 50%; /* Делаем круглой */
+    background-color: #f0f0f0; /* Легкий фон */
+    color: #333; /* Цвет иконки */
+    text-align: center; /* Центрируем иконку внутри круга */
+    line-height: 40px; /* Выравниваем иконку по вертикали внутри круга */
+    transition: background-color 0.3s ease, color 0.3s ease; /* Плавный переход для ховера */
+}
+
+.w3layouts_social_list a:hover {
+    background-color: #007bff; /* Цвет фона при наведении */
+    color: #fff; /* Цвет иконки при наведении */
+}
+
+</style>
+
+
+
+
+<div class="footer-wrapper">
+    <footer class="editContent">
+        <div class="container">
+            <div class="row footer-top">
+                <div class="col-lg-4 footer-grid_section_w3layouts">
+                    <h2 class="logo-2 mb-lg-4 mb-3">
+                        <a  href="{% url 'main:home' %}" class="editContent">
+                                    <span class="fa" aria-hidden="true">
+                                      CinoWave
+                                    </span>
+                        </a>
+                    </h2>
+                    <p class="editContent">
+                        CinoWave — ваш путеводитель в мире кино! У нас вы найдете актуальное расписание сеансов,
+                        информацию о новинках, сможете удобно выбрать места и купить билеты онлайн.
+                        Откройте для себя лучшие фильмы и наслаждайтесь кинематографом без очередей.
+                    </p>
+
+                    </div>
+                <div class="col-lg-8 footer-right">
+
+                    <div class="row mt-lg-4 bottom-w3layouts-sec-nav mx-0">
+                        <div class="col-md-4 footer-grid_section_w3layouts">
+                            <h3 class="footer-title text-uppercase editContent mb-lg-4 mb-3">
+                                 Афиша    </h3>
+                            <ul class="list-unstyled w3layouts-icons">
+                                <li>
+                                     <a   href="{% url 'session_list' %}"> Розклад </a>
+                                </li>
+                                <li>
+                                    <a   href="{% url 'movies_soon' %}"> Незабаром   </a>
+                                </li>
+                                 <li>
+                                    <a href="{% url 'cinema_list' %}">   Кінотеатри </a>
+                                </li>
+                                 <li>
+                                     <a   href="{% url 'main:promotions_list' %}"> Акції </a>
+                                </li>
+
+                            </ul>
+                        </div>
+                        <div class="col-md-4 footer-grid_section_w3layouts">
+                            <div class="agileinfo_social_icons">
+                                <h3 class="footer-title text-uppercase editContent mb-lg-4 mb-3">
+                                    Про кінотеатр  </h3>
+                                <ul class="list-unstyled w3layouts-icons">
+                                    <li>
+                                        <a   href="{% url 'main:paiges_news_list' %}">  Новини </a>
+                                    </li>
+                                    <li>
+                                        <a  href="{% url 'main:paiges_cinema_detail' slug='promotion' %}"> Реклама </a>
+                                    </li>
+                                    <li>
+                                        <a   href="{% url 'main:paiges_cinema_detail' slug='kafe-bar' %}">  Кафе-Бар </a>
+                                    </li>
+
+
+                                   <li>
+                                    <a href="{% url 'main:promotions_list' %}"class="editContent">Контакты</a>
+                                </li>
+                                </ul>
+                            </div>
+                            </div>
+                        <div class="col-md-4 footer-grid_section_w3layouts my-md-0 my-5">
+                            <h4 class="sub-con-fo ad-info my-4 editContent"> </h4>
+                            <ul class="w3layouts_social_list media-soc list-unstyled">
+                                <li>
+                                    <a href="#" class="w3pvt_facebook editContent">
+                                        <span class="fa fa-facebook-f"></span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="w3pvt_twitter editContent">
+                                        <span class="fa fa-twitter"></span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="w3pvt_dribble editContent">
+                                        <span class="fa fa-dribbble"></span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="w3pvt_google editContent">
+                                        <span class="fa fa-google-plus"></span>
+                                    </a>
+                                </li>
+                            </ul>
+
+
+                            <div class="contact-info">
+                                <div class="footer-address-inf my-2">
+                                    <h4 class="ad-info mb-1 editContent">Email </h4>
+                                    <p class="editContent"><a href="mailto:info@example.com">info@example.com</a>
+                                    </p>
+                                </div>
+                                <div class="footer-address-inf">
+                                    <h4 class="ad-info mb-1 editContent">Location</h4>
+                                    <p class="editContent">Zaporizhia</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <div class="cpy-right py-3">
+        <div class="container">
+            <div class="row">
+                <p class="col-md-10 text-center">© 2025 SpaceLab  . All rights reserved | Design by
+                    <a href="https://spacelab.ua/"> SpaceLab  </a>
+                </p>
+                <a href="{% url 'main:home' %}" class="move-top text-right col-md-2"><span
+                        class="fa fa-long-arrow-up" aria-hidden="true"></span></a>
+                </div>
+        </div>
+    </div>
+</div>

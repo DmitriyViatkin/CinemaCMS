@@ -1,0 +1,197 @@
+{% extends 'main/index1.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block seo_head_content %}
+    {% if page_seo_data %}
+        <title>{% if page_seo_data.title %}{{ page_seo_data.title }}{% else %}{% translate "Контакти" %}{% endif %}</title>
+        <meta name="description" content="{% if page_seo_data.description %}{{ page_seo_data.description }}{% else %}{% translate "Повний список контактів наших кінотеатрів." %}{% endif %}">
+    {% else %}
+        <title>{% translate "Наші Контакти" %}</title>
+        <meta name="description" content="{% translate "Знайдіть контактні дані всіх наших кінотеатрів." %}">
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<style>
+    /* Base styling for the page structure */
+    .container.mt-4 {
+        padding: 20px;
+    }
+
+    /* Style for each contact block */
+    .contact-block-wrapper {
+        background-color: #f8f9fa; /* Light background for the details section */
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+        margin-bottom: 40px; /* Space between each contact block */
+        max-width: 900px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .contact-block-wrapper:last-child {
+        margin-bottom: 0; /* No margin after the last block */
+    }
+
+    /* Flex container for title, address/phone, and logo */
+    .contact-header-section {
+        display: flex;
+        flex-wrap: wrap; /* Allow wrapping on smaller screens */
+        justify-content: space-between; /* Pushes logo to the right */
+        align-items: flex-start; /* Aligns items to the top */
+        margin-bottom: 20px; /* Space between header section and map */
+    }
+
+    /* Text content (title, address, phone) */
+    .contact-text-details {
+        flex: 1; /* Takes available space */
+        min-width: 250px; /* Ensures text doesn't become too narrow */
+        padding-right: 20px; /* Space between text and logo */
+    }
+
+    .contact-text-details h2 {
+        color: #343a40;
+        margin-top: 0; /* Remove default top margin */
+        margin-bottom: 10px;
+        font-size: 2.2rem;
+    }
+
+    .contact-text-details p {
+        color: #6c757d;
+        line-height: 1.6;
+        margin-bottom: 5px; /* Smaller margin between address/phone */
+    }
+
+    /* Logo wrapper */
+    .contact-logo-wrapper {
+        flex-shrink: 0; /* Don't shrink */
+        width: 150px; /* Fixed width for logo area */
+        height: 150px; /* Fixed height for logo area to keep it square */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 1px solid #e9ecef;
+        border-radius: 5px;
+        background-color: #fff;
+        overflow: hidden; /* Ensure logo stays within bounds */
+    }
+
+    .contact-logo {
+        max-width: 90%; /* Logo takes most of the wrapper, but has some padding */
+        max-height: 90%;
+        display: block;
+        object-fit: contain; /* Ensures the entire image is visible without cropping */
+    }
+
+    .no-image-placeholder {
+        background-color: #e9ecef;
+        color: #adb5bd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        height: 100%;
+        text-align: center;
+        padding: 10px;
+        border-radius: 5px;
+    }
+
+    /* Google Map styling */
+    .map-container {
+        width: 100%;
+        height: 300px;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+    }
+
+    .map-container iframe {
+        width: 100%;
+        height: 100%;
+        border: 0;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .contact-header-section {
+            flex-direction: column; /* Stack items vertically */
+            align-items: center; /* Center items */
+            text-align: center;
+        }
+        .contact-text-details {
+            padding-right: 0;
+            width: 100%;
+            margin-bottom: 20px; /* Add space below text when stacked */
+        }
+        .contact-logo-wrapper {
+            margin-bottom: 20px; /* Add space below logo when stacked */
+        }
+        .contact-text-details h2 {
+            font-size: 1.8rem;
+        }
+        .map-container {
+            height: 250px; /* Smaller map height on mobile */
+        }
+    }
+</style>
+
+<div class="container mt-4">
+    <h1 class="text-center mb-5">{% translate "Наші контактні дані" %}</h1>
+
+    {% if contacts_data %}
+        {% for contact_entry in contacts_data %}
+            <div class="contact-block-wrapper">
+                {% with paige=contact_entry.contact main_picture=contact_entry.main_picture logo_picture=contact_entry.logo_picture %}
+
+
+                    <div class="contact-header-section">
+
+                        <div class="contact-text-details">
+                            <h2>{{ paige.title }}</h2>
+                            <p><strong>{% translate "Адрес:" %}</strong> {{ paige.address }}</p>
+                            <p><strong>{% translate "Бронирование билетов:" %}</strong> {{ paige.phone_number }}</p>
+                        </div>
+
+                    {% if main_picture %}
+                        <img src="{{ main_picture.image.url }}" alt="{% translate 'Главное изображение' %} {{ paige.title }}" class="main-page-image">
+                    {% endif %}
+
+                    </div>
+
+                    {# Google Map Section for each contact #}
+                    {% if paige.latitude and paige.longitude %}
+                        <div class="map-container mt-4">
+                            <iframe
+                                src="https://maps.google.com/maps?q={{ paige.latitude }},{{ paige.longitude }}&z=15&output=embed"
+                                width="100%"
+                                height="100%"
+                                style="border:0;"
+                                allowfullscreen=""
+                                loading="lazy"
+                                referrerpolicy="no-referrer-when-downgrade">
+                            </iframe>
+                        </div>
+                    {% else %}
+                        <p class="text-center text-muted mt-3">{% translate "Координаты для карты отсутствуют для" %} "{{ paige.title }}".</p>
+                    {% endif %}
+                {% endwith %}
+            </div> {# End contact-block-wrapper #}
+        {% endfor %}
+
+    {% else %}
+        <div class="text-center alert alert-info">
+            <p>{% translate "Информация о контактах пока отсутствует." %}</p>
+            <p>{% translate "Пожалуйста, добавьте контактные данные через административную панель." %}</p>
+        </div>
+    {% endif %}
+
+    {# Include the banner block #}
+    {% include 'core/banner.html' %}
+
+</div>
+
+<script src="{% static 'js/script.js' %}" ></script>
+
+{% endblock %}

@@ -1,12 +1,14 @@
 {# news_card.html #}
+{% load static %}
+{% load i18n %}
 <div class="col">
-  {# Added bg-dark, text-white, and rounded for aesthetics #}
+
   <div class="card h-100 bg-dark text-white rounded shadow-sm">
     {% if news.main_picture %}
       <img src="{{ news.main_picture.image.url }}" class="card-img-top" alt="{{ news.title }}" style="height: 250px; object-fit: cover;">
     {% else %}
-      <div class="d-flex align-items-center justify-content-center" style="height: 250px; background-color: #333;"> {# Changed placeholder background to a dark gray #}
-        <span class="text-white-50">Зображення відсутнє</span> {# Changed text color for placeholder #}
+      <div class="d-flex align-items-center justify-content-center" style="height: 250px; background-color: #333;">
+        <span class="text-white-50">{% trans "Зображення відсутнє" %}</span>
       </div>
     {% endif %}
     <div class="card-body d-flex flex-column">

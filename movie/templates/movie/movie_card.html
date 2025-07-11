@@ -1,14 +1,16 @@
 {#movie_card.html#}
+{% load static %}
+{% load i18n %}
 <div class="card h-100">
   {% if movie.main_picture %}
     <img src="{{ movie.main_picture.image.url }}" class="card-img-top" alt="{{ movie.title }}" style="height: 250px; object-fit: cover;">
   {% else %}
     <div class="d-flex align-items-center justify-content-center" style="height: 250px; background-color: #e9ecef;">
-      <span class="text-muted">Зображення відсутнє</span>
+      <span class="text-muted">{% trans "Зображення відсутнє" %} </span>
     </div>
   {% endif %}
   <div class="card-body">
     <h5 class="card-title">{{ movie.title }}</h5>
-   <a href="{% url 'movie_detail' movie_id=movie.id %}" class="btn btn-primary">Детальніше</a>
+   <a href="{% url 'movie_detail' movie_id=movie.id %}" class="btn btn-primary">{% trans "Детальніше" %}</a>
   </div>
 </div>

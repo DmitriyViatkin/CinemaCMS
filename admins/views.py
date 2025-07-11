@@ -229,77 +229,58 @@ def index(request):
 def new_contacts(request):
     print(f"--- new_contacts view called, Request method: {request.method} ---")
 
-    seo_instance = None
-    try:
-        seo_instance = Block_SEO.objects.get(id=1)
+    # Спроба отримати існуючий SEO блок (id=1), або None
+    seo_instance = Block_SEO.objects.filter(id=1).first()
+    if seo_instance:
         print(f"DEBUG: Found existing Block_SEO instance with ID: {seo_instance.id}")
-    except Block_SEO.DoesNotExist:
-        print("DEBUG: Block_SEO instance with id=1 does not exist. A new one will be created if form is valid.")
-        seo_instance = None
-    except Exception as e:
-        print(f"ERROR: An unexpected error occurred while retrieving Block_SEO: {e}")
+    else:
+        print("DEBUG: Block_SEO instance with id=1 does not exist yet.")
 
-    if request.method=='POST':
+    if request.method == 'POST':
         print("DEBUG: Handling POST request.")
         formset = ContactFormSet(request.POST, request.FILES, queryset=Contact.objects.all())
         block_seo_form = BlockSEOForm(request.POST, instance=seo_instance)
 
-        print(f"DEBUG: Data from POST request (first 200 chars): {str(request.POST)[:200]}...")
-        if request.FILES:
-            print(f"DEBUG: Files from POST request: {request.FILES.keys()}")
-        else:
-            print("DEBUG: No files in POST request.")
-
         if formset.is_valid() and block_seo_form.is_valid():
-            print("DEBUG: Both ContactFormSet and BlockSEOForm are valid. Proceeding to save.")
-
-
             try:
+                # Зберігаємо або створюємо SEO блок
+                block_seo = block_seo_form.save()
+                print(f"DEBUG: BlockSEOForm saved. title_seo: {block_seo.title_seo}")
 
-                contacts = formset.save()
-                print(f"DEBUG: Formset saved {len(contacts)} contacts.")
+                # Зберігаємо контакти з привʼязкою до SEO
+                contacts = formset.save(commit=False)
+                for contact in contacts:
+                    contact.seo_block = block_seo
+                    contact.save()
 
+                # Видалення позначених для видалення
                 for obj in formset.deleted_objects:
-                    print(f"DEBUG: Deleting contact: {obj.title} (ID: {obj.id})")
+                    print(f"DEBUG: Deleting contact {obj.title} (ID: {obj.id})")
                     if obj.gallery:
                         obj.gallery.delete()
                         print(f"DEBUG: Deleted gallery for contact {obj.title}")
                     obj.delete()
 
+                print(f"DEBUG: Saved {len(contacts)} contacts. Redirecting.")
+                return redirect('con')
+
             except Exception as e:
-                print(f"ERROR: An error occurred during formset save: {e}")
-
+                print(f"ERROR: Failed to save formset or SEO block: {e}")
                 raise e
-            block_seo_form.save()
-            print(f"DEBUG: BlockSEOForm saved. New/updated title_seo: {block_seo_form.instance.title_seo}")
-
-            print("DEBUG: Redirecting to 'con' (contacts list page).")
-            return redirect('con')
         else:
-            print("WARNING: One or more forms are NOT valid. Displaying errors.")
+            print("WARNING: Formset or SEO form invalid.")
             if not formset.is_valid():
-                print("ERROR: ContactFormSet is INVALID.")
                 for i, form in enumerate(formset):
                     if form.errors:
-                        print(f"  Form {i} errors: {form.errors}")
-                    if form.non_field_errors():
-                        print(f"  Form {i} non-field errors: {form.non_field_errors()}")
-            else:
-                print("DEBUG: ContactFormSet is VALID.")
-
+                        print(f"Form {i} errors: {form.errors}")
             if not block_seo_form.is_valid():
-                print("ERROR: BlockSEOForm is INVALID.")
-                print(f"  BlockSEOForm errors: {block_seo_form.errors}")
-                print(f"  BlockSEOForm non_field_errors: {block_seo_form.non_field_errors()}")
-            else:
-                print("DEBUG: BlockSEOForm is VALID.")
+                print(f"SEO form errors: {block_seo_form.errors}")
 
-    else:  # GET request
+    else:
         print("DEBUG: Handling GET request.")
         formset = ContactFormSet(queryset=Contact.objects.all())
         block_seo_form = BlockSEOForm(instance=seo_instance)
 
-    print("DEBUG: Rendering new_contacts.html template.")
     return render(request, 'admin/paige_list/new_contacts.html', {
         'formset': formset,
         'block_seo_form': block_seo_form
@@ -943,134 +924,116 @@ def delete_tickets (request, pk):
 
 @staff_member_required
 def add_banners(request):
-    banner_formset = BannersFormSet(request.POST or None, request.FILES or None, queryset=Banners.objects.all(), prefix='top_banners')
-    cross_banner_instance = Cross_Banner.objects.first()
-    cross_banner_form = CrossBannerForm(request.POST or None, request.FILES or None, instance=cross_banner_instance, prefix='cross_banner')
-    news_formset = NewsFormSet(request.POST or None, request.FILES or None, queryset=News.objects.all(), prefix='news')
+    banner_formset = BannersFormSet(
+        request.POST or None,
+        request.FILES or None,
+        queryset=Banners.objects.select_related('gallery').prefetch_related(
+            Prefetch('gallery__pictures', queryset=Picture.objects.filter(image_type='main_picture'))
+        ),
+        prefix='top_banners'
+    )
 
+    news_formset = NewsFormSet(
+        request.POST or None,
+        request.FILES or None,
+        queryset=News.objects.select_related('gallery').prefetch_related(
+            Prefetch('gallery__pictures', queryset=Picture.objects.filter(image_type='main_picture'))
+        ),
+        prefix='news'
+    )
 
-    if request.method=='POST':
+    cross_banner_instance = Cross_Banner.objects.select_related('gallery').prefetch_related(
+        Prefetch('gallery__pictures', queryset=Picture.objects.all())
+    ).first()
 
-        if "which_form_is_it" in request.POST:
-            which_form_is_submiting = request.POST["which_form_is_it"]
+    cross_banner_form = CrossBannerForm(
+        request.POST or None,
+        request.FILES or None,
+        instance=cross_banner_instance,
+        prefix='cross_banner'
+    )
 
-            if str(which_form_is_submiting) == "this_is_form_banner":
+    if request.method == 'POST':
+        which_form = request.POST.get("which_form_is_it")
 
-                if banner_formset.is_valid():
+        if which_form == "this_is_form_banner":
+            if banner_formset.is_valid():
+                banner_formset.save()
+                for form in banner_formset.forms:
+                    if not form.cleaned_data:
+                        continue
+                    banner = form.instance
+                    main_picture_file = form.cleaned_data.get('main_picture')
 
-                    banner_formset.save()
+                    if banner and not banner.gallery:
+                        banner.gallery = Gallery.objects.create()
+                        banner.save()
 
-                    for form in banner_formset.forms:
-                        if not form.cleaned_data:
-                            continue
-                        banner = form.instance
+                    if banner.gallery:
+                        picture = banner.gallery.pictures.filter(image_type='main_picture').first()
+                        if not picture:
+                            picture = Picture(gallery=banner.gallery, image_type='main_picture')
 
-                        # Перевіряємо, чи передано новий файл
-                        main_picture_file = form.cleaned_data.get('main_picture')
+                        if main_picture_file:
+                            picture.image = main_picture_file
+                        picture.save()
 
-                        # Якщо новина не має галереї — створюємо її
-                        if banner and not banner.gallery:
-                            banner.gallery = Gallery.objects.create()
-                            banner.save()
+                return redirect('add_banners')
 
-                        # Якщо є галерея — отримуємо або створюємо Picture з типом main_picture
-                        if banner.gallery:
-                            picture = banner.gallery.pictures.filter(image_type='main_picture').first()
-                            if not picture:
-                                picture = Picture(gallery=banner.gallery, image_type='main_picture')
+        elif which_form == "this_is_form_cross_banner":
+            if cross_banner_form.is_valid():
+                cross_banner = cross_banner_form.save()
+                image_file = request.FILES.get('cross_banner-image')
 
-                            # Оновлюємо зображення, тільки якщо новий файл передано
-                            if main_picture_file:
-                                picture.image = main_picture_file
+                if cross_banner:
+                    if not cross_banner.gallery_id:
+                        cross_banner.gallery = Gallery.objects.create()
+                        cross_banner.save()
 
+                    if cross_banner.gallery:
+                        picture = cross_banner.gallery.pictures.first()
+                        if not picture:
+                            picture = Picture(gallery=cross_banner.gallery)
+
+                        if image_file:
+                            picture.image = image_file
                             picture.save()
+                return redirect('add_banners')
 
-                    banner_formset.save()
+        elif which_form == "this_is_form_news":
+            if news_formset.is_valid():
+                news_formset.save()
+                for form in news_formset.forms:
+                    if not form.cleaned_data:
+                        continue
+                    news = form.instance
+                    main_picture_file = form.cleaned_data.get('main_picture')
 
-                    return redirect('add_banners')
-                else:
-                    pass
+                    if news and not news.gallery:
+                        news.gallery = Gallery.objects.create()
+                        news.save()
 
+                    if news.gallery:
+                        picture = news.gallery.pictures.filter(image_type='main_picture').first()
+                        if not picture:
+                            picture = Picture(gallery=news.gallery, image_type='main_picture')
 
-            elif str(which_form_is_submiting) == "this_is_form_cross_banner":
+                        if main_picture_file:
+                            picture.image = main_picture_file
+                        picture.save()
 
-                if cross_banner_form.is_valid():
-                    cross_banner = cross_banner_form.save()
-                    image_file = request.FILES.get('cross_banner-image')
+                return redirect('add_banners')
 
-                    if cross_banner:
-                        if not cross_banner.gallery_id:
-                            cross_banner.gallery = Gallery.objects.create()
-                            cross_banner.save()
+    # Оптимізоване отримання зображень без додаткових запитів
+    def get_main_picture_url(gallery):
+        if gallery and hasattr(gallery, 'pictures'):
+            picture = next((p for p in gallery.pictures.all() if p.image_type == 'main_picture' and p.image), None)
+            if picture:
+                return picture.image.url
+        return None
 
-                        if cross_banner.gallery:
-                            picture = cross_banner.gallery.pictures.first()
-
-                            if not picture:
-                                picture = Picture(gallery=cross_banner.gallery)
-
-                            if image_file:
-                                picture.image = image_file
-                                picture.save()
-                            else:
-                                pass
-                    return redirect('add_banners')
-
-                else:
-                    pass
-            elif str(which_form_is_submiting)=="this_is_form_news":
-
-                if news_formset.is_valid():
-
-                    news_formset.save()
-                    for form in news_formset.forms:
-                        if not form.cleaned_data:
-                            continue
-                        news = form.instance
-
-                        # Перевіряємо, чи передано новий файл
-                        main_picture_file = form.cleaned_data.get('main_picture')
-
-                        # Якщо новина не має галереї — створюємо її
-                        if news and not news.gallery:
-                            news.gallery = Gallery.objects.create()
-                            news.save()
-
-                        # Якщо є галерея — отримуємо або створюємо Picture з типом main_picture
-                        if news.gallery:
-                            picture = news.gallery.pictures.filter(image_type='main_picture').first()
-                            if not picture:
-                                picture = Picture(gallery=news.gallery, image_type='main_picture')
-
-                            # Оновлюємо зображення, тільки якщо новий файл передано
-                            if main_picture_file:
-                                picture.image = main_picture_file
-
-                            picture.save()
-
-                    return redirect('add_banners')
-                else:
-                    pass
-        else:
-                pass
-
-    form_data = []
-    for form in banner_formset.forms:
-        image_url = None
-        if form.instance.gallery:
-            picture = form.instance.gallery.pictures.filter(image_type='main_picture').first()
-            if picture and picture.image:
-                image_url = picture.image.url
-        form_data.append({'form': form, 'image_url': image_url})
-
-    news_form_data = []
-    for form in news_formset.forms:
-        image_url = None
-        if form.instance.gallery:
-            picture = form.instance.gallery.pictures.filter(image_type='main_picture').first()
-            if picture and picture.image:
-                image_url = picture.image.url
-        news_form_data.append({'form': form, 'image_url': image_url})
+    form_data = [{'form': form, 'image_url': get_main_picture_url(form.instance.gallery)} for form in banner_formset.forms]
+    news_form_data = [{'form': form, 'image_url': get_main_picture_url(form.instance.gallery)} for form in news_formset.forms]
 
     return render(request, 'admin/banner/add_banner.html', {
         'formset': banner_formset,

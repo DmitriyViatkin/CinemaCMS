@@ -10,7 +10,7 @@ import json
 from django.db.models import Prefetch
 from collections import defaultdict
 from movie.models import Movies
-from main.models import Banners
+from main.models import Banners,Contact
 import locale
 from django.db.models import Q
 from channels.layers import get_channel_layer
@@ -18,6 +18,8 @@ from asgiref.sync import async_to_sync
 from datetime import date, datetime
 from django.utils import timezone
 from datetime import date
+
+
 
 
 
@@ -135,7 +137,7 @@ def hall_detail(request, hall_id):
 
 
 locale.setlocale(locale.LC_TIME, 'uk_UA.UTF-8')
-def session_list(request):
+def session_list(request, cinema=None, hall=None):
     # --- Отримуємо GET-параметри ---
     date_filter = request.GET.get('date')
     cinema_filter = request.GET.get('cinema')
@@ -298,7 +300,7 @@ def buy_ticket_view(request, session_id):
             'id': seat.id,
             'status': current_status,
             'is_vip': seat.is_vip,
-            'price': float(seat.price),
+            'price': float(session.price),
             'row_number': seat.number_row,
             'seat_number': seat.seat,
             'is_user_booked': is_user_booked
@@ -329,11 +331,13 @@ def buy_ticket_view(request, session_id):
         'session_time': session.time_session,
         'session_date': session.date,
         'movie_title': movie.title,
-        'movie_price': float(session.movie.price) if session.movie.price is not None else 0.0,
+        'session_price': float(session.price) if session.price is not None else 0.0,
         'hall_picture': hall_picture.image.url if hall_picture and hall_picture.image else None,
         'movie_picture': movie_picture.image.url if movie_picture and movie_picture.image else None,
         'seat_rows_current_status_json': json.dumps(ordered_seat_rows),
-        'user_tickets': user_tickets_for_session,
+        'session_price': session.price,
+        'user_tickets': user_tickets_for_session, # <-- ВОТ ЗДЕСЬ МЫ ПЕРЕДАЕМ!
+        'user_tickets_seat_ids': user_booked_seat_ids,  # <-- ЭТОТ СПИСОК С ID МЕСТ ПОЛЬЗОВАТЕЛЯ
     }
 
     return render(request, 'core/buy_ticket/buy_ticket.html', context)
