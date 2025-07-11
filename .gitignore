@@ -100,3 +100,20 @@ Thumbs.db
 # IDE specific files (for PyCharm)
 .idea/
 
+# Виртуальные окружения
+.venv/
+venv/
+
+# Скомпилированные файлы Python
+*.pyc
+__pycache__/
+
+# Файлы локализации Django (скомпилированные)
+*.mo
+*.pot
+
+# Файлы БД (если используете SQLite)
+db.sqlite3
+
+# Файлы IDE (например, PyCharm)
+.idea/
