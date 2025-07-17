@@ -212,8 +212,8 @@ class Contact(models.Model):
     )
     title = models.CharField(max_length=100, verbose_name= 'Опис ')
     address = models.CharField(max_length=250, verbose_name= 'Адреса ')
-    latitude = models.FloatField(null=True, blank=True, verbose_name='Довгота ')
-    longitude = models.FloatField(null=True, blank=True, verbose_name='Широта ')
+    latitude = models.FloatField(null=True, blank=True)  # Это должно быть ШИРОТОЙ
+    longitude = models.FloatField(null=True, blank=True)
     phone_number = models.CharField(max_length=15, verbose_name= 'Номер телефону')
     def __str__(self):
         return self.title

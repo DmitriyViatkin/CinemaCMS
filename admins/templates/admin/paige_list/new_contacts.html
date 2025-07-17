@@ -1,30 +1,31 @@
+
 {% extends 'admin/index.html' %}
 {% load static %}
-{% load widget_tweaks %}
+{% load widget_tweaks %} {# Убедитесь, что 'widget_tweaks' добавлен в INSTALLED_APPS #}
 
 {% block content %}
 <form method="post" enctype="multipart/form-data" id="contact-formset">
     {% csrf_token %}
 
 
-    {# --- Начало формсета контактов (без изменений из предыдущего ответа) --- #}
+    {# --- Формсет контактов --- #}
     {{ formset.management_form }}
 
     <div id="form-container">
         {% for form in formset %}
-            <div class="contact-form-instance card card-primary mb-4">
+            <div class="contact-form-instance card card-primary mb-4" data-form-index="{{ forloop.counter0 }}">
                 <div class="card-header">
                     <h3 class="card-title">
                         {% if form.instance.pk %}
-                            Редагувати контакт: {{ form.instance.title }}
+                            Редактировать контакт: {{ form.instance.title|default:"Без названия" }}
                         {% else %}
-                            Додати новий кінотеатр
+                            Добавить новый контакт
                         {% endif %}
                     </h3>
                 </div>
                 <div class="card-body">
                     {% if form.instance.pk %}
-                        {{ form.id }}
+                        {{ form.id }} {# Скрытое поле ID для существующих объектов #}
                     {% endif %}
 
                     <div class="form-group row">
@@ -34,7 +35,8 @@
                             {% for error in form.title.errors %}
                                 <div class="alert alert-danger">{{ error }}</div>
                             {% endfor %}
-                            <div class="d-flex justify-content-end align-items-center mt-2">
+
+                             <div class="d-flex justify-content-end align-items-center mt-2">
                                 <div class="form-check form-switch ml-3">
                                     <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>
                                     <label class="form-check-label" for="flexSwitchCheckChecked"></label>
@@ -53,22 +55,20 @@
                         </div>
                     </div>
 
-                      {# Latitude field - now explicitly a visible TextInput #}
                     <div class="form-group row">
                         <label for="{{ form.latitude.id_for_label }}" class="col-sm-3 col-form-label">{{ form.latitude.label }}</label>
                         <div class="col-sm-9">
-                            {{ form.latitude }} {# No need for add_class, widget already has it #}
+                            {{ form.latitude|add_class:"form-control" }}
                             {% for error in form.latitude.errors %}
                                 <div class="alert alert-danger">{{ error }}</div>
                             {% endfor %}
                         </div>
                     </div>
 
-                    {# Longitude field - now explicitly a visible TextInput #}
                     <div class="form-group row">
                         <label for="{{ form.longitude.id_for_label }}" class="col-sm-3 col-form-label">{{ form.longitude.label }}</label>
                         <div class="col-sm-9">
-                            {{ form.longitude }} {# No need for add_class, widget already has it #}
+                            {{ form.longitude|add_class:"form-control" }}
                             {% for error in form.longitude.errors %}
                                 <div class="alert alert-danger">{{ error }}</div>
                             {% endfor %}
@@ -78,129 +78,153 @@
                     <div class="form-group row">
                         <label for="{{ form.phone_number.id_for_label }}" class="col-sm-3 col-form-label">{{ form.phone_number.label }}</label>
                         <div class="col-sm-9">
-                            {{ form.phone_number|add_class:"form-control" }}
+                            {{ form.phone_number|add_class:"form-control phone-input" }}
                             {% for error in form.phone_number.errors %}
                                 <div class="alert alert-danger">{{ error }}</div>
                             {% endfor %}
                         </div>
                     </div>
 
-                    <div class="form-group row">
+                    <div class="form-group row align-items-start">
                         <label class="col-sm-3 col-form-label">Лого</label>
                         <div class="col-sm-9 d-flex align-items-center">
-                            <div class="image-upload-preview d-flex align-items-center border p-2" style="min-width: 150px; min-height: 100px; justify-content: center; position: relative;">
-                                {# Всегда создаем img, но скрываем его, если нет src #}
+                            <div class="image-upload-preview d-flex align-items-center justify-content-center border p-2"
+                                 style="width: 150px; height: 100px; position: relative; overflow: hidden; cursor: pointer;">
+                                {# Изображение будет показано, если есть URL #}
                                 <img src="{% if form.get_current_contact_image and form.get_current_contact_image.image %}{{ form.get_current_contact_image.image.url }}{% endif %}"
-                                     alt="Поточне зображення"
+                                     alt="Текущее изображение"
                                      class="img-thumbnail"
-                                     style="max-width: 100%; max-height: 80px; object-fit: contain; {% if not form.get_current_contact_image or not form.get_current_contact_image.image %}display: none;{% endif %}"
+                                     style="max-width: 100%; max-height: 100%; object-fit: contain; {% if not form.get_current_contact_image or not form.get_current_contact_image.image %}display: none;{% endif %}"
                                 >
-                                {# Иконка по умолчанию показывается, если нет src #}
-                                <i class="fas fa-image fa-3x text-muted" style="{% if form.get_current_contact_image and form.get_current_contact_image.image %}display: none;{% endif %}"></i>
+                                {# Иконка по умолчанию показывается, если нет изображения #}
+                                <i class="fas fa-image fa-3x text-muted"
+                                   style="position: absolute; {% if form.get_current_contact_image and form.get_current_contact_image.image %}display: none;{% endif %}"></i>
 
-                                <input type="file" name="{{ form.contact_picture.name }}" id="{{ form.contact_picture.id_for_label }}" style="display: none;">
-                                <label for="{{ form.contact_picture.id_for_label }}" class="btn btn-outline-secondary btn-sm" style="position: absolute; bottom: 5px; right: 5px; cursor: pointer; display: none;">Загрузить</label>
+                                {# ИСПРАВЛЕННАЯ СТРОКА НИЖЕ: использование |attr #}
+                                {{ form.contact_picture|attr:"style:display:none;" }}
+                                {% for error in form.contact_picture.errors %}
+                                    <div class="alert alert-danger mt-2">{{ error }}</div>
+                                {% endfor %}
+
+                                {# Кнопки Загрузить/Удалить - будут скрыты и показаны через JS #}
+                                <div class="overlay-buttons"
+                                     style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s;">
+                                    <button type="button" class="btn btn-primary btn-sm mb-2 upload-button">Загрузить</button>
+                                    <button type="button" class="btn btn-danger btn-sm delete-image-button">Удалить</button>
+                                </div>
                             </div>
-                            <div class="d-flex flex-column ml-3">
-                                <button type="button" class="btn btn-primary btn-sm mb-2 upload-button" data-input-id="{{ form.contact_picture.id_for_label }}">Загрузить</button>
-                                <button type="button" class="btn btn-danger btn-sm delete-image-button" data-checkbox-id="{{ form.delete_contact_picture.id_for_label }}">Удалить</button>
-                                {{ form.delete_contact_picture }}
-                            </div>
-                            {% for error in form.contact_picture.errors %}
-                                <div class="alert alert-danger mt-2">{{ error }}</div>
-                            {% endfor %}
+                            {# Скрытый чекбокс delete_contact_picture #}
+                            {{ form.delete_contact_picture }}
                         </div>
                     </div>
 
                     {% if formset.can_delete %}
                         <div class="form-check mt-3">
                             {{ form.DELETE }}
-                            <label class="form-check-label" for="{{ form.DELETE.id_for_label }}">Видалити цей кінотеатр</label>
+                            <label class="form-check-label" for="{{ form.DELETE.id_for_label }}">Удалить этот контакт</label>
                         </div>
                     {% endif %}
+                    {{ form.gallery }} {# Скрытое поле галереи #}
                 </div>
             </div>
         {% endfor %}
-
     </div>
-
-
 
     <div class="text-center mt-4 mb-5">
         <button type="button" id="add-contact-button" class="btn btn-success btn-lg">
-            <i class="fas fa-plus"></i> Добавить еще кинотеатр
+            <i class="fas fa-plus"></i> Добавить еще контакт
         </button>
     </div>
+
     <div class="card-body">
-            {% include 'admin/card_forms/seo_form.html' with form=block_seo_form %}
+        {% include 'admin/card_forms/seo_form.html' with form=block_seo_form %}
     </div>
-    <button type="submit" class="btn btn-primary mt-4">Зберегти контакти</button>
+
+    <button type="submit" class="btn btn-primary mt-4">Сохранить контакты</button>
 </form>
 
-    {# Подключение jQuery и Bootstrap JS, если они еще не загружены #}
-    {# Убедитесь, что эти пути правильные для вашего проекта #}
+
     <script src="{% static 'admins/plugins/jquery/jquery.min.js' %}"></script>
     <script src="{% static 'admins/plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 
+    <script src="{% static 'admins/plugins/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'admins/plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'admins/plugins/moment/moment.min.js' %}"></script>
+    <script src="{% static 'admins/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js' %}"></script>
+    <script src="{% static 'admins/plugins/daterangepicker/daterangepicker.js' %}"></script>
 
+    <script src="{% static 'admins/plugins/select2/js/select2.full.min.js' %}"></script>
+    <script src="{% static 'admins/plugins/bootstrap4-duallistbox/jquery.bootstrap-duallistbox.min.js' %}"></script>
+    <script src="{% static 'admins/plugins/inputmask/jquery.inputmask.min.js' %}"></script>
+    <script src="{% static 'admins/plugins/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js' %}"></script>
+    <script src="{% static 'admins/plugins/bootstrap-switch/js/bootstrap-switch.min.js' %}"></script>
+    <script src="{% static 'admins/plugins/bs-stepper/js/bs-stepper.min.js' %}"></script>
+    <script src="{% static 'admins/plugins/dropzone/min/dropzone.min.js' %}"></script>
+    <script src="{% static 'admins/dist/js/adminlte.min.js' %}"></script>
     <script>
         $(document).ready(function() {
-            // Если вы используете Bootstrap Switch, раскомментируйте и настройте
-            /*
-            $('input[data-bootstrap-switch]').each(function(){
-                $(this).bootstrapSwitch('state', $(this).prop('checked'));
-            });
-            */
-
-            // --- JS для Динамического Добавления Форм (Formset) ---
-            var formsetContainer = $('#form-container'); // Контейнер, где находятся все формы
-            var addButton = $('#add-contact-button'); // Кнопка "Добавить еще кинотеатр"
-            var totalForms = $('#id_{{ formset.prefix }}-TOTAL_FORMS'); // Скрытое поле TOTAL_FORMS
-            // Клонируем первую форму для использования в качестве шаблона для новых форм.
-            // .clone(true) копирует данные, обработчики событий и дочерние элементы.
-            var formTemplate = $('.contact-form-instance:first').clone(true);
+            var formsetContainer = $('#form-container');
+            var addButton = $('#add-contact-button');
+            var totalForms = $('#id_{{ formset.prefix }}-TOTAL_FORMS');
+            var formTemplate = $('.contact-form-instance:first').clone(true); // Клонируем первую форму как шаблон
 
             // Функция для очистки полей в клонированной форме
             function clearForm(form) {
-                // Очищаем текстовые поля, textarea, number inputs
-                form.find('input[type="text"], input[type="number"], textarea').val('');
-                form.find('input[type="file"]').val(''); // Очищаем file input
+                form.find(':input').each(function() {
+                    var $this = $(this);
+                    if ($this.is('input[type="text"], input[type="number"], textarea')) {
+                        $this.val('');
+                    } else if ($this.is('input[type="file"]')) {
+                        $this.val(''); // Очищаем file input
+                    } else if ($this.is('input[type="checkbox"]')) {
+                        $this.prop('checked', false); // Снимаем чекбоксы
+                    }
+                    // Дополнительно: сброс классов ошибок
+                    $this.removeClass('is-invalid');
+                    $this.closest('.form-group').find('.alert-danger').remove(); // Удаляем сообщения об ошибках
+                });
+
+                // Сброс состояния предпросмотра изображения
                 form.find('.img-thumbnail').attr('src', '').hide(); // Скрываем предпросмотр изображения
                 form.find('i.fa-image').show(); // Показываем иконку по умолчанию
-                form.find('input[type="hidden"][name$="-id"]').val(''); // Очищаем ID для новых форм (если есть)
-                form.find('input[type="checkbox"]').prop('checked', false); // Снимаем все чекбоксы
-                form.find('.alert-danger').remove(); // Удаляем сообщения об ошибках
-                form.find('h3.card-title').text('Додати новий кінотеатр'); // Обновляем заголовок
+                form.find('.overlay-buttons').css('opacity', '0'); // Скрываем кнопки оверлея
+                form.find('h3.card-title').text('Добавить новый контакт'); // Обновляем заголовок
+                form.find('input[name$="-id"]').val(''); // Очищаем ID для новых форм
             }
 
-            // Обработчик клика по кнопке "Добавить еще кинотеатр"
+            // Обработчик клика по кнопке "Добавить еще контакт"
             addButton.click(function() {
-                var currentTotalForms = parseInt(totalForms.val()); // Текущее количество форм
-                var newForm = formTemplate.clone(true); // Клонируем шаблон формы
+                var currentTotalForms = parseInt(totalForms.val());
+                var newFormIndex = currentTotalForms;
+                var newForm = formTemplate.clone(true);
 
                 // Обновляем атрибуты name и id для всех полей в новой форме
-                // Заменяем текущий индекс (например, -0-) на новый (-N-)
-                newForm.find(':input').each(function() {
-                    var name = $(this).attr('name');
-                    var id = $(this).attr('id');
+                newForm.find(':input, label').each(function() {
+                    var $this = $(this);
+                    var name = $this.attr('name');
+                    var id = $this.attr('id');
+                    var htmlFor = $this.attr('for');
+
                     if (name) {
-                        $(this).attr({
-                            'name': name.replace(/-\d+-/, '-' + currentTotalForms + '-'),
-                            'id': id.replace(/-\d+-/, '-' + currentTotalForms + '-')
-                        });
+                        $this.attr('name', name.replace(/-\d+-/, '-' + newFormIndex + '-'));
+                    }
+                    if (id) {
+                        $this.attr('id', id.replace(/-\d+-/, '-' + newFormIndex + '-'));
+                    }
+                    if (htmlFor) {
+                        $this.attr('for', htmlFor.replace(/-\d+-/, '-' + newFormIndex + '-'));
                     }
                 });
 
-                // Очищаем новую форму от старых значений и ошибок
+                newForm.attr('data-form-index', newFormIndex);
+
+                // Очищаем новую форму
                 clearForm(newForm);
 
-                // Добавляем новую форму в контейнер
                 formsetContainer.append(newForm);
+                totalForms.val(newFormIndex + 1);
 
-                // Обновляем значение TOTAL_FORMS
-                totalForms.val(currentTotalForms + 1);
-
-                // Если используете Bootstrap Switch, инициализируйте его для нового переключателя
+                // Если вы используете Bootstrap Switch, переинициализируйте
                 /*
                 newForm.find('input[data-bootstrap-switch]').each(function(){
                     $(this).bootstrapSwitch();
@@ -208,83 +232,80 @@
                 */
             });
 
-            // --- JS для обработки изображений (Загрузить/Удалить/Превью) ---
-            // Используем делегирование событий для кнопок загрузки/удаления и input[type="file"].
-            // Это позволяет обрабатывать события на динамически добавленных элементах.
+            // --- JS для обработки изображений (Загрузить/Удалить/Превью/Кнопки) ---
+
+            // Показать/скрыть кнопки Загрузить/Удалить при наведении
+            formsetContainer.on('mouseenter', '.image-upload-preview', function() {
+                $(this).find('.overlay-buttons').css('opacity', '1');
+            }).on('mouseleave', '.image-upload-preview', function() {
+                $(this).find('.overlay-buttons').css('opacity', '0');
+            });
 
             // Обработчик клика по кнопке "Загрузить" (эмулирует клик по скрытому input file)
             formsetContainer.on('click', '.upload-button', function() {
-                var inputId = $(this).data('input-id'); // Получаем ID скрытого input file из data-атрибута
-                $('#' + inputId).click(); // Вызываем клик по скрытому input
+                var $formInstance = $(this).closest('.contact-form-instance');
+                $formInstance.find('input[type="file"][name$="-contact_picture"]').click();
             });
 
             // Обработчик изменения (выбора файла) для скрытого input[type="file"]
-            formsetContainer.on('change', 'input[type="file"]', function() {
-                var input = this; // Сам элемент input[type="file"]
-                var reader = new FileReader(); // Объект FileReader для чтения файла
-                var $formGroup = $(this).closest('.form-group'); // Находим родительскую группу формы
-                var $previewContainer = $formGroup.find('.image-upload-preview'); // Контейнер предпросмотра
-                var $imgPreview = $previewContainer.find('.img-thumbnail'); // Элемент img для предпросмотра
-                var $defaultIcon = $previewContainer.find('i.fa-image'); // Иконка по умолчанию
+            formsetContainer.on('change', 'input[type="file"][name$="-contact_picture"]', function() {
+                var input = this;
+                var reader = new FileReader();
+                var $formInstance = $(this).closest('.contact-form-instance');
+                var $imgPreview = $formInstance.find('.img-thumbnail');
+                var $defaultIcon = $formInstance.find('i.fa-image');
+                var $deleteCheckbox = $formInstance.find('input[name$="-delete_contact_picture"]');
 
                 reader.onload = function(e) {
-                    // Когда файл прочитан, устанавливаем src для img и показываем его
                     $imgPreview.attr('src', e.target.result).show();
-                    $defaultIcon.hide(); // Скрываем иконку по умолчанию
+                    $defaultIcon.hide();
                 };
 
                 if (input.files && input.files[0]) {
-                    reader.readAsDataURL(input.files[0]); // Читаем файл как URL данных
-                    // Если загружается новое изображение, снимаем отметку с чекбокса удаления
-                    var deleteCheckboxId = $(this).closest('.form-group').find('.delete-image-button').data('checkbox-id');
-                    $('#' + deleteCheckboxId).prop('checked', false);
+                    reader.readAsDataURL(input.files[0]);
+                    $deleteCheckbox.prop('checked', false); // Снимаем отметку "удалить" при загрузке нового
                 } else {
                     // Если файл не выбран (например, отменили выбор), сбрасываем предпросмотр
                     $imgPreview.attr('src', '').hide();
                     $defaultIcon.show();
+                    // Здесь не сбрасываем чекбокс удаления, если файл не выбран
+                    // Это позволяет пользователю нажать "удалить" без выбора нового файла
                 }
             });
 
             // Обработчик клика по кнопке "Удалить" изображение
             formsetContainer.on('click', '.delete-image-button', function() {
-                var $formGroup = $(this).closest('.form-group');
-                var deleteCheckboxId = $(this).data('checkbox-id'); // ID чекбокса удаления
-                var $fileInput = $formGroup.find('input[type="file"]'); // Скрытый input file
-                var $imgPreview = $formGroup.find('.img-thumbnail'); // Элемент img предпросмотра
-                var $defaultIcon = $formGroup.find('i.fa-image'); // Иконка по умолчанию
+                var $formInstance = $(this).closest('.contact-form-instance');
+                var $fileInput = $formInstance.find('input[type="file"][name$="-contact_picture"]');
+                var $imgPreview = $formInstance.find('.img-thumbnail');
+                var $defaultIcon = $formInstance.find('i.fa-image');
+                var $deleteCheckbox = $formInstance.find('input[name$="-delete_contact_picture"]');
 
-                // Помечаем чекбокс для удаления (это Django будет обрабатывать при сохранении)
-                $('#' + deleteCheckboxId).prop('checked', true);
+                // Помечаем чекбокс для удаления
+                $deleteCheckbox.prop('checked', true);
 
-                // Очищаем file input, чтобы при следующем POST-запросе не было старого файла
-                $fileInput.val('');
-                // Скрываем предпросмотр и показываем иконку по умолчанию
+                // Очищаем file input и сбрасываем предпросмотр
+                $fileInput.val(''); // Важно очистить file input
                 $imgPreview.attr('src', '').hide();
                 $defaultIcon.show();
             });
 
-            // Инициализация предпросмотра для уже существующих изображений при загрузке страницы
-            // Проходим по всем формам и проверяем, есть ли уже изображения
-           formsetContainer.find('.contact-form-instance').each(function() { // Проходим по каждой форме
-                var $formInstance = $(this);
-                var $previewContainer = $formInstance.find('.image-upload-preview');
-                var $imgPreview = $previewContainer.find('.img-thumbnail');
-                var $defaultIcon = $previewContainer.find('i.fa-image');
 
-                // Получаем src из HTML (он может быть пустым, если картинки нет)
-                var currentSrc = $imgPreview.attr('src');
+            // Инициализация предпросмотра и кнопок при загрузке страницы
+            formsetContainer.find('.contact-form-instance').each(function() {
+                var $formInstance = $(this);
+                var $imgPreview = $formInstance.find('.img-thumbnail');
+                var $defaultIcon = $formInstance.find('i.fa-image');
+                var currentSrc = $imgPreview.attr('src'); // Получаем src из HTML
 
                 if (currentSrc) { // Если src не пуст, значит, есть URL картинки
-                    $imgPreview.show(); // Показываем img
-                    $defaultIcon.hide(); // Скрываем иконку
+                    $imgPreview.show();
+                    $defaultIcon.hide();
                 } else {
-                    // Если src пуст, значит, картинки нет
-                    $imgPreview.hide(); // Скрываем img
-                    $defaultIcon.show(); // Показываем иконку по умолчанию
+                    $imgPreview.hide();
+                    $defaultIcon.show();
                 }
             });
-
         });
     </script>
 {% endblock %}
-

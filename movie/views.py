@@ -11,7 +11,7 @@ from collections import defaultdict
 
 # Create your views here.
 def movie_list(request):
-    movies_list = Movies.objects.all().select_related('gallery').order_by('title')
+    movies_list = Movies.objects.all().select_related('gallery',  ).order_by('title')
 
     paginator = Paginator(movies_list, 10)
     page = request.GET.get('page')
@@ -73,7 +73,7 @@ def movie_detail(request, movie_id):
     if movie_filter:
         sessions = sessions.filter(movie_filter)
 
-    # Фільтруємо available_dates, щоб показати тільки дати з сьогоднішнього дня і далі
+
     available_dates = (
         Sessions.objects.filter(movie=movie, date__gte=today)
         .values_list('date', flat=True)
@@ -91,6 +91,7 @@ def movie_detail(request, movie_id):
 
     context = {
         'movie': movie,
+        'seo_block': movie.seo_block,
         'main_picture': main_picture,
         'gallery_pictures': movie.gallery.pictures.all() if movie.gallery else [],
         'sessions': sessions,

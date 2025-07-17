@@ -1,39 +1,79 @@
 {% extends 'main/index1.html' %}
+{% load static %}
+{% load i18n %}
 
 {% block title %}Список кинотеатров{% endblock %}
 
 {% block content %}
-  <h1 class="mb-4">Список фільмів</h1>
 
-  <div class="cards-grid-container" >
-    {% for movie in movies %}
-          {% include 'movie/movie_card.html' with movie=movie %}
-    {% endfor %}
-  <div class="pagination mt-4 text-center">
-    <span class="step-links">
-      {% if movies.has_previous %}
-        <a class="btn btn-outline-secondary btn-sm" href="?page=1">&laquo; перша</a>
-        <a class="btn btn-outline-secondary btn-sm" href="?page={{ movies.previous_page_number }}">назад</a>
-      {% endif %}
+<div class="cards-grid-container">
+  {% for movie in movies %}
+    {% include 'movie/movie_card.html' with movie=movie %}
+  {% endfor %}
+</div>
 
-      <span class="mx-2">
-        Сторінка {{ movies.number }} з {{ movies.paginator.num_pages }}
+{# Блок пагинации #}
+<div class="pagination-wrapper"> {# Новый контейнер для центрирования #}
+    <div class="pagination mt-4"> {# Убираем text-center отсюда, будем центрировать сам блок #}
+      <span class="step-links">
+        {% if movies.has_previous %}
+          <a class="btn btn-outline-secondary btn-sm" href="?page=1">&laquo; перша</a>
+          <a class="btn btn-outline-secondary btn-sm" href="?page={{ movies.previous_page_number }}">назад</a>
+        {% endif %}
+
+        <span class="mx-2">
+          Сторінка {{ movies.number }} з {{ movies.paginator.num_pages }}
+        </span>
+
+        {% if movies.has_next %}
+          <a class="btn btn-outline-secondary btn-sm" href="?page={{ movies.next_page_number }}">далі</a>
+          <a class="btn btn-outline-secondary btn-sm" href="?page={{ movies.paginator.num_pages }}">остання &raquo;</a>
+        {% endif %}
       </span>
+    </div>
+</div>
 
-      {% if movies.has_next %}
-        <a class="btn btn-outline-secondary btn-sm" href="?page={{ movies.next_page_number }}">далі</a>
-        <a class="btn btn-outline-secondary btn-sm" href="?page={{ movies.paginator.num_pages }}">остання &raquo;</a>
-      {% endif %}
-    </span>
-  </div>
 <style>
    .cards-grid-container {
-     max-width: 80%; /* Or any width you prefer, e.g., 960px, 1400px */
-    margin: 0 auto;
-    display: grid;
+     max-width: 80%;
+     margin: 0 auto; /* Центрирует контейнер сетки */
+     display: grid;
+     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+     gap: 30px;
+     margin-bottom: 40px;
+      background-color: #000000; /* Черный фон */
+     padding: 20px; /* Внутренние отступы, чтобы карточки не прилипали к краям фона */
+     border-radius: 8px; /* Немного скругленные углы, чтобы выглядело приятнее */
+   }
 
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 30px; /
-}
+   .pagination-wrapper {
+        text-align: center; /* Центрирует внутреннее инлайновое содержимое */
+        /* Если .pagination должен быть блочным элементом с фиксированной шириной,
+           тогда для .pagination-wrapper не нужен text-align: center,
+           а для .pagination нужно:
+           margin-left: auto;
+           margin-right: auto;
+           width: fit-content; / * Или фиксированная ширина * /
+        */
+   }
+
+   .pagination {
+       margin-top: 40px;
+       margin-bottom: 40px;
+       /* Если это flexbox контейнер, то можно использовать justify-content: center; */
+       display: inline-block; /* Делаем его инлайн-блоком, чтобы он занимал только нужную ширину */
+   }
+   /* Для .step-links, чтобы его содержимое было inline-block или flex */
+   .step-links {
+       display: flex; /* Используем flexbox для центрирования кнопок и текста */
+       justify-content: center; /* Центрирует элементы внутри step-links */
+       align-items: center; /* Выравнивает элементы по вертикали */
+       flex-wrap: wrap; /* Позволяет элементам переноситься на новую строку при нехватке места */
+   }
+   .step-links a,
+   .step-links span {
+       margin: 0 5px; /* Немного отступа между кнопками и текстом */
+   }
 </style>
-{% endblock %}
+
+{% endblock %}}

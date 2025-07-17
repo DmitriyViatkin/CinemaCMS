@@ -26,7 +26,7 @@ class Movies(models.Model):
     description = models.TextField(verbose_name=_('Опис'))
 
     relise_date = models.DateField(verbose_name=_('Дата проката'))
-    age_limit = models.IntegerField(verbose_name=_('Вікова категорія'))
+    age_limit = models.PositiveIntegerField(verbose_name=_('Вікова категорія'))
     date = models.DateField(auto_now_add=True, verbose_name=_('Дата створення запису'))
     is_2d =  models.BooleanField(default=False, verbose_name='2D')
     is_3d = models.BooleanField(default=False, verbose_name='3D')

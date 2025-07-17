@@ -2,7 +2,7 @@
 {% for field in main_picture_form %}
     {% if field.name == 'image' %}
         <div class="form-group field-row-aligned main-picture-container" style="display: flex; align-items: center; gap: 15px;">
-            <label style="min-width: 120px;">Главная картинка</label> {# <-- Хардкодим метку для единообразия #}
+            <label style="min-width: 120px;">Главная картинка</label>
 
             <div class="image-preview-container" style="position: relative; width: 130px; height: 90px; border: 1px solid #000; display: flex; align-items: center; justify-content: center;">
                 {% if field.value and field.value.url %}
@@ -10,20 +10,19 @@
                 {% else %}
                     <img src="{% static 'images/картинка.png' %}" alt="Превью главной картинки" style="max-width: 100%; max-height: 100%;">
                 {% endif %}
-                {# Кнопка-крестик для главной картинки #}
+
                 <button type="button" class="btn btn-danger btn-sm remove-main-picture-cross" title="Удалить главную картинку"
                         style="position: absolute; top: -5px; right: -5px; display: none; z-index: 10;">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
 
-            {# Стандартный input[type="file"] будет скрыт через forms.py #}
-            {{ field }}
 
-            {# Кастомная кнопка загрузки - УДАЛИЛИ АТРИБУТ "for" #}
+          <div style="display: none;" >  {{ field }}</div>
+
+
             <label class="btn btn-light btn-sm custom-file-button-main-picture">загрузить</label>
 
-            {# Кнопка удаления #}
             <button type="button" class="btn btn-light btn-sm remove-main-picture-btn">Удалить</button>
 
             {% if field.errors %}

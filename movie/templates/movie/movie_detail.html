@@ -121,7 +121,7 @@
     <div class="container mt-4">
         {# Блок трейлера фільму #}
         {% if movie.url_trailer %}
-            <div class="video-responsive mb-4"> {# Контейнер для адаптивного відео #}
+            <div class="video-responsive mb-4">
                 <iframe
                     src="{{ movie.get_youtube_embed_url }}"
                     title="Офіційний трейлер фільму: {{ movie.title }}"
@@ -270,7 +270,7 @@
 
             <div class="col-md-8">
                <div class="mt-4">
-    <button type="button" class="btn btn-success" id="global-buy-ticket-btn">Купити квиток</button>
+    <button type="button" class="btn btn-success" id="global-buy-ticket-btn">{% trans 'Купити квиток' %}</button>
 </div>
 
                 <h1>{{ movie.title }}</h1>

@@ -140,13 +140,25 @@ class EmailCampaignForm(forms.ModelForm):
                 "Пожалуйста, выберите существующий шаблон или загрузите новый файл."
             )
         return cleaned_data
+
+
+
 class ContactForm(forms.ModelForm):
-    contact_picture = forms.ImageField(required=False, label="Лого")
-    delete_contact_picture = forms.BooleanField(required=False, initial=False, widget=forms.HiddenInput())
+    contact_picture = forms.ImageField(
+        required=False,
+        label="Лого",
+        widget=forms.ClearableFileInput(
+            attrs={'name': 'form-__prefix__-contact_picture'}
+        )
+    )
+    delete_contact_picture = forms.BooleanField(
+        required=False,
+        initial=False,
+        widget=forms.HiddenInput()
+    )
 
     class Meta:
         model = Contact
-
         fields = ['title', 'address', 'latitude', 'longitude', 'phone_number', 'gallery']
         widgets = {
             'latitude': forms.TextInput(attrs={'class': 'form-control'}),
@@ -178,6 +190,7 @@ class ContactForm(forms.ModelForm):
         if isinstance(gallery_data, str) and not gallery_data:
             return None
         return gallery_data
+
     def save(self, commit=True):
         contact = super().save(commit=False)
 
@@ -196,9 +209,9 @@ class ContactForm(forms.ModelForm):
                 gallery = Gallery.objects.create()
                 contact.gallery = gallery
 
-            Picture.objects.create(gallery=gallery, image=contact_picture)
+            Picture.objects.create(gallery=gallery, image=contact_picture, image_type='logo')
         elif not contact.gallery:
-             contact.gallery = None
+            contact.gallery = None
 
         if commit:
             contact.save()
@@ -336,6 +349,7 @@ class PictureForm(forms.ModelForm):
         widgets = {
             'gallery': forms.HiddenInput(),
             'image_type': forms.HiddenInput(),
+            'image': forms.FileInput(),
 
         }
 

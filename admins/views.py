@@ -6,7 +6,7 @@ from movie.models import Movies
 from users.models import User,Email_campaing,Tamplate_email
 from django.utils.decorators import method_decorator
 from django.db.models import Prefetch
-
+from datetime import timedelta
 from main.models import Gallery, Banners, Cross_Banner, News, PaigesNews, Promotion, PaigesCinema, MainPaiges, Contact, Block_SEO
 from core.models import Cinemas, Halls, Sessions, Seats, Tickets
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -33,10 +33,7 @@ def email_campaign_create(request, campaign_id=None):
     if request.method == 'POST':
         form = EmailCampaignForm(request.POST, request.FILES, instance=campaign_instance)
 
-        print("DEBUG POST: request.POST.get('recipient_mode'):", request.POST.get('recipient_mode'))
-        print("DEBUG POST: request.POST.get('users'):", request.POST.get('users'))
-        print("DEBUG POST: request.FILES.get('new_template_file'):", request.FILES.get('new_template_file'))
-        print("DEBUG POST: request.POST.get('template'):", request.POST.get('template'))
+
 
         if form.is_valid():
             email_campaign = form.save(commit=False)
@@ -50,18 +47,18 @@ def email_campaign_create(request, campaign_id=None):
                 try:
                     template_obj = Tamplate_email.objects.get(template_file__icontains=file_name)
                     template_obj.template_file.save(file_name, new_template_file, save=True)
-                    print(f"DEBUG: Обновлен существующий шаблон с файлом: {file_name}")
+
                 except Tamplate_email.DoesNotExist:
                     template_obj = Tamplate_email()
                     template_obj.template_file.save(file_name, new_template_file, save=True)
-                    print(f"DEBUG: Создан новый шаблон с файлом: {file_name}")
+
                 email_campaign.template = template_obj
             elif existing_template_obj:
                 email_campaign.template = existing_template_obj
-                print(f"DEBUG: Выбран существующий шаблон с ID: {existing_template_obj.id}")
+
             else:
                 email_campaign.template = None
-                print("DEBUG: Шаблон не выбран и новый файл не загружен.")
+
 
             email_campaign.save()
 
@@ -71,17 +68,17 @@ def email_campaign_create(request, campaign_id=None):
 
             if recipient_mode == "selected":
                 if selected_user_ids:
-                    print(f"DEBUG: Выбран режим 'selected'. Количество ID из формы: {len(selected_user_ids)}")
+
                     users_to_set = User.objects.filter(id__in=selected_user_ids)
                     email_campaign.users.set(users_to_set)
                 else:
-                    print("DEBUG: Режим 'selected' выбран, но ни один пользователь не выбран.")
+
                     email_campaign.users.clear()
             elif recipient_mode == "all":
-                print("DEBUG: Выбран режим 'all'.")
+
                 all_active_users = User.objects.filter(is_active=True)
                 email_campaign.users.set(all_active_users)
-                print(f"DEBUG: Количество активных пользователей: {all_active_users.count()}")
+
 
             email_campaign.save()
 
@@ -98,7 +95,7 @@ def email_campaign_create(request, campaign_id=None):
                 return redirect(f"{reverse('email_campaign_create')}?task_id={task.task_id}")
 
             else:
-                print("DEBUG: Нет email-адресов для отправки. Задача Celery не запущена.")
+
                 email_campaign.status = 'sent'
                 email_campaign.save()
                 # Если нет получателей, можно просто перенаправить на список или ту же страницу без task_id
@@ -106,7 +103,7 @@ def email_campaign_create(request, campaign_id=None):
 
 
         else:  # Форма невалидна
-            print(f"DEBUG: Форма невалидна. Ошибки: {form.errors}")
+
 
             templates = Tamplate_email.objects.order_by('-id')[:5]
             for template_item in templates:
@@ -132,7 +129,7 @@ def email_campaign_create(request, campaign_id=None):
 
     else:  # GET-запрос
         form = EmailCampaignForm(instance=campaign_instance)
-        print(f"DEBUG (GET request): Form fields available: {list(form.fields.keys())}")
+
 
         selected_user_ids_for_template = []
 
@@ -147,8 +144,8 @@ def email_campaign_create(request, campaign_id=None):
         if campaign_instance and campaign_instance.template:
             if 'template' in form.fields:
                 form.fields['template'].initial = campaign_instance.template.pk
-            else:
-                print("ОШИБКА КОНФИГУРАЦИИ: Поле 'template' не найдено в EmailCampaignForm. Проверьте admins/forms.py.")
+
+
 
 
         current_task_id = request.GET.get('task_id')
@@ -200,12 +197,71 @@ def index(request):
     user_count = User.objects.count()
     ticket_count = Tickets.objects.count()
     movie_count = Movies.objects.count()
-    today = timezone.now().date()
-    date_from = today - timezone.timedelta(days=30)
-    ticket_sales = (Tickets.objects.filter(session__date__gte=date_from,session__date__lte=today).
-                    values('session__date').annotate(count=Count('id')).order_by('session__date' ))
+
+    today = timezone.now().date()  # Получаем текущую дату без времени
+    date_from = today - timedelta(days=30)
+
+    # --- График общих продаж по дням (уже оптимизирован) ---
+    ticket_sales = (
+        Tickets.objects
+        .filter(session__date__range=(date_from, today))
+        .values('session__date')
+        .annotate(count=Count('id'))
+        .order_by('session__date')
+    )
+
     chart_labels = [item['session__date'].strftime('%Y-%m-%d') for item in ticket_sales]
     chart_data = [item['count'] for item in ticket_sales]
+
+    # --- ОПТИМИЗИРОВАННЫЕ ПРОДАЖИ ПО КИНОТЕАТРАМ ---
+    # 1. Получаем все кинотеатры (возможно, уже нужно было раньше, можно использовать кэш)
+    #    Используем dict comprehension для быстрого доступа по ID
+    cinemas_data = {cinema.id: cinema.title for cinema in Cinemas.objects.all()}
+
+    # 2. Создаем список всех дат в диапазоне 31 дня
+    all_dates = [date_from + timedelta(days=i) for i in range(31)]
+    chart_days = [d.strftime('%Y-%m-%d') for d in all_dates]  # Для вашего контекста
+
+    # 3. Выполняем ОДИН агрегирующий запрос
+    #    Он посчитает количество билетов для каждой пары (кинотеатр, дата)
+    aggregated_sales = (
+        Tickets.objects
+        .filter(session__date__range=(date_from, today))
+        .values(
+            'session__cinema_id',  # ID кинотеатра
+            'session__date'  # Дата сессии
+        )
+        .annotate(
+            tickets_count=Count('id')  # Подсчет билетов
+        )
+        .order_by(
+            'session__cinema_id',
+            'session__date'
+        )
+    )
+
+    # 4. Преобразуем результат в удобную структуру для шаблона
+    #    cinema_sales будет выглядеть: { 'Название_Кинотеатра_1': [count_day1, count_day2, ...], ... }
+    cinema_sales = {title: [0] * 31 for title in cinemas_data.values()}  # Инициализируем нулями
+
+    # Создаем временный словарь для удобства сопоставления ID и индекса даты
+    temp_cinema_daily_counts = {cinema_id: {d: 0 for d in all_dates} for cinema_id in cinemas_data.keys()}
+
+    for item in aggregated_sales:
+        cinema_id = item['session__cinema_id']
+        session_date = item['session__date']
+        count = item['tickets_count']
+
+        if cinema_id in temp_cinema_daily_counts and session_date in temp_cinema_daily_counts[cinema_id]:
+            temp_cinema_daily_counts[cinema_id][session_date] = count
+
+    # Переносим данные в final cinema_sales в нужном порядке
+    for cinema_id, daily_data in temp_cinema_daily_counts.items():
+        cinema_title = cinemas_data[cinema_id]
+        daily_counts_ordered = [daily_data[d] for d in all_dates]
+        cinema_sales[cinema_title] = daily_counts_ordered
+
+    # 🎯 Данные для круговых диаграмм (knob)
     knob_data = {
         'category1': 5,
         'category2': 10,
@@ -215,77 +271,63 @@ def index(request):
     context = {
         'user_count': user_count,
         'ticket_count': ticket_count,
-        'movie_count' : movie_count,
-        'chart_labels': chart_labels,
-        'chart_data': chart_data,
+        'movie_count': movie_count,
+        'chart_labels': chart_labels,  # для общего графика
+        'chart_data': chart_data,  # для общего графика
+        'cinema_sales': cinema_sales,  # для графика по кинотеатрам (теперь оптимизировано!)
+        'chart_days': chart_days,  # список дат для осей графиков
         'knob_data': knob_data,
     }
 
-    return render(request,'admin/index.html', context)
-
-
-
+    return render(request, 'admin/index.html', context)
 @staff_member_required
 def new_contacts(request):
-    print(f"--- new_contacts view called, Request method: {request.method} ---")
-
-    # Спроба отримати існуючий SEO блок (id=1), або None
     seo_instance = Block_SEO.objects.filter(id=1).first()
-    if seo_instance:
-        print(f"DEBUG: Found existing Block_SEO instance with ID: {seo_instance.id}")
-    else:
-        print("DEBUG: Block_SEO instance with id=1 does not exist yet.")
+    if not seo_instance:
+        seo_instance = Block_SEO.objects.create(title="Контакты SEO", description="SEO описание для страницы контактов")
 
     if request.method == 'POST':
-        print("DEBUG: Handling POST request.")
-        formset = ContactFormSet(request.POST, request.FILES, queryset=Contact.objects.all())
         block_seo_form = BlockSEOForm(request.POST, instance=seo_instance)
+        formset = ContactFormSet(request.POST, request.FILES, queryset=Contact.objects.filter(seo_block=seo_instance))
 
         if formset.is_valid() and block_seo_form.is_valid():
             try:
-                # Зберігаємо або створюємо SEO блок
                 block_seo = block_seo_form.save()
-                print(f"DEBUG: BlockSEOForm saved. title_seo: {block_seo.title_seo}")
 
-                # Зберігаємо контакти з привʼязкою до SEO
-                contacts = formset.save(commit=False)
-                for contact in contacts:
-                    contact.seo_block = block_seo
-                    contact.save()
+                for form in formset:
+                    if form.is_valid():
+                        if form.cleaned_data.get('DELETE') and not form.instance.pk:
+                            continue
 
-                # Видалення позначених для видалення
-                for obj in formset.deleted_objects:
-                    print(f"DEBUG: Deleting contact {obj.title} (ID: {obj.id})")
-                    if obj.gallery:
-                        obj.gallery.delete()
-                        print(f"DEBUG: Deleted gallery for contact {obj.title}")
-                    obj.delete()
+                        contact = form.save(commit=False)
+                        contact.seo_block = block_seo
+                        if not contact.gallery:
+                            gallery = Gallery.objects.create()
+                            contact.gallery = gallery
+                        contact_picture = form.cleaned_data.get('contact_picture')
+                        print("contact_picture in cleaned_data:", contact_picture)
+                        contact.save()
 
-                print(f"DEBUG: Saved {len(contacts)} contacts. Redirecting.")
+                for form in formset.deleted_forms:
+                    if form.instance.pk:
+                        if form.instance.gallery:
+                            form.instance.gallery.delete()
+                        form.instance.delete()
+
                 return redirect('con')
 
             except Exception as e:
-                print(f"ERROR: Failed to save formset or SEO block: {e}")
+                print(f"Ошибка при сохранении контактов: {e}")
                 raise e
-        else:
-            print("WARNING: Formset or SEO form invalid.")
-            if not formset.is_valid():
-                for i, form in enumerate(formset):
-                    if form.errors:
-                        print(f"Form {i} errors: {form.errors}")
-            if not block_seo_form.is_valid():
-                print(f"SEO form errors: {block_seo_form.errors}")
 
     else:
-        print("DEBUG: Handling GET request.")
-        formset = ContactFormSet(queryset=Contact.objects.all())
         block_seo_form = BlockSEOForm(instance=seo_instance)
+        formset = ContactFormSet(queryset=Contact.objects.filter(seo_block=seo_instance))
 
     return render(request, 'admin/paige_list/new_contacts.html', {
         'formset': formset,
         'block_seo_form': block_seo_form
     })
-
 
 
 @staff_member_required
@@ -406,12 +448,7 @@ def add_movie(request, movie_id=None):
 
         else:
 
-            print("Ошибка валидации форм")
-            print("block_seo_form.errors:", block_seo_form.errors)
-            print("movie_form.errors:", movie_form.errors)
-            print("gallery_form.errors:", gallery_form.errors)
-            print("picture_formset.errors:", picture_formset.errors)
-            print("main_picture_form.errors:", main_picture_form.errors)
+
 
             return render(request, 'admin/movies_lists/add_movies.html', {
                 'block_seo_form': block_seo_form,
@@ -564,13 +601,7 @@ def add_cinema_create(request, cinema_id=None):
             return redirect('cinema_lists')
 
         else:
-            print("Ошибка валидации форм")
-            print("block_seo_form.errors:", block_seo_form.errors)
-            print("cinema_form.errors:", cinema_form.errors)
-            print("gallery_form.errors:", gallery_form.errors)
-            print("picture_formset.errors:", picture_formset.errors)
-            print("banner_form.errors:", banner_form.errors)
-            print("logo_form.errors:", logo_form.errors)
+
 
             return render(request, 'admin/cinema/add_cinema.html', {
                 'block_seo_form': block_seo_form,
@@ -676,7 +707,7 @@ def add_halls_create(request, cinema_pk, halls_id=None):
             prefix='banner_form'
         )
 
-        # УВАГА: У POST НЕ ПЕРЕДАЄМО queryset
+
         picture_formset = PictureFormSet(
             request.POST, request.FILES,
             prefix='pictures'
@@ -723,13 +754,8 @@ def add_halls_create(request, cinema_pk, halls_id=None):
                 picture_to_delete.delete()
 
             return redirect('add_cinema_edit', cinema_id=cinema_pk)
-        else:
-            print("❌ Помилка валідації форм:")
-            print("block_seo_form.errors:", block_seo_form.errors)
-            print("halls_form.errors:", halls_form.errors)
-            print("gallery_form.errors:", gallery_form.errors)
-            print("picture_formset.errors:", picture_formset.errors)
-            print("banner_form.errors:", banner_form.errors)
+
+
 
     else:
         block_seo_form = BlockSEOForm(instance=block_seo_instance)
@@ -771,156 +797,6 @@ def delete_halls(request, pk):
     hall_to_delete.delete()
 
     return redirect('add_cinema_edit', cinema_id=cinema_id)
-
-@method_decorator(staff_member_required, name='dispatch')
-class Session_Lists(ListView):
-
-    model = Sessions
-    template_name = 'admin/session/sessions_list.html'
-    context_object_name = 'sessions'
-    paginate_by = 50
-    def get_queryset(self):
-        queryset  = super().get_queryset()
-        return queryset
-    def get_context_data( self,   **kwargs  ):
-        context= super().get_context_data(**kwargs)
-        return context
-
-
-
-@staff_member_required
-def add_edit_session(request, session_id=None):
-    if request.method == 'POST':
-        formset = SessionFormSet(request.POST)
-        if formset.is_valid():
-            formset.save()
-            return redirect('sessions_list')
-    else:
-
-        formset = SessionFormSet(queryset=Sessions.objects.none())
-
-    return render(request, 'admin/session/add_sessions.html', {
-        'session_formset': formset,
-        'session': None
-    })
-
-@staff_member_required
-def delete_sessions(request, pk):
-        sessions = get_object_or_404(Sessions, pk=pk)
-
-        sessions.delete()
-
-        return redirect('sessions_list')
-
-@staff_member_required
-def seats_list(request: HttpRequest) :
-    seats_list = Seats.objects.select_related('halls').order_by('number_row', 'seat')
-    paginator = Paginator(seats_list, 10)
-    page_number = request.GET.get('page')
-
-    try:
-        seats = paginator.page(page_number)
-    except PageNotAnInteger:
-        seats = paginator.page(1)
-    except EmptyPage:
-        seats = paginator.page(paginator.num_pages)
-
-    context = {'seats': seats}
-
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        html = render_to_string('admin/seats_list/seats_table_partial.html', context, request=request)
-        return HttpResponse(html)
-    else:
-        return render(request, 'admin/seats_list/seats_list.html', context)
-
-@staff_member_required
-def add_edit_seat(request):
-    seat_id = request.GET.get('seat_id') or request.POST.get('seat_id')
-    if seat_id:
-        seat_instance = get_object_or_404(Seats, id=seat_id)
-        form = SeatForm(request.POST or None, instance=seat_instance)
-    else:
-        form = SeatForm(request.POST or None)
-
-    if request.method == 'POST' and form.is_valid():
-        form.save()
-        return redirect('seats_list')
-
-    seats = Seats.objects.all().order_by('number_row', 'seat')
-    return render(request, 'admin/seats_list/add_seats.html', {
-        'form': form,
-        'seats': seats,
-    })
-
-@staff_member_required
-def delete_seats(request, pk):
-        seat = get_object_or_404(Seats, pk=pk)
-
-        seat.delete()
-
-        return redirect('seats_list')
-
-@staff_member_required
-def tickets_list(request):
-
-    tickets_list = Tickets.objects.all()
-
-
-    paginator = Paginator(tickets_list, 10)
-    page = request.GET.get('page')
-    try:
-        tickets = paginator.page(page)
-    except PageNotAnInteger:
-        tickets = paginator.page(1)
-    except EmptyPage:
-        tickets = paginator.page(paginator.num_pages)
-
-    context = {
-        'tickets': tickets,
-    }
-    return render(request, 'admin/tickets/tickets_list.html', context)
-
-@staff_member_required
-def add_edit_ticket(request, session_id=None):
-    session_instance = None
-    ticket_instance = None
-
-    if session_id:
-        session_instance = get_object_or_404(Sessions, id=session_id)
-        try:
-            ticket_instance = Tickets.objects.get(session=session_instance)
-        except Tickets.DoesNotExist:
-            ticket_instance = Tickets(session=session_instance)
-
-    if request.method == 'POST':
-        form = TicketForm(request.POST, instance=ticket_instance)
-        if form.is_valid():
-            saved_ticket = form.save()
-
-            seat_to_update = saved_ticket.seat
-            if seat_to_update:
-                seat_to_update.status = 'S'
-                seat_to_update.save()
-
-            return redirect('tickets_lists')
-    else:
-        form = TicketForm(instance=ticket_instance)
-
-    context = {
-        'form': form,
-        'session': session_instance,
-    }
-    return render(request, 'admin/tickets/add_tickets.html', context)
-
-@staff_member_required
-def delete_tickets (request, pk):
-        tickets = get_object_or_404(Tickets, pk=pk)
-        if request.method == 'POST':
-            tickets.delete()
-            return redirect('tickets_lists')
-        tickets.delete()
-        return redirect('tickets_lists')
-
 
 @staff_member_required
 def add_banners(request):
@@ -1117,7 +993,7 @@ def add_user(request, user_id=None):
 def delete_user(request, users_id):
     user = get_object_or_404(User, pk=users_id)
 
-    if request.method == 'POST': # <<< Видалення відбувається тільки тут
+    if request.method == 'POST':
         user.delete()
         return redirect('users')
     else: #
@@ -1234,12 +1110,7 @@ def news_paige_add(request, news_id=None):
 
         else:
 
-            print("Ошибка валидации форм")
-            print("block_seo_form.errors:", block_seo_form.errors)
-            print("news_form.errors:", news_form.errors)
-            print("gallery_form.errors:", gallery_form.errors)
-            print("picture_formset.errors:", picture_formset.errors)
-            print("main_picture_form.errors:", main_picture_form.errors)
+
 
             return render(request, 'admin/news_paige/add_news.html', {
                 'block_seo_form': block_seo_form,
@@ -1398,13 +1269,7 @@ def promotion_paige_add(request, promotion_id=None):
 
             return redirect('promotion')
 
-        else:
-            print("Помилки валідації:")
-            print("block_seo_form:", block_seo_form.errors)
-            print("promotion_form:", promotion_form.errors)
-            print("gallery_form:", gallery_form.errors)
-            print("picture_formset:", picture_formset.errors)
-            print("main_picture_form:", main_picture_form.errors)
+
 
     else:
         block_seo_form = BlockSEOForm(instance=block_seo_instance)
@@ -1493,9 +1358,7 @@ def  main_paige (request, paige_id=None):
             return redirect('paige')
 
         else:
-            print("Ошибка валидации форм")
-            print("block_seo_form.errors:", block_seo_form.errors)
-            print("paige_form.errors:", paige_form.errors)
+
 
             return render(request, 'admin/paige_list/main_paige.html', {
                 'block_seo_form': block_seo_form,
@@ -1605,12 +1468,7 @@ def  paige_add (request, paige_id=None):
 
         else:
 
-            print("Ошибка валидации форм")
-            print("block_seo_form.errors:", block_seo_form.errors)
-            print("paige_form.errors:", paige_form.errors)
-            print("gallery_form.errors:", gallery_form.errors)
-            print("picture_formset.errors:", picture_formset.errors)
-            print("main_picture_form.errors:", main_picture_form.errors)
+
 
             return render(request, 'admin/paige_list/add_paige.html', {
                 'block_seo_form': block_seo_form,

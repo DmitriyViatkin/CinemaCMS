@@ -1,6 +1,12 @@
 {% load static %}
 {% load i18n %}
 
+ <style>
+    input[type="file"] {
+        display: none;
+    }
+
+</style>
 {{ picture_formset.management_form }}
 
 <div id="pictures-formset">
@@ -18,13 +24,17 @@
                         {% endif %}
 
                         <button type="button" class="btn btn-danger btn-sm remove-item-cross" title="Видалити зображення"
-                                {% if not form.image.value %}style="display: none;"{% endif %}> {# Только показывать, если есть загруженное изображение #}
+                                {% if not form.image.value %}style="display: none;"{% endif %}>
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
 
-                    <div class="custom-file-input-wrapper">
+                    <div class="custom-file-input-wrapper"  style="display: none;">
                         {{ form.image }}
+
+                    </div>
+                     <div class="custom-file-input-wrapper"   >
+
                         <label class="btn btn-secondary custom-file-button">{% translate "Додати" %}</label>
                     </div>
 
@@ -34,7 +44,7 @@
                 </div>
             </div>
 
-            <button type="button" class="btn btn-light btn-sm remove-gallery-btn mt-2"> {% translate "Видалити" %}</button>
+
 
             {{ form.id }}
             {{ form.image_type }}
@@ -64,11 +74,11 @@
                 </div>
             </div>
         </div>
-        <button type="button" class="btn btn-light btn-sm remove-gallery-btn mt-2"> {% translate "Видалити" %}</button>
+
         {{ picture_formset.empty_form.id }}
         {{ picture_formset.empty_form.image_type }}
         {{ picture_formset.empty_form.gallery }}
-        <div class="delete-checkbox-hidden-field visually-hidden"> {# Скрываем, как и другие #}
+        <div class="delete-checkbox-hidden-field visually-hidden">
             {{ picture_formset.empty_form.DELETE }}
         </div>
     </div>
@@ -119,11 +129,7 @@
         }
     }
 
-    /**
-     * Обновляет индексы полей формы (id, name, for) в формсете.
-     * @param {HTMLElement} formElement - Элемент формы для обновления.
-     * @param {number} newIndex - Новый индекс.
-     */
+
     function updateFormIndices(formElement, newIndex) {
         formElement.querySelectorAll('[id*="pictures-"], [name*="pictures-"], [for*="pictures-"]').forEach(node => {
             let id = node.getAttribute('id');
@@ -260,12 +266,7 @@
         console.error("Empty form template for gallery not found! Check #empty-form structure.");
     }
 
-    /**
-     * Обновляет значение TOTAL_FORMS в management_form.
-     * ЭТО КЛЮЧЕВАЯ ФУНКЦИЯ ДЛЯ КОРРЕКТНОЙ РАБОТЫ ФОРМСЕТА.
-     * Она должна отражать ОБЩЕЕ количество форм (видимых и скрытых, но не удаленных)
-     * присутствующих в DOM.
-     */
+
     const updateActualFormCount = () => {
         // Получаем все формы формсета, независимо от их видимости
         const allForms = picturesFormsetContainer.querySelectorAll('.gallery-image-form');
@@ -276,8 +277,7 @@
         // Переиндексируем ВСЕ формы в DOM
         allForms.forEach((form, index) => {
             updateFormIndices(form, index);
-            // Если форма скрыта и помечена на удаление, убедимся, что DELETE-флаг установлен.
-            // Это важно после переиндексации, чтобы флаг DELETE был привязан к новому индексу.
+
             const deleteCheckbox = form.querySelector('input[type="checkbox"][name$="-DELETE"]');
             if (form.style.display === 'none' && deleteCheckbox) {
                 deleteCheckbox.checked = true;
@@ -286,10 +286,7 @@
     };
 
 
-    /**
-     * Инициализирует логику для формсета галереи.
-     * @param {HTMLElement} form - Элемент формы из формсета.
-     */
+
     const initializeGalleryForm = (form) => {
         const fileInput = form.querySelector('input[type="file"]');
         const previewContainer = form.querySelector('.image-preview-container');
@@ -414,12 +411,10 @@
         });
     }
 
-    // Скрываем поля из пустого шаблона формы
-    // emptyFormTemplate уже был клонирован и удален, так что этот блок не нужен для его скрытия в DOM
-    // Если вы хотите, чтобы сам HTML-шаблон (div#empty-form) был скрыт, это нужно делать в CSS или HTML.
 
 
-    // --- ИНИЦИАЛИЗАЦИЯ JQUERY ПЛАГИНОВ (если они должны быть внутри DOMContentLoaded) ---
+
+
     if (typeof jQuery !== 'undefined') {
         $(function () {
             $('#reservationdatetime').datetimepicker({ icons: { time: 'far fa-clock' } });

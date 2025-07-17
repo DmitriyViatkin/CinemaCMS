@@ -1,3 +1,4 @@
+
 {% extends 'admin/index.html' %}
 {% load static %}
 {% load i18n %}
@@ -161,56 +162,54 @@
                           <div class="card-body">
                               {# Українська версія полів #}
                               {% include 'admin/card_forms/halls_form_uk.html' with form=halls_form %}
-
                           </div>
-
                       </div>
 
                       <div id="russianTab" class="tab-pane">
                           <div class="card-body">
                               {# Російська версія полів #}
                               {% include 'admin/card_forms/halls_form_ru.html' with form=halls_form %}
-
                           </div>
                       </div>
-
                   </div>
                   <br>
+
+                  {# Цей div-блок об'єднує поля "Кінотеатр" та "Схема залу" #}
                   <div class="card-body">
-                                <div class="card-body">
-                                          <div class="form-group">
-                                            {{ halls_form.cinema.label_tag }}
-                                            {{halls_form.cinema}}
-                                            {% if halls_form.cinema.help_text %}
-                                              <small class="form-text text-muted">{{ halls_form.cinema.help_text }}</small>
-                                            {% endif %}
-                                            {% for error in halls_form.cinema_uk.errors %}
-                                              <div class="alert alert-danger">{{ error }}</div>
-                                            {% endfor %}
-                                          </div>
-                                        </div>
                       <div class="form-group">
-                            {{ halls_form.scheme_hall.label_tag }}
-                            {{ halls_form.scheme_hall }}
-                            {% if halls_form.scheme_hall.help_text %}
-                              <small class="form-text text-muted">{{halls_form.scheme_hall.help_text }}</small>
-                            {% endif %}
-                            {% for error in halls_form.scheme_hall.errors %}
-                              <div class="alert alert-danger">{{ error }}</div>
-                            {% endfor %}
-                          </div>
-                        </div>
+                          {{ halls_form.cinema.label_tag }}
+                          {{ halls_form.cinema }}
+                          {% if halls_form.cinema.help_text %}
+                            <small class="form-text text-muted">{{ halls_form.cinema.help_text }}</small>
+                          {% endif %}
+                          {% for error in halls_form.cinema_uk.errors %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                          {% endfor %}
+                      </div>
 
-                      <div class="card-body">
+                      <div class="form-group">
+                          {{ halls_form.scheme_hall.label_tag }}
+                          {{ halls_form.scheme_hall }}
+                          {% if halls_form.scheme_hall.help_text %}
+                            <small class="form-text text-muted">{{ halls_form.scheme_hall.help_text }}</small>
+                          {% endif %}
+                          {% for error in halls_form.scheme_hall.errors %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                          {% endfor %}
+                      </div>
+                  </div>
 
-                              <br>
-                              {% include 'admin/card_forms/banner_image.html' %}
-                              <br>
-                              <h3>{% translate 'Картинки галереї (Українська)'%} </h3>
-                              {% include 'admin/card_forms/gallery_form.html' %}
-                              <br>
-                              <h3>SEO (Українська)</h3>
-                              {% include 'admin/card_forms/seo_form.html' with form=block_seo_form %}
+                  {# Цей div-блок для Банера, Галереї та SEO #}
+                  <div class="card-body">
+                      <br>
+                      {% include 'admin/card_forms/banner_image.html' %}
+                      <br>
+                      <h3>{% translate 'Картинки галереї (Українська)'%} </h3>
+                      {% include 'admin/card_forms/gallery_form.html' %}
+                      <br>
+                      <h3>SEO (Українська)</h3>
+                      {% include 'admin/card_forms/seo_form.html' with form=block_seo_form %}
+                  </div>
 
                   <div class="card-footer">
                       <button type="submit" class="btn btn-primary">
@@ -218,13 +217,26 @@
                       </button>
                   </div>
               </form>
-            </div>
-          </div>
-        </div>
-    </div>
-</section>
+            </div> {# Закриття card card-primary #}
+          </div> {# Закриття col-md-12 #}
+        </div> {# Закриття row #}
+    </div> {# Закриття container-fluid #}
+</section> {# Закриття section content #}
 
+<script src="{% static 'admins/plugins/jquery/jquery.min.js' %}"></script>
+<script src="{% static 'admins/plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'admins/plugins/moment/moment.min.js' %}"></script>
+<script src="{% static 'admins/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js' %}"></script>
+<script src="{% static 'admins/plugins/daterangepicker/daterangepicker.js' %}"></script>
 
+<script src="{% static 'admins/plugins/select2/js/select2.full.min.js' %}"></script>
+<script src="{% static 'admins/plugins/bootstrap4-duallistbox/jquery.bootstrap-duallistbox.min.js' %}"></script>
+<script src="{% static 'admins/plugins/inputmask/jquery.inputmask.min.js' %}"></script>
+<script src="{% static 'admins/plugins/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js' %}"></script>
+<script src="{% static 'admins/plugins/bootstrap-switch/js/bootstrap-switch.min.js' %}"></script>
+<script src="{% static 'admins/plugins/bs-stepper/js/bs-stepper.min.js' %}"></script>
+<script src="{% static 'admins/plugins/dropzone/min/dropzone.min.js' %}"></script>
+<script src="{% static 'admins/dist/js/adminlte.min.js' %}"></script>
 <script>
     const DEFAULT_IMAGE_URL = "{% static 'images/картинка.png' %}";
 </script>
@@ -244,10 +256,5 @@
 {# Інші CSS та скрипти, які не залежать від jQuery UI / datetimepicker #}
 <link rel="stylesheet" href="{% static 'css/movie_css.css' %}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
-
-
-
-
 
 {% endblock %}

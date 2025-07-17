@@ -5,10 +5,9 @@ from datetime import timedelta
 from movie.models import Movies
 from django.db.models import Prefetch
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.conf import settings
 
-
-
-def contact_paige (request):
+def contact_paige(request):
     banners = Banners.objects.select_related('gallery').prefetch_related(
         Prefetch(
             'gallery__pictures',
@@ -16,7 +15,9 @@ def contact_paige (request):
             to_attr='banner_pictures'
         )
     )
-    contacts = Contact.objects.select_related('gallery', 'seo_block').prefetch_related(
+
+    # Fetch contacts with their related data
+    contacts_queryset = Contact.objects.select_related('gallery', 'seo_block').prefetch_related(
         Prefetch(
             'gallery__pictures',
             queryset=Picture.objects.all(),
@@ -24,43 +25,47 @@ def contact_paige (request):
         )
     ).all()
 
-
     contacts_data = []
 
-    for contact_item in contacts:  # Проходимо по кожному контакту
-        main_picture = None
+    for contact_item in contacts_queryset:  # Проходимо по кожному контакту
+
         logo_picture = None
-        gallery_pictures_list = []
+
 
         if contact_item.gallery and hasattr(contact_item.gallery, 'all_gallery_images'):
             for pic in contact_item.gallery.all_gallery_images:
-                if pic.image_type == 'main_picture':
-                    main_picture = pic
-                elif pic.image_type == 'logo':
+                if  pic.image_type == 'logo':
                     logo_picture = pic
-                elif pic.image_type == 'gallery':
-                    gallery_pictures_list.append(pic)
 
+
+        current_latitude = contact_item.latitude if hasattr(contact_item, 'latitude') else None
+        current_longitude = contact_item.longitude if hasattr(contact_item, 'longitude') else None
+
+        # --- ВЫВОД В КОНСОЛЬ ДОЛГОТЫ И ШИРОТЫ КАЖДОГО КОНТАКТА ---
+        print(f"Контакт: {contact_item.title if hasattr(contact_item, 'title') else 'Без названия'}")
+        print(f"  Широта: {current_latitude}")
+        print(f"  Долгота: {current_longitude}")
+        # -----------------------------------------------------------
 
         contacts_data.append({
             'contact': contact_item,
-            'main_picture': main_picture,
             'logo_picture': logo_picture,
-            'gallery_pictures_list': gallery_pictures_list,  # Якщо знадобиться вивести галерею
+
+            'latitude': current_latitude, # Сохраняем для передачи в шаблон
+            'longitude': current_longitude, # Сохраняем для передачи в шаблон
         })
 
     page_seo_data = None
-    if contacts.exists() and contacts.first().seo_block:
-        page_seo_data = contacts.first().seo_block  # This line is correct, it gets a single Block_SEO object
+    if contacts_queryset.exists() and contacts_queryset.first().seo_block:
+        page_seo_data = contacts_queryset.first().seo_block
     else:
-        # This 'else' block doesn't set page_seo_data, so it could remain None
-        pass
+        pass # Handle this case if necessary
 
-    print (page_seo_data)
-    context={
-       'contacts_data': contacts_data,
+    context = {
+       'contacts_data': contacts_data, # This now contains latitude/longitude for each item
        'banners': banners,
         'page_seo_data': page_seo_data,
+        'MAPS_API_KEY': settings.MAPS_API_KEY, # Make sure API key is passed!
     }
     return render(request, 'main/contact_paige.html', context)
 
