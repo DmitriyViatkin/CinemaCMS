@@ -490,7 +490,7 @@ class HallsForm(forms.ModelForm):
     class Meta:
         model = Halls
 
-        exclude = ['seo_block','date', 'gallery']
+
         fields = [
             'title_uk', 'title_ru',
             'description_uk', 'description_ru',
@@ -505,6 +505,9 @@ class HallsForm(forms.ModelForm):
             'description':_("Опис"),
 
         }
+        
+
+
 class CinemaForm(forms.ModelForm):
 
     class Meta:

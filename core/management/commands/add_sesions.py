@@ -157,3 +157,8 @@ class Command(BaseCommand):
             current_date += timedelta(days=1)
 
         self.stdout.write(self.style.SUCCESS(f'Создано {sessions_created_count} новых сеансов.'))
+"""
+ python manage.py add_sesions   --cinema_id 9   --movie_id 5   --start_date 2025-07-16   --end_date 2025-09-25   --times 14:00,16:00
+
+
+"""

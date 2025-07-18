@@ -7,6 +7,7 @@ from users.models import User,Email_campaing,Tamplate_email
 from django.utils.decorators import method_decorator
 from django.db.models import Prefetch
 from datetime import timedelta
+from django.db.models.functions import TruncMonth
 from main.models import Gallery, Banners, Cross_Banner, News, PaigesNews, Promotion, PaigesCinema, MainPaiges, Contact, Block_SEO
 from core.models import Cinemas, Halls, Sessions, Seats, Tickets
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -213,17 +214,14 @@ def index(request):
     chart_labels = [item['session__date'].strftime('%Y-%m-%d') for item in ticket_sales]
     chart_data = [item['count'] for item in ticket_sales]
 
-    # --- ОПТИМИЗИРОВАННЫЕ ПРОДАЖИ ПО КИНОТЕАТРАМ ---
-    # 1. Получаем все кинотеатры (возможно, уже нужно было раньше, можно использовать кэш)
-    #    Используем dict comprehension для быстрого доступа по ID
+
     cinemas_data = {cinema.id: cinema.title for cinema in Cinemas.objects.all()}
 
-    # 2. Создаем список всех дат в диапазоне 31 дня
+
     all_dates = [date_from + timedelta(days=i) for i in range(31)]
     chart_days = [d.strftime('%Y-%m-%d') for d in all_dates]  # Для вашего контекста
 
-    # 3. Выполняем ОДИН агрегирующий запрос
-    #    Он посчитает количество билетов для каждой пары (кинотеатр, дата)
+
     aggregated_sales = (
         Tickets.objects
         .filter(session__date__range=(date_from, today))
@@ -240,11 +238,8 @@ def index(request):
         )
     )
 
-    # 4. Преобразуем результат в удобную структуру для шаблона
-    #    cinema_sales будет выглядеть: { 'Название_Кинотеатра_1': [count_day1, count_day2, ...], ... }
-    cinema_sales = {title: [0] * 31 for title in cinemas_data.values()}  # Инициализируем нулями
 
-    # Создаем временный словарь для удобства сопоставления ID и индекса даты
+    cinema_sales = {title: [0] * 31 for title in cinemas_data.values()}
     temp_cinema_daily_counts = {cinema_id: {d: 0 for d in all_dates} for cinema_id in cinemas_data.keys()}
 
     for item in aggregated_sales:
@@ -261,25 +256,43 @@ def index(request):
         daily_counts_ordered = [daily_data[d] for d in all_dates]
         cinema_sales[cinema_title] = daily_counts_ordered
 
-    # 🎯 Данные для круговых диаграмм (knob)
+
     knob_data = {
         'category1': 5,
         'category2': 10,
         'category3': 20,
     }
+    year_ago = today - timedelta(days=365)
+
+    monthly_sales = (
+        Tickets.objects
+        .filter(session__date__gte=year_ago)
+        .annotate(month=TruncMonth('session__date'))
+        .values('month')
+        .annotate(count=Count('id'))
+        .order_by('month')
+    )
+
+    monthly_labels = [item['month'].strftime('%Y-%m') for item in monthly_sales]
+    monthly_data = [item['count'] for item in monthly_sales]
 
     context = {
+        'monthly_labels': monthly_labels,
+        'monthly_data': monthly_data,
         'user_count': user_count,
         'ticket_count': ticket_count,
         'movie_count': movie_count,
-        'chart_labels': chart_labels,  # для общего графика
-        'chart_data': chart_data,  # для общего графика
-        'cinema_sales': cinema_sales,  # для графика по кинотеатрам (теперь оптимизировано!)
-        'chart_days': chart_days,  # список дат для осей графиков
+        'chart_labels': chart_labels,
+        'chart_data': chart_data,
+        'cinema_sales': cinema_sales,
+        'chart_days': chart_days,
         'knob_data': knob_data,
     }
 
     return render(request, 'admin/index.html', context)
+
+
+
 @staff_member_required
 def new_contacts(request):
     seo_instance = Block_SEO.objects.filter(id=1).first()
@@ -467,7 +480,8 @@ def add_movie(request, movie_id=None):
         gallery_form = GalleryForm(instance=gallery_instance)
 
         picture_formset = PictureFormSet(
-            queryset=Picture.objects.filter(gallery=gallery_instance).exclude(pk=current_main_picture_object.pk) if current_main_picture_object else Picture.objects.filter(gallery=gallery_instance),
+            queryset=Picture.objects.filter(gallery=gallery_instance).exclude(pk=current_main_picture_object.pk)
+            if current_main_picture_object else Picture.objects.filter(gallery=gallery_instance),
             prefix='pictures'
         )
 
@@ -798,26 +812,35 @@ def delete_halls(request, pk):
 
     return redirect('add_cinema_edit', cinema_id=cinema_id)
 
-@staff_member_required
 def add_banners(request):
+    # 1. Оптимізоване отримання даних для формсетів Banners та News
+    # Використовуємо select_related для Gallery та prefetch_related для Picture,
+    # щоб отримати всі необхідні дані за мінімальну кількість запитів.
+    # Фільтруємо Picture одразу, щоб отримати лише 'main_picture'.
+    banner_queryset = Banners.objects.select_related('gallery').prefetch_related(
+        Prefetch('gallery__pictures', queryset=Picture.objects.filter(image_type='main_picture'))
+    )
     banner_formset = BannersFormSet(
         request.POST or None,
         request.FILES or None,
-        queryset=Banners.objects.select_related('gallery').prefetch_related(
-            Prefetch('gallery__pictures', queryset=Picture.objects.filter(image_type='main_picture'))
-        ),
+        queryset=banner_queryset,
         prefix='top_banners'
     )
 
+    news_queryset = News.objects.select_related('gallery').prefetch_related(
+        Prefetch('gallery__pictures', queryset=Picture.objects.filter(image_type='main_picture'))
+    )
     news_formset = NewsFormSet(
         request.POST or None,
         request.FILES or None,
-        queryset=News.objects.select_related('gallery').prefetch_related(
-            Prefetch('gallery__pictures', queryset=Picture.objects.filter(image_type='main_picture'))
-        ),
+        queryset=news_queryset,
         prefix='news'
     )
 
+    # 2. Оптимізоване отримання даних для Cross_Banner
+    # Отримуємо екземпляр Cross_Banner з пов'язаною Gallery та всіма Picture
+    # (оскільки для Cross_Banner не вказано image_type, отримуємо всі).
+    # Цей запит виконається лише один раз.
     cross_banner_instance = Cross_Banner.objects.select_related('gallery').prefetch_related(
         Prefetch('gallery__pictures', queryset=Picture.objects.all())
     ).first()
@@ -829,6 +852,17 @@ def add_banners(request):
         prefix='cross_banner'
     )
 
+    # 3. Попередня обробка URL зображення для Cross_Banner
+    # Щоб уникнути повторних запитів `LIMIT 1` у шаблоні,
+    # обчислюємо URL зображення Cross_Banner один раз тут і передаємо його в контекст.
+    cross_banner_image_url = None
+    if cross_banner_instance and cross_banner_instance.gallery:
+        # Оскільки prefetch_related вже завантажив усі зображення для цієї галереї,
+        # ми просто шукаємо перше зображення, яке має файл.
+        picture = next((p for p in cross_banner_instance.gallery.pictures.all() if p.image), None)
+        if picture:
+            cross_banner_image_url = picture.image.url
+
     if request.method == 'POST':
         which_form = request.POST.get("which_form_is_it")
 
@@ -837,43 +871,49 @@ def add_banners(request):
                 banner_formset.save()
                 for form in banner_formset.forms:
                     if not form.cleaned_data:
-                        continue
+                        continue # Пропускаємо порожні форми
+
                     banner = form.instance
                     main_picture_file = form.cleaned_data.get('main_picture')
 
                     if banner and not banner.gallery:
+                        # Якщо у банера немає галереї, створюємо її
                         banner.gallery = Gallery.objects.create()
-                        banner.save()
+                        banner.save() # Зберігаємо банер, щоб зв'язати нову галерею
 
                     if banner.gallery:
-                        picture = banner.gallery.pictures.filter(image_type='main_picture').first()
+                        # Отримуємо або створюємо main_picture для галереї поточного банера.
+                        # Цей запит буде цільовим і виконуватиметься один раз за оновлення.
+                        # Оскільки 'banner' - це збережений об'єкт, він не містить початкових prefetched даних.
+                        picture = Picture.objects.filter(gallery=banner.gallery, image_type='main_picture').first()
                         if not picture:
                             picture = Picture(gallery=banner.gallery, image_type='main_picture')
 
                         if main_picture_file:
                             picture.image = main_picture_file
-                        picture.save()
-
+                            picture.save()
                 return redirect('add_banners')
 
         elif which_form == "this_is_form_cross_banner":
             if cross_banner_form.is_valid():
-                cross_banner = cross_banner_form.save()
+                # Зберігаємо форму, але поки не фіксуємо зміни в БД,
+                # щоб спочатку переконатися, що галерея існує.
+                cross_banner = cross_banner_form.save(commit=False)
+
+                if not cross_banner.gallery:
+                    cross_banner.gallery = Gallery.objects.create()
+                cross_banner.save() # Зберігаємо Cross_Banner, щоб зв'язати галерею або оновити існуючу
+
+                # Отримуємо або створюємо зображення для галереї *збереженого* Cross_Banner.
+                # Це буде один цільовий запит.
+                picture = Picture.objects.filter(gallery=cross_banner.gallery).first()
+                if not picture:
+                    picture = Picture(gallery=cross_banner.gallery)
+
                 image_file = request.FILES.get('cross_banner-image')
-
-                if cross_banner:
-                    if not cross_banner.gallery_id:
-                        cross_banner.gallery = Gallery.objects.create()
-                        cross_banner.save()
-
-                    if cross_banner.gallery:
-                        picture = cross_banner.gallery.pictures.first()
-                        if not picture:
-                            picture = Picture(gallery=cross_banner.gallery)
-
-                        if image_file:
-                            picture.image = image_file
-                            picture.save()
+                if image_file:
+                    picture.image = image_file
+                    picture.save()
                 return redirect('add_banners')
 
         elif which_form == "this_is_form_news":
@@ -881,33 +921,41 @@ def add_banners(request):
                 news_formset.save()
                 for form in news_formset.forms:
                     if not form.cleaned_data:
-                        continue
+                        continue # Пропускаємо порожні форми
+
                     news = form.instance
                     main_picture_file = form.cleaned_data.get('main_picture')
 
                     if news and not news.gallery:
+                        # Якщо у новини немає галереї, створюємо її
                         news.gallery = Gallery.objects.create()
-                        news.save()
+                        news.save() # Зберігаємо новину, щоб зв'язати нову галерею
 
                     if news.gallery:
-                        picture = news.gallery.pictures.filter(image_type='main_picture').first()
+                        # Отримуємо або створюємо main_picture для галереї поточної новини.
+                        # Цей запит буде цільовим і виконуватиметься один раз за оновлення.
+                        picture = Picture.objects.filter(gallery=news.gallery, image_type='main_picture').first()
                         if not picture:
                             picture = Picture(gallery=news.gallery, image_type='main_picture')
 
                         if main_picture_file:
                             picture.image = main_picture_file
-                        picture.save()
-
+                            picture.save()
                 return redirect('add_banners')
 
-    # Оптимізоване отримання зображень без додаткових запитів
+    # 4. Оптимізована допоміжна функція для отримання URL зображення
+    # Ця функція використовує вже завантажені (prefetched) дані,
+    # тому вона не генерує нових запитів до бази даних.
     def get_main_picture_url(gallery):
         if gallery and hasattr(gallery, 'pictures'):
-            picture = next((p for p in gallery.pictures.all() if p.image_type == 'main_picture' and p.image), None)
+            # Оскільки Prefetch вже відфільтрував за image_type='main_picture',
+            # нам просто потрібно знайти перше зображення, яке має файл.
+            picture = next((p for p in gallery.pictures.all() if p.image), None)
             if picture:
                 return picture.image.url
         return None
 
+    # 5. Підготовка даних форм для рендерингу, використовуючи оптимізовану функцію
     form_data = [{'form': form, 'image_url': get_main_picture_url(form.instance.gallery)} for form in banner_formset.forms]
     news_form_data = [{'form': form, 'image_url': get_main_picture_url(form.instance.gallery)} for form in news_formset.forms]
 
@@ -915,26 +963,11 @@ def add_banners(request):
         'formset': banner_formset,
         'form_data': form_data,
         'cross_banner_form': cross_banner_form,
+        'cross_banner_image_url': cross_banner_image_url, # Передаємо попередньо обчислений URL
         'news_formset': news_formset,
         'news_form_data': news_form_data,
     })
 
-@staff_member_required
-def banners_list(request):
-    banners_list = Banners.objects.select_related('gallery').all().order_by('id')
-
-    paginator = Paginator(banners_list, 10)
-    page = request.GET.get('page')
-    try:
-        banners = paginator.page(page)
-    except PageNotAnInteger:
-        banners = paginator.page(1)
-    except EmptyPage:
-        banners = paginator.page(paginator.num_pages)
-
-    context = {'banners': banners}
-
-    return render(request, 'admin/banner/banner.html', context)
 
 @staff_member_required
 def delete_banners(request, banners_id):

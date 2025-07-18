@@ -1,0 +1,74 @@
+ Sales
+                </h3>
+                <div class="card-tools">
+                  <ul class="nav nav-pills ml-auto">
+                   <li class="nav-item">
+                        <a class="nav-link" href="#monthly-chart" data-toggle="tab">Monthly</a>
+                      </li>
+
+                  </ul>
+                </div>
+              </div><!-- /.card-header -->
+              <div class="card-body">
+               <div class="tab-content p-0">
+                  <div class="chart tab-pane active" id="monthly-chart" style="position: relative; height: 300px;">
+                    <canvas id="monthly-chart-canvas" height="300" style="height: 300px;"></canvas>
+                  </div>
+                </div>
+              </div><!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+
+
+
+
+            <!-- /.card -->
+          </section>
+          <!-- /.Left col -->
+          <!-- right col (We are only adding the ID to make the widgets sortable)-->
+          <section class="col-lg-5 connectedSortable">
+                <!-- Map card -->
+            <div class="card bg-gradient-primary">
+              <div class="card-header border-0">
+                <h3 class="card-title">
+                  <i class="fas fa-map-marker-alt mr-1"></i>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const ctx = document.getElementById('monthly-chart-canvas');
+    if (ctx) {
+      new Chart(ctx.getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: {{ monthly_labels|safe }},
+          datasets: [{
+            label: 'Квитки за місяць',
+            backgroundColor: 'rgba(60,141,188,0.9)',
+            borderColor: 'rgba(60,141,188,0.8)',
+            pointRadius: 3,
+            pointColor: '#3b8bba',
+            pointStrokeColor: 'rgba(60,141,188,1)',
+            pointHighlightFill: '#fff',
+            pointHighlightStroke: 'rgba(60,141,188,1)',
+            data: {{ monthly_data|safe }},
+            fill: true,
+            tension: 0.3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              ticks: { color: "#aaa" }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: { color: "#aaa" }
+            }
+          }
+        }
+      });
+    }
+  });
+</script>

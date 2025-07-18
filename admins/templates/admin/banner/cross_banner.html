@@ -1,60 +1,97 @@
+<style>
+.upload-btn-cross {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+    line-height: 1;
+    transition: background-color 0.3s ease;
+}
+
+.upload-btn-cross:hover {
+    background-color: #0056b3;
+}
+
+.upload-btn-cross span {
+    display: block;
+}
+
+.upload-btn-cross > div {
+    display: none;
+}
+</style>
+
 <form method="post" enctype="multipart/form-data" class="cross-banner-form">
-            {% csrf_token %}
-            <h3 style="text-align: center;">Сквозной банер на заднем фоне</h3>
-            <div style="padding: 15px;">
-                <p>Розмір: 2000x3000</p>
+    {% csrf_token %}
+    <h3 style="text-align: center;">Сквозной банер на заднем фоне</h3>
+    <div style="padding: 15px;">
+        <p>Розмір: 2000x3000</p>
 
-                {% if cross_banner_form.errors %}
-                    <div class="alert alert-danger">
-                        {{ cross_banner_form.errors }}
-                    </div>
-                {% endif %}
+        {% if cross_banner_form.errors %}
+            <div class="alert alert-danger">
+                {{ cross_banner_form.errors }}
+            </div>
+        {% endif %}
 
-                <div class="form-check">
-                    {{ cross_banner_form.type.0 }}
-                    {{ cross_banner_form.type.choice_label_0 }}
-                    <input type="hidden" name="which_form_is_it" value="this_is_form_cross_banner">
+        <div class="form-check">
+            {{ cross_banner_form.type.0 }}
+            {{ cross_banner_form.type.choice_label_0 }}
+            <input type="hidden" name="which_form_is_it" value="this_is_form_cross_banner">
+        </div>
+
+        <fieldset>
+            <div style="display: flex; gap: 20px; align-items: flex-start; margin-top: 15px;">
+                <div style="min-width: 150px;">
+                    <label>
+                        <input type="radio" name="background_type" value="photo" checked>
+                        Фото на фоне
+                    </label><br>
+                    <label>
+                        <input type="radio" name="background_type" value="plain">
+                        Просто фон
+                    </label>
                 </div>
 
-                <fieldset>
-                    <div style="display: flex; gap: 20px; align-items: flex-start; margin-top: 15px;">
-                        <div style="min-width: 150px;">
-                            <label>
-                                <input type="radio" name="background_type" value="photo" checked>
-                                Фото на фоне
-                            </label><br>
-                            <label>
-                                <input type="radio" name="background_type" value="plain">
-                                Просто фон
-                            </label>
-                        </div>
-
-                        <div style="display: flex; gap: 20px; align-items: flex-start;">
-                            <div id="image-preview">
-                                {% if cross_banner_form.instance.gallery and cross_banner_form.instance.gallery.pictures.first and cross_banner_form.instance.gallery.pictures.first.image %}
-                                    <img id="preview-img" src="{{ cross_banner_form.instance.gallery.pictures.first.image.url }}" alt="Превью" />
-                                {% else %}
-                                    <div id="preview-placeholder">
-
-                                    </div>
-                                {% endif %}
-                            </div>
-
-                            <div style="display: flex; gap: 10px; align-items: center;">
-                                <label class="upload-btn-cross">
-                                    <span>Добавить</span>
-                                    {{ cross_banner_form.image.as_widget }}
-                                </label>
-                                
-
-                                {% if cross_banner_form.instance.gallery and cross_banner_form.instance.gallery.pictures.first %}
-                                    <button type="submit" name="delete_cross_banner" class="btn btn-outline-danger btn-sm">Удалить</button>
-                                {% endif %}
-
-                                <button type="submit" name="save_cross_banner" class="btn btn-primary">Сохранить фон</button>
-                            </div>
-                        </div>
+                <div style="display: flex; gap: 20px; align-items: flex-start;">
+                    <div id="image-preview">
+                        {% if cross_banner_image_url %}
+                            <img id="preview-img" src="{{ cross_banner_image_url }}" alt="Превью" />
+                        {% else %}
+                            <div id="preview-placeholder"></div>
+                        {% endif %}
                     </div>
-                </fieldset>
+
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <label class="upload-btn-cross">
+                            <span>Добавить</span>
+                            <div>{{ cross_banner_form.image.as_widget }}</div>
+                        </label>
+
+                        {% if cross_banner_image_url %}
+                            <button type="submit" name="delete_cross_banner" class="btn btn-outline-danger btn-sm">Удалить</button>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
-        </form>
+        </fieldset>
+    </div>
+</form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.querySelector('.cross-banner-form input[type="file"]');
+    const form = document.querySelector('.cross-banner-form');
+
+    if (fileInput && form) {
+        fileInput.addEventListener('change', function() {
+            form.submit();
+        });
+    }
+});
+</script>
