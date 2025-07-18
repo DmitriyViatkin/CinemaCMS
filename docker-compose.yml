@@ -1,8 +1,7 @@
-
 services:
   web:
     build: .
-    command: gunicorn myproject.wsgi:application --bind 0.0.0.0:8000
+    command: gunicorn cinewave.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - .:/app
     ports:
@@ -16,11 +15,11 @@ services:
     image: postgres:15
     restart: always
     environment:
-      POSTGRES_DB: mydb
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ${POSTGRES_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_USER_NAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_VALUE}
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
+      - cinema_postgres_data:/var/lib/postgresql/data/
 
 volumes:
-  postgres_data:
+  cinema_postgres_data:

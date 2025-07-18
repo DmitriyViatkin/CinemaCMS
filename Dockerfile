@@ -12,7 +12,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
-    netcat \
+
     && rm -rf /var/lib/apt/lists/*
 
 # Устанавливаем зависимости
@@ -23,7 +23,7 @@ RUN pip install -r requirements.txt
 # Копируем проект
 COPY . .
 # Меняем владельца файлов на нового пользователя
-RUN chown -R director:director/app
+RUN chown -R director:director /app
 
 # Переключаемся на пользователя
 USER director
