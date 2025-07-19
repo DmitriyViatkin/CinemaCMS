@@ -12,7 +12,6 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
-
     && rm -rf /var/lib/apt/lists/*
 
 # Устанавливаем зависимости
@@ -27,5 +26,4 @@ RUN chown -R director:director /app
 
 # Переключаемся на пользователя
 USER director
-# Добавим команду запуска
-CMD ["gunicorn", "cinewave.wsgi:application", "--bind", "0.0.0.0:8000"]
+
