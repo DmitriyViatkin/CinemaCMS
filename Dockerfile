@@ -1,11 +1,13 @@
-
 FROM python:3.12-slim
 
-#  переменные окружения
+# Переменные окружения
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+
+# Создаем пользователя director
 RUN adduser --disabled-password --gecos '' director
-#  рабочая директория
+
+# Рабочая директория
 WORKDIR /app
 
 # Зависимости
@@ -21,9 +23,9 @@ RUN pip install -r requirements.txt
 
 # Копируем проект
 COPY . .
+
 # Меняем владельца файлов на нового пользователя
 RUN chown -R director:director /app
 
-# Переключаемся на пользователя
+# Переключаемся на пользователя director для всех последующих операций
 USER director
-

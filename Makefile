@@ -1,82 +1,120 @@
-include .env
-export $(shell sed 's/=.*//' .env)
+.PHONY: help install run migrate makemigrations colectstatic test clean
 
-.PHONY: help up start stop restart status ps clean
+#Переменные
+PYTHON = python3
+PIP = pip3
+MANAGE = $(PYTHON) manage.py
 
-help: ## This help.
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+DOCKER_COMPOSE = docker compose
+DOCKER_IMAGE_NAME = my_django_app
+DOCKER_CONTAINER_NAME = my_django_container
 
-up: ## Up all or c=<name> containers in foreground
-	docker-compose -f $(or $(DOCKER_COMPOSE_FILE), docker-compose.yml) up $(c)
 
-up-d: ## Up all or c=<name> containers in background
-	docker-compose -f $(or $(DOCKER_COMPOSE_FILE), docker-compose.yml) up -d $(c)
+# Цель по умолчанию - показать помощь
+help:
+	@echo "--------------------------------------------------------"
+	@echo "Доступные команды для Django-проекта:"
+	@echo "--------------------------------------------------------"
+	@echo "  make help           - Показать это сообщение"
+	@echo "  make install        - Установить зависимости из requirements.txt"
+	@echo "  make run            - Запустить Django-сервер разработки (http://127.0.0.1:8000/)"
+	@echo "  make run-port       - Запустить Django-сервер с указанием порта"
+	@echo "  make migrate        - Применить миграции базы данных"
+	@echo "  make makemigrations - Создать новые миграции"
+	@echo "  make collectstatic  - Собрать статические файлы"
+	@echo "  make test           - Запустить тесты проекта"
+	@echo "  make createsuperuser - Создать нового суперпользователя"
+	@echo "  make shell          - Запустить Django shell"
+	@echo "  make clean          - Удалить временные файлы (__pycache__, *.pyc)"
+	@echo "  make migrate-all    - Создать и применить все миграции"
+	@echo "  make deploy         - Пример цели для деплоя (требует настройки)"
+	@echo ""
+	@echo "--- Docker Commands ---"
+	@echo "  make docker-build       - Собрать Docker-образ проекта"
+	@echo "  make docker-up          - Запустить контейнеры Docker Compose (в фоновом режиме)"
+	@echo "  make docker-up-foreground - Запустить контейнеры Docker Compose (в текущем терминале)"
+	@echo "  make docker-down        - Остановить и удалить контейнеры Docker Compose"
+	@echo "  make docker-exec CMD=\"...\" - Выполнить произвольную команду в основном контейнере Django"
+	@echo "  make docker-migrate     - Применить миграции внутри контейнера"
+	@echo "  make docker-makemigrations - Создать миграции внутри контейнера"
+	@echo "  make docker-test        - Запустить тесты внутри контейнера"
+	@echo "  make docker-shell       - Запустить Django shell внутри контейнера"
+	@echo "  make docker-logs        - Просмотр логов контейнеров"
+	@echo "  make docker-rm-containers - Удалить все остановленные контейнеры"
+	@echo "  make docker-rm-images   - Удалить Docker-образ проекта"
+	@echo "--------------------------------------------------------"
 
-start: ## Start all or c=<name> containers
-	docker-compose -f $(or $(DOCKER_COMPOSE_FILE), docker-compose.yml) start $(c)
+#Command
 
-build: ## Build all or c=<name> containers in background
-	docker-compose -f $(or $(DOCKER_COMPOSE_FILE), docker-compose.yml) up --build $(c)
+install:
+	$(PIP) install -r requirements.txt
 
-build-d: ## Build all or c=<name> containers in foreground
-	docker-compose -f $(or $(DOCKER_COMPOSE_FILE), docker-compose.yml) up --build -d $(c)
+run:
+	$(MANAGE) runserver
 
-stop: ## Stop all or c=<name> containers
-	docker-compose -f $(or $(DOCKER_COMPOSE_FILE), docker-compose.yml) stop $(c)
+migrate:
+	$(MANAGE) migrate
 
-restart: ## Restart all or c=<name> containers
-	docker-compose -f $(or $(DOCKER_COMPOSE_FILE), docker-compose.yml) restart $(c)
+makemigrations:
+	$(MANAGE) makemigrations
 
-rebuild: ## Rebuild all or c=<name> containers
-	docker-compose -f $(or $(DOCKER_COMPOSE_FILE), docker-compose.yml) bash -c "down && up --build -d"
+colectstatic:
+	$(MANAGE) colectstatic --noinput
 
-logs: ## Show logs for all or c=<name> containers
-	docker-compose -f $(or $(DOCKER_COMPOSE_FILE), docker-compose.yml) logs --tail=$(or $(n), 100) -f $(c)
+clean:
+	find . -name "*.pyc" -delete
+	find . -name "__pycache__" -type d -exec rm {}+
 
-status: ## Show status of containers
-	docker-compose -f $(or $(DOCKER_COMPOSE_FILE), docker-compose.yml) ps
+createsuperuser:
+	$(MANAGE) createsuperuser
 
-ps: status ## Alias of status
+migrate-all: makemigrations migrate
+	echo "Все миграции созданы и применены."
 
-clean: ## Clean all data
-	docker-compose -f $(or $(DOCKER_COMPOSE_FILE), docker-compose.yml) down
 
-down: clean ## Alias of clean
+docker-build:
+	@echo "Собираем Docker-образ $(DOCKER_IMAGE_NAME)..."
+	docker build -t $(DOCKER_IMAGE_NAME) .
+	@echo "Docker-образ $(DOCKER_IMAGE_NAME) успешно собран."
 
-prune: ## Prune all unused containers
-	docker system prune --all --volumes
+docker-up:
+	@echo "Запускаем Docker-контейнеры через Docker Compose..."
+	$(DOCKER_COMPOSE) up -d --build
+	@echo "Docker-контейнеры запущены в фоновом режиме."
+docker-down:
+	@echo "Останавливаем и удаляем Docker-контейнеры..."
+	$(DOCKER_COMPOSE) down --remove-orphans
+	@echo "Docker-контейнеры остановлены и удалены."
 
-images: ## Show all images
-	docker-compose -f $(or $(DOCKER_COMPOSE_FILE), docker-compose.yml) images
+docker-migrate:
+	@echo "Применяем миграции в контейнере..."
+	$(DOCKER_COMPOSE) exec web $(PYTHON) manage.py migrate
+	@echo "Миграции применены в контейнере."
 
-exec: ## Exec container
-	docker-compose -f $(or $(DOCKER_COMPOSE_FILE), docker-compose.yml) exec $(or $(c), api) bash
+docker-makemigrations:
+	@echo "Создаем новые миграции в контейнере..."
+	$(DOCKER_COMPOSE) exec web $(PYTHON) manage.py makemigrations
+	@echo "Миграции созданы в контейнере."
+docker-createsuperuser:
+	@echo "Создаем суперпользователя в контейнере..."
+	$(DOCKER_COMPOSE) exec web $(PYTHON) manage.py createsuperuser
+	@echo "Суперпользователь создан (или процесс запущен) в контейнере."
 
-manage: ## Get health-check info
-	docker-compose -f $(or $(DOCKER_COMPOSE_FILE), docker-compose.yml) exec $(or $(c), api) python manage.py $(e)
+# Загрузка начальных данных (фиксатур) в контейнере
+# Пример: make docker-load-initial-data FIXTURE="my_app/fixtures/initial_data.json"
+docker-load-initial-data:
+	@echo "Загружаем начальные данные из фиксатуры $(FIXTURE) в контейнере..."
+	$(DOCKER_COMPOSE) exec web $(PYTHON) manage.py load_initial_data $(FIXTURE)
+	@echo "Начальные данные загружены в контейнере."
+docker-collectstatic:
+	@echo "Собираем статические файлы в контейнере..."
+	$(DOCKER_COMPOSE) exec web $(PYTHON) manage.py collectstatic --noinput
+	@echo "Статические файлы собраны в контейнере."
 
-health-check: ## Get health-check info
-	docker-compose -f $(or $(DOCKER_COMPOSE_FILE), docker-compose.yml) exec $(or $(c), api) python manage.py health_check
+doker-start:docker-makemigrations  docker-migrate docker-createsuperuser docker-load-initial-data docker-collectstatic
+	@echo "Миграции созданы в контейнере."
 
-shell: ## Exec shell
-	docker-compose -f $(or $(DOCKER_COMPOSE_FILE), docker-compose.yml) exec $(or $(c), api) python manage.py shell_plus
-
-test: ## Run tests
-	docker-compose -f $(or $(DOCKER_COMPOSE_FILE), docker-compose.yml) exec $(or $(c), api) pytest $(or $(e), .)
-
-cov:
-	docker-compose -f $(or $(DOCKER_COMPOSE_FILE), docker-compose.yml) exec $(or $(c), api) pytest --cov=. --cov-config=../.coveragerc --no-cov-on-fail --cov-fail-under=90 $(or $(e), .)
-
-coverage: ## Run tests
-	docker-compose -f $(or $(DOCKER_COMPOSE_FILE), docker-compose.yml) exec $(or $(c), api) coverage run --rcfile=../.coveragerc -m pytest $(or $(e), .)
-	docker-compose -f $(or $(DOCKER_COMPOSE_FILE), docker-compose.yml) exec $(or $(c), api) coverage report --fail-under=90 -m
-
-perform: ## Perform code by black, isort and autoflake
-	docker-compose -f $(or $(DOCKER_COMPOSE_FILE), docker-compose.yml) exec $(or $(c), api) black $(or $(e), .)
-	docker-compose -f $(or $(DOCKER_COMPOSE_FILE), docker-compose.yml) exec $(or $(c), api) isort $(or $(e), .)
-	docker-compose -f $(or $(DOCKER_COMPOSE_FILE), docker-compose.yml) exec $(or $(c), api) autoflake --in-place --remove-all-unused-imports --recursive $(or $(e), .)
-
-lint: ## Check code by pylint
-	docker-compose -f $(or $(DOCKER_COMPOSE_FILE), docker-compose.yml) exec $(or $(c), api) pylint --load-plugins pylint_django --django-settings-module=settings $(or $(e), ../src)
-
-quality: perform lint test health-check
+docker-rm-containers:
+	@echo "Удаляем все остановленные Docker-контейнеры..."
+	docker rm $(shell docker ps -aq) || true
+	@echo "Остановленные Docker-контейнеры удалены."

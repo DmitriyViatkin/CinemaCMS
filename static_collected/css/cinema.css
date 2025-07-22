@@ -1,0 +1,23 @@
+.add-cinema-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex; /* Використовуємо flex для вирівнювання по центру */
+  align-items: center; /* Вирівнювання по вертикалі */
+  text-decoration: none;
+  z-index: 10;
+}
+
+
+.add-cinema-button button {
+  display: flex; /* Використовуємо flex для вирівнювання іконки та тексту */
+  align-items: center; /* Вирівнювання по вертикалі */
+}
+
+
+
+.add-cinema-button .add-text {
+  font-size: 16px;
+  margin-left: 5px;
+
+}
