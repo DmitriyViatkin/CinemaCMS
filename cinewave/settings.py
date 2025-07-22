@@ -112,12 +112,21 @@ LOGOUT_URL = 'logout'
 
 DATABASES = {
     'default': {
+<<<<<<< HEAD
         'ENGINE': os.getenv('DB_ENGINE'),
         'NAME': os.getenv('POSTGRES_DB_NAME'),
         'USER':os.getenv('POSTGRES_USER_NAME'),
         'PASSWORD':os.getenv('POSTGRES_PASSWORD_VALUE'),
         'HOST': os.getenv('DB_HOST'),
         'PORT': os.getenv('DB_PORT'),
+=======
+        'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),
+        'NAME': os.getenv('POSTGRES_DB_NAME', 'DB_cinewave'),
+        'USER': os.getenv('POSTGRES_USER_NAME', 'dimas'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD_VALUE', ''),
+        'HOST': os.getenv('DB_HOST', 'db'),
+        'PORT': os.getenv('DB_PORT', '5432'),
+>>>>>>> feature
     }
 }
 
@@ -164,7 +173,6 @@ INTERNAL_IPS = [
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 
-STATIC_URL = '/static/'
 LOCALE_PATHS = (
      os.path.join(BASE_DIR, 'locale'),
 )
@@ -173,7 +181,11 @@ MODELTRANSLATION_TRANSLATION_REGISTRY = "cinewave.translation"
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
+STATIC_URL = '/static/'
+STATIC_ROOT = '/app/static_collected'
+
 MEDIA_URL = '/media/'
+MEDIA_ROOT = '/app/media'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
@@ -190,7 +202,7 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
 
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 
 
 

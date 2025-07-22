@@ -1,58 +1,30 @@
+# Virtual Environments
+.venv/
 venv/
+env/
+# If venv is inside an app directory (e.g., my_app/venv/)
+*/venv/
+
+# Environment variables files
 .env
-media
+.env.development
 
-# Other common temporary files
-*.log
-.DS_Store
-
-# Python compiled files
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-__pycache__/
-*.pyc
-*.pyd
-*.pyo
-
-# C extensions
-*.so
-
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-
+# Collected static files for Django
+static_collected/
 
 # User-uploaded media files
 media/
 
-# Byte-compiled / optimized / DLL files
+# Python compiled files
 __pycache__/
 *.pyc
 *.pyd
 *.pyo
 
-# C extensions
+# C extensions (if any, typically for compiled libraries)
 *.so
 
-# Distribution / packaging
+# Distribution / packaging (for Python packages)
 .Python
 build/
 develop-eggs/
@@ -71,49 +43,19 @@ share/python-wheels/
 .installed.cfg
 *.egg
 
+# Django specific files
+*.log         # Log files
+*.pot         # Translation template files
+*.mo          # Compiled translation files
+db.sqlite3    # SQLite database file
 
-# Editors
-*.sublime-project
-*.sublime-workspace
-.vscode/ # Visual Studio Code
-.idea/   # PyCharm
+# IDE specific files
+.idea/             # PyCharm specific files
+.vscode/           # Visual Studio Code specific files
+*.sublime-project  # Sublime Text project files
+*.sublime-workspace # Sublime Text workspace files
 
-# Environments
-.env/
-venv/
-env/
-*/venv/ # If venv is inside an app directory
-
-# Specific to Django
-*.log
-*.pot
-*.mo
-*.db # SQLite database
-media/ # User-uploaded files (if you serve them from a specific folder)
-
-# OS-specific
-.DS_Store
-.Trashes
-
-Thumbs.db
-
-# IDE specific files (for PyCharm)
-.idea/
-
-# Виртуальные окружения
-.venv/
-venv/
-
-# Скомпилированные файлы Python
-*.pyc
-__pycache__/
-
-# Файлы локализации Django (скомпилированные)
-*.mo
-*.pot
-
-# Файлы БД (если используете SQLite)
-db.sqlite3
-
-# Файлы IDE (например, PyCharm)
-.idea/
+# OS-specific temporary files
+.DS_Store      # macOS metadata files
+.Trashes       # macOS Trash
+Thumbs.db      # Windows thumbnail cache
