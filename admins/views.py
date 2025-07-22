@@ -21,7 +21,7 @@ from .send_email import send_campaign_email
 from os.path import basename
 from .tasks import send_campaign_emails_task
 from django.urls import reverse
-
+import os
 @staff_member_required
 def email_campaign_create(request, campaign_id=None):
     campaign_instance = None
@@ -813,10 +813,7 @@ def delete_halls(request, pk):
     return redirect('add_cinema_edit', cinema_id=cinema_id)
 
 def add_banners(request):
-    # 1. Оптимізоване отримання даних для формсетів Banners та News
-    # Використовуємо select_related для Gallery та prefetch_related для Picture,
-    # щоб отримати всі необхідні дані за мінімальну кількість запитів.
-    # Фільтруємо Picture одразу, щоб отримати лише 'main_picture'.
+
     banner_queryset = Banners.objects.select_related('gallery').prefetch_related(
         Prefetch('gallery__pictures', queryset=Picture.objects.filter(image_type='main_picture'))
     )
@@ -837,10 +834,7 @@ def add_banners(request):
         prefix='news'
     )
 
-    # 2. Оптимізоване отримання даних для Cross_Banner
-    # Отримуємо екземпляр Cross_Banner з пов'язаною Gallery та всіма Picture
-    # (оскільки для Cross_Banner не вказано image_type, отримуємо всі).
-    # Цей запит виконається лише один раз.
+
     cross_banner_instance = Cross_Banner.objects.select_related('gallery').prefetch_related(
         Prefetch('gallery__pictures', queryset=Picture.objects.all())
     ).first()
@@ -852,13 +846,10 @@ def add_banners(request):
         prefix='cross_banner'
     )
 
-    # 3. Попередня обробка URL зображення для Cross_Banner
-    # Щоб уникнути повторних запитів `LIMIT 1` у шаблоні,
-    # обчислюємо URL зображення Cross_Banner один раз тут і передаємо його в контекст.
+
     cross_banner_image_url = None
     if cross_banner_instance and cross_banner_instance.gallery:
-        # Оскільки prefetch_related вже завантажив усі зображення для цієї галереї,
-        # ми просто шукаємо перше зображення, яке має файл.
+
         picture = next((p for p in cross_banner_instance.gallery.pictures.all() if p.image), None)
         if picture:
             cross_banner_image_url = picture.image.url
@@ -882,9 +873,7 @@ def add_banners(request):
                         banner.save() # Зберігаємо банер, щоб зв'язати нову галерею
 
                     if banner.gallery:
-                        # Отримуємо або створюємо main_picture для галереї поточного банера.
-                        # Цей запит буде цільовим і виконуватиметься один раз за оновлення.
-                        # Оскільки 'banner' - це збережений об'єкт, він не містить початкових prefetched даних.
+
                         picture = Picture.objects.filter(gallery=banner.gallery, image_type='main_picture').first()
                         if not picture:
                             picture = Picture(gallery=banner.gallery, image_type='main_picture')
@@ -895,25 +884,30 @@ def add_banners(request):
                 return redirect('add_banners')
 
         elif which_form == "this_is_form_cross_banner":
+
             if cross_banner_form.is_valid():
-                # Зберігаємо форму, але поки не фіксуємо зміни в БД,
-                # щоб спочатку переконатися, що галерея існує.
+
                 cross_banner = cross_banner_form.save(commit=False)
 
                 if not cross_banner.gallery:
                     cross_banner.gallery = Gallery.objects.create()
-                cross_banner.save() # Зберігаємо Cross_Banner, щоб зв'язати галерею або оновити існуючу
 
-                # Отримуємо або створюємо зображення для галереї *збереженого* Cross_Banner.
-                # Це буде один цільовий запит.
+                cross_banner.save()
                 picture = Picture.objects.filter(gallery=cross_banner.gallery).first()
+
                 if not picture:
                     picture = Picture(gallery=cross_banner.gallery)
 
+                # Обработка загруженного файла изображения
+
                 image_file = request.FILES.get('cross_banner-image')
+
                 if image_file:
                     picture.image = image_file
+                    picture.image_type = 'gallery'
                     picture.save()
+                    image_mime_type = image_file.content_type
+                    file_extension = os.path.splitext(image_file.name)[1]
                 return redirect('add_banners')
 
         elif which_form == "this_is_form_news":

@@ -3,10 +3,10 @@
 services:
   web:
     volumes:
-      - ./media:/app/media  # Замість media_data: використання локальної папки media
+      - ./media:/app/media
 
   nginx:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./media:/app/media:ro                 # Замість media_data: доступ до локальної media/
-      - ./static_collected:/app/static_collected:ro  # Для статики, якщо зібрана локально
+      - ./media:/app/media:ro
+      - ./static_collected:/app/static_collected:ro

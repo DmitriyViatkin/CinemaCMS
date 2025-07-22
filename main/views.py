@@ -37,35 +37,28 @@ def contact_paige(request):
                 if  pic.image_type == 'logo':
                     logo_picture = pic
 
-
         current_latitude = contact_item.latitude if hasattr(contact_item, 'latitude') else None
         current_longitude = contact_item.longitude if hasattr(contact_item, 'longitude') else None
-
-        # --- ВЫВОД В КОНСОЛЬ ДОЛГОТЫ И ШИРОТЫ КАЖДОГО КОНТАКТА ---
-        print(f"Контакт: {contact_item.title if hasattr(contact_item, 'title') else 'Без названия'}")
-        print(f"  Широта: {current_latitude}")
-        print(f"  Долгота: {current_longitude}")
-        # -----------------------------------------------------------
 
         contacts_data.append({
             'contact': contact_item,
             'logo_picture': logo_picture,
 
-            'latitude': current_latitude, # Сохраняем для передачи в шаблон
-            'longitude': current_longitude, # Сохраняем для передачи в шаблон
+            'latitude': current_latitude,
+            'longitude': current_longitude,
         })
 
     page_seo_data = None
     if contacts_queryset.exists() and contacts_queryset.first().seo_block:
         page_seo_data = contacts_queryset.first().seo_block
     else:
-        pass # Handle this case if necessary
+        pass
 
     context = {
-       'contacts_data': contacts_data, # This now contains latitude/longitude for each item
+       'contacts_data': contacts_data,
        'banners': banners,
         'page_seo_data': page_seo_data,
-        'MAPS_API_KEY': settings.MAPS_API_KEY, # Make sure API key is passed!
+        'MAPS_API_KEY': settings.MAPS_API_KEY,
     }
     return render(request, 'main/contact_paige.html', context)
 
@@ -82,9 +75,7 @@ def index(request):
 
     if cross_banner_obj and cross_banner_obj.gallery and cross_banner_obj.gallery.cross_banner_pictures:
         cross_banner_background_url = cross_banner_obj.gallery.cross_banner_pictures[0].image.url
-        print(f"URL для фонового кросс-баннера: {cross_banner_background_url}")
-    else:
-        print("Кросс-баннер не найден, или у него нет галереи/изображений.")
+
     banners = Banners.objects.select_related('gallery').prefetch_related(
         Prefetch(
             'gallery__pictures',
@@ -93,16 +84,13 @@ def index(request):
         )
     )
 
-
-
-
     for banner in banners:
         if banner.gallery:
             banner.pictures = banner.gallery.banner_pictures
-            print(f"Для банера {banner.id} знайдено {len(banner.pictures)} зображень.")
+
         else:
             banner.pictures = []
-            print(f"Банер {banner.id} не має галереї.")
+
 
     # Фільми, що вже в прокаті
     movies = Movies.objects.filter(
@@ -163,12 +151,12 @@ def paiges_cinema_detail(request, slug):
         PaigesCinema.objects.select_related('gallery', 'seo_block').prefetch_related(
             Prefetch(
                 'gallery__pictures',
-                queryset=Picture.objects.all(), # Вы можете добавить .order_by('order') если у Picture есть поле order
+                queryset=Picture.objects.all(),
                 to_attr='all_related_pictures'
             )
         ),
         seo_block__seo_url=slug,
-        is_active=True # Добавляем фильтр is_active, если он важен
+        is_active=True
     )
 
     main_picture = None

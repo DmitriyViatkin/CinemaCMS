@@ -1,16 +1,15 @@
-
 services:
   web:
     build: .
     command: gunicorn cinewave.wsgi:application --bind 0.0.0.0:8000
     volumes:
-      - .:/app
-      - ./static_collected:/app/static_collected
-      - ./media:/app/media
+      - .:/app # Монтируем корневую директорию проекта в /app внутри контейнера
+      - ./static_collected:/app/static_collected # Статические файлы будут собираться сюда на хосте
+      - ./media:/app/media # Медиафайлы будут сохраняться сюда на хосте
     env_file:
-      - .env.development
+      - .env.development # Используем файл переменных окружения для разработки
     ports:
-      - "8000:8000"
+      - "8000:8000" # Пробрасываем порт Gunicorn
     depends_on:
       - db
     networks:
@@ -24,27 +23,27 @@ services:
       POSTGRES_USER: ${POSTGRES_USER_NAME}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_VALUE}
     volumes:
-      - cinema_postgres_data:/var/lib/postgresql/data/
+      - cinema_postgres_data:/var/lib/postgresql/data/ # Именованный том для данных PostgreSQL
     networks:
       - app-network
 
   nginx:
     build: ./nginx
     ports:
-      - "80:80"
-      - "443:443"
+      - "80:80" # Пробрасываем HTTP порт
+      - "443:443" # Пробрасываем HTTPS порт (если используется)
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./static_collected:/app/static_collected:ro
-      - ./media:/app/media:ro
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro # Конфигурация Nginx
+      - ./static_collected:/app/static_collected:ro # Доступ Nginx к статическим файлам на хосте (только чтение)
+      - ./media:/app/media:ro # Доступ Nginx к медиафайлам на хосте (только чтение)
     depends_on:
       - web
     networks:
       - app-network
 
 volumes:
-  cinema_postgres_data:
+  cinema_postgres_data: # Определение именованного тома для базы данных
 
 networks:
   app-network:
-    driver: bridge
+    driver: bridge # Определение пользовательской сети Docker
