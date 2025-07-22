@@ -112,21 +112,14 @@ LOGOUT_URL = 'logout'
 
 DATABASES = {
     'default': {
-<<<<<<< HEAD
-        'ENGINE': os.getenv('DB_ENGINE'),
-        'NAME': os.getenv('POSTGRES_DB_NAME'),
-        'USER':os.getenv('POSTGRES_USER_NAME'),
-        'PASSWORD':os.getenv('POSTGRES_PASSWORD_VALUE'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
-=======
+
         'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),
         'NAME': os.getenv('POSTGRES_DB_NAME', 'DB_cinewave'),
         'USER': os.getenv('POSTGRES_USER_NAME', 'dimas'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD_VALUE', ''),
         'HOST': os.getenv('DB_HOST', 'db'),
         'PORT': os.getenv('DB_PORT', '5432'),
->>>>>>> feature
+
     }
 }
 
@@ -182,7 +175,7 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
 STATIC_URL = '/static/'
-STATIC_ROOT = '/app/static_collected'
+STATIC_ROOT = BASE_DIR / 'static_collected'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/app/media'

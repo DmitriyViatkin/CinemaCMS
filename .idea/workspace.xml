@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="d5e96242-c510-4e82-873f-5343bb181003" name="Changes" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="CSS File" />
+        <option value="JavaScript File" />
+        <option value="package.json" />
+        <option value="Python Script" />
+        <option value="HTML File" />
+        <option value="Dockerfile" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="scheme_hall" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;DmitriyViatkin&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;git@github.com:/DmitriyViatkin/CinemaCMS.git&quot;,
+    &quot;accountId&quot;: &quot;f6784788-98e7-4fd8-a13b-89e451afd092&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 3
+}</component>
+  <component name="ProjectId" id="2v8CUqfav2A2VsGPw47IklK6tvf" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_MARK_IGNORED_FILES_AS_EXCLUDED&quot;: &quot;true&quot;,
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;Makefile Target.migrate-all.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Python.urls.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenDjangoStructureViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/dimas/PycharmProjects/CinemaCMS/core/templates/core&quot;,
+    &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;Docker&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  },
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;postgresql&quot;
+    ]
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/core/templates/core" />
+      <recent name="$PROJECT_DIR$/staticfiles" />
+      <recent name="$PROJECT_DIR$/static/paiges" />
+      <recent name="$PROJECT_DIR$/static/images" />
+      <recent name="$PROJECT_DIR$/static/movies" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/media" />
+      <recent name="$PROJECT_DIR$/core/templates/core" />
+      <recent name="$PROJECT_DIR$/static" />
+      <recent name="$PROJECT_DIR$/admins/templates/admin" />
+      <recent name="$PROJECT_DIR$/admins/static" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Django Server.CinemaCMS">
+    <configuration name="migrate-all" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
+      <makefile filename="$PROJECT_DIR$/Makefile" target="migrate-all" workingDirectory="" arguments="">
+        <envs />
+      </makefile>
+      <method v="2" />
+    </configuration>
+    <configuration name="CinemaCMS" type="Python.DjangoServer" factoryName="Django server">
+      <module name="CinemaCMS" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="launchJavascriptDebuger" value="false" />
+      <option name="port" value="8000" />
+      <option name="host" value="" />
+      <option name="additionalOptions" value="" />
+      <option name="browserUrl" value="" />
+      <option name="runTestServer" value="false" />
+      <option name="runNoReload" value="false" />
+      <option name="useCustomRunCommand" value="false" />
+      <option name="customRunCommand" value="" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Makefile Target.migrate-all" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-b26f3e71634d-JavaScript-PY-251.26094.141" />
+        <option value="bundled-python-sdk-9f8e2b94138c-36ea0e71a18c-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-251.26094.141" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="d5e96242-c510-4e82-873f-5343bb181003" name="Changes" comment="" />
+      <created>1743517334894</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1743517334894</updated>
+      <workItem from="1748676743854" duration="67000" />
+      <workItem from="1748676815112" duration="28660000" />
+      <workItem from="1749649159973" duration="16294000" />
+      <workItem from="1749705164143" duration="505000" />
+      <workItem from="1749726319360" duration="18806000" />
+      <workItem from="1749747137727" duration="7965000" />
+      <workItem from="1749792921714" duration="5894000" />
+      <workItem from="1749799722956" duration="5729000" />
+      <workItem from="1749805603601" duration="12297000" />
+      <workItem from="1749894925713" duration="9358000" />
+      <workItem from="1749984858193" duration="11348000" />
+      <workItem from="1750054266352" duration="13996000" />
+      <workItem from="1750068771733" duration="23115000" />
+      <workItem from="1750155854729" duration="2344000" />
+      <workItem from="1750243915479" duration="6124000" />
+      <workItem from="1750341432017" duration="14857000" />
+      <workItem from="1750399072120" duration="2617000" />
+      <workItem from="1750429725039" duration="10973000" />
+      <workItem from="1750485336064" duration="21824000" />
+      <workItem from="1750591229999" duration="8089000" />
+      <workItem from="1750758873720" duration="10842000" />
+      <workItem from="1750780660384" duration="10652000" />
+      <workItem from="1750828629284" duration="25873000" />
+      <workItem from="1751021848456" duration="18409000" />
+      <workItem from="1751095063923" duration="12254000" />
+      <workItem from="1751178976215" duration="13890000" />
+      <workItem from="1751379415475" duration="49000" />
+      <workItem from="1751379909004" duration="50000" />
+      <workItem from="1751380028814" duration="1380000" />
+      <workItem from="1751383637443" duration="1876000" />
+      <workItem from="1751386189179" duration="665000" />
+      <workItem from="1751386980471" duration="8000" />
+      <workItem from="1751387246599" duration="233000" />
+      <workItem from="1751387515085" duration="60000" />
+      <workItem from="1751387602865" duration="201000" />
+      <workItem from="1751387909189" duration="186000" />
+      <workItem from="1751388132944" duration="32000" />
+      <workItem from="1751390210839" duration="14677000" />
+      <workItem from="1751448540141" duration="1996000" />
+      <workItem from="1751450910741" duration="2701000" />
+      <workItem from="1751457506274" duration="8000" />
+      <workItem from="1751457601009" duration="2055000" />
+      <workItem from="1751460201766" duration="837000" />
+      <workItem from="1751461209943" duration="2510000" />
+      <workItem from="1751463966515" duration="394000" />
+      <workItem from="1751464446395" duration="7209000" />
+      <workItem from="1751537390994" duration="1929000" />
+      <workItem from="1751539483670" duration="1275000" />
+      <workItem from="1751540787581" duration="4740000" />
+      <workItem from="1751625467308" duration="4679000" />
+      <workItem from="1751732032643" duration="9383000" />
+      <workItem from="1751784882600" duration="2731000" />
+      <workItem from="1751787669761" duration="49850000" />
+      <workItem from="1751888460882" duration="32000" />
+      <workItem from="1752061219499" duration="13819000" />
+      <workItem from="1752149716188" duration="18383000" />
+      <workItem from="1752214778481" duration="13313000" />
+      <workItem from="1752231083791" duration="1392000" />
+      <workItem from="1752474892983" duration="3360000" />
+      <workItem from="1752503787218" duration="9199000" />
+      <workItem from="1752578084861" duration="901000" />
+      <workItem from="1752660313897" duration="10136000" />
+      <workItem from="1752748006645" duration="18492000" />
+      <workItem from="1752821935433" duration="10895000" />
+      <workItem from="1752834685747" duration="3994000" />
+      <workItem from="1752839339804" duration="508000" />
+      <workItem from="1752839935540" duration="289000" />
+      <workItem from="1752840550773" duration="633000" />
+      <workItem from="1752841304336" duration="861000" />
+      <workItem from="1752842271723" duration="321000" />
+      <workItem from="1752843112574" duration="2836000" />
+      <workItem from="1752846195425" duration="997000" />
+      <workItem from="1752847320797" duration="769000" />
+      <workItem from="1752848235568" duration="5464000" />
+      <workItem from="1752857292727" duration="66000" />
+      <workItem from="1752859859502" duration="333000" />
+      <workItem from="1752916551521" duration="6569000" />
+      <workItem from="1753105093484" duration="12733000" />
+      <workItem from="1753163540499" duration="11193000" />
+      <workItem from="1753176349464" duration="4031000" />
+      <workItem from="1753180430929" duration="6357000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
+    <option name="GROUP_MULTIFILE_MERGE_BY_DIRECTORY" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/core/urls.py</url>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/../gore/My_blog/settings.py</url>
+          <line>11</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>

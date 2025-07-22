@@ -564,13 +564,7 @@ def add_cinema_create(request, cinema_id=None):
             return redirect('cinema_lists')
 
         else:
-            print("Ошибка валидации форм")
-            print("block_seo_form.errors:", block_seo_form.errors)
-            print("cinema_form.errors:", cinema_form.errors)
-            print("gallery_form.errors:", gallery_form.errors)
-            print("picture_formset.errors:", picture_formset.errors)
-            print("banner_form.errors:", banner_form.errors)
-            print("logo_form.errors:", logo_form.errors)
+
 
             return render(request, 'admin/cinema/add_cinema.html', {
                 'block_seo_form': block_seo_form,
@@ -723,13 +717,7 @@ def add_halls_create(request, cinema_pk, halls_id=None):
                 picture_to_delete.delete()
 
             return redirect('add_cinema_edit', cinema_id=cinema_pk)
-        else:
-            print("❌ Помилка валідації форм:")
-            print("block_seo_form.errors:", block_seo_form.errors)
-            print("halls_form.errors:", halls_form.errors)
-            print("gallery_form.errors:", gallery_form.errors)
-            print("picture_formset.errors:", picture_formset.errors)
-            print("banner_form.errors:", banner_form.errors)
+
 
     else:
         block_seo_form = BlockSEOForm(instance=block_seo_instance)

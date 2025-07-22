@@ -77,7 +77,7 @@ docker-build:
 	docker build -t $(DOCKER_IMAGE_NAME) .
 	@echo "Docker-образ $(DOCKER_IMAGE_NAME) успешно собран."
 
-docker-up:
+run-up:
 	@echo "Запускаем Docker-контейнеры через Docker Compose..."
 	$(DOCKER_COMPOSE) up -d --build
 	@echo "Docker-контейнеры запущены в фоновом режиме."

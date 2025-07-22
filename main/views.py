@@ -72,7 +72,7 @@ def index(request):
             to_attr='cross_banner_pictures'
         )
     ).first()
-
+    print(cross_banner_obj)
     cross_banner_background_url = None
 
     if cross_banner_obj and cross_banner_obj.gallery and cross_banner_obj.gallery.cross_banner_pictures:

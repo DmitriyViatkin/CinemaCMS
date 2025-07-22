@@ -1,0 +1,1673 @@
+Index: admins/templates/admin/movies_lists/add_movies.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>{% extends 'admin/index.html' %}\n{% load static %}\n{% block title %}Додати фільм{% endblock %}\n\n{% block content %}\n<h1>Додати новий фільм</h1>\n\n<section class=\"content\" >\n    <div class=\"container-fluid\">\n        <div class=\"row\">\n            <div class=\"col-md-12\">\n                <div class=\"card card-primary\">\n                    <div class=\"card-header\">\n                        <h3 class=\"card-title\">Додати фільм</h3>\n                    </div>\n                    <form method=\"post\" enctype=\"multipart/form-data\">\n                        {% csrf_token %}\n\n                        {% if movie_form.non_field_errors %}\n                            <div class=\"alert alert-danger\">{{ movie_form.non_field_errors }}</div>\n                        {% endif %}\n                        {% if block_seo_form.non_field_errors %}\n                            <div class=\"alert alert-danger\">{{ block_seo_form.non_field_errors }}</div>\n                        {% endif %}\n                        {% if gallery_form.non_field_errors %}\n                            <div class=\"alert alert-danger\">{{ gallery_form.non_field_errors }}</div>\n                        {% endif %}\n                        {% if picture_formset.non_form_errors %}\n                            <div class=\"alert alert-danger\">{{ picture_formset.non_form_errors }}</div>\n                        {% endif %}\n                        {% if main_picture_form.non_field_errors %}\n                            <div class=\"alert alert-danger\">{{ main_picture_form.non_field_errors }}</div>\n                        {% endif %}\n\n                        <div class=\"card-body\">\n                            <h2>Інформація про фільм</h2>\n                            {% include 'admin/card_forms/movie_form.html' with form=movie_form %}\n\n                            <h2>SEO Інформація</h2>\n                            {% include 'admin/card_forms/seo_form.html' with form=block_seo_form %}\n\n                            <h2>Галерея</h2>\n\n\n                            <h3>Головна картинка</h3>\n                            <div class=\"main-picture-form border p-3 mb-3\">\n                                {% for field in main_picture_form %}\n                                    {% if field.name == 'image' %}\n                                        <div class=\"form-group\">\n                                            {{ field.label_tag }}\n                                            {{ field }}\n                                            {% if field.errors %}\n                                                <div class=\"alert alert-danger\">{{ field.errors }}</div>\n                                            {% endif %}\n                                            <div class=\"image-preview\" style=\"max-width: 200px; max-height: 200px; margin-top: 10px;\"></div>\n                                        </div>\n                                    {% endif %}\n                                {% endfor %}\n                                <div style=\"display: none;\">{{ main_picture_form.image_type.label_tag }} {{ main_picture_form.image_type }}</div>\n                                <div style=\"display: none;\">{{ main_picture_form.gallery.label_tag }} {{ main_picture_form.gallery }}</div>\n                            </div>\n\n                            <h3>Картинки галереї</h3>\n                            {{ picture_formset.management_form }}\n                            <div id=\"pictures-formset\">\n                                {% for form in picture_formset %}\n                                    <div class=\"gallery-image-form border p-3 mb-3\">\n                                        <div style=\"display: none;\">{{ form.id }}</div>\n                                        {% if form.non_field_errors %}<div class=\"alert alert-danger\">{{ form.non_field_errors }}</div>{% endif %}\n                                        <div class=\"form-group\">\n                                            {{ form.image.label_tag }}\n                                            {% if form.instance.pk and form.instance.image %}\n                                                <img src=\"{{ form.instance.image.url }}\" alt=\"Поточне зображення\" style=\"max-width: 100px; max-height: 100px; margin-bottom: 10px;\">\n                                            {% endif %}\n                                            {{ form.image }}\n                                            {% if form.image.help_text %}<small class=\"form-text text-muted\">{{ form.image.help_text }}</small>{% endif %}\n                                            {% for error in form.image.errors %}<div class=\"alert alert-danger\">{{ error }}</div>{% endfor %}\n                                        </div>\n                                        <div class=\"form-group form-check\">\n                                            {{ form.DELETE }}\n                                            {{ form.DELETE.label_tag }}\n                                            {% for error in form.DELETE.errors %}<div class=\"alert alert-danger\">{{ error }}</div>{% endfor %}\n                                        </div>\n                                        <div style=\"display: none;\">{{ form.image_type.label_tag }} {{ form.image_type }}</div>\n                                        <div class=\"form-group\" style=\"display: none;\">\n                                            <label for=\"{{ form.prefix }}-gallery\">Gallery:</label>\n                                            {{ form.gallery }}\n                                        </div>\n                                    </div>\n                                {% endfor %}\n                                {{ picture_formset.empty_form }}\n                            </div>\n                            <button id=\"add-picture-form\" type=\"button\" class=\"btn btn-success mt-2\">Додати ще одне зображення</button>\n                        </div>\n\n                        <div class=\"card-footer\">\n                            <button type=\"submit\" class=\"btn btn-primary\">Створити</button>\n                        </div>\n                    </form>\n                </div>\n            </div>\n        </div>\n    </section>\n\n    <script>\n        document.addEventListener('DOMContentLoaded', function() {\n            // Предварительный просмотр главной картинки\n            const mainPictureInput = document.querySelector('.main-picture-form input[type=\"file\"]');\n            const mainPicturePreview = document.querySelector('.main-picture-form .image-preview');\n\n            if (mainPictureInput && mainPicturePreview) {\n                mainPictureInput.addEventListener('change', function() {\n                    previewImage(this, mainPicturePreview, 200, 200);\n                });\n            }\n\n            // Обработка формсета галереи\n            const addPictureFormButton = document.getElementById('add-picture-form');\n            const picturesFormsetContainer = document.getElementById('pictures-formset');\n            const emptyFormTemplate = document.querySelector('#empty-form .gallery-image-form').cloneNode(true);\n            const totalForms = document.querySelector('#id_pictures-TOTAL_FORMS');\n            let formCount = picturesFormsetContainer.querySelectorAll('.gallery-image-form').length;\n\n            function updateFormIndices(form, newIndex) {\n                form.querySelectorAll('input, select, textarea, label').forEach(node => {\n                    let id = node.getAttribute('id');\n                    let name = node.getAttribute('name');\n\n                    if (id && id.includes('__prefix__')) {\n                        node.setAttribute('id', id.replace('__prefix__', newIndex));\n                    } else if (id && id.includes('-')) {\n                        const parts = id.split('-');\n                        node.setAttribute('id', parts[0] + '-' + newIndex + '-' + parts.slice(2).join('-'));\n                    }\n\n                    if (name && name.includes('__prefix__')) {\n                        node.setAttribute('name', name.replace('__prefix__', newIndex));\n                    } else if (name && name.startsWith('pictures-')) {\n                        const parts = name.split('-');\n                        node.setAttribute('name', 'pictures-' + newIndex + '-' + parts.slice(2).join('-'));\n                    }\n\n                    if (node.tagName === 'LABEL' && node.getAttribute('for') && node.getAttribute('for').includes('__prefix__')) {\n                        node.setAttribute('for', node.getAttribute('for').replace('__prefix__', newIndex));\n                    } else if (node.tagName === 'LABEL' && node.getAttribute('for') && node.getAttribute('for').startsWith('id_pictures-')) {\n                        const parts = node.getAttribute('for').split('-');\n                        node.setAttribute('for', 'id_pictures-' + newIndex + '-' + parts.slice(2).join('-'));\n                    }\n\n                    if (node.tagName === 'INPUT' && node.getAttribute('type') === 'file') {\n                        const preview = form.querySelector('.image-preview');\n                        if (preview) preview.innerHTML = '';\n                        node.addEventListener('change', function() {\n                            previewImage(this, preview, 100, 100);\n                        });\n                    }\n                });\n            }\n\n            function previewImage(input, previewContainer, maxWidth, maxHeight) {\n                if (input.files && input.files[0]) {\n                    const reader = new FileReader();\n                    reader.onload = function(e) {\n                        previewContainer.innerHTML = `<img src=\"${e.target.result}\" style=\"max-width: ${maxWidth}px; max-height: ${maxHeight}px;\">`;\n                    }\n                    reader.readAsDataURL(input.files[0]);\n                } else {\n                    previewContainer.innerHTML = '';\n                }\n            }\n\n            addPictureFormButton.addEventListener('click', function() {\n                const newForm = emptyFormTemplate.cloneNode(true);\n                updateFormIndices(newForm, formCount);\n\n                const deleteButton = document.createElement('button');\n                deleteButton.classList.add('btn', 'btn-danger', 'mt-2', 'remove-form');\n                deleteButton.textContent = 'Видалити';\n                deleteButton.addEventListener('click', function() {\n                    newForm.remove();\n                    formCount--;\n                    totalForms.value = formCount;\n                    updateFormIndicesOnDelete();\n                });\n                newForm.appendChild(deleteButton);\n\n                picturesFormsetContainer.appendChild(newForm);\n                formCount++;\n                totalForms.value = formCount;\n\n                // Скрываем поля id и image_type в новой форме\n                const newIdField = newForm.querySelector('[id$=\"-id\"]');\n                if (newIdField) {\n                    newIdField.closest('.form-group').style.display = 'none';\n                }\n                const newImageTypeField = newForm.querySelector('[id$=\"-image_type\"]');\n                if (newImageTypeField) {\n                    newImageTypeField.closest('.form-group').style.display = 'none';\n                }\n\n                // Скрываем label поля image_type в новой форме\n                const newImageTypeLabel = newForm.querySelector('label[for$=\"-image_type\"]');\n                if (newImageTypeLabel) {\n                    newImageTypeLabel.style.display = 'none';\n                }\n\n                // Скрываем label и поле Gallery в новой форме\n                const newGalleryLabel = newForm.querySelector('label[for$=\"-gallery\"]');\n                const newGalleryField = newForm.querySelector('[id$=\"-gallery\"]');\n                if (newGalleryLabel) {\n                    newGalleryLabel.style.display = 'none';\n                }\n                if (newGalleryField) {\n                    newGalleryField.closest('.form-group').style.display = 'none';\n                }\n            });\n\n            picturesFormsetContainer.addEventListener('click', function(event) {\n                if (event.target.classList.contains('remove-form')) {\n                    event.preventDefault();\n                    const formToDelete = event.target.closest('.gallery-image-form');\n                    const indexToRemove = Array.from(picturesFormsetContainer.children).indexOf(formToDelete);\n                    formToDelete.remove();\n                    formCount--;\n                    totalForms.value = formCount;\n                    updateFormIndicesOnDelete();\n                }\n            });\n\n            function updateFormIndicesOnDelete() {\n                const forms = picturesFormsetContainer.querySelectorAll('.gallery-image-form');\n                forms.forEach((form, index) => {\n                    updateFormIndices(form, index);\n                    // Скрываем поля id и image_type после обновления индексов\n                    const idField = form.querySelector('[id$=\"-id\"]');\n                    if (idField) {\n                        idField.closest('.form-group').style.display = 'none';\n                    }\n                    const imageTypeField = form.querySelector('[id$=\"-image_type\"]');\n                    if (imageTypeField) {\n                        imageTypeField.closest('.form-group').style.display = 'none';\n                    }\n                    // Скрываем label поля image_type после обновления индексов\n                    const imageTypeLabel = form.querySelector('label[for$=\"-image_type\"]');\n                    if (imageTypeLabel) {\n                        imageTypeLabel.style.display = 'none';\n                    }\n                    // Скрываем label и поле Gallery после обновления индексов\n                    const galleryLabel = form.querySelector('label[for$=\"-gallery\"]');\n                    const galleryField = form.querySelector('[id$=\"-gallery\"]');\n                    if (galleryLabel) {\n                        galleryLabel.style.display = 'none';\n                    }\n                    if (galleryField) {\n                        galleryField.closest('.form-group').style.display = 'none';\n                    }\n                });\n            }\n\n            picturesFormsetContainer.querySelectorAll('.gallery-image-form').forEach((form, index) => {\n                updateFormIndices(form, index);\n                const fileInput = form.querySelector('input[type=\"file\"]');\n                const previewContainer = form.querySelector('.image-preview');\n                if (fileInput && previewContainer) {\n                    fileInput.addEventListener('change', function() {\n                        previewImage(this, previewContainer, 100, 100);\n                    });\n                }\n                // Скрываем поля id и image_type при загрузке страницы\n                const initialIdField = form.querySelector('[id$=\"-id\"]');\n                if (initialIdField) {\n                    initialIdField.closest('.form-group').style.display = 'none';\n                }\n                const initialImageTypeField = form.querySelector('[id$=\"-image_type\"]');\n                if (initialImageTypeField) {\n                    initialImageTypeField.closest('.form-group').style.display = 'none';\n                }\n                // Скрываем label поля image_type при загрузке страницы\n                const initialImageTypeLabel = form.querySelector('label[for$=\"-image_type\"]');\n                if (initialImageTypeLabel) {\n                    initialImageTypeLabel.style.display = 'none';\n                }\n                // Скрываем label и поле Gallery при загрузке страницы\n                const initialGalleryLabel = form.querySelector('label[for$=\"-gallery\"]');\n                const initialGalleryField = form.querySelector('[id$=\"-gallery\"]');\n                if (initialGalleryLabel) {\n                    initialGalleryLabel.style.display = 'none';\n                }\n                if (initialGalleryField) {\n                    initialGalleryField.closest('.form-group').style.display = 'none';\n                }\n            });\n\n            // Скрываем поля id и image_type в пустой форме\n            const emptyFormDiv = document.querySelector('#empty-form .gallery-image-form');\n            if (emptyFormDiv) {\n                const idFieldEmpty = emptyFormDiv.querySelector('[id$=\"__prefix__-id\"]');\n                if (idFieldEmpty) {\n                    idFieldEmpty.closest('.form-group').style.display = 'none';\n                }\n                const imageTypeFieldEmpty = emptyFormDiv.querySelector('[id$=\"__prefix__-image_type\"]');\n                if (imageTypeFieldEmpty) {\n                    imageTypeFieldEmpty.closest('.form-group').style.display = 'none';\n                }\n                // Скрываем label поля image_type в пустой форме\n                const imageTypeLabelEmpty = emptyFormDiv.querySelector('label[for$=\"__prefix__-image_type\"]');\n                if (imageTypeLabelEmpty) {\n                    imageTypeLabelEmpty.style.display = 'none';\n                }\n                // Скрываем label и поле Gallery в пустой форме\n                const galleryLabelEmpty = emptyFormDiv.querySelector('label[for$=\"__prefix__-gallery\"]');\n                const galleryFieldEmpty = emptyFormDiv.querySelector('[id$=\"__prefix__-gallery\"]');\n                if (galleryLabelEmpty) {\n                    galleryLabelEmpty.style.display = 'none';\n                }\n                if (galleryFieldEmpty) {\n                    galleryFieldEmpty.closest('.form-group').style.display = 'none';\n                }\n            }\n\n            // Скрываем label главной картинки \"Тип зображення\" и \"Галерея\"\n            const mainImageTypeLabel = document.querySelector('.main-picture-form label[for$=\"-image_type\"]');\n            if (mainImageTypeLabel) {\n                mainImageTypeLabel.style.display = 'none';\n            }\n            const mainGalleryLabel = document.querySelector('.main-picture-form label[for$=\"-gallery\"]');\n            if (mainGalleryLabel) {\n                mainGalleryLabel.style.display = 'none';\n            }\n        });\n    </script>\n\n    <div style=\"display: none;\">\n        {{ picture_formset.empty_form }}\n        <div id=\"empty-form\">\n            <div class=\"gallery-image-form border p-3 mb-3\">\n                {% for field in picture_formset.empty_form %}\n                    <div class=\"form-group\">\n                        {{ field.label_tag }}\n                        {{ field }}\n                        {% if field.help_text %}<small class=\"form-text text-muted\">{{ field.help_text }}</small>{% endif %}\n                        {% for error in field.errors %}<div class=\"alert alert-danger\">{{ error }}</div>{% endfor %}\n                    </div>\n                {% endfor %}\n                <div class=\"image-preview\" style=\"max-width: 100px; max-height: 100px; margin-top: 10px;\"></div>\n            </div>\n        </div>\n    </div>\n\n\n{% endblock %}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/admins/templates/admin/movies_lists/add_movies.html b/admins/templates/admin/movies_lists/add_movies.html
+--- a/admins/templates/admin/movies_lists/add_movies.html	(revision 09995edf10a3bdb2cb66c1f197b45a23e8f45852)
++++ b/admins/templates/admin/movies_lists/add_movies.html	(date 1749047820937)
+@@ -3,349 +3,188 @@
+ {% block title %}Додати фільм{% endblock %}
+ 
+ {% block content %}
+-<h1>Додати новий фільм</h1>
++
+ 
+-<section class="content" >
+-    <div class="container-fluid">
+-        <div class="row">
+-            <div class="col-md-12">
+-                <div class="card card-primary">
+-                    <div class="card-header">
+-                        <h3 class="card-title">Додати фільм</h3>
+-                    </div>
+-                    <form method="post" enctype="multipart/form-data">
+-                        {% csrf_token %}
++<section class="content">
++  <div class="container-fluid">
++    <div class="row">
++      <div class="col-md-12">
++        <div class="card card-primary">
++          <div class="card-header">
++            <h3 class="card-title">Додати фільм</h3>
++          </div>
++          <form method="post" enctype="multipart/form-data">
++            {% csrf_token %}
+ 
+-                        {% if movie_form.non_field_errors %}
+-                            <div class="alert alert-danger">{{ movie_form.non_field_errors }}</div>
+-                        {% endif %}
+-                        {% if block_seo_form.non_field_errors %}
+-                            <div class="alert alert-danger">{{ block_seo_form.non_field_errors }}</div>
+-                        {% endif %}
+-                        {% if gallery_form.non_field_errors %}
+-                            <div class="alert alert-danger">{{ gallery_form.non_field_errors }}</div>
+-                        {% endif %}
+-                        {% if picture_formset.non_form_errors %}
+-                            <div class="alert alert-danger">{{ picture_formset.non_form_errors }}</div>
+-                        {% endif %}
+-                        {% if main_picture_form.non_field_errors %}
+-                            <div class="alert alert-danger">{{ main_picture_form.non_field_errors }}</div>
+-                        {% endif %}
++            {% if movie_form.non_field_errors %}
++              <div class="alert alert-danger">{{ movie_form.non_field_errors }}</div>
++            {% endif %}
++            {% if block_seo_form.non_field_errors %}
++              <div class="alert alert-danger">{{ block_seo_form.non_field_errors }}</div>
++            {% endif %}
++            {% if gallery_form.non_field_errors %}
++              <div class="alert alert-danger">{{ gallery_form.non_field_errors }}</div>
++            {% endif %}
++            {% if picture_formset.non_form_errors %}
++              <div class="alert alert-danger">{{ picture_formset.non_form_errors }}</div>
++            {% endif %}
++            {% if main_picture_form.non_field_errors %}
++              <div class="alert alert-danger">{{ main_picture_form.non_field_errors }}</div>
++            {% endif %}
+ 
+-                        <div class="card-body">
+-                            <h2>Інформація про фільм</h2>
+-                            {% include 'admin/card_forms/movie_form.html' with form=movie_form %}
++            <div class="card-body">
++              <h2>Інформація про фільм</h2>
++              {% include 'admin/card_forms/movie_form.html' with form=movie_form %}
+ 
+-                            <h2>SEO Інформація</h2>
+-                            {% include 'admin/card_forms/seo_form.html' with form=block_seo_form %}
++              <h2>SEO Інформація</h2>
++              {% include 'admin/card_forms/seo_form.html' with form=block_seo_form %}
+ 
+-                            <h2>Галерея</h2>
++              <h2>Галерея</h2>
+ 
+-
+-                            <h3>Головна картинка</h3>
+-                            <div class="main-picture-form border p-3 mb-3">
+-                                {% for field in main_picture_form %}
+-                                    {% if field.name == 'image' %}
+-                                        <div class="form-group">
+-                                            {{ field.label_tag }}
+-                                            {{ field }}
+-                                            {% if field.errors %}
+-                                                <div class="alert alert-danger">{{ field.errors }}</div>
+-                                            {% endif %}
+-                                            <div class="image-preview" style="max-width: 200px; max-height: 200px; margin-top: 10px;"></div>
+-                                        </div>
+-                                    {% endif %}
+-                                {% endfor %}
+-                                <div style="display: none;">{{ main_picture_form.image_type.label_tag }} {{ main_picture_form.image_type }}</div>
+-                                <div style="display: none;">{{ main_picture_form.gallery.label_tag }} {{ main_picture_form.gallery }}</div>
+-                            </div>
++              <h3>Головна картинка</h3>
++              <div class="main-picture-form border p-3 mb-3">
++                {% for field in main_picture_form %}
++                  {% if field.name == 'image' %}
++                    <div class="form-group">
++                      {{ field.label_tag }}
++                      {{ field }}
++                      {% if field.errors %}
++                        <div class="alert alert-danger">{{ field.errors }}</div>
++                      {% endif %}
++                      <div class="image-preview" style="max-width: 200px; max-height: 200px; margin-top: 10px;"></div>
++                    </div>
++                  {% endif %}
++                {% endfor %}
++                <div style="display: none;">{{ main_picture_form.image_type }}</div>
++                <div style="display: none;">{{ main_picture_form.gallery }}</div>
++              </div>
+ 
+-                            <h3>Картинки галереї</h3>
+-                            {{ picture_formset.management_form }}
+-                            <div id="pictures-formset">
+-                                {% for form in picture_formset %}
+-                                    <div class="gallery-image-form border p-3 mb-3">
+-                                        <div style="display: none;">{{ form.id }}</div>
+-                                        {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+-                                        <div class="form-group">
+-                                            {{ form.image.label_tag }}
+-                                            {% if form.instance.pk and form.instance.image %}
+-                                                <img src="{{ form.instance.image.url }}" alt="Поточне зображення" style="max-width: 100px; max-height: 100px; margin-bottom: 10px;">
+-                                            {% endif %}
+-                                            {{ form.image }}
+-                                            {% if form.image.help_text %}<small class="form-text text-muted">{{ form.image.help_text }}</small>{% endif %}
+-                                            {% for error in form.image.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+-                                        </div>
+-                                        <div class="form-group form-check">
+-                                            {{ form.DELETE }}
+-                                            {{ form.DELETE.label_tag }}
+-                                            {% for error in form.DELETE.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+-                                        </div>
+-                                        <div style="display: none;">{{ form.image_type.label_tag }} {{ form.image_type }}</div>
+-                                        <div class="form-group" style="display: none;">
+-                                            <label for="{{ form.prefix }}-gallery">Gallery:</label>
+-                                            {{ form.gallery }}
+-                                        </div>
+-                                    </div>
+-                                {% endfor %}
+-                                {{ picture_formset.empty_form }}
+-                            </div>
+-                            <button id="add-picture-form" type="button" class="btn btn-success mt-2">Додати ще одне зображення</button>
+-                        </div>
++              <h3>Картинки галереї</h3>
++              {{ picture_formset.management_form }}
++              <div id="pictures-formset">
++                {% for form in picture_formset %}
++                  <div class="gallery-image-form border p-3 mb-3">
++                    <div style="display: none;">{{ form.id }}</div>
++                    {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
++                    <div class="form-group">
++                      {{ form.image.label_tag }}
++                      {% if form.instance.pk and form.instance.image %}
++                        <img src="{{ form.instance.image.url }}" style="max-width: 100px; max-height: 100px; margin-bottom: 10px;">
++                      {% endif %}
++                      {{ form.image }}
++                    </div>
++                    <div class="form-group form-check">
++                      {{ form.DELETE }} {{ form.DELETE.label_tag }}
++                    </div>
++                    <div style="display: none;">{{ form.image_type }}</div>
++                    <div style="display: none;">{{ form.gallery }}</div>
++                    <div class="image-preview" style="max-width: 100px; max-height: 100px; margin-top: 10px;"></div>
++                  </div>
++                {% endfor %}
++              </div>
++              <button id="add-picture-form" type="button" class="btn btn-success mt-2">Додати ще одне зображення</button>
++            </div>
+ 
+-                        <div class="card-footer">
+-                            <button type="submit" class="btn btn-primary">Створити</button>
+-                        </div>
+-                    </form>
+-                </div>
+-            </div>
+-        </div>
+-    </section>
++            <div class="card-footer">
++              <button type="submit" class="btn btn-primary">Створити</button>
++            </div>
++          </form>
++        </div>
++      </div>
++    </div>
++  </div>
++</section>
+ 
+-    <script>
+-        document.addEventListener('DOMContentLoaded', function() {
+-            // Предварительный просмотр главной картинки
+-            const mainPictureInput = document.querySelector('.main-picture-form input[type="file"]');
+-            const mainPicturePreview = document.querySelector('.main-picture-form .image-preview');
+-
+-            if (mainPictureInput && mainPicturePreview) {
+-                mainPictureInput.addEventListener('change', function() {
+-                    previewImage(this, mainPicturePreview, 200, 200);
+-                });
+-            }
+-
+-            // Обработка формсета галереи
+-            const addPictureFormButton = document.getElementById('add-picture-form');
+-            const picturesFormsetContainer = document.getElementById('pictures-formset');
+-            const emptyFormTemplate = document.querySelector('#empty-form .gallery-image-form').cloneNode(true);
+-            const totalForms = document.querySelector('#id_pictures-TOTAL_FORMS');
+-            let formCount = picturesFormsetContainer.querySelectorAll('.gallery-image-form').length;
+-
+-            function updateFormIndices(form, newIndex) {
+-                form.querySelectorAll('input, select, textarea, label').forEach(node => {
+-                    let id = node.getAttribute('id');
+-                    let name = node.getAttribute('name');
+-
+-                    if (id && id.includes('__prefix__')) {
+-                        node.setAttribute('id', id.replace('__prefix__', newIndex));
+-                    } else if (id && id.includes('-')) {
+-                        const parts = id.split('-');
+-                        node.setAttribute('id', parts[0] + '-' + newIndex + '-' + parts.slice(2).join('-'));
+-                    }
+-
+-                    if (name && name.includes('__prefix__')) {
+-                        node.setAttribute('name', name.replace('__prefix__', newIndex));
+-                    } else if (name && name.startsWith('pictures-')) {
+-                        const parts = name.split('-');
+-                        node.setAttribute('name', 'pictures-' + newIndex + '-' + parts.slice(2).join('-'));
+-                    }
+-
+-                    if (node.tagName === 'LABEL' && node.getAttribute('for') && node.getAttribute('for').includes('__prefix__')) {
+-                        node.setAttribute('for', node.getAttribute('for').replace('__prefix__', newIndex));
+-                    } else if (node.tagName === 'LABEL' && node.getAttribute('for') && node.getAttribute('for').startsWith('id_pictures-')) {
+-                        const parts = node.getAttribute('for').split('-');
+-                        node.setAttribute('for', 'id_pictures-' + newIndex + '-' + parts.slice(2).join('-'));
+-                    }
+-
+-                    if (node.tagName === 'INPUT' && node.getAttribute('type') === 'file') {
+-                        const preview = form.querySelector('.image-preview');
+-                        if (preview) preview.innerHTML = '';
+-                        node.addEventListener('change', function() {
+-                            previewImage(this, preview, 100, 100);
+-                        });
+-                    }
+-                });
+-            }
+-
+-            function previewImage(input, previewContainer, maxWidth, maxHeight) {
+-                if (input.files && input.files[0]) {
+-                    const reader = new FileReader();
+-                    reader.onload = function(e) {
+-                        previewContainer.innerHTML = `<img src="${e.target.result}" style="max-width: ${maxWidth}px; max-height: ${maxHeight}px;">`;
+-                    }
+-                    reader.readAsDataURL(input.files[0]);
+-                } else {
+-                    previewContainer.innerHTML = '';
+-                }
+-            }
++
++<div id="empty-form" style="display: none;">
++  <div class="gallery-image-form border p-3 mb-3">
++    {% for field in picture_formset.empty_form %}
++      <div class="form-group">
++
++        {% if field.name == 'image' %}
++          {{ field.label_tag }}
++        {% endif %}
++        {{ field }}
++
++
++        {% if field.name == 'gallery' or field.name == 'image_type' or field.name == 'id' %}
++          <style>
++
++
++            label[for="{{ field.id_for_label }}"] { display: none; }
++          </style>
++        {% endif %}
++      </div>
++    {% endfor %}
++    <div class="image-preview" style="max-width: 100px; max-height: 100px; margin-top: 10px;"></div>
++  </div>
++</div>
++
++<!-- JavaScript -->
++<script>
++  document.addEventListener('DOMContentLoaded', function () {
++    function previewImage(input, previewContainer, maxWidth, maxHeight) {
++      if (input.files && input.files[0]) {
++        const reader = new FileReader();
++        reader.onload = function (e) {
++          previewContainer.innerHTML = `<img src="${e.target.result}" style="max-width:${maxWidth}px; max-height:${maxHeight}px;">`;
++        };
++        reader.readAsDataURL(input.files[0]);
++      } else {
++        previewContainer.innerHTML = '';
++      }
++    }
+ 
+-            addPictureFormButton.addEventListener('click', function() {
+-                const newForm = emptyFormTemplate.cloneNode(true);
+-                updateFormIndices(newForm, formCount);
+-
+-                const deleteButton = document.createElement('button');
+-                deleteButton.classList.add('btn', 'btn-danger', 'mt-2', 'remove-form');
+-                deleteButton.textContent = 'Видалити';
+-                deleteButton.addEventListener('click', function() {
+-                    newForm.remove();
+-                    formCount--;
+-                    totalForms.value = formCount;
+-                    updateFormIndicesOnDelete();
+-                });
+-                newForm.appendChild(deleteButton);
+-
+-                picturesFormsetContainer.appendChild(newForm);
+-                formCount++;
+-                totalForms.value = formCount;
+-
+-                // Скрываем поля id и image_type в новой форме
+-                const newIdField = newForm.querySelector('[id$="-id"]');
+-                if (newIdField) {
+-                    newIdField.closest('.form-group').style.display = 'none';
+-                }
+-                const newImageTypeField = newForm.querySelector('[id$="-image_type"]');
+-                if (newImageTypeField) {
+-                    newImageTypeField.closest('.form-group').style.display = 'none';
+-                }
++    const mainPictureInput = document.querySelector('.main-picture-form input[type="file"]');
++    const mainPreview = document.querySelector('.main-picture-form .image-preview');
++    if (mainPictureInput && mainPreview) {
++      mainPictureInput.addEventListener('change', function () {
++        previewImage(this, mainPreview, 200, 200);
++      });
++    }
+ 
+-                // Скрываем label поля image_type в новой форме
+-                const newImageTypeLabel = newForm.querySelector('label[for$="-image_type"]');
+-                if (newImageTypeLabel) {
+-                    newImageTypeLabel.style.display = 'none';
+-                }
++    const formsetContainer = document.getElementById('pictures-formset');
++    const addBtn = document.getElementById('add-picture-form');
++    const totalForms = document.getElementById('id_pictures-TOTAL_FORMS');
++    let formCount = formsetContainer.querySelectorAll('.gallery-image-form').length;
+ 
+-                // Скрываем label и поле Gallery в новой форме
+-                const newGalleryLabel = newForm.querySelector('label[for$="-gallery"]');
+-                const newGalleryField = newForm.querySelector('[id$="-gallery"]');
+-                if (newGalleryLabel) {
+-                    newGalleryLabel.style.display = 'none';
+-                }
+-                if (newGalleryField) {
+-                    newGalleryField.closest('.form-group').style.display = 'none';
+-                }
+-            });
+-
+-            picturesFormsetContainer.addEventListener('click', function(event) {
+-                if (event.target.classList.contains('remove-form')) {
+-                    event.preventDefault();
+-                    const formToDelete = event.target.closest('.gallery-image-form');
+-                    const indexToRemove = Array.from(picturesFormsetContainer.children).indexOf(formToDelete);
+-                    formToDelete.remove();
+-                    formCount--;
+-                    totalForms.value = formCount;
+-                    updateFormIndicesOnDelete();
+-                }
+-            });
+-
+-            function updateFormIndicesOnDelete() {
+-                const forms = picturesFormsetContainer.querySelectorAll('.gallery-image-form');
+-                forms.forEach((form, index) => {
+-                    updateFormIndices(form, index);
+-                    // Скрываем поля id и image_type после обновления индексов
+-                    const idField = form.querySelector('[id$="-id"]');
+-                    if (idField) {
+-                        idField.closest('.form-group').style.display = 'none';
+-                    }
+-                    const imageTypeField = form.querySelector('[id$="-image_type"]');
+-                    if (imageTypeField) {
+-                        imageTypeField.closest('.form-group').style.display = 'none';
+-                    }
+-                    // Скрываем label поля image_type после обновления индексов
+-                    const imageTypeLabel = form.querySelector('label[for$="-image_type"]');
+-                    if (imageTypeLabel) {
+-                        imageTypeLabel.style.display = 'none';
+-                    }
+-                    // Скрываем label и поле Gallery после обновления индексов
+-                    const galleryLabel = form.querySelector('label[for$="-gallery"]');
+-                    const galleryField = form.querySelector('[id$="-gallery"]');
+-                    if (galleryLabel) {
+-                        galleryLabel.style.display = 'none';
+-                    }
+-                    if (galleryField) {
+-                        galleryField.closest('.form-group').style.display = 'none';
+-                    }
+-                });
+-            }
++    function updateFormIndex(form, index) {
++      form.querySelectorAll('input, select, textarea, label').forEach(el => {
++        ['name', 'id', 'for'].forEach(attr => {
++          if (el.hasAttribute(attr)) {
++            el.setAttribute(attr, el.getAttribute(attr).replace(/pictures-(\d+|__prefix__)-/, `pictures-${index}-`));
++          }
++        });
++      });
++    }
++
++    addBtn.addEventListener('click', () => {
++      const emptyTemplate = document.querySelector('#empty-form .gallery-image-form');
++      const newForm = emptyTemplate.cloneNode(true);
++      updateFormIndex(newForm, formCount);
++      formsetContainer.appendChild(newForm);
++      totalForms.value = ++formCount;
++
++      const fileInput = newForm.querySelector('input[type="file"]');
++      const preview = newForm.querySelector('.image-preview');
++      if (fileInput && preview) {
++        fileInput.addEventListener('change', function () {
++          previewImage(this, preview, 100, 100);
++        });
++      }
++    });
+ 
+-            picturesFormsetContainer.querySelectorAll('.gallery-image-form').forEach((form, index) => {
+-                updateFormIndices(form, index);
+-                const fileInput = form.querySelector('input[type="file"]');
+-                const previewContainer = form.querySelector('.image-preview');
+-                if (fileInput && previewContainer) {
+-                    fileInput.addEventListener('change', function() {
+-                        previewImage(this, previewContainer, 100, 100);
+-                    });
+-                }
+-                // Скрываем поля id и image_type при загрузке страницы
+-                const initialIdField = form.querySelector('[id$="-id"]');
+-                if (initialIdField) {
+-                    initialIdField.closest('.form-group').style.display = 'none';
+-                }
+-                const initialImageTypeField = form.querySelector('[id$="-image_type"]');
+-                if (initialImageTypeField) {
+-                    initialImageTypeField.closest('.form-group').style.display = 'none';
+-                }
+-                // Скрываем label поля image_type при загрузке страницы
+-                const initialImageTypeLabel = form.querySelector('label[for$="-image_type"]');
+-                if (initialImageTypeLabel) {
+-                    initialImageTypeLabel.style.display = 'none';
+-                }
+-                // Скрываем label и поле Gallery при загрузке страницы
+-                const initialGalleryLabel = form.querySelector('label[for$="-gallery"]');
+-                const initialGalleryField = form.querySelector('[id$="-gallery"]');
+-                if (initialGalleryLabel) {
+-                    initialGalleryLabel.style.display = 'none';
+-                }
+-                if (initialGalleryField) {
+-                    initialGalleryField.closest('.form-group').style.display = 'none';
+-                }
+-            });
+-
+-            // Скрываем поля id и image_type в пустой форме
+-            const emptyFormDiv = document.querySelector('#empty-form .gallery-image-form');
+-            if (emptyFormDiv) {
+-                const idFieldEmpty = emptyFormDiv.querySelector('[id$="__prefix__-id"]');
+-                if (idFieldEmpty) {
+-                    idFieldEmpty.closest('.form-group').style.display = 'none';
+-                }
+-                const imageTypeFieldEmpty = emptyFormDiv.querySelector('[id$="__prefix__-image_type"]');
+-                if (imageTypeFieldEmpty) {
+-                    imageTypeFieldEmpty.closest('.form-group').style.display = 'none';
+-                }
+-                // Скрываем label поля image_type в пустой форме
+-                const imageTypeLabelEmpty = emptyFormDiv.querySelector('label[for$="__prefix__-image_type"]');
+-                if (imageTypeLabelEmpty) {
+-                    imageTypeLabelEmpty.style.display = 'none';
+-                }
+-                // Скрываем label и поле Gallery в пустой форме
+-                const galleryLabelEmpty = emptyFormDiv.querySelector('label[for$="__prefix__-gallery"]');
+-                const galleryFieldEmpty = emptyFormDiv.querySelector('[id$="__prefix__-gallery"]');
+-                if (galleryLabelEmpty) {
+-                    galleryLabelEmpty.style.display = 'none';
+-                }
+-                if (galleryFieldEmpty) {
+-                    galleryFieldEmpty.closest('.form-group').style.display = 'none';
+-                }
+-            }
+-
+-            // Скрываем label главной картинки "Тип зображення" и "Галерея"
+-            const mainImageTypeLabel = document.querySelector('.main-picture-form label[for$="-image_type"]');
+-            if (mainImageTypeLabel) {
+-                mainImageTypeLabel.style.display = 'none';
+-            }
+-            const mainGalleryLabel = document.querySelector('.main-picture-form label[for$="-gallery"]');
+-            if (mainGalleryLabel) {
+-                mainGalleryLabel.style.display = 'none';
+-            }
+-        });
+-    </script>
++    // Ініціалізація попереднього перегляду для існуючих форм
++    formsetContainer.querySelectorAll('.gallery-image-form').forEach(form => {
++      const fileInput = form.querySelector('input[type="file"]');
++      const preview = form.querySelector('.image-preview');
++      if (fileInput && preview) {
++        fileInput.addEventListener('change', function () {
++          previewImage(this, preview, 100, 100);
++        });
++      }
++    });
++  });
++</script>
+ 
+-    <div style="display: none;">
+-        {{ picture_formset.empty_form }}
+-        <div id="empty-form">
+-            <div class="gallery-image-form border p-3 mb-3">
+-                {% for field in picture_formset.empty_form %}
+-                    <div class="form-group">
+-                        {{ field.label_tag }}
+-                        {{ field }}
+-                        {% if field.help_text %}<small class="form-text text-muted">{{ field.help_text }}</small>{% endif %}
+-                        {% for error in field.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+-                    </div>
+-                {% endfor %}
+-                <div class="image-preview" style="max-width: 100px; max-height: 100px; margin-top: 10px;"></div>
+-            </div>
+-        </div>
+-    </div>
+-
+-
+ {% endblock %}
+\ No newline at end of file
+Index: admins/templates/admin/cinema/cinema_card.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>{# cinema_card.html #}\n<div class=\"card h-100\">\n  {% if cinema.gallery.logos %}\n    <img src=\"{{ cinema.gallery.logos.0.image.url }}\" class=\"card-img-top\" alt=\"{{ cinema.title }} Логотип\" style=\"height: 250px; object-fit: contain;\">\n  {% else %}\n    <div class=\"d-flex align-items-center justify-content-center\" style=\"height: 250px; background-color: #e9ecef;\">\n      <span class=\"text-muted\">Логотип відсутній</span>\n    </div>\n  {% endif %}\n\n  <div class=\"card-body d-flex flex-column\">\n    <h5 class=\"card-title\">{{ cinema.title }}</h5>\n\n    <a href=\"{% url 'add_cinema_edit' cinema.id %}\" class=\"btn btn-primary mt-auto\">Детальніше</a>\n  </div>\n</div>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/admins/templates/admin/cinema/cinema_card.html b/admins/templates/admin/cinema/cinema_card.html
+--- a/admins/templates/admin/cinema/cinema_card.html	(revision 09995edf10a3bdb2cb66c1f197b45a23e8f45852)
++++ b/admins/templates/admin/cinema/cinema_card.html	(date 1749047820926)
+@@ -12,5 +12,6 @@
+     <h5 class="card-title">{{ cinema.title }}</h5>
+ 
+     <a href="{% url 'add_cinema_edit' cinema.id %}" class="btn btn-primary mt-auto">Детальніше</a>
++    <a href="{% url 'delete_cinema' cinema.id %}" class="btn btn-primary mt-auto">Видалити</a>
+   </div>
+ </div>
+\ No newline at end of file
+Index: admins/views.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from django.shortcuts import render, redirect, get_object_or_404\nfrom django.db.models import Count\nfrom django.utils import timezone\nfrom movie.models import Movies\nfrom users.models import User\n\nfrom django.db.models import Prefetch\n\n\nfrom main.models import Gallery, Banners, Cross_Banner, News, PaigesNews, Promotion\nfrom core.models import Cinemas, Halls, Sessions, Seats, Tickets\nfrom django.core.paginator import Paginator, EmptyPage, PageNotAnInteger\nfrom .forms import (PaigesNewsForm,BlockSEOForm, MovieForm, PictureFormSet, GalleryForm, CinemaForm, HallsForm, SessionsForm,\n                    TicketForm,SeatForm, PictureFormSet1,PromotionForm,  BannersFormSet,  NewsFormSet,  PictureForm, UserForm, SessionFormSet , Picture,  CrossBannerForm , modelformset_factory)\nfrom django.contrib.admin.views.decorators import staff_member_required\nfrom django.http import HttpRequest, HttpResponse\nfrom django.template.loader import render_to_string\n\n\n@staff_member_required\ndef index(request):\n    user_count = User.objects.count()\n    ticket_count = Tickets.objects.count()\n    movie_count = Movies.objects.count()\n    today = timezone.now().date()\n    date_from = today - timezone.timedelta(days=30)\n    ticket_sales = (Tickets.objects.filter(session__date__gte=date_from,session__date__lte=today).\n                    values('session__date').annotate(count=Count('id')).order_by('session__date' ))\n    chart_labels = [item['session__date'].strftime('%Y-%m-%d') for item in ticket_sales]\n    chart_data = [item['count'] for item in ticket_sales]\n    knob_data = {\n        'category1': 5,\n        'category2': 10,\n        'category3': 20,\n    }\n\n    context = {\n        'user_count': user_count,\n        'ticket_count': ticket_count,\n        'movie_count' : movie_count,\n        'chart_labels': chart_labels,\n        'chart_data': chart_data,\n        'knob_data': knob_data,\n    }\n\n    return render(request,'admin/index.html', context)\n\n@staff_member_required\ndef movie_list(request):\n    movies_list = Movies.objects.all().select_related('gallery').order_by('title')\n    paginator = Paginator(movies_list, 10)  # Показывать 10 фильмов на странице\n\n    page = request.GET.get('page')\n    try:\n        movies = paginator.page(page)\n    except PageNotAnInteger:\n        # Если page не целое число, показать первую страницу\n        movies = paginator.page(1)\n    except EmptyPage:\n        # Если page вне диапазона (например, 9999), показать последнюю страницу\n        movies = paginator.page(paginator.num_pages)\n    for movie in movies:\n        if movie.gallery:\n            movie.main_picture = movie.gallery.pictures.filter(image_type=\"main_picture\").first()\n        else:\n            movie.main_picture = None\n\n    context = {'movies': movies}\n    return render(request, 'admin/movies_lists/movies_lists.html', context)\n\n@staff_member_required\ndef add_movie(request, movie_id=None):\n\n    movie_instance = None\n    block_seo_instance = None\n    gallery_instance = None\n    main_picture_form = None\n\n    if movie_id is not None:\n        movie_instance = get_object_or_404(Movies, pk=movie_id)\n        block_seo_instance = movie_instance.seo_block\n        gallery_instance = movie_instance.gallery\n        if gallery_instance is None:\n            gallery_instance = Gallery.objects.create()\n\n    if request.method=='POST':\n        block_seo_form = BlockSEOForm(request.POST, instance=block_seo_instance)\n        movie_form = MovieForm(request.POST, instance=movie_instance)\n        gallery_form = GalleryForm(request.POST, instance=gallery_instance)\n        picture_formset = PictureFormSet1( request.POST, request.FILES, instance=gallery_instance, prefix='pictures' )\n        main_picture_form = PictureForm(request.POST, request.FILES, prefix='main_picture_form', initial={\n                                                        'image_type': 'main_picture', 'gallery': gallery_instance})\n\n        if block_seo_form.is_valid() and movie_form.is_valid() and gallery_form.is_valid() and picture_formset.is_valid() and main_picture_form.is_valid():\n            block_seo_instance = block_seo_form.save()\n            gallery_instance = gallery_form.save()\n            movie_instance = movie_form.save(commit=False)\n            movie_instance.seo_block = block_seo_instance\n            movie_instance.gallery = gallery_instance\n\n            movie_instance.save()\n\n            # Сохранение главной картинки через отдельную форму\n            if main_picture_form.cleaned_data.get('image'):\n                main_picture = main_picture_form.save(commit=False)\n                main_picture.gallery = gallery_instance\n                main_picture.image_type = 'main_picture'\n                main_picture.save()\n                movie_instance.main_picture = main_picture.image\n                movie_instance.save()\n\n            for picture_form in picture_formset:\n                if picture_form.cleaned_data and not picture_form.cleaned_data.get('DELETE', False) and picture_form.cleaned_data.get('image'):\n                    picture = picture_form.save(commit=False)\n                    picture.gallery = gallery_instance\n                    picture.save()\n                elif picture_form.cleaned_data.get('DELETE', False) and picture_form.instance.pk:\n                    picture_form.instance.delete()\n\n            return redirect('movie_list')\n        else:\n            print(\"Form validation failed\")\n            print(\"block_seo_form.errors:\", block_seo_form.errors)\n            print(\"movie_form.errors:\", movie_form.errors)\n            print(\"gallery_form.errors:\", gallery_form.errors)\n            print(\"picture_formset.errors:\", picture_formset.errors)\n            print(\"main_picture_form.errors:\", main_picture_form.errors)\n            return render(request, 'admin/movies_lists/add_movies.html', {\n                'block_seo_form': block_seo_form,\n                'movie_form': movie_form,\n                'gallery_form': gallery_form,\n                'picture_formset': picture_formset,\n                'main_picture_form': main_picture_form,\n                'movie': movie_instance,\n            })\n\n    else:\n        block_seo_form = BlockSEOForm(instance=block_seo_instance)\n        movie_form = MovieForm(instance=movie_instance)\n        gallery_form = GalleryForm(instance=gallery_instance)\n        picture_formset = PictureFormSet1(\n            instance=gallery_instance,\n            prefix='pictures'\n        )\n        main_picture_form = PictureForm(prefix='main_picture_form', initial={'image_type': 'main_picture',\n                                                                             'gallery': gallery_instance})\n\n    return render(request, 'admin/movies_lists/add_movies.html', {\n        'block_seo_form': block_seo_form,\n        'movie_form': movie_form,\n        'gallery_form': gallery_form,\n        'picture_formset': picture_formset,\n        'main_picture_form': main_picture_form,\n        'movie': movie_instance,\n    })\n\n@staff_member_required\ndef delete_movie(request, pk):\n    movie = get_object_or_404(Movies, pk=pk)\n    movie.delete()\n    return redirect('movie_list')\n\n@staff_member_required\ndef cinema_list(request):\n    cinemas_list = Cinemas.objects.select_related('gallery').prefetch_related(\n        Prefetch(\n            'gallery__pictures',\n            queryset=Picture.objects.filter(image_type='logo'),\n            to_attr='logos'\n        )\n    ).order_by('title')\n    paginator = Paginator(cinemas_list, 10)\n    page_number = request.GET.get('page')\n    cinemas = paginator.get_page(page_number)\n    return render(request, 'admin/cinema/cinema_list.html', {'cinemas': cinemas})\n\n@staff_member_required\ndef add_cinema_create(request, cinema_id=None):\n    cinema_instance = None\n    block_seo_instance = None\n    gallery_instance = None\n\n\n\n    if cinema_id is not None:\n        cinema_instance = get_object_or_404(Cinemas, pk=cinema_id)\n        block_seo_instance = cinema_instance.seo_block\n        gallery_instance = cinema_instance.gallery\n\n        if gallery_instance is None:\n            gallery_instance = Gallery.objects.create()\n    else:\n        gallery_instance = Gallery.objects.create()\n\n    if request.method == 'POST':\n        cinema_form = CinemaForm(request.POST, instance=cinema_instance)\n        block_seo_form = BlockSEOForm(request.POST, instance=block_seo_instance)\n        gallery_form = GalleryForm(request.POST, instance=gallery_instance)\n\n        picture_formset = PictureFormSet1(request.POST, request.FILES,\n                                         queryset=Picture.objects.filter(gallery=gallery_instance),\n                                         prefix='pictures')\n\n        logo_form = PictureForm(request.POST, request.FILES, prefix='logo')\n        banner_form = PictureForm(request.POST, request.FILES, prefix='banner')\n\n        if (cinema_form.is_valid() and block_seo_form.is_valid() and gallery_form.is_valid()\n                and picture_formset.is_valid() and logo_form.is_valid() and banner_form.is_valid()):\n\n            # Save related objects\n            block_seo_instance = block_seo_form.save()\n            gallery_instance = gallery_form.save()\n\n            # Save cinema\n            cinema_instance = cinema_form.save(commit=False)\n            cinema_instance.seo_block = block_seo_instance\n            cinema_instance.gallery = gallery_instance\n            if cinema_id is None and not cinema_instance.date:\n                cinema_instance.date = timezone.now().date()\n            cinema_instance.save()\n\n            # Save logo\n            logo_instance = logo_form.save(commit=False)\n            logo_instance.gallery = gallery_instance\n            logo_instance.image_type = 'logo'\n            logo_instance.save()\n\n            # Save banner\n            banner_instance = banner_form.save(commit=False)\n            banner_instance.gallery = gallery_instance\n            banner_instance.image_type = 'main_picture'\n            banner_instance.save()\n\n            # Save gallery pictures\n            pictures = picture_formset.save(commit=False)\n            for picture in pictures:\n                picture.gallery = gallery_instance\n                picture.image_type = 'gallery'\n                picture.save()\n            picture_formset.save_m2m()\n\n            return redirect('cinema_lists')\n\n        else:\n            print(\"Form Errors:\")\n            print(\"cinema_form:\", cinema_form.errors)\n            print(\"seo_form:\", block_seo_form.errors)\n            print(\"gallery_form:\", gallery_form.errors)\n            print(\"picture_formset:\", picture_formset.errors)\n            print(\"logo_form:\", logo_form.errors)\n            print(\"banner_form:\", banner_form.errors)\n\n    else:\n        cinema_form = CinemaForm(instance=cinema_instance)\n        block_seo_form = BlockSEOForm(instance=block_seo_instance)\n        gallery_form = GalleryForm(instance=gallery_instance)\n\n        picture_formset = PictureFormSet1(\n            queryset=Picture.objects.filter(gallery=gallery_instance),\n            prefix='pictures'\n        )\n\n        # ok to prefill preview\n        logo_instance = Picture.objects.filter(gallery=gallery_instance, image_type='logo').first()\n        banner_instance = Picture.objects.filter(gallery=gallery_instance, image_type='main_picture').first()\n        logo_form = PictureForm(instance=logo_instance, prefix='logo')\n        banner_form = PictureForm(instance=banner_instance, prefix='banner')\n\n    halls = Halls.objects.filter(cinema=cinema_instance) if cinema_instance else Halls.objects.none()\n\n    return render(request, 'admin/cinema/add_cinema.html', {\n        'block_seo_form': block_seo_form,\n        'cinema_form': cinema_form,\n        'gallery_form': gallery_form,\n        'picture_formset': picture_formset,\n        'cinema': cinema_instance,\n        'form': cinema_form,\n        'logo_form': logo_form,\n        'banner_form': banner_form,\n        'halls': halls,\n    })\n\n@staff_member_required\ndef delete_cinema(request, pk):\n    cinema = get_object_or_404(Cinemas, pk=pk)\n    cinema.delete()\n    return redirect('cinema_list')\n\n@staff_member_required\ndef halls_list(request):\n\n        halls_list = Halls.objects.all()\n\n        paginator = Paginator(halls_list, 10)\n        page = request.GET.get('page')\n        try:\n            halls = paginator.page(page)\n        except PageNotAnInteger:\n            halls = paginator.page(1)\n        except EmptyPage:\n            halls = paginator.page(paginator.num_pages)\n\n        context = {'halls': halls}\n        return render(request, 'admin/halls/halls_lists.html', context)\n\n@staff_member_required\ndef add_halls_create(request,   halls_id=None):\n    halls_instance = None\n    block_seo_instance = None\n    gallery_instance = None\n\n    if halls_id is not None:\n        halls_instance = get_object_or_404(Halls, pk=halls_id)\n        block_seo_instance = halls_instance.seo_block\n        gallery_instance = halls_instance.gallery\n\n        if gallery_instance is None:\n            gallery_instance = Gallery.objects.create()\n\n    if request.method == 'POST':\n        block_seo_form = BlockSEOForm(request.POST, instance=block_seo_instance)\n        halls_form = HallsForm(request.POST, instance=halls_instance)  # Тут використовуємо HallsForm\n        gallery_form = GalleryForm(request.POST, instance=gallery_instance)\n        picture_formset = PictureFormSet1(request.POST, request.FILES, instance=gallery_instance, prefix='pictures')\n        logo_form = PictureForm(request.POST, request.FILES, prefix='logo')\n        banner_form = PictureForm(request.POST, request.FILES, prefix='banner')\n\n        print(\"POST DATA:\", request.POST)\n        print(\"block_seo_form errors:\", block_seo_form.errors)\n        print(\"halls_form errors:\", halls_form.errors)\n        print(\"gallery_form errors:\", gallery_form.errors)\n        print(\"picture_formset errors:\", picture_formset.errors)\n\n        if block_seo_form.is_valid() and halls_form.is_valid() and gallery_form.is_valid() and picture_formset.is_valid():\n            block_seo_instance = block_seo_form.save()\n            gallery_instance = gallery_form.save()\n\n            halls_instance = halls_form.save(commit=False)\n            halls_instance.seo_block = block_seo_instance\n            halls_instance.gallery = gallery_instance\n\n            if halls_id is None and not halls_instance.date:\n                halls_instance.date = timezone.now().date()\n\n            halls_instance.save()\n\n            logo_instance = logo_form.save(commit=False)\n            logo_instance.gallery = gallery_instance\n            logo_instance.image_type = 'logo'\n            logo_instance.save()\n\n            # Save banner\n            banner_instance = banner_form.save(commit=False)\n            banner_instance.gallery = gallery_instance\n            banner_instance.image_type = 'main_picture'\n            banner_instance.save()\n\n            picture_formset.instance = gallery_instance\n            picture_formset.save()\n\n            return redirect( 'cinema_lists')\n    else:\n        # Ініціалізуємо форми без даних POST\n        block_seo_form = BlockSEOForm(instance=block_seo_instance)\n        halls_form = HallsForm(instance=halls_instance)  # Тепер правильна форма\n        gallery_form = GalleryForm(instance=gallery_instance)\n        picture_formset = PictureFormSet1(instance=gallery_instance)\n        logo_instance = Picture.objects.filter(gallery=gallery_instance, image_type='logo').first()\n        banner_instance = Picture.objects.filter(gallery=gallery_instance, image_type='main_picture').first()\n        logo_form = PictureForm(instance=logo_instance, prefix='logo')\n        banner_form = PictureForm(instance=banner_instance, prefix='banner')\n\n    return render(request, 'admin/halls/add_halls.html', {\n        'block_seo_form': block_seo_form,\n        'halls_form': halls_form,\n        'gallery_form': gallery_form,\n        'picture_formset': picture_formset,\n        'halls': halls_instance,\n        'form': halls_form,\n        'logo_form':logo_form,\n        'banner_form': banner_form\n    })\n\n@staff_member_required\ndef delete_halls(request, pk):\n    halls = get_object_or_404(Halls, pk=pk)\n    halls.delete()\n    return redirect('halls_list')\n\n@staff_member_required\ndef session_list(request):\n    session_list = Sessions.objects.all()\n\n    paginator = Paginator(session_list, 10)\n    page = request.GET.get('page')\n    try:\n        sessions = paginator.page(page)\n    except PageNotAnInteger:\n        sessions = paginator.page(1)\n    except EmptyPage:\n        sessions = paginator.page(paginator.num_pages)\n\n    context = {'sessions': sessions}\n    return render(request, 'admin/session/sessions_list.html', context)\n\n@staff_member_required\ndef add_edit_session(request, session_id=None):\n    if request.method == 'POST':\n        formset = SessionFormSet(request.POST)\n        if formset.is_valid():\n            formset.save()\n            return redirect('sessions_list')\n    else:\n        # Важливо: передаємо пустий queryset, щоб уникнути заповнених форм\n        formset = SessionFormSet(queryset=Sessions.objects.none())\n\n    return render(request, 'admin/session/add_sessions.html', {\n        'session_formset': formset,\n        'session': None\n    })\n\n@staff_member_required\ndef delete_sessions(request, pk):\n        sessions = get_object_or_404(Sessions, pk=pk)\n\n        sessions.delete()\n\n        return redirect('sessions_list')\n\n@staff_member_required\ndef seats_list(request: HttpRequest) -> HttpResponse:\n    seats_list = Seats.objects.select_related('halls').order_by('number_row', 'seat')\n    paginator = Paginator(seats_list, 10)\n    page_number = request.GET.get('page')\n\n    try:\n        seats = paginator.page(page_number)\n    except PageNotAnInteger:\n        seats = paginator.page(1)\n    except EmptyPage:\n        seats = paginator.page(paginator.num_pages)\n\n    context = {'seats': seats}\n\n    if request.headers.get('x-requested-with') == 'XMLHttpRequest':\n        html = render_to_string('admin/seats_list/seats_table_partial.html', context, request=request)\n        return HttpResponse(html)\n    else:\n        return render(request, 'admin/seats_list/seats_list.html', context)\n\n@staff_member_required\ndef add_edit_seat(request):\n    seat_id = request.GET.get('seat_id') or request.POST.get('seat_id')\n    if seat_id:\n        seat_instance = get_object_or_404(Seats, id=seat_id)\n        form = SeatForm(request.POST or None, instance=seat_instance)\n    else:\n        form = SeatForm(request.POST or None)\n\n    if request.method == 'POST' and form.is_valid():\n        form.save()\n        return redirect('seats_list')\n\n    seats = Seats.objects.all().order_by('number_row', 'seat')\n    return render(request, 'admin/seats_list/add_seats.html', {\n        'form': form,\n        'seats': seats,\n    })\n\n@staff_member_required\ndef delete_seats(request, pk):\n        seat = get_object_or_404(Seats, pk=pk)\n\n        seat.delete()\n\n        return redirect('seats_list')\n\n@staff_member_required\ndef tickets_list(request):\n\n    tickets_list = Tickets.objects.all()\n\n\n    paginator = Paginator(tickets_list, 10)\n    page = request.GET.get('page')\n    try:\n        tickets = paginator.page(page)\n    except PageNotAnInteger:\n        tickets = paginator.page(1)\n    except EmptyPage:\n        tickets = paginator.page(paginator.num_pages)\n\n    context = {\n        'tickets': tickets,\n    }\n    return render(request, 'admin/tickets/tickets_list.html', context)\n\n@staff_member_required\ndef add_edit_ticket(request, session_id=None):\n    session_instance = None\n    ticket_instance = None\n\n    if session_id:\n        session_instance = get_object_or_404(Sessions, id=session_id)\n        try:\n            ticket_instance = Tickets.objects.get(session=session_instance)\n        except Tickets.DoesNotExist:\n            ticket_instance = Tickets(session=session_instance)\n\n    if request.method == 'POST':\n        form = TicketForm(request.POST, instance=ticket_instance)\n        if form.is_valid():\n            saved_ticket = form.save()\n\n            seat_to_update = saved_ticket.seat\n            if seat_to_update:\n                seat_to_update.status = 'S'\n                seat_to_update.save()\n\n            return redirect('tickets_lists')\n    else:\n        form = TicketForm(instance=ticket_instance)\n\n    context = {\n        'form': form,\n        'session': session_instance,\n    }\n    return render(request, 'admin/tickets/add_tickets.html', context)\n\n@staff_member_required\ndef delete_tickets (request, pk):\n        tickets = get_object_or_404(Tickets, pk=pk)\n        if request.method == 'POST':\n            tickets.delete()\n            return redirect('tickets_lists')\n        tickets.delete()\n        return redirect('tickets_lists')\n\n\n@staff_member_required\ndef add_banners(request):\n    banner_formset = BannersFormSet(request.POST or None, request.FILES or None, queryset=Banners.objects.all(), prefix='top_banners')\n    cross_banner_instance = Cross_Banner.objects.first()\n    cross_banner_form = CrossBannerForm(request.POST or None, request.FILES or None, instance=cross_banner_instance, prefix='cross_banner')\n    news_formset = NewsFormSet(request.POST or None, request.FILES or None, queryset=News.objects.all(), prefix='news')\n\n\n    if request.method=='POST':\n\n        if \"which_form_is_it\" in request.POST:\n            which_form_is_submiting = request.POST[\"which_form_is_it\"]\n\n            if str(which_form_is_submiting) == \"this_is_form_banner\":\n\n                if banner_formset.is_valid():\n\n                    banner_formset.save()\n\n                    for form in banner_formset.forms:\n                        if not form.cleaned_data:\n                            continue\n                        banner = form.instance\n\n                        # Перевіряємо, чи передано новий файл\n                        main_picture_file = form.cleaned_data.get('main_picture')\n\n                        # Якщо новина не має галереї — створюємо її\n                        if banner and not banner.gallery:\n                            banner.gallery = Gallery.objects.create()\n                            banner.save()\n\n                        # Якщо є галерея — отримуємо або створюємо Picture з типом main_picture\n                        if banner.gallery:\n                            picture = banner.gallery.pictures.filter(image_type='main_picture').first()\n                            if not picture:\n                                picture = Picture(gallery=banner.gallery, image_type='main_picture')\n\n                            # Оновлюємо зображення, тільки якщо новий файл передано\n                            if main_picture_file:\n                                picture.image = main_picture_file\n\n                            picture.save()\n\n                    banner_formset.save()\n\n                    return redirect('add_banners')\n                else:\n                    pass\n\n\n            elif str(which_form_is_submiting) == \"this_is_form_cross_banner\":\n\n                if cross_banner_form.is_valid():\n                    cross_banner = cross_banner_form.save()\n                    image_file = request.FILES.get('cross_banner-image')\n\n                    if cross_banner:\n                        if not cross_banner.gallery_id:\n                            cross_banner.gallery = Gallery.objects.create()\n                            cross_banner.save()\n\n                        if cross_banner.gallery:\n                            picture = cross_banner.gallery.pictures.first()\n\n                            if not picture:\n                                picture = Picture(gallery=cross_banner.gallery)\n\n                            if image_file:\n                                picture.image = image_file\n                                picture.save()\n                            else:\n                                pass\n                    return redirect('add_banners')\n\n                else:\n                    pass\n            elif str(which_form_is_submiting)==\"this_is_form_news\":\n\n                if news_formset.is_valid():\n\n                    news_formset.save()\n                    for form in news_formset.forms:\n                        if not form.cleaned_data:\n                            continue\n                        news = form.instance\n\n                        # Перевіряємо, чи передано новий файл\n                        main_picture_file = form.cleaned_data.get('main_picture')\n\n                        # Якщо новина не має галереї — створюємо її\n                        if news and not news.gallery:\n                            news.gallery = Gallery.objects.create()\n                            news.save()\n\n                        # Якщо є галерея — отримуємо або створюємо Picture з типом main_picture\n                        if news.gallery:\n                            picture = news.gallery.pictures.filter(image_type='main_picture').first()\n                            if not picture:\n                                picture = Picture(gallery=news.gallery, image_type='main_picture')\n\n                            # Оновлюємо зображення, тільки якщо новий файл передано\n                            if main_picture_file:\n                                picture.image = main_picture_file\n\n                            picture.save()\n\n                    return redirect('add_banners')\n                else:\n                    pass\n        else:\n                pass\n\n    form_data = []\n    for form in banner_formset.forms:\n        image_url = None\n        if form.instance.gallery:\n            picture = form.instance.gallery.pictures.filter(image_type='main_picture').first()\n            if picture and picture.image:\n                image_url = picture.image.url\n        form_data.append({'form': form, 'image_url': image_url})\n\n    news_form_data = []\n    for form in news_formset.forms:\n        image_url = None\n        if form.instance.gallery:\n            picture = form.instance.gallery.pictures.filter(image_type='main_picture').first()\n            if picture and picture.image:\n                image_url = picture.image.url\n        news_form_data.append({'form': form, 'image_url': image_url})\n\n    return render(request, 'admin/banner/add_banner.html', {\n        'formset': banner_formset,\n        'form_data': form_data,\n        'cross_banner_form': cross_banner_form,\n        'news_formset': news_formset,\n        'news_form_data': news_form_data,\n    })\n\n@staff_member_required\ndef banners_list(request):\n    banners_list = Banners.objects.select_related('gallery').all().order_by('id')\n\n    paginator = Paginator(banners_list, 10)\n    page = request.GET.get('page')\n    try:\n        banners = paginator.page(page)\n    except PageNotAnInteger:\n        banners = paginator.page(1)\n    except EmptyPage:\n        banners = paginator.page(paginator.num_pages)\n\n    context = {'banners': banners}\n\n    return render(request, 'admin/banner/banner.html', context)\n\n@staff_member_required\ndef delete_banners(request, banners_id):\n     banner = get_object_or_404(Banners, pk=banners_id)\n     if request.method == 'POST':\n         banner.delete()\n\n     return redirect('banners')\n\n@staff_member_required\ndef user_list(request):\n\n    user_list_all = User.objects.all()\n    paginator = Paginator(user_list_all, 10)\n    page_number = request.GET.get('page')\n\n    try:\n        users_page = paginator.page(page_number)\n    except PageNotAnInteger:\n        users_page = paginator.page(1)\n    except EmptyPage:\n        users_page = paginator.page(paginator.num_pages)\n    context = {'users': users_page}\n    return render(request, 'admin/user/user_lists.html', context)\n\n@staff_member_required\ndef add_user(request, user_id=None):\n    user_instance = None\n    is_edit = False\n\n    if user_id:\n\n        user_instance = get_object_or_404(User, pk=user_id)\n        is_edit = True\n\n\n    if request.method == 'POST':\n\n        form = UserForm(request.POST, instance=user_instance)\n\n\n        if form.is_valid():\n\n            form.save()\n\n            return redirect('users')\n\n    else:\n        form = UserForm(instance=user_instance)\n    return render(request, 'admin/user/add_user.html', {\n        'form': form,\n        'user_instance': user_instance,\n        'is_edit': is_edit,\n    })\n\n@staff_member_required\ndef delete_user(request, users_id):\n    user = get_object_or_404(User, pk=users_id)\n\n    if request.method == 'POST': # <<< Видалення відбувається тільки тут\n        user.delete()\n        return redirect('users')\n    else: #\n        return redirect('users')\n\n@staff_member_required\ndef news_paige(request):\n    news_list_all = PaigesNews.objects.all()\n    paginator = Paginator(news_list_all, 10)\n    page_number = request.GET.get('page')\n\n    try:\n        news_page = paginator.page(page_number)\n    except PageNotAnInteger:\n        news_page = paginator.page(1)\n    except EmptyPage:\n        news_page = paginator.page(paginator.num_pages)\n    context = {'news': news_page}\n    return render(request, 'admin/news_paige/news_lists.html', context)\n\n@staff_member_required\ndef news_paige_add(request, news_id=None):\n    news_instance = None\n    block_seo_instance = None\n    gallery_instance = None\n\n    current_main_picture_object = None\n\n    if news_id:\n        news_instance = get_object_or_404(PaigesNews, pk=news_id)\n        block_seo_instance = news_instance.seo_block\n        gallery_instance = news_instance.gallery\n\n        if gallery_instance is None:\n            gallery_instance = Gallery.objects.create()\n            news_instance.gallery = gallery_instance\n            news_instance.save()\n\n\n        current_main_picture_object = gallery_instance.pictures.filter(image_type='main_picture').first()\n\n\n    if gallery_instance is None:\n        gallery_instance = Gallery.objects.create()  # Создаем новую галерею\n\n\n    if request.method=='POST':\n        block_seo_form = BlockSEOForm(request.POST, instance=block_seo_instance)\n        news_form = PaigesNewsForm(request.POST, instance=news_instance)\n        gallery_form = GalleryForm(request.POST, instance=gallery_instance)\n\n        # Для modelformset_factory, queryset нужен и для POST (чтобы Django знал, какие объекты обновлять)\n        picture_formset = PictureFormSet(\n            request.POST,\n            request.FILES,\n            queryset=Picture.objects.filter(gallery=gallery_instance).exclude(pk=current_main_picture_object.pk) if current_main_picture_object else Picture.objects.filter(gallery=gallery_instance),\n            prefix='pictures', initial=[{'image_type': 'gallery_image'}]\n        )\n\n        main_picture_form = PictureForm(request.POST, request.FILES, instance=current_main_picture_object, prefix='main_picture_form')\n\n\n        if f'{main_picture_form.prefix}-image_type' not in request.POST:\n            main_picture_form.data = main_picture_form.data.copy()\n            main_picture_form.data[f'{main_picture_form.prefix}-image_type'] = 'main_picture'\n\n        if f'{main_picture_form.prefix}-gallery' not in request.POST and gallery_instance.pk:\n            main_picture_form.data = main_picture_form.data.copy()\n            main_picture_form.data[f'{main_picture_form.prefix}-gallery'] = gallery_instance.pk\n\n\n\n        if (block_seo_form.is_valid() and\n                news_form.is_valid() and\n                gallery_form.is_valid() and\n                picture_formset.is_valid() and  #\n                main_picture_form.is_valid()):\n\n            block_seo_saved = block_seo_form.save()\n            gallery_saved = gallery_form.save()\n\n            news_saved = news_form.save(commit=False)\n            news_saved.seo_block = block_seo_saved\n            news_saved.gallery = gallery_saved\n            news_saved.save()\n\n\n            if main_picture_form.cleaned_data.get('image'):\n                main_picture_saved = main_picture_form.save(commit=False)\n                main_picture_saved.gallery = gallery_saved\n                main_picture_saved.image_type = 'main_picture'\n                main_picture_saved.save()\n\n                if current_main_picture_object and current_main_picture_object.pk!=main_picture_saved.pk:\n                    current_main_picture_object.delete()\n\n            elif main_picture_form.cleaned_data.get('DELETE') and current_main_picture_object:\n                current_main_picture_object.delete()\n\n\n            instances = picture_formset.save(commit=False)\n            for picture in instances:\n                if not picture.pk:\n                    picture.gallery = gallery_saved\n                    if not picture.image_type:\n                        picture.image_type = 'gallery_image'\n                picture.save()\n\n\n            for picture in picture_formset.deleted_objects:\n                picture.delete()\n\n            return redirect('news')\n\n        else:\n\n            print(\"Ошибка валидации форм\")\n            print(\"block_seo_form.errors:\", block_seo_form.errors)\n            print(\"news_form.errors:\", news_form.errors)\n            print(\"gallery_form.errors:\", gallery_form.errors)\n            print(\"picture_formset.errors:\", picture_formset.errors)\n            print(\"main_picture_form.errors:\", main_picture_form.errors)\n\n            return render(request, 'admin/news_paige/add_news.html', {\n                'block_seo_form': block_seo_form,\n                'news_form': news_form,\n                'gallery_form': gallery_form,\n                'picture_formset': picture_formset,\n                'main_picture_form': main_picture_form,\n                'news': news_instance,\n                'is_edit': news_instance is not None,\n            })\n\n\n    else:\n        block_seo_form = BlockSEOForm(instance=block_seo_instance)\n        news_form = PaigesNewsForm(instance=news_instance)\n        gallery_form = GalleryForm(instance=gallery_instance)\n\n\n        picture_formset = PictureFormSet(\n            queryset=Picture.objects.filter(gallery=gallery_instance).exclude(pk=current_main_picture_object.pk) if current_main_picture_object else Picture.objects.filter(gallery=gallery_instance),\n            prefix='pictures'\n        )\n\n        main_picture_form = PictureForm(\n            instance=current_main_picture_object,\n            prefix='main_picture_form',\n            initial={'image_type': 'main_picture'}  # Initial для новой формы главной картинки\n        )\n\n    return render(request, 'admin/news_paige/add_news.html', {\n        'block_seo_form': block_seo_form,\n        'news_form': news_form,\n        'gallery_form': gallery_form,\n        'picture_formset': picture_formset,\n        'main_picture_form': main_picture_form,\n        'news': news_instance,\n        'is_edit': news_instance is not None,\n    })\n\n\n@staff_member_required\ndef news_paige_delete(request, news_id):\n    news = get_object_or_404(PaigesNews, pk=news_id)\n    if request.method=='POST':\n        news.delete()\n\n    return redirect('news')\n\n@staff_member_required\ndef promotion_paige(request):\n    promotion_list_all = Promotion.objects.all().order_by('-date')\n    paginator = Paginator(promotion_list_all, 10)\n    page_number = request.GET.get('page')\n    print(promotion_list_all)\n\n    try:\n        promotion_page = paginator.page(page_number)\n    except PageNotAnInteger:\n        promotion_page = paginator.page(1)\n    except EmptyPage:\n        promotion_page = paginator.page(paginator.num_pages)\n    context = {'promotions': promotion_page}\n    return render(request, 'admin/promotion/promotion_list.html', context)\n\n@staff_member_required\ndef  promotion_paige_add(request, promotion_id=None):\n    promotion_instance = None\n    block_seo_instance = None\n    gallery_instance = None\n\n    current_main_picture_object = None\n\n    if promotion_id:\n        promotion_instance = get_object_or_404(PaigesNews, pk=promotion_id)\n        block_seo_instance = promotion_instance.seo_block\n        gallery_instance = promotion_instance.gallery\n\n        if gallery_instance is None:\n            gallery_instance = Gallery.objects.create()\n            promotion_instance.gallery = gallery_instance\n            promotion_instance.save()\n\n\n        current_main_picture_object = gallery_instance.pictures.filter(image_type='main_picture').first()\n\n\n    if gallery_instance is None:\n        gallery_instance = Gallery.objects.create()  # Создаем новую галерею\n\n\n    if request.method=='POST':\n        block_seo_form = BlockSEOForm(request.POST, instance=block_seo_instance)\n        promotion_form = PromotionForm(request.POST, instance=promotion_instance)\n        gallery_form = GalleryForm(request.POST, instance=gallery_instance)\n\n\n        picture_formset = PictureFormSet(\n            request.POST,\n            request.FILES,\n            queryset=Picture.objects.filter(gallery=gallery_instance).exclude(pk=current_main_picture_object.pk) if current_main_picture_object else Picture.objects.filter(gallery=gallery_instance),\n            prefix='pictures', initial=[{'image_type': 'gallery_image'}]\n        )\n\n        main_picture_form = PictureForm(request.POST, request.FILES, instance=current_main_picture_object, prefix='main_picture_form')\n\n\n        if f'{main_picture_form.prefix}-image_type' not in request.POST:\n            main_picture_form.data = main_picture_form.data.copy()\n            main_picture_form.data[f'{main_picture_form.prefix}-image_type'] = 'main_picture'\n\n        if f'{main_picture_form.prefix}-gallery' not in request.POST and gallery_instance.pk:\n            main_picture_form.data = main_picture_form.data.copy()\n            main_picture_form.data[f'{main_picture_form.prefix}-gallery'] = gallery_instance.pk\n\n\n\n        if (block_seo_form.is_valid() and\n                promotion_form.is_valid() and\n                gallery_form.is_valid() and\n                picture_formset.is_valid() and\n                main_picture_form.is_valid()):\n\n            block_seo_saved = block_seo_form.save()\n            gallery_saved = gallery_form.save()\n\n            promotion_saved = promotion_form.save(commit=False)\n            promotion_saved.seo_block = block_seo_saved\n            promotion_saved.gallery = gallery_saved\n            promotion_saved.save()\n\n\n            if main_picture_form.cleaned_data.get('image'):\n                main_picture_saved = main_picture_form.save(commit=False)\n                main_picture_saved.gallery = gallery_saved\n                main_picture_saved.image_type = 'main_picture'\n                main_picture_saved.save()\n\n                if current_main_picture_object and current_main_picture_object.pk!=main_picture_saved.pk:\n                    current_main_picture_object.delete()\n\n            elif main_picture_form.cleaned_data.get('DELETE') and current_main_picture_object:\n                current_main_picture_object.delete()\n\n\n            instances = picture_formset.save(commit=False)\n            for picture in instances:\n                if not picture.pk:\n                    picture.gallery = gallery_saved\n                    if not picture.image_type:\n                        picture.image_type = 'gallery_image'\n                picture.save()\n\n\n            for picture in picture_formset.deleted_objects:\n                picture.delete()\n\n            return redirect('promotion')\n\n        else:\n\n            print(\"Ошибка валидации форм\")\n            print(\"block_seo_form.errors:\", block_seo_form.errors)\n            print(\"Promotion_form.errors:\", promotion_form.errors)\n            print(\"gallery_form.errors:\", gallery_form.errors)\n            print(\"picture_formset.errors:\", picture_formset.errors)\n            print(\"main_picture_form.errors:\", main_picture_form.errors)\n\n            return render(request, 'admin/promotion/add_promotion.html', {\n                'block_seo_form': block_seo_form,\n                'promotion_form': promotion_form,\n                'gallery_form': gallery_form,\n                'picture_formset': picture_formset,\n                'main_picture_form': main_picture_form,\n                'promotion': promotion_instance,\n                'is_edit': promotion_instance is not None,\n            })\n\n\n    else:\n        block_seo_form = BlockSEOForm(instance=block_seo_instance)\n        promotion_form = PaigesNewsForm(instance=promotion_instance)\n        gallery_form = GalleryForm(instance=gallery_instance)\n\n\n        picture_formset = PictureFormSet(\n            queryset=Picture.objects.filter(gallery=gallery_instance).exclude(pk=current_main_picture_object.pk) if current_main_picture_object else Picture.objects.filter(gallery=gallery_instance),\n            prefix='pictures'\n        )\n\n        main_picture_form = PictureForm(\n            instance=current_main_picture_object,\n            prefix='main_picture_form',\n            initial={'image_type': 'main_picture'}\n        )\n\n    return render(request, 'admin/promotion/add_promotion.html', {\n        'block_seo_form': block_seo_form,\n        'promotion_form': promotion_form,\n        'gallery_form': gallery_form,\n        'picture_formset': picture_formset,\n        'main_picture_form': main_picture_form,\n        'promotion': promotion_instance,\n        'is_edit': promotion_instance is not None,\n    })\n\n\n@staff_member_required\ndef promotion_paige_delete(request, news_id):\n    news = get_object_or_404(PaigesNews, pk=news_id)\n    if request.method=='POST':\n        news.delete()\n\n    return redirect('news')
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/admins/views.py b/admins/views.py
+--- a/admins/views.py	(revision 09995edf10a3bdb2cb66c1f197b45a23e8f45852)
++++ b/admins/views.py	(date 1749048119700)
+@@ -7,10 +7,10 @@
+ from django.db.models import Prefetch
+ 
+ 
+-from main.models import Gallery, Banners, Cross_Banner, News, PaigesNews, Promotion
++from main.models import Gallery, Banners, Cross_Banner, News, PaigesNews, Promotion, PaigesCinema
+ from core.models import Cinemas, Halls, Sessions, Seats, Tickets
+ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+-from .forms import (PaigesNewsForm,BlockSEOForm, MovieForm, PictureFormSet, GalleryForm, CinemaForm, HallsForm, SessionsForm,
++from .forms import (PaigesNewsForm,PaigesCinemaForm,BlockSEOForm, MovieForm, PictureFormSet, GalleryForm, CinemaForm, HallsForm, SessionsForm,
+                     TicketForm,SeatForm, PictureFormSet1,PromotionForm,  BannersFormSet,  NewsFormSet,  PictureForm, UserForm, SessionFormSet , Picture,  CrossBannerForm , modelformset_factory)
+ from django.contrib.admin.views.decorators import staff_member_required
+ from django.http import HttpRequest, HttpResponse
+@@ -70,61 +70,97 @@
+ 
+ @staff_member_required
+ def add_movie(request, movie_id=None):
+-
+     movie_instance = None
+     block_seo_instance = None
+     gallery_instance = None
+-    main_picture_form = None
++
++    current_main_picture_object = None
++
++    if movie_id:
++        paige_instance = get_object_or_404(PaigesNews, pk=movie_id)
++        block_seo_instance = paige_instance.seo_block
++        gallery_instance = paige_instance.gallery
++
++        if gallery_instance is None:
++            gallery_instance = Gallery.objects.create()
++            paige_instance.gallery = gallery_instance
++            paige_instance.save()
+ 
+-    if movie_id is not None:
+-        movie_instance = get_object_or_404(Movies, pk=movie_id)
+-        block_seo_instance = movie_instance.seo_block
+-        gallery_instance = movie_instance.gallery
+-        if gallery_instance is None:
+-            gallery_instance = Gallery.objects.create()
++        current_main_picture_object = gallery_instance.pictures.filter(image_type='main_picture').first()
++
++    if gallery_instance is None:
++        gallery_instance = Gallery.objects.create()
+ 
+     if request.method=='POST':
+         block_seo_form = BlockSEOForm(request.POST, instance=block_seo_instance)
+         movie_form = MovieForm(request.POST, instance=movie_instance)
+         gallery_form = GalleryForm(request.POST, instance=gallery_instance)
+-        picture_formset = PictureFormSet1( request.POST, request.FILES, instance=gallery_instance, prefix='pictures' )
+-        main_picture_form = PictureForm(request.POST, request.FILES, prefix='main_picture_form', initial={
+-                                                        'image_type': 'main_picture', 'gallery': gallery_instance})
++
++        picture_formset = PictureFormSet(
++            request.POST,
++            request.FILES,
++            queryset=Picture.objects.filter(gallery=gallery_instance).exclude(pk=current_main_picture_object.pk) if current_main_picture_object else Picture.objects.filter(gallery=gallery_instance),
++            prefix='pictures', initial=[{'image_type': 'gallery_image'}]
++        )
+ 
+-        if block_seo_form.is_valid() and movie_form.is_valid() and gallery_form.is_valid() and picture_formset.is_valid() and main_picture_form.is_valid():
+-            block_seo_instance = block_seo_form.save()
+-            gallery_instance = gallery_form.save()
+-            movie_instance = movie_form.save(commit=False)
+-            movie_instance.seo_block = block_seo_instance
+-            movie_instance.gallery = gallery_instance
++        main_picture_form = PictureForm(request.POST, request.FILES, instance=current_main_picture_object, prefix='main_picture_form')
+ 
+-            movie_instance.save()
++        if f'{main_picture_form.prefix}-image_type' not in request.POST:
++            main_picture_form.data = main_picture_form.data.copy()
++            main_picture_form.data[f'{main_picture_form.prefix}-image_type'] = 'main_picture'
+ 
+-            # Сохранение главной картинки через отдельную форму
++        if f'{main_picture_form.prefix}-gallery' not in request.POST and gallery_instance.pk:
++            main_picture_form.data = main_picture_form.data.copy()
++            main_picture_form.data[f'{main_picture_form.prefix}-gallery'] = gallery_instance.pk
++
++        if (block_seo_form.is_valid() and
++                movie_form.is_valid() and
++                gallery_form.is_valid() and
++                picture_formset.is_valid() and  #
++                main_picture_form.is_valid()):
++
++            block_seo = block_seo_form.save()
++            gallery = gallery_form.save()
++
++            movie = movie_form.save(commit=False)
++            movie.seo_block = block_seo
++            movie.gallery = gallery
++            movie.save()
++
+             if main_picture_form.cleaned_data.get('image'):
+                 main_picture = main_picture_form.save(commit=False)
+-                main_picture.gallery = gallery_instance
++                main_picture.gallery = gallery
+                 main_picture.image_type = 'main_picture'
+                 main_picture.save()
+-                movie_instance.main_picture = main_picture.image
+-                movie_instance.save()
++
++                if current_main_picture_object and current_main_picture_object.pk!=main_picture.pk:
++                    current_main_picture_object.delete()
+ 
+-            for picture_form in picture_formset:
+-                if picture_form.cleaned_data and not picture_form.cleaned_data.get('DELETE', False) and picture_form.cleaned_data.get('image'):
+-                    picture = picture_form.save(commit=False)
+-                    picture.gallery = gallery_instance
+-                    picture.save()
+-                elif picture_form.cleaned_data.get('DELETE', False) and picture_form.instance.pk:
+-                    picture_form.instance.delete()
++            elif main_picture_form.cleaned_data.get('DELETE') and current_main_picture_object:
++                current_main_picture_object.delete()
++
++            instances = picture_formset.save(commit=False)
++            for picture in instances:
++                if not picture.pk:
++                    picture.gallery = gallery
++                    if not picture.image_type:
++                        picture.image_type = 'gallery_image'
++                picture.save()
++
++            for picture in picture_formset.deleted_objects:
++                picture.delete()
+ 
+             return redirect('movie_list')
++
+         else:
+-            print("Form validation failed")
++
++            print("Ошибка валидации форм")
+             print("block_seo_form.errors:", block_seo_form.errors)
+             print("movie_form.errors:", movie_form.errors)
+             print("gallery_form.errors:", gallery_form.errors)
+             print("picture_formset.errors:", picture_formset.errors)
+             print("main_picture_form.errors:", main_picture_form.errors)
++
+             return render(request, 'admin/movies_lists/add_movies.html', {
+                 'block_seo_form': block_seo_form,
+                 'movie_form': movie_form,
+@@ -132,18 +168,25 @@
+                 'picture_formset': picture_formset,
+                 'main_picture_form': main_picture_form,
+                 'movie': movie_instance,
++                'is_edit': movie_instance is not None,
+             })
++
+ 
+     else:
+         block_seo_form = BlockSEOForm(instance=block_seo_instance)
+         movie_form = MovieForm(instance=movie_instance)
+         gallery_form = GalleryForm(instance=gallery_instance)
+-        picture_formset = PictureFormSet1(
+-            instance=gallery_instance,
++
++        picture_formset = PictureFormSet(
++            queryset=Picture.objects.filter(gallery=gallery_instance).exclude(pk=current_main_picture_object.pk) if current_main_picture_object else Picture.objects.filter(gallery=gallery_instance),
+             prefix='pictures'
+         )
+-        main_picture_form = PictureForm(prefix='main_picture_form', initial={'image_type': 'main_picture',
+-                                                                             'gallery': gallery_instance})
++
++        main_picture_form = PictureForm(
++            instance=current_main_picture_object,
++            prefix='main_picture_form',
++            initial={'image_type': 'main_picture'}
++        )
+ 
+     return render(request, 'admin/movies_lists/add_movies.html', {
+         'block_seo_form': block_seo_form,
+@@ -152,7 +195,9 @@
+         'picture_formset': picture_formset,
+         'main_picture_form': main_picture_form,
+         'movie': movie_instance,
++        'is_edit': movie_instance is not None,
+     })
++
+ 
+ @staff_member_required
+ def delete_movie(request, pk):
+@@ -180,111 +225,159 @@
+     block_seo_instance = None
+     gallery_instance = None
+ 
++    current_main_picture_object = None
++    current_logo_picture_object = None
+ 
+ 
+-    if cinema_id is not None:
+-        cinema_instance = get_object_or_404(Cinemas, pk=cinema_id)
++    if cinema_id:
++        cinema_instance = get_object_or_404(PaigesNews, pk=cinema_id)
+         block_seo_instance = cinema_instance.seo_block
+         gallery_instance = cinema_instance.gallery
+ 
++
+         if gallery_instance is None:
+             gallery_instance = Gallery.objects.create()
+-    else:
+-        gallery_instance = Gallery.objects.create()
++            cinema_instance.gallery = gallery_instance
++            cinema_instance.save()
++
++
++        if gallery_instance:
++            current_main_picture_object = gallery_instance.pictures.filter(image_type='main_picture').first()
++            current_logo_picture_object = gallery_instance.pictures.filter(image_type='logo').first()
++
+ 
+-    if request.method == 'POST':
++    if request.method=='POST':
++        block_seo_form = BlockSEOForm(request.POST, instance=block_seo_instance)
+         cinema_form = CinemaForm(request.POST, instance=cinema_instance)
+-        block_seo_form = BlockSEOForm(request.POST, instance=block_seo_instance)
+         gallery_form = GalleryForm(request.POST, instance=gallery_instance)
+ 
+-        picture_formset = PictureFormSet1(request.POST, request.FILES,
+-                                         queryset=Picture.objects.filter(gallery=gallery_instance),
+-                                         prefix='pictures')
++        banner_form = PictureForm(request.POST, request.FILES, instance=current_main_picture_object,
++                                                                                 prefix='banner_form')
++        logo_form = PictureForm(request.POST, request.FILES, instance=current_logo_picture_object,
++                                                                                prefix='logo_form')
++
++
++        picture_queryset_for_formset = Picture.objects.none()
++        if gallery_instance:
++            picture_queryset_for_formset = gallery_instance.pictures.filter(image_type='gallery_image').order_by('pk')
++
++        picture_formset = PictureFormSet(request.POST,  request.FILES,   queryset=picture_queryset_for_formset,
++                                                                                prefix='pictures'   )
+ 
+-        logo_form = PictureForm(request.POST, request.FILES, prefix='logo')
+-        banner_form = PictureForm(request.POST, request.FILES, prefix='banner')
++
++        if (block_seo_form.is_valid() and
++                cinema_form.is_valid() and
++                gallery_form.is_valid() and
++                picture_formset.is_valid() and
++                banner_form.is_valid() and
++                logo_form.is_valid()):
++
++
++            block_seo = block_seo_form.save()
++            gallery = gallery_form.save()
++
++
++            cinema = cinema_form.save(commit=False)
++            cinema.seo_block = block_seo
++            cinema.gallery = gallery
++            cinema.save()
++
++            if banner_form.cleaned_data.get('image'):
++                banner_picture = banner_form.save(commit=False)
++                banner_picture.gallery = gallery
++                banner_picture.image_type = 'main_picture'
++                banner_picture.save()
+ 
+-        if (cinema_form.is_valid() and block_seo_form.is_valid() and gallery_form.is_valid()
+-                and picture_formset.is_valid() and logo_form.is_valid() and banner_form.is_valid()):
++                if current_main_picture_object and current_main_picture_object.pk!=banner_picture.pk:
++                    current_main_picture_object.delete()
++            elif banner_form.cleaned_data.get('DELETE') and current_main_picture_object:
++                current_main_picture_object.delete()
+ 
+-            # Save related objects
+-            block_seo_instance = block_seo_form.save()
+-            gallery_instance = gallery_form.save()
+ 
+-            # Save cinema
+-            cinema_instance = cinema_form.save(commit=False)
+-            cinema_instance.seo_block = block_seo_instance
+-            cinema_instance.gallery = gallery_instance
+-            if cinema_id is None and not cinema_instance.date:
+-                cinema_instance.date = timezone.now().date()
+-            cinema_instance.save()
++            if logo_form.cleaned_data.get('image'):
++                logo_picture = logo_form.save(commit=False)
++                logo_picture.gallery = gallery
++                logo_picture.image_type = 'logo'
++                logo_picture.save()
+ 
+-            # Save logo
+-            logo_instance = logo_form.save(commit=False)
+-            logo_instance.gallery = gallery_instance
+-            logo_instance.image_type = 'logo'
+-            logo_instance.save()
++                if current_logo_picture_object and current_logo_picture_object.pk!=logo_picture.pk:
++                    current_logo_picture_object.delete()
++            elif logo_form.cleaned_data.get('DELETE') and current_logo_picture_object:
++                current_logo_picture_object.delete()
+ 
+-            # Save banner
+-            banner_instance = banner_form.save(commit=False)
+-            banner_instance.gallery = gallery_instance
+-            banner_instance.image_type = 'main_picture'
+-            banner_instance.save()
+ 
+-            # Save gallery pictures
+-            pictures = picture_formset.save(commit=False)
+-            for picture in pictures:
+-                picture.gallery = gallery_instance
+-                picture.image_type = 'gallery'
+-                picture.save()
+-            picture_formset.save_m2m()
++            instances_gallery = picture_formset.save(commit=False)
++            for pic_instance in instances_gallery:
++
++                if not pic_instance.pk:
++                    pic_instance.gallery = gallery
++                    if not pic_instance.image_type:
++                        pic_instance.image_type = 'gallery_image'
++                pic_instance.save()
++
++
++            for picture_to_delete in picture_formset.deleted_objects:
++                picture_to_delete.delete()
++
+ 
+             return redirect('cinema_lists')
+ 
+         else:
+-            print("Form Errors:")
+-            print("cinema_form:", cinema_form.errors)
+-            print("seo_form:", block_seo_form.errors)
+-            print("gallery_form:", gallery_form.errors)
+-            print("picture_formset:", picture_formset.errors)
+-            print("logo_form:", logo_form.errors)
+-            print("banner_form:", banner_form.errors)
++            print("Ошибка валидации форм")
++            print("block_seo_form.errors:", block_seo_form.errors)
++            print("cinema_form.errors:", cinema_form.errors)
++            print("gallery_form.errors:", gallery_form.errors)
++            print("picture_formset.errors:", picture_formset.errors)
++            print("banner_form.errors:", banner_form.errors)
++            print("logo_form.errors:", logo_form.errors)
++
++            return render(request, 'admin/paige_list/add_paige.html', {
++                'block_seo_form': block_seo_form,
++                'cinema_form': cinema_form,
++                'gallery_form': gallery_form,
++                'picture_formset': picture_formset,
++                'banner_form': banner_form,
++                'logo_form': logo_form,
++                'cinema': cinema_instance,
++                'is_edit': cinema_instance is not None,
++            })
++
+ 
+     else:
++        block_seo_form = BlockSEOForm(instance=block_seo_instance)
+         cinema_form = CinemaForm(instance=cinema_instance)
+-        block_seo_form = BlockSEOForm(instance=block_seo_instance)
+         gallery_form = GalleryForm(instance=gallery_instance)
+ 
+-        picture_formset = PictureFormSet1(
+-            queryset=Picture.objects.filter(gallery=gallery_instance),
+-            prefix='pictures'
+-        )
++
++        picture_queryset_for_formset = Picture.objects.none()
++        if gallery_instance:
++            picture_queryset_for_formset = gallery_instance.pictures.filter(image_type='gallery_image').order_by('pk')
+ 
+-        # ok to prefill preview
+-        logo_instance = Picture.objects.filter(gallery=gallery_instance, image_type='logo').first()
+-        banner_instance = Picture.objects.filter(gallery=gallery_instance, image_type='main_picture').first()
+-        logo_form = PictureForm(instance=logo_instance, prefix='logo')
+-        banner_form = PictureForm(instance=banner_instance, prefix='banner')
++        picture_formset = PictureFormSet( queryset=picture_queryset_for_formset, prefix='pictures'     )
+ 
+-    halls = Halls.objects.filter(cinema=cinema_instance) if cinema_instance else Halls.objects.none()
++        banner_form = PictureForm( instance=current_main_picture_object, prefix='banner_form',
++                                                        initial={'image_type': 'main_picture'}     )
++
++        logo_form = PictureForm(instance=current_logo_picture_object,     prefix='logo_form',
++                                                                      initial={'image_type': 'logo'}        )
+ 
+     return render(request, 'admin/cinema/add_cinema.html', {
+         'block_seo_form': block_seo_form,
+         'cinema_form': cinema_form,
+         'gallery_form': gallery_form,
+         'picture_formset': picture_formset,
++        'banner_form': banner_form,
++        'logo_form': logo_form,
+         'cinema': cinema_instance,
+-        'form': cinema_form,
+-        'logo_form': logo_form,
+-        'banner_form': banner_form,
+-        'halls': halls,
++        'is_edit': cinema_instance is not None,
+     })
++
+ 
+ @staff_member_required
+ def delete_cinema(request, pk):
+     cinema = get_object_or_404(Cinemas, pk=pk)
+     cinema.delete()
+-    return redirect('cinema_list')
++    return redirect('cinema_lists')
+ 
+ @staff_member_required
+ def halls_list(request):
+@@ -428,7 +521,7 @@
+         return redirect('sessions_list')
+ 
+ @staff_member_required
+-def seats_list(request: HttpRequest) -> HttpResponse:
++def seats_list(request: HttpRequest) :
+     seats_list = Seats.objects.select_related('halls').order_by('number_row', 'seat')
+     paginator = Paginator(seats_list, 10)
+     page_number = request.GET.get('page')
+@@ -1081,7 +1174,175 @@
+ 
+ 
+ @staff_member_required
+-def promotion_paige_delete(request, news_id):
++def promotion_paige_delete(request, promotion_id):
++    promotion = get_object_or_404(Promotion, pk=promotion_id)
++    if request.method=='POST':
++        promotion.delete()
++
++    return redirect('promotion')
++
++
++# Viev Paige
++
++@staff_member_required
++def paige(request):
++    paige_list_all = PaigesCinema.objects.all()
++    paginator = Paginator(paige_list_all, 10)
++    page_number = request.GET.get('page')
++
++    try:
++        paige_page = paginator.page(page_number)
++    except PageNotAnInteger:
++        paige_page = paginator.page(1)
++    except EmptyPage:
++        page = paginator.page(paginator.num_pages)
++    context = {'paiges': paige_page}
++    return render(request, 'admin/paige_list/paige_lists.html', context)
++
++@staff_member_required
++def  paige_add(request, paige_id=None):
++    paige_instance = None
++    block_seo_instance = None
++    gallery_instance = None
++
++    current_main_picture_object = None
++
++    if paige_id:
++        paige_instance = get_object_or_404(PaigesNews, pk=paige_id)
++        block_seo_instance = paige_instance.seo_block
++        gallery_instance = paige_instance.gallery
++
++        if gallery_instance is None:
++            gallery_instance = Gallery.objects.create()
++            paige_instance.gallery = gallery_instance
++            paige_instance.save()
++
++
++        current_main_picture_object = gallery_instance.pictures.filter(image_type='main_picture').first()
++
++
++    if gallery_instance is None:
++        gallery_instance = Gallery.objects.create()  # Создаем новую галерею
++
++
++    if request.method=='POST':
++        block_seo_form = BlockSEOForm(request.POST, instance=block_seo_instance)
++        paige_form = PaigesCinemaForm(request.POST, instance=paige_instance)
++        gallery_form = GalleryForm(request.POST, instance=gallery_instance)
++
++
++        picture_formset = PictureFormSet(
++            request.POST,
++            request.FILES,
++            queryset=Picture.objects.filter(gallery=gallery_instance).exclude(pk=current_main_picture_object.pk) if current_main_picture_object else Picture.objects.filter(gallery=gallery_instance),
++            prefix='pictures', initial=[{'image_type': 'gallery_image'}]
++        )
++
++        main_picture_form = PictureForm(request.POST, request.FILES, instance=current_main_picture_object, prefix='main_picture_form')
++
++
++        if f'{main_picture_form.prefix}-image_type' not in request.POST:
++            main_picture_form.data = main_picture_form.data.copy()
++            main_picture_form.data[f'{main_picture_form.prefix}-image_type'] = 'main_picture'
++
++        if f'{main_picture_form.prefix}-gallery' not in request.POST and gallery_instance.pk:
++            main_picture_form.data = main_picture_form.data.copy()
++            main_picture_form.data[f'{main_picture_form.prefix}-gallery'] = gallery_instance.pk
++
++
++
++        if (block_seo_form.is_valid() and
++                paige_form.is_valid() and
++                gallery_form.is_valid() and
++                picture_formset.is_valid() and  #
++                main_picture_form.is_valid()):
++
++            block_seo  = block_seo_form.save()
++            gallery = gallery_form.save()
++
++            paige = paige_form.save(commit=False)
++            paige.seo_block = block_seo
++            paige.gallery = gallery
++            paige.save()
++
++
++            if main_picture_form.cleaned_data.get('image'):
++                main_picture = main_picture_form.save(commit=False)
++                main_picture.gallery = gallery
++                main_picture.image_type = 'main_picture'
++                main_picture.save()
++
++                if current_main_picture_object and current_main_picture_object.pk!=main_picture.pk:
++                    current_main_picture_object.delete()
++
++            elif main_picture_form.cleaned_data.get('DELETE') and current_main_picture_object:
++                current_main_picture_object.delete()
++
++
++            instances = picture_formset.save(commit=False)
++            for picture in instances:
++                if not picture.pk:
++                    picture.gallery = gallery
++                    if not picture.image_type:
++                        picture.image_type = 'gallery_image'
++                picture.save()
++
++
++            for picture in picture_formset.deleted_objects:
++                picture.delete()
++
++            return redirect('paige')
++
++        else:
++
++            print("Ошибка валидации форм")
++            print("block_seo_form.errors:", block_seo_form.errors)
++            print("paige_form.errors:", paige_form.errors)
++            print("gallery_form.errors:", gallery_form.errors)
++            print("picture_formset.errors:", picture_formset.errors)
++            print("main_picture_form.errors:", main_picture_form.errors)
++
++            return render(request, 'admin/paige_list/add_paige.html', {
++                'block_seo_form': block_seo_form,
++                'paige_form': paige_form,
++                'gallery_form': gallery_form,
++                'picture_formset': picture_formset,
++                'main_picture_form': main_picture_form,
++                'paige': paige_instance,
++                'is_edit': paige_instance is not None,
++            })
++
++
++    else:
++        block_seo_form = BlockSEOForm(instance=block_seo_instance)
++        news_form = PaigesNewsForm(instance=paige_instance)
++        gallery_form = GalleryForm(instance=gallery_instance)
++
++
++        picture_formset = PictureFormSet(
++            queryset=Picture.objects.filter(gallery=gallery_instance).exclude(pk=current_main_picture_object.pk) if current_main_picture_object else Picture.objects.filter(gallery=gallery_instance),
++            prefix='pictures'
++        )
++
++        main_picture_form = PictureForm(
++            instance=current_main_picture_object,
++            prefix='main_picture_form',
++            initial={'image_type': 'main_picture'}
++        )
++
++    return render(request,  'admin/paige_list/add_paige.html', {
++        'block_seo_form': block_seo_form,
++        'paige_form': news_form,
++        'gallery_form': gallery_form,
++        'picture_formset': picture_formset,
++        'main_picture_form': main_picture_form,
++        'paige': paige_instance,
++        'is_edit': paige_instance is not None,
++    })
++
++
++@staff_member_required
++def  paige_delete(request, news_id):
+     news = get_object_or_404(PaigesNews, pk=news_id)
+     if request.method=='POST':
+         news.delete()
+Index: movie/models.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from django.db import models\n\n# Create your models here.\nfrom main.models import Block_SEO, Gallery, Picture\n\n\nclass Movies(models.Model):\n    GENRE_CHOISES = [\n        (\"DR\", \"Драма\"),\n        (\"COM\", \"Комедія\"),\n        (\"ACT\", \"Бойовик\"),\n        (\"TR\", \"Трилер\"),\n        (\"HOR\", \"Жахи\"),\n        (\"Sci\", \"Фантастика\"),\n        (\"FAN\", \"Фентезі\"),\n    ]\n\n    VIDEO_CHOISES = [\n        (\"2D\", \"2D\"),\n        (\"3D\", \"3D\"),\n        (\"imax\", \"IMAX\")\n    ]\n\n    id = models.AutoField(primary_key=True)\n    seo_block = models.OneToOneField(Block_SEO, on_delete=models.CASCADE, verbose_name='Блок СЕО ')\n    genre = models.CharField(max_length=11, choices=GENRE_CHOISES, verbose_name='Жанр ')\n    title = models.CharField(max_length=255, verbose_name='Назва')\n    url_trailer = models.URLField(verbose_name='URL трелера ')\n    description = models.TextField(verbose_name='Опис ')\n    video_type = models.CharField(max_length=5, choices=VIDEO_CHOISES, verbose_name='Тип відео ')\n    relise_date = models.DateField(verbose_name='Дата проката')\n    age_limit = models.IntegerField(verbose_name='Вікова категорія')\n    date = models.DateField(verbose_name='Дата')\n\n    gallery = models.ForeignKey(Gallery, on_delete=models.SET_NULL, null=True, blank=True,\n                                related_name='movies', verbose_name='Галерея зображень')\n\n    def __str__(self):\n        return self.title\n\n\n    class Meta:\n        verbose_name = 'Кіно стрічка'\n        verbose_name_plural = 'Кіно стрічки'\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/movie/models.py b/movie/models.py
+--- a/movie/models.py	(revision 09995edf10a3bdb2cb66c1f197b45a23e8f45852)
++++ b/movie/models.py	(date 1749047019338)
+@@ -30,7 +30,7 @@
+     video_type = models.CharField(max_length=5, choices=VIDEO_CHOISES, verbose_name='Тип відео ')
+     relise_date = models.DateField(verbose_name='Дата проката')
+     age_limit = models.IntegerField(verbose_name='Вікова категорія')
+-    date = models.DateField(verbose_name='Дата')
++    date = models.DateField(auto_now_add=True, verbose_name='Дата створення запису')
+ 
+     gallery = models.ForeignKey(Gallery, on_delete=models.SET_NULL, null=True, blank=True,
+                                 related_name='movies', verbose_name='Галерея зображень')
+Index: admins/templates/admin/sidebar.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+> {# sidebar.html #}\n{% load static %}\n    <div class=\"sidebar\">\n     <!-- Sidebar Menu -->\n      <nav class=\"mt-2\">\n        <ul class=\"nav nav-pills nav-sidebar flex-column\" data-widget=\"treeview\" role=\"menu\" data-accordion=\"false\">\n          <!-- Add icons to the links using the .nav-icon class\n               with font-awesome or any other icon font library -->\n\n\n          <li class=\"nav-item\">\n          <li class=\"nav-item\">\n            <a href=\"{% url 'users' %}\" class=\"nav-link\">\n              <i class=\"nav-icon far fa-image\"></i>\n              <p>\n                Пользователи\n              </p>\n            </a>\n\n\n           <li class=\"nav-item\">\n            <a href=\"{% url 'sessions_list' %}\" class=\"nav-link\">\n              <i class=\"nav-icon far fa-image\"></i>\n              <p>\n                Сеанси\n              </p>\n            </a>\n          </li>\n\n          <li class=\"nav-item\">\n            <a href=\"{% url 'movie_list' %}\" class=\"nav-link\">\n              <i class=\"nav-icon far fa-image\"></i>\n              <p>\n                Фільми\n              </p>\n            </a>\n          </li>\n          <li class=\"nav-item\">\n            <a href=\"{% url 'add_banners' %}\" class=\"nav-link\">\n              <i class=\"nav-icon far fa-image\"></i>\n              <p>\n                Банери\n              </p>\n            </a>\n          </li>\n            </li>\n          <li class=\"nav-item\">\n            <a href=\"{% url 'news' %}\" class=\"nav-link\">\n              <i class=\"nav-icon far fa-image\"></i>\n              <p>\n               Новини\n              </p>\n            </a>\n          </li>\n           <li class=\"nav-item\">\n            <a href=\"{% url 'promotion' %}\" class=\"nav-link\">\n              <i class=\"nav-icon far fa-image\"></i>\n              <p>\n               Акції\n              </p>\n            </a>\n          </li>\n          <li class=\"nav-item\">\n            <a href=\"{% url 'tickets_lists' %}\" class=\"nav-link\">\n              <i class=\"nav-icon far fa-image\"></i>\n              <p>\n                Квитки\n              </p>\n            </a>\n          </li>\n          <li class=\"nav-item\">\n            <a href=\"#\" class=\"nav-link\">\n              <i class=\"nav-icon far fa-envelope\"></i>\n              <p>\n                Mailbox\n                <i class=\"fas fa-angle-left right\"></i>\n              </p>\n            </a>\n            <ul class=\"nav nav-treeview\">\n              <li class=\"nav-item\">\n                <a href=\"pages/mailbox/mailbox.html\" class=\"nav-link\">\n                  <i class=\"far fa-circle nav-icon\"></i>\n                  <p>Inbox</p>\n                </a>\n              </li>\n              <li class=\"nav-item\">\n                <a href=\"pages/mailbox/compose.html\" class=\"nav-link\">\n                  <i class=\"far fa-circle nav-icon\"></i>\n                  <p>Compose</p>\n                </a>\n              </li>\n              <li class=\"nav-item\">\n                <a href=\"pages/mailbox/read-mail.html\" class=\"nav-link\">\n                  <i class=\"far fa-circle nav-icon\"></i>\n                  <p>Read</p>\n                </a>\n              </li>\n            </ul>\n          </li>\n           <li class=\"nav-item\">\n            <a href=\"#\" class=\"nav-link\">\n              <i class=\"nav-icon fas fa-book\"></i>\n              <p>\n                Кинотеатр\n                <i class=\"fas fa-angle-left right\"></i>\n              </p>\n            </a>\n            <ul class=\"nav nav-treeview\">\n              <li class=\"nav-item\">\n                <a href=\"{% url 'cinema_lists' %}\" class=\"nav-link\">\n                  <i class=\"far fa-circle nav-icon\"></i>\n                  <p>Кінотеатр</p>\n                </a>\n              </li>\n              <li class=\"nav-item\">\n                <a href=\"{% url 'halls_lists' %}\" class=\"nav-link\">\n                  <i class=\"far fa-circle nav-icon\"></i>\n                  <p>Зали</p>\n                </a>\n              </li>\n              <li class=\"nav-item\">\n                <a href=\"{% url 'seats_list' %}\" class=\"nav-link\">\n                    <i class=\"far fa-circle nav-icon\"></i>\n                    <p>Місця</p>\n                </a>\n\n              </li>\n\n\n            </ul>\n          </li>\n          <li class=\"nav-item\">\n            <a href=\"#\" class=\"nav-link\">\n              <i class=\"nav-icon fas fa-book\"></i>\n              <p>\n                Pages\n                <i class=\"fas fa-angle-left right\"></i>\n              </p>\n            </a>\n            <ul class=\"nav nav-treeview\">\n              <li class=\"nav-item\">\n                <a href=\"pages/examples/invoice.html\" class=\"nav-link\">\n                  <i class=\"far fa-circle nav-icon\"></i>\n                  <p>Invoice</p>\n                </a>\n              </li>\n              <li class=\"nav-item\">\n                <a href=\"pages/examples/profile.html\" class=\"nav-link\">\n                  <i class=\"far fa-circle nav-icon\"></i>\n                  <p>Profile</p>\n                </a>\n              </li>\n              <li class=\"nav-item\">\n                <a href=\"pages/examples/e-commerce.html\" class=\"nav-link\">\n                  <i class=\"far fa-circle nav-icon\"></i>\n                  <p>E-commerce</p>\n                </a>\n              </li>\n              </ul>\n          </li>\n\n        </ul>\n      </nav>\n      <!-- /.sidebar-menu -->\n    </div>\n    <!-- /.sidebar -->\n  </aside>\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/admins/templates/admin/sidebar.html b/admins/templates/admin/sidebar.html
+--- a/admins/templates/admin/sidebar.html	(revision 09995edf10a3bdb2cb66c1f197b45a23e8f45852)
++++ b/admins/templates/admin/sidebar.html	(date 1749048328596)
+@@ -130,18 +130,18 @@
+             </ul>
+           </li>
+           <li class="nav-item">
+-            <a href="#" class="nav-link">
++            <a href="{% url 'paige' %}"class="nav-link">
+               <i class="nav-icon fas fa-book"></i>
+               <p>
+-                Pages
++                Сторінки
+                 <i class="fas fa-angle-left right"></i>
+               </p>
+             </a>
+             <ul class="nav nav-treeview">
+               <li class="nav-item">
+-                <a href="pages/examples/invoice.html" class="nav-link">
++                <a href="{% url 'paige' %}" class="nav-link">
+                   <i class="far fa-circle nav-icon"></i>
+-                  <p>Invoice</p>
++                  <p>Список сторінок</p>
+                 </a>
+               </li>
+               <li class="nav-item">
+Index: admins/forms.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from django import forms\nfrom main.models import Block_SEO, Gallery, Picture\nfrom  movie.models import Movies\nfrom  users.models import User\nfrom core.models import Cinemas, Halls, Sessions,Seats, Tickets\nfrom main.models import Banners, Cross_Banner, News, PaigesNews, Promotion\nfrom django.forms import inlineformset_factory, formset_factory, modelformset_factory\n\n\nclass PromotionForm(forms.ModelForm):\n    class Meta:\n        model = Promotion\n        fields = ['title', 'description', 'url_video', 'date', 'is_active']\n        widgets = {\n            'date': forms.DateInput(attrs={'type': 'date'}),\n            'is_active': forms.CheckboxInput()\n        }\n\nclass PaigesNewsForm(forms.ModelForm):\n    class Meta:\n        model=PaigesNews\n       # exclude =['id', 'seo_block', 'gallery']\n        fields = ['title', 'description', 'url', 'date', 'is_active']\n        widgets= {\n            'date': forms.DateInput(attrs={'type': 'date'}),\n            'is_active':forms.CheckboxInput()\n        }\n\nclass CrossBannerForm(forms.ModelForm):\n    image = forms.ImageField(required=False, label='Зображення для банера', widget=forms.FileInput() )\n    type = forms.CharField(widget=forms.HiddenInput(), required=False, initial='photo_background')\n\n    class Meta:\n        model = Cross_Banner\n        fields = ['type']\n\n    def __init__(self, *args, **kwargs):\n        super().__init__(*args, **kwargs)\n        if self.instance and self.instance.pk and self.instance.gallery:\n            picture = self.instance.gallery.pictures.first()\n            if picture and picture.image:\n                self.fields['image'].initial = picture.image\n\n    def save(self, commit=True):\n\n        instance = super().save(commit=False)\n\n        if commit:\n            instance.save()\n        return instance\n\n\nclass UserForm(forms.ModelForm):\n    class Meta:\n        model = User\n\n        fields = '__all__'\n        exclude = ['last_login', 'date_joined', 'groups', 'user_permissions', 'password']\n\nclass PictureForm(forms.ModelForm):\n\n    image = forms.ImageField(label='Зображення')\n    class Meta:\n        model = Picture\n\n        fields = ['image', 'gallery', 'image_type']\n\n        widgets = {\n            'gallery': forms.HiddenInput(),\n            'image_type': forms.HiddenInput(),\n        }\n\n    def __init__(self, *args, **kwargs):\n        super().__init__(*args, **kwargs)\n\n        self.fields['gallery'].required = False\n\n\n        if not self.instance.pk:\n            self.initial['image_type'] = 'gallery'\n\n\n\n\nPictureFormSet = modelformset_factory(\n    model=Picture,\n    form=PictureForm,\n    fields=['image', 'gallery', 'image_type'], # Поля должны совпадать с Meta.fields формы\n    extra=1,\n    can_delete=True,\n)\n\n\nclass GalleryForm(forms.ModelForm):\n\n    class Meta:\n        model = Gallery\n        fields = '__all__'\n        widgets = {\n            'scroll_speed': forms.NumberInput(attrs={'min': '1', 'step': '1'}),\n        }\n\n\nclass BannerForm(forms.ModelForm):\n        main_picture = forms.ImageField(required=False, label='Головне зображення')\n\n        class Meta:\n            model = Banners\n            fields = ['url', 'text', 'scroll_speed', 'is_active']\n\n        def save(self, commit=True):\n            banner = super().save(commit=False)\n            # Якщо у банера немає галереї — створимо\n            if not banner.gallery:\n                gallery = Gallery.objects.create()\n                banner.gallery = gallery\n            if commit:\n                banner.save()\n\n\n                main_picture_file = self.cleaned_data.get('main_picture')\n                if main_picture_file:\n\n                    picture = banner.gallery.pictures.filter(image_type='main_picture').first()\n                    if not picture:\n                        picture = Picture(gallery=banner.gallery, image_type='main_picture')\n                    picture.image = main_picture_file\n                    picture.save()\n\n            return banner\n\nBannersFormSet = modelformset_factory(Banners, form=BannerForm, extra=0, can_delete=True)\n\nclass NewsForm(forms.ModelForm):\n    main_picture = forms.ImageField(required=False, label='Головне зображення')\n\n    class Meta:\n        model = News\n        fields = ['url', 'scroll_speed', 'is_active']\n\n    def save(self, commit=True):\n        news = super().save(commit=False)\n\n\n        if not news.gallery:\n            gallery = Gallery.objects.create()\n            news.gallery = gallery\n\n        if commit:\n            news.save()\n\n\n            main_picture_file = self.cleaned_data.get('main_picture')\n            if main_picture_file:\n                picture = news.gallery.pictures.filter(image_type='main_picture').first()\n                if not picture:\n                    picture = Picture(gallery=news.gallery, image_type='main_picture')\n                picture.image = main_picture_file\n                picture.save()\n\n        return news\n\nNewsFormSet = modelformset_factory(News, form=NewsForm, extra=0, can_delete=True)\n\n\nclass TicketForm(forms.ModelForm):\n    class Meta:\n        model = Tickets\n\n        fields = ['session', 'movie', 'seat', 'profile', 'halls']\n        widgets = {\n            'session': forms.Select(attrs={'class': 'form-control'}),\n            'movie': forms.Select(attrs={'class': 'form-control'}),\n            'seat': forms.Select(attrs={'class': 'form-control'}),\n            'profile': forms.Select(attrs={'class': 'form-control'}),\n            'halls': forms.Select(attrs={'class': 'form-control'}),\n        }\n        labels = {\n            'session': 'Сеанс',\n            'movie': 'Фільм',\n            'seat': 'Місце',\n            'profile': 'Глядач',\n            'halls': 'Зал',}\n\n\nclass SeatForm(forms.ModelForm):\n    class Meta:\n        model = Seats\n        fields = ['number_row', 'halls','seat', 'status', 'is_vip', 'price']\n\n\nclass SessionsForm(forms.ModelForm):\n    class Meta:\n        model = Sessions\n        fields = '__all__'\n        widgets = {\n            'date': forms.DateInput(attrs={'type': 'date'}),\n            'time_session': forms.TimeInput(attrs={'type': 'time'}),\n            'duration': forms.TimeInput(attrs={'type': 'time'}),\n        }\n\nSessionFormSet = modelformset_factory(Sessions, form=SessionsForm, fields='__all__', extra=1)\n\n\nclass HallsForm(forms.ModelForm):\n    class Meta:\n        model = Halls\n\n        exclude = ['seo_block','date', 'gallery']\n\n        fields = [ 'title', 'cinema', 'description', 'rows', 'seats_row']\n\n\nclass CinemaForm(forms.ModelForm):\n\n    class Meta:\n        model = Cinemas\n\n        fields = ['title', 'description' , 'conditions', 'city',]\n\n\nclass BlockSEOForm(forms.ModelForm):\n\n    class Meta:\n        model = Block_SEO\n        fields = ['title_seo', 'seo_url', 'seo_text', 'seo_keywords', 'seo_description']\n        widgets = {\n            'seo_text': forms.Textarea(attrs={'rows': 4}),\n            'seo_description': forms.Textarea(attrs={'rows': 4}),\n        }\n\n\nclass MovieForm(forms.ModelForm):\n\n    class Meta:\n        model = Movies\n\n        fields = ['genre', 'title', 'url_trailer', 'description',\n                  'video_type', 'relise_date', 'age_limit']\n\n        widgets = {\n            'description': forms.Textarea(attrs={'rows': 6}),\n            'relise_date': forms.DateInput(attrs={'type': 'date'}),\n        }\n\n\n\nPICTURE_TYPE_DEFAULT = 'gallery'\n\nPictureFormSet1 = inlineformset_factory(\n    Gallery,\n    Picture,\n    form=PictureForm,\n    fields=('image',),\n    extra=1,\n    max_num=10,\n    can_delete=True,)\n\n\n\n\n\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/admins/forms.py b/admins/forms.py
+--- a/admins/forms.py	(revision 09995edf10a3bdb2cb66c1f197b45a23e8f45852)
++++ b/admins/forms.py	(date 1749047663295)
+@@ -3,10 +3,18 @@
+ from  movie.models import Movies
+ from  users.models import User
+ from core.models import Cinemas, Halls, Sessions,Seats, Tickets
+-from main.models import Banners, Cross_Banner, News, PaigesNews, Promotion
++from main.models import Banners, Cross_Banner, News, PaigesNews, Promotion, PaigesCinema
+ from django.forms import inlineformset_factory, formset_factory, modelformset_factory
+ 
+ 
++class PaigesCinemaForm(forms.ModelForm):
++    class Meta:
++        model = PaigesCinema
++        exclude = ['id', 'seo_block', 'gallery']
++        fields = '__all__'
++        widgets = {
++            'is_active': forms.CheckboxInput(),}
++
+ class PromotionForm(forms.ModelForm):
+     class Meta:
+         model = Promotion
+@@ -74,14 +82,16 @@
+         super().__init__(*args, **kwargs)
+ 
+         self.fields['gallery'].required = False
++        self.fields['gallery'].label = ''  # Устанавливаем пустую метку
++        self.fields['image_type'].label = ''  # Устанавливаем пустую метку
+ 
++
++        if 'id' in self.fields:
++            self.fields['id'].label = ''
+ 
+         if not self.instance.pk:
+             self.initial['image_type'] = 'gallery'
+ 
+-
+-
+-
+ PictureFormSet = modelformset_factory(
+     model=Picture,
+     form=PictureForm,
+@@ -89,8 +99,6 @@
+     extra=1,
+     can_delete=True,
+ )
+-
+-
+ class GalleryForm(forms.ModelForm):
+ 
+     class Meta:
+@@ -251,10 +259,11 @@
+     Gallery,
+     Picture,
+     form=PictureForm,
+-    fields=('image',),
++    fields=('image', 'image_type'),
+     extra=1,
+     max_num=10,
+-    can_delete=True,)
++    can_delete=True,
++)
+ 
+ 
+ 
+Index: admins/templates/admin/cinema/cinema_list.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>{% extends 'admin/index.html' %}\n{% load static %}\n<link rel=\"stylesheet\" href=\"{% static 'css/cinema.css' %}\">\n{% block title %}Список кінотеатрів{% endblock %}\n\n{% block content %}\n<div class=\"container mt-5 position-relative\"> {# Додаємо position-relative для контейнера #}\n  <h2 class=\"mb-4 text-center\">Список кінотеатрів</h2>\n\n  {% if cinemas %}\n    <div class=\"row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4\">\n      {% for cinema in cinemas %}\n        <div class=\"col\">\n          {% include 'admin/cinema/cinema_card.html' with cinema=cinema %}\n        </div>\n      {% endfor %}\n    </div>\n\n    {% if cinemas.has_other_pages %}\n      <nav aria-label=\"Сторінки\" class=\"mt-5\">\n        <ul class=\"pagination justify-content-center\">\n          {% if cinemas.has_previous %}\n            <li class=\"page-item\">\n              <a class=\"page-link\" href=\"?page=1\">&laquo; Перша</a>\n            </li>\n            <li class=\"page-item\">\n              <a class=\"page-link\" href=\"?page={{ cinemas.previous_page_number }}\">Назад</a>\n            </li>\n          {% endif %}\n\n          <li class=\"page-item disabled\">\n            <span class=\"page-link\">Сторінка {{ cinemas.number }} з {{ cinemas.paginator.num_pages }}</span>\n          </li>\n\n          {% if cinemas.has_next %}\n            <li class=\"page-item\">\n              <a class=\"page-link\" href=\"?page={{ cinemas.next_page_number }}\">Вперед</a>\n            </li>\n            <li class=\"page-item\">\n              <a class=\"page-link\" href=\"?page={{ cinemas.paginator.num_pages }}\">Остання &raquo;</a>\n            </li>\n          {% endif %}\n        </ul>\n      </nav>\n    {% endif %}\n\n  {% else %}\n    <p class=\"text-center text-muted\">Немає доступних кінотеатрів.</p>\n  {% endif %}\n<br>\n<a href=\"{% url 'add_cinema_create' %}\" class=\"add-cinema-button\" style=\"display: inline-flex; align-items: center; text-decoration: none; cursor: pointer; border: none; background: none;\">\n    <img src=\"{% static 'images/plus.svg' %}\" alt=\"Додати кінотеатр\" width=\"200\" height=\"200\" style=\"vertical-align: middle;\">\n    <span class=\"add-text\" style=\"margin-left: 5px; vertical-align: middle;\"> Додати кінотеатр </span>\n</a>\n</div>\n{% endblock %}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/admins/templates/admin/cinema/cinema_list.html b/admins/templates/admin/cinema/cinema_list.html
+--- a/admins/templates/admin/cinema/cinema_list.html	(revision 09995edf10a3bdb2cb66c1f197b45a23e8f45852)
++++ b/admins/templates/admin/cinema/cinema_list.html	(date 1749047820915)
+@@ -4,7 +4,7 @@
+ {% block title %}Список кінотеатрів{% endblock %}
+ 
+ {% block content %}
+-<div class="container mt-5 position-relative"> {# Додаємо position-relative для контейнера #}
++<div class="container mt-5 position-relative">
+   <h2 class="mb-4 text-center">Список кінотеатрів</h2>
+ 
+   {% if cinemas %}
+Index: admins/urls.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from django.urls import path\nfrom . import views\n\nfrom .table import MovieListDate\n\nurlpatterns = [\n\n    path('', views.index, name='admins'),\n\n    path('add_movie/create/', views.add_movie, name='add_movie_create'),\n    path('movies_list/list/', views.movie_list, name='movie_list'),\n\n    path('movies_list/list/data/', MovieListDate.as_view(), name='movie_list_data'),\n    path('add_movie/<int:movie_id>/', views.add_movie, name='add_movie_edit'),\n    path('movies/<int:pk>/delete/', views.delete_movie, name='delete_movie'),\n\n\n    path('cinema_lists/',views.cinema_list, name='cinema_lists'),\n    path('add_cinema/add_cinema_create', views.add_cinema_create, name='add_cinema_create'),\n    path('add_cinema/<int:cinema_id>/', views.add_cinema_create ,name='add_cinema_edit'),\n    path('cinema_lists/<int:pk>/delete/', views.delete_cinema, name='delete_cinema'),\n\n    path('halls_lists/',views.halls_list, name='halls_lists'),\n    path('add_halls/add_halls_create/ ', views.add_halls_create, name='add_halls_create'),\n    path('add_halls/<int:halls_id>/', views.add_halls_create ,name='add_halls_edit'),\n    path('halls_lists/<int:pk>/delete/', views.delete_halls, name='delete_halls'),\n\n    path('sessions_lists/',views.session_list, name='sessions_list'),\n    path('add_sessions/add_sessions', views.add_edit_session, name='add_sessions'),\n    path('add_sessions/<int:session_id>/', views.add_edit_session,name='add_sessions_edit'),\n    path('sessions_lists/<int:pk>/delete/', views.delete_sessions, name='delete_sessions'),\n\n    path('seats_list/', views.seats_list, name='seats_list'),\n    path('seats_list/add_seats/', views.add_edit_seat, name='add_seats'),\n    path('seats_list/<int:session_id>/', views.add_edit_seat, name='edit_seats'),\n    path('seats_lists/<int:pk>/delete/', views.delete_seats, name='delete_seats'),\n\n    path('ticket/tickets_lists/', views.tickets_list, name='tickets_lists'),\n    path('ticket/tickets_lists/add_ticket/', views.add_edit_ticket, name='add_ticket'),\n    path('ticket/tickets_lists/add_ticket/<int:session_id>/', views.add_edit_ticket, name='edit_ticket'),\n    path('ticket/tickets_lists/<int:pk>/delete/', views.delete_tickets, name='delete'),\n\n    path('banners/', views.banners_list, name='banners'),\n    path('banners/add_banners', views.add_banners, name='add_banners'),\n    path('banners/<int:banners_id>/', views.add_banners, name='edit_banners'),\n    path('banners/<int:banners_id>/delete_banners/', views.delete_banners, name='delete_banners'),\n\n\n    path('user/', views.user_list, name='users'),\n    path('user/add_user', views.add_user, name='add_users'),\n    path('user/<int:user_id>/edit/', views.add_user, name='edit_users'),\n    path('user/<int:user_id>/delete_user/', views.delete_user, name='delete_user'),\n\n    path('news/', views.news_paige, name='news'),\n    path('news/add_news', views.news_paige_add, name='add_news'),\n    path('news/<int:news_id>/edit/', views.news_paige_add, name='edit_news'),\n    path('news/<int:news_id>/delete_news/', views.news_paige_delete, name='delete_news'),\n\n    path('promotion/', views.promotion_paige, name='promotion'),\n    path('promotion/add_promotion', views.promotion_paige_add, name='add_promotion'),\n    path('promotion/<int:promotion_id>/edit/', views.promotion_paige_add, name='edit_promotion'),\n    path('promotion/<int:promotion_id>/delete_promotion/', views.promotion_paige_delete, name='delete_promotion')\n]
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/admins/urls.py b/admins/urls.py
+--- a/admins/urls.py	(revision 09995edf10a3bdb2cb66c1f197b45a23e8f45852)
++++ b/admins/urls.py	(date 1749035853968)
+@@ -59,5 +59,10 @@
+     path('promotion/', views.promotion_paige, name='promotion'),
+     path('promotion/add_promotion', views.promotion_paige_add, name='add_promotion'),
+     path('promotion/<int:promotion_id>/edit/', views.promotion_paige_add, name='edit_promotion'),
+-    path('promotion/<int:promotion_id>/delete_promotion/', views.promotion_paige_delete, name='delete_promotion')
++    path('promotion/<int:promotion_id>/delete_promotion/', views.promotion_paige_delete, name='delete_promotion'),
++
++    path('paige/', views.paige, name='paige'),
++    path('paige/add_paige', views.paige_add, name='add_paige'),
++    path('paige/<int:paige_id>/edit/', views.paige_add, name='edit_paige'),
++    path('paige/<int:paige_id>/delete_paige/', views.paige_delete, name='delete_paige'),
+ ]
+\ No newline at end of file
+Index: admins/templates/admin/paige_list/paige_lists.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/admins/templates/admin/paige_list/paige_lists.html b/admins/templates/admin/paige_list/paige_lists.html
+new file mode 100644
+--- /dev/null	(date 1749038021500)
++++ b/admins/templates/admin/paige_list/paige_lists.html	(date 1749038021500)
+@@ -0,0 +1,62 @@
++{% extends 'admin/index.html' %}
++
++{% block title %}Список новин{% endblock %}
++{% block content %}
++<section class="content">
++    <div class="container-fluid">
++        <div class="row">
++            <div class="col-12">
++                <div class="card">
++                    <div class="card-header d-flex justify-content-between align-items-center">
++                        <h3 class="card-title mb-0">Список сторінок</h3>
++                        <div class="card-tools">
++
++                            <a href="{% url 'add_paige' %}" class="btn btn-success btn-sm">
++                                <i class="fas fa-plus"></i> Додати сторінку        </a>
++                        </div>
++                    </div>
++                    <div class="card-body">
++
++                        <table id="news_Table" class="table table-bordered table-hover">
++                            <thead>
++                                <tr>
++                                    <th>Назва</th>
++                                    <th>Дата створення</th>
++                                    <th>Статус</th>
++                                </tr>
++                            </thead>
++
++                                {% for paige in paiges %}
++                                <tr>
++                                    <td>{{ paige.title }}</td>
++                                    <td>{{ paige.date|date:"d.m.Y" }}</td>
++                                    <td>{{ paige.is_active }}</td>
++                                    <td>
++
++                                       <a href="{% url 'edit_paige' paige.pk %}" class="btn btn-primary btn-sm">Редагувати</a>
++                                   <form action="{% url 'delete_paige' paige_id=paige.pk %}" method="post" style="display:inline;">
++
++                                            {% csrf_token %}
++
++                                            <button type="submit" class="btn btn-danger btn-sm"
++                                                    onclick="return confirm('Ви впевнені, що хочете видалити сторінку {{ paige.title }}?');">
++                                                Видалити
++                                            </button>
++                                   </form>
++                                    </td>
++                                </tr>
++                                {% empty %}
++
++                                <tr>
++                                      <td colspan="7">Список сторінок пустий.</td>
++                                </tr>
++                                {% endfor %}
++                            </tbody>
++                        </table>
++                    </div>
++                    </div>
++                </div>
++            </div>
++        </div>
++    </section>
++{% endblock %}
+\ No newline at end of file
+Index: admins/templates/admin/paige_list/add_paige.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/admins/templates/admin/paige_list/add_paige.html b/admins/templates/admin/paige_list/add_paige.html
+new file mode 100644
+--- /dev/null	(date 1749039272496)
++++ b/admins/templates/admin/paige_list/add_paige.html	(date 1749039272496)
+@@ -0,0 +1,273 @@
++{% extends 'admin/index.html' %}
++{% load static %}
++{% block title %}Додати сторінку {% endblock %}
++
++{% block content %}
++
++
++<section class="content" >
++    <div class="container-fluid">
++        <div class="row">
++            <div class="col-md-12">
++                <div class="card card-primary">
++                    <div class="card-header">
++                        <h3 class="card-title">Додати сторінку </h3>
++                    </div>
++                    <form method="post" enctype="multipart/form-data">
++                        {% csrf_token %}
++
++
++                        {% if paige_form.non_field_errors %}
++                            <div class="alert alert-danger">{{ paige_form.non_field_errors }}</div>
++                        {% endif %}
++                        {% if block_seo_form.non_field_errors %}
++                            <div class="alert alert-danger">{{ block_seo_form.non_field_errors }}</div>
++                        {% endif %}
++                        {% if gallery_form.non_field_errors %}
++                            <div class="alert alert-danger">{{ gallery_form.non_field_errors }}</div>
++                        {% endif %}
++                        {% if picture_formset.non_form_errors %}
++                            <div class="alert alert-danger">{{ picture_formset.non_form_errors }}</div>
++                        {% endif %}
++                        {% if main_picture_form.non_field_errors %}
++                            <div class="alert alert-danger">{{ main_picture_form.non_field_errors }}</div>
++                        {% endif %}
++
++                        <div class="card-body">
++                            <h2>Інформація про сторінку </h2>
++
++                                        <div class="card-body">
++                                              <div class="form-group">
++                                                    {{ paige_form.title.label_tag }}
++                                                    {{ paige_form.title }}
++                                                    {% if paige_form.title.help_text %}<small class="form-text text-muted">{{ paige_form.title.help_text }}</small>{% endif %}
++                                                    {% for error in paige_form.title.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
++
++                                                    {{ paige_form.date.label_tag }}
++                                                    {{ paige_form.date }}
++                                                    {% if paige_form.date.help_text %}<small class="form-text text-muted">{{ paige_form.date.help_text }}</small>{% endif %}
++                                                    {% for error in paige_form.date.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
++
++                                                    {{ paige_form.is_active.label_tag }}
++                                                    {{ paige_form.is_active }}
++                                                    {% if paige_form.is_active.help_text %}<small class="form-text text-muted">{{ paige_form.gallery.help_text }}</small>{% endif %}
++                                                    {% for error in paige_form.is_active.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
++
++
++                                              </div>
++                                        </div>
++
++                                        <div class="card-body">
++                                          <div class="form-group">
++                                                {{ paige_form.description.label_tag }}
++                                                {{ paige_form.description }}
++                                                {% if paige_form.description.help_text %}<small class="form-text text-muted">{{ paige_form.description.help_text }}</small>{% endif %}
++                                                {% for error in paige_form.description.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
++                                          </div>
++                                        </div>
++
++                            <h3>Головна картинка</h3>
++               <div class="main-picture-form border p-3 mb-3" style="width: 400px; height: 200px;">
++
++                    {% for field in main_picture_form %}
++                       {% if field.name == 'image' %}
++                                         <div class="form-group">
++                                             {{ field.label_tag }}
++                                             {{ field }}
++                                             {% if field.errors %}
++                                                 <div class="alert alert-danger">{{ field.errors }}</div>
++                                             {% endif %}
++                                             <div class="image-preview" style="max-width: 200px; max-height: 200px; margin-top: 10px;">
++
++                                                 {% if news.main_picture and news.main_picture.image %}
++                                                     <img src="{{ news.main_picture.image.url }}" alt="Поточне головне зображення" style="max-width: 200px; max-height: 200px;">
++                                                 {% endif %}
++                                             </div>
++                                         </div>
++                                     {% elif field.name == 'DELETE' %}
++                                         <div class="form-group form-check">
++                                             {{ field }}
++                                             {{ field.label_tag }}
++                                             {% for error in field.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
++                                         </div>
++                                     {% else %}
++                                         {# Другие поля главной картинки (например, image_type, gallery), если они есть, #}
++                                         {# будут выведены здесь. Если они HiddenInput в PictureForm, они будут скрыты. #}
++                                         {{ field }}
++                                     {% endif %}
++                    {% endfor %}
++                </div>
++
++                            <h3>Картинки галереї</h3>
++                            {{ picture_formset.management_form }}
++                            <div id="pictures-formset">
++                                {% for form in picture_formset %}
++                                    <div class="gallery-image-form border p-3 mb-3">
++                                        {# Эти поля теперь будут скрыты благодаря HiddenInput в PictureForm #}
++                                        {{ form.id }}
++                                        {{ form.image_type }}
++                                        {{ form.gallery }}
++
++                                        {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
++                                        <div class="form-group">
++                                            {{ form.image.label_tag }}
++                                            {% if form.instance.pk and form.instance.image %}
++                                                <img src="{{ form.instance.image.url }}" alt="Поточне зображення" style="max-width: 100px; max-height: 100px; margin-bottom: 10px;">
++                                            {% endif %}
++                                            {{ form.image }}
++                                            {% if form.image.help_text %}<small class="form-text text-muted">{{ form.image.help_text }}</small>{% endif %} {# ИСПРАВЛЕНО: добавлен пробел #}
++                                            {% for error in form.image.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
++                                            <div class="image-preview" style="max-width: 100px; max-height: 100px; margin-top: 10px;"></div>
++                                        </div>
++                                        <div class="form-group form-check">
++                                            {{ form.DELETE }}
++                                            {{ form.DELETE.label_tag }}
++                                            {% for error in form.DELETE.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
++                                        </div>
++                                        <button type="button" class="btn btn-danger mt-2 remove-form">Видалити</button>
++                                    </div>
++                                {% endfor %}
++                            </div>
++                            <button id="add-picture-form" type="button" class="btn btn-success mt-2">Додати ще одне зображення</button>
++                        </div>
++                            <h2>SEO Інформація</h2>
++                            {% include 'admin/card_forms/seo_form.html' with form=block_seo_form %}
++                        <div class="card-footer">
++                            <button type="submit" class="btn btn-primary">Створити</button>
++                        </div>
++                    </form>
++                </div>
++            </div>
++        </div>
++         </div>
++    </section>
++
++
++    <div id="empty-form-template" style="display: none;">
++        {% for field in picture_formset.empty_form %}
++            {% if field.name == 'image' %}
++                <div class="form-group">
++                    {{ field.label_tag }}
++                    {{ field }}
++                    {% if field.help_text %}<small class="form-text text-muted">{{ field.help_text }}</small>{% endif %} {# ИСПРАВЛЕНО: добавлен пробел #}
++                    {% for error in field.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
++                </div>
++                <div class="image-preview" style="max-width: 100px; max-height: 100px; margin-top: 10px;"></div>
++            {% elif field.name == 'DELETE' %}
++                <div class="form-group form-check">
++                    {{ field }}
++                    {{ field.label_tag }}
++                    {% for error in field.errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
++                </div>
++            {% else %}
++                {# Эти поля (image_type, gallery, id) будут скрыты благодаря HiddenInput в PictureForm #}
++                {{ field }}
++            {% endif %}
++        {% endfor %}
++        <button type="button" class="btn btn-danger mt-2 remove-form">Видалити</button>
++    </div>
++
++
++    <script>
++        document.addEventListener('DOMContentLoaded', function() {
++            // Предварительный просмотр главной картинки
++            const mainPictureInput = document.querySelector('.main-picture-form input[type="file"]');
++            const mainPicturePreview = document.querySelector('.main-picture-form .image-preview');
++
++            if (mainPictureInput && mainPicturePreview) {
++                mainPictureInput.addEventListener('change', function() {
++                    previewImage(this, mainPicturePreview, 200, 200);
++                });
++            }
++
++            // Обработка формсета галереи
++            const addPictureFormButton = document.getElementById('add-picture-form');
++            const picturesFormsetContainer = document.getElementById('pictures-formset');
++            const emptyFormTemplate = document.getElementById('empty-form-template').innerHTML;
++            const totalForms = document.querySelector('#id_pictures-TOTAL_FORMS');
++            let formCount = picturesFormsetContainer.querySelectorAll('.gallery-image-form').length;
++
++            function updateFormIndices(formElement, newIndex) {
++                formElement.querySelectorAll('[id], [name], [for]').forEach(node => {
++                    if (node.id) {
++                        node.id = node.id.replace(/-\d+-/, `-${newIndex}-`);
++                        node.id = node.id.replace(/__prefix__/, newIndex);
++                    }
++                    if (node.name) {
++                        node.name = node.name.replace(/-\d+-/, `-${newIndex}-`);
++                        node.name = node.name.replace(/__prefix__/, newIndex);
++                    }
++                    if (node.tagName === 'LABEL' && node.htmlFor) {
++                        node.htmlFor = node.htmlFor.replace(/-\d+-/, `-${newIndex}-`);
++                        node.htmlFor = node.htmlFor.replace(/__prefix__/, newIndex);
++                    }
++                });
++                // Инициализация предпросмотра изображения для новой формы
++                const fileInput = formElement.querySelector('input[type="file"]');
++                const previewContainer = formElement.querySelector('.image-preview');
++                if (fileInput && previewContainer) {
++                    fileInput.addEventListener('change', function() {
++                        previewImage(this, previewContainer, 100, 100);
++                    });
++                }
++            }
++
++            function previewImage(input, previewContainer, maxWidth, maxHeight) {
++                if (input.files && input.files[0]) {
++                    const reader = new FileReader();
++                    reader.onload = function(e) {
++                        previewContainer.innerHTML = `<img src="${e.target.result}" style="max-width: ${maxWidth}px; max-height: ${maxHeight}px;">`;
++                    }
++                    reader.readAsDataURL(input.files[0]);
++                } else {
++                    previewContainer.innerHTML = '';
++                }
++            }
++
++            addPictureFormButton.addEventListener('click', function() {
++                const newFormWrapper = document.createElement('div');
++                newFormWrapper.classList.add('gallery-image-form', 'border', 'p-3', 'mb-3');
++                newFormWrapper.innerHTML = emptyFormTemplate;
++
++                updateFormIndices(newFormWrapper, formCount);
++
++                picturesFormsetContainer.appendChild(newFormWrapper);
++                formCount++;
++                totalForms.value = formCount;
++            });
++
++            // Делегирование события для кнопок удаления (для уже существующих и новых форм)
++            picturesFormsetContainer.addEventListener('click', function(event) {
++                if (event.target.classList.contains('remove-form')) {
++                    event.preventDefault();
++                    const formToRemove = event.target.closest('.gallery-image-form');
++                    const deleteCheckbox = formToRemove.querySelector('input[type="checkbox"][id$="-DELETE"]');
++
++                    if (deleteCheckbox) {
++                        deleteCheckbox.checked = true;
++                        formToRemove.style.display = 'none';
++                    } else {
++                        formToRemove.remove();
++                    }
++                    formCount--;
++                    totalForms.value = formCount;
++                }
++            });
++
++            // Инициализация предпросмотра для существующих форм при загрузке страницы
++            picturesFormsetContainer.querySelectorAll('.gallery-image-form').forEach(formElement => {
++                const fileInput = formElement.querySelector('input[type="file"]');
++                const previewContainer = formElement.querySelector('.image-preview');
++                if (fileInput && previewContainer) {
++                    fileInput.addEventListener('change', function() {
++                        previewImage(this, previewContainer, 100, 100);
++                    });
++                    const existingImg = formElement.querySelector('img[alt="Поточне зображення"]');
++                    if (existingImg) {
++                        previewContainer.appendChild(existingImg.cloneNode(true));
++                    }
++                }
++            });
++        });
++    </script>
++{% endblock %}
+\ No newline at end of file
