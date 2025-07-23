@@ -100,7 +100,7 @@ docker-createsuperuser:
 	$(DOCKER_COMPOSE) exec web $(PYTHON) manage.py createsuperuser
 	@echo "Суперпользователь создан (или процесс запущен) в контейнере."
 
-# Загрузка начальных данных (фиксатур) в контейнере
+
 # Пример: make docker-load-initial-data FIXTURE="my_app/fixtures/initial_data.json"
 docker-load-initial-data:
 	@echo "Загружаем начальные данные из фиксатуры $(FIXTURE) в контейнере..."
