@@ -5,9 +5,9 @@
 {% block title %}{{ page.title }}{% endblock %}
 
 {% block seo_meta %}
-    <title>{{ cinema_page.seo_block.title_seo|default:hall.title }}  </title>
-    <meta name="keywords" content="{{cinema_page.seo_block.seo_keywords|default:'' }}{% if cinema_page.seo_block.seo_keywords %},{% endif %}">
-    <meta name="description" content="{{ cinema_page.seo_block.seo_description|default:'' }}.">
+    <title>{{ page.seo_block.title_seo|default:page.title }}</title>
+    <meta name="keywords" content="{{ page.seo_block.seo_keywords|default:'' }}{% if page.seo_block.seo_keywords %},{% endif %}">
+    <meta name="description" content="{{ page.seo_block.seo_description|default:'' }}.">
 {% endblock %}
 
 {% block content %}

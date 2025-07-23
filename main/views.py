@@ -172,7 +172,7 @@ def paiges_cinema_detail(request, slug):
 
     return render(request, 'main/paiges_cinema_detail.html', {
         'seo_block': cinema_page.seo_block,
-        'page': cinema_page, # Передаем объект PaigesCinema под более ясным именем
+        'page': cinema_page,
         'main_picture': main_picture,
         'gallery_pictures': gallery_pictures_list
     })

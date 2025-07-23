@@ -22,6 +22,7 @@ from os.path import basename
 from .tasks import send_campaign_emails_task
 from django.urls import reverse
 import os
+from django.contrib import messages
 from django.core.files.base import ContentFile
 @staff_member_required
 def email_campaign_create(request, campaign_id=None):
@@ -1449,6 +1450,8 @@ def  main_paige (request, paige_id=None):
 
 @staff_member_required
 def  paige_add (request, paige_id=None):
+    print(f"DEBUG: Entering paige_add view. paige_id: {paige_id}")
+
     paige_instance = None
     block_seo_instance = None
     gallery_instance = None
@@ -1456,50 +1459,93 @@ def  paige_add (request, paige_id=None):
     current_main_picture_object = None
 
     if paige_id:
-        paige_instance = get_object_or_404(PaigesCinema, pk=paige_id)
-        block_seo_instance = paige_instance.seo_block
-        gallery_instance = paige_instance.gallery
+        print(f"DEBUG: paige_id provided: {paige_id}. Attempting to fetch instances.")
+        try:
+            paige_instance = get_object_or_404(PaigesCinema, pk=paige_id)
+            block_seo_instance = paige_instance.seo_block
+            gallery_instance = paige_instance.gallery
+            print(
+                f"DEBUG: Found paige_instance: {paige_instance.pk}, seo_block: {block_seo_instance.pk if block_seo_instance else 'None'}, gallery: {gallery_instance.pk if gallery_instance else 'None'}")
 
-        if gallery_instance is None:
-            gallery_instance = Gallery.objects.create()
-            paige_instance.gallery = gallery_instance
-            paige_instance.save()
+            if gallery_instance is None:
+                print("DEBUG: paige_instance has no gallery. Creating one.")
+                gallery_instance = Gallery.objects.create()
+                paige_instance.gallery = gallery_instance
+                paige_instance.save()
+                messages.info(request, "A new gallery was created and linked to this page.")
+                print(f"DEBUG: New gallery created and linked: {gallery_instance.pk}")
 
-        current_main_picture_object = gallery_instance.pictures.filter(image_type='main_picture').first()
+            current_main_picture_object = gallery_instance.pictures.filter(image_type='main_picture').first()
+            print(
+                f"DEBUG: current_main_picture_object: {current_main_picture_object.pk if current_main_picture_object else 'None'}")
+        except Exception as e:
+            print(f"DEBUG: Error fetching instances for paige_id {paige_id}: {e}")
+            messages.error(request, f"Error loading page for editing: {e}")
+            return redirect('paige')  # Redirect to avoid further errors
 
     if gallery_instance is None:
+        print("DEBUG: No gallery instance found or provided. Creating a new one.")
         gallery_instance = Gallery.objects.create()  # Создаем новую галерею
+        messages.info(request, "A new gallery was initialized for this new page.")
+        print(f"DEBUG: Created new gallery: {gallery_instance.pk}")
 
-    if request.method=='POST':
+    if request.method == 'POST':
+        print("DEBUG: Request method is POST.")
         block_seo_form = BlockSEOForm(request.POST, instance=block_seo_instance)
         paige_form = PaigesCinemaForm(request.POST, instance=paige_instance)
         gallery_form = GalleryForm(request.POST, instance=gallery_instance)
 
+        # Filter queryset for picture_formset
+        picture_queryset = Picture.objects.filter(gallery=gallery_instance)
+        if current_main_picture_object:
+            picture_queryset = picture_queryset.exclude(pk=current_main_picture_object.pk)
+
         picture_formset = PictureFormSet(
             request.POST,
             request.FILES,
-            queryset=Picture.objects.filter(gallery=gallery_instance).exclude(pk=current_main_picture_object.pk) if
-            current_main_picture_object else Picture.objects.filter(gallery=gallery_instance),
-            prefix='pictures', initial=[{'image_type': 'gallery_image'}]
+            queryset=picture_queryset,
+            prefix='pictures',
+            initial=[{'image_type': 'gallery'}]  # Corrected from 'gallery_image' to 'gallery' if that's your type
         )
+        print(f"DEBUG: Initial picture_formset queryset count: {picture_queryset.count()}")
 
         main_picture_form = PictureForm(request.POST, request.FILES, instance=current_main_picture_object,
                                         prefix='main_picture_form')
 
+        # Debugging form data manipulation for main_picture_form
         if f'{main_picture_form.prefix}-image_type' not in request.POST:
+            print(f"DEBUG: Setting image_type for main_picture_form data.")
             main_picture_form.data = main_picture_form.data.copy()
             main_picture_form.data[f'{main_picture_form.prefix}-image_type'] = 'main_picture'
+        else:
+            print(
+                f"DEBUG: image_type already in main_picture_form data: {request.POST.get(f'{main_picture_form.prefix}-image_type')}")
 
         if f'{main_picture_form.prefix}-gallery' not in request.POST and gallery_instance.pk:
+            print(f"DEBUG: Setting gallery for main_picture_form data.")
             main_picture_form.data = main_picture_form.data.copy()
             main_picture_form.data[f'{main_picture_form.prefix}-gallery'] = gallery_instance.pk
+        else:
+            print(
+                f"DEBUG: gallery already in main_picture_form data or gallery_instance has no PK: {request.POST.get(f'{main_picture_form.prefix}-gallery') if request.POST.get(f'{main_picture_form.prefix}-gallery') else 'Not set/No PK'}")
+
+        print(f"DEBUG: Validating forms...")
+        print(f"  block_seo_form valid: {block_seo_form.is_valid()} Errors: {block_seo_form.errors}")
+        print(f"  paige_form valid: {paige_form.is_valid()} Errors: {paige_form.errors}")
+        print(f"  gallery_form valid: {gallery_form.is_valid()} Errors: {gallery_form.errors}")
+        print(
+            f"  picture_formset valid: {picture_formset.is_valid()} Errors: {picture_formset.errors} Formset non_form_errors: {picture_formset.non_form_errors()}")
+        for i, form in enumerate(picture_formset):
+            print(f"    Picture form {i} valid: {form.is_valid()} Errors: {form.errors}")
+        print(f"  main_picture_form valid: {main_picture_form.is_valid()} Errors: {main_picture_form.errors}")
 
         if (block_seo_form.is_valid() and
                 paige_form.is_valid() and
                 gallery_form.is_valid() and
-                picture_formset.is_valid() and  #
+                picture_formset.is_valid() and
                 main_picture_form.is_valid()):
 
+            print("DEBUG: All forms are valid. Saving data.")
             block_seo = block_seo_form.save()
             gallery = gallery_form.save()
 
@@ -1507,36 +1553,53 @@ def  paige_add (request, paige_id=None):
             paige.seo_block = block_seo
             paige.gallery = gallery
             paige.save()
+            print(f"DEBUG: PaigesCinema saved: {paige.pk}")
 
             if main_picture_form.cleaned_data.get('image'):
+                print("DEBUG: Main picture image provided. Saving main picture.")
                 main_picture = main_picture_form.save(commit=False)
                 main_picture.gallery = gallery
-                main_picture.image_type = 'main_picture'
+                main_picture.image_type = 'main_picture'  # Ensure this is always set correctly
                 main_picture.save()
+                print(f"DEBUG: Main picture saved: {main_picture.pk}")
 
-                if current_main_picture_object and current_main_picture_object.pk!=main_picture.pk:
+                if current_main_picture_object and current_main_picture_object.pk != main_picture.pk:
+                    print(f"DEBUG: Deleting old main picture: {current_main_picture_object.pk}")
                     current_main_picture_object.delete()
-
+                    messages.info(request, "Old main picture replaced.")
             elif main_picture_form.cleaned_data.get('DELETE') and current_main_picture_object:
+                print(f"DEBUG: Main picture marked for deletion. Deleting: {current_main_picture_object.pk}")
                 current_main_picture_object.delete()
+                messages.info(request, "Main picture deleted.")
+            else:
+                print("DEBUG: No main picture image provided or marked for deletion.")
 
             instances = picture_formset.save(commit=False)
+            print(f"DEBUG: Processing {len(instances)} gallery picture instances.")
             for picture in instances:
-                if not picture.pk:
+                if not picture.pk:  # New picture
+                    print(f"DEBUG: Saving new gallery picture: {picture.image.name if picture.image else 'No image'}")
                     picture.gallery = gallery
                     if not picture.image_type:
-                        picture.image_type = 'gallery_image'
-                picture.save()
+                        picture.image_type = 'gallery'  # Ensure this is 'gallery' as per your type
+                    picture.save()
+                else:  # Existing picture, updated
+                    print(
+                        f"DEBUG: Updating existing gallery picture: {picture.pk} ({picture.image.name if picture.image else 'No image'})")
+                    picture.save()  # Save if it was an existing instance that was modified
+            messages.success(request, f"Gallery pictures saved/updated.")
 
             for picture in picture_formset.deleted_objects:
+                print(f"DEBUG: Deleting gallery picture: {picture.pk}")
                 picture.delete()
+                messages.info(request, f"Gallery picture {picture.pk} deleted.")
 
-            return redirect('paige')
+            messages.success(request, "Page saved successfully!")
+            return redirect('paige')  # Ensure 'paige' is the correct URL name
 
         else:
-
-
-
+            print("DEBUG: One or more forms are NOT valid. Re-rendering form with errors.")
+            messages.error(request, "Please correct the errors in the form.")
             return render(request, 'admin/paige_list/add_paige.html', {
                 'block_seo_form': block_seo_form,
                 'paige_form': paige_form,
@@ -1547,24 +1610,32 @@ def  paige_add (request, paige_id=None):
                 'is_edit': paige_instance is not None,
             })
 
-
-    else:
+    else:  # GET request
+        print("DEBUG: Request method is GET.")
         block_seo_form = BlockSEOForm(instance=block_seo_instance)
         paige_form = PaigesCinemaForm(instance=paige_instance)
         gallery_form = GalleryForm(instance=gallery_instance)
 
+        # Filter queryset for picture_formset for GET request
+        picture_queryset = Picture.objects.filter(gallery=gallery_instance)
+        if current_main_picture_object:
+            picture_queryset = picture_queryset.exclude(pk=current_main_picture_object.pk)
+
         picture_formset = PictureFormSet(
-            queryset=Picture.objects.filter(gallery=gallery_instance).exclude(pk=current_main_picture_object.pk) if
-            current_main_picture_object else Picture.objects.filter(gallery=gallery_instance),
+            queryset=picture_queryset,
             prefix='pictures'
         )
+        print(f"DEBUG: GET: Initial picture_formset queryset count: {picture_queryset.count()}")
 
         main_picture_form = PictureForm(
             instance=current_main_picture_object,
             prefix='main_picture_form',
             initial={'image_type': 'main_picture'}
         )
+        print(
+            f"DEBUG: GET: main_picture_form instance: {current_main_picture_object.pk if current_main_picture_object else 'None'}")
 
+    print("DEBUG: Rendering template.")
     return render(request, 'admin/paige_list/add_paige.html', {
         'block_seo_form': block_seo_form,
         'paige_form': paige_form,
