@@ -171,6 +171,7 @@ def paiges_cinema_detail(request, slug):
                 gallery_pictures_list.append(pic) # ИСПРАВЛЕНИЕ: Добавляем картинку в список
 
     return render(request, 'main/paiges_cinema_detail.html', {
+        'seo_block': cinema_page.seo_block,
         'page': cinema_page, # Передаем объект PaigesCinema под более ясным именем
         'main_picture': main_picture,
         'gallery_pictures': gallery_pictures_list
@@ -221,6 +222,7 @@ def paiges_news_detail(request, slug):
                 gallery_pictures_list.append(pic)
 
     return render(request, 'main/paiges_news_detail.html', {
+        'seo_block':  paige_news.seo_block,
         'paige_news': paige_news,
         'main_picture': main_picture,
         'gallery_pictures_list': list(gallery_pictures_list),
@@ -292,6 +294,7 @@ def promotion_detail(request, slug):
                 gallery_pictures_list.append(pic)
 
     return render(request, 'main/promotion_detail.html', {
+        'seo_block': promotion.seo_block,
         'promotion': promotion,
         'main_picture': main_picture,
         'gallery_pictures_list':list( gallery_pictures_list),

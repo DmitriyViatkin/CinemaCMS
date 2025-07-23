@@ -22,6 +22,7 @@ from os.path import basename
 from .tasks import send_campaign_emails_task
 from django.urls import reverse
 import os
+from django.core.files.base import ContentFile
 @staff_member_required
 def email_campaign_create(request, campaign_id=None):
     campaign_instance = None
@@ -859,29 +860,42 @@ def add_banners(request):
 
         if which_form == "this_is_form_banner":
             if banner_formset.is_valid():
-                banner_formset.save()
+                pictures_data = []
+
                 for form in banner_formset.forms:
                     if not form.cleaned_data:
-                        continue # Пропускаємо порожні форми
+                        continue
 
                     banner = form.instance
                     main_picture_file = form.cleaned_data.get('main_picture')
 
+                    # 🛡 Збережемо копію вмісту файлу, щоб не втратити
+                    if main_picture_file:
+                        file_copy = ContentFile(main_picture_file.read())
+                        file_copy.name = main_picture_file.name
+                        pictures_data.append((banner, file_copy))
+                    else:
+                        pictures_data.append((banner, None))
+
+                banner_formset.save()
+
+                for banner, main_picture_file in pictures_data:
                     if banner and not banner.gallery:
-                        # Якщо у банера немає галереї, створюємо її
                         banner.gallery = Gallery.objects.create()
-                        banner.save() # Зберігаємо банер, щоб зв'язати нову галерею
+                        banner.save()
 
-                    if banner.gallery:
+                    if banner.gallery and main_picture_file:
+                        picture = Picture.objects.filter(
+                            gallery=banner.gallery, image_type='main_picture'
+                        ).first()
 
-                        picture = Picture.objects.filter(gallery=banner.gallery, image_type='main_picture').first()
                         if not picture:
                             picture = Picture(gallery=banner.gallery, image_type='main_picture')
 
-                        if main_picture_file:
-                            picture.image = main_picture_file
-                            picture.save()
+                        picture.image = main_picture_file
+                        picture.save()
                 return redirect('add_banners')
+
 
         elif which_form == "this_is_form_cross_banner":
 
@@ -910,46 +924,72 @@ def add_banners(request):
                     file_extension = os.path.splitext(image_file.name)[1]
                 return redirect('add_banners')
 
+
         elif which_form == "this_is_form_news":
+
             if news_formset.is_valid():
-                news_formset.save()
+
+                pictures_data = []
+
                 for form in news_formset.forms:
+
                     if not form.cleaned_data:
-                        continue # Пропускаємо порожні форми
+                        continue
 
                     news = form.instance
+
                     main_picture_file = form.cleaned_data.get('main_picture')
 
-                    if news and not news.gallery:
-                        # Якщо у новини немає галереї, створюємо її
-                        news.gallery = Gallery.objects.create()
-                        news.save() # Зберігаємо новину, щоб зв'язати нову галерею
+                    # 🛡 Безпечне копіювання файлу
 
-                    if news.gallery:
-                        # Отримуємо або створюємо main_picture для галереї поточної новини.
-                        # Цей запит буде цільовим і виконуватиметься один раз за оновлення.
-                        picture = Picture.objects.filter(gallery=news.gallery, image_type='main_picture').first()
+                    if main_picture_file:
+
+                        file_copy = ContentFile(main_picture_file.read())
+
+                        file_copy.name = main_picture_file.name
+
+                        pictures_data.append((news, file_copy))
+
+                    else:
+
+                        pictures_data.append((news, None))
+
+                news_formset.save()
+
+                for news, main_picture_file in pictures_data:
+
+                    if news and not news.gallery:
+                        news.gallery = Gallery.objects.create()
+
+                        news.save()
+
+                    if news.gallery and main_picture_file:
+
+                        picture = Picture.objects.filter(
+
+                            gallery=news.gallery, image_type='main_picture'
+
+                        ).first()
+
                         if not picture:
                             picture = Picture(gallery=news.gallery, image_type='main_picture')
 
-                        if main_picture_file:
-                            picture.image = main_picture_file
-                            picture.save()
+                        picture.image = main_picture_file
+
+                        picture.save()
+
                 return redirect('add_banners')
 
-    # 4. Оптимізована допоміжна функція для отримання URL зображення
-    # Ця функція використовує вже завантажені (prefetched) дані,
-    # тому вона не генерує нових запитів до бази даних.
+
     def get_main_picture_url(gallery):
         if gallery and hasattr(gallery, 'pictures'):
-            # Оскільки Prefetch вже відфільтрував за image_type='main_picture',
-            # нам просто потрібно знайти перше зображення, яке має файл.
+
             picture = next((p for p in gallery.pictures.all() if p.image), None)
             if picture:
                 return picture.image.url
         return None
 
-    # 5. Підготовка даних форм для рендерингу, використовуючи оптимізовану функцію
+
     form_data = [{'form': form, 'image_url': get_main_picture_url(form.instance.gallery)} for form in banner_formset.forms]
     news_form_data = [{'form': form, 'image_url': get_main_picture_url(form.instance.gallery)} for form in news_formset.forms]
 

@@ -94,6 +94,7 @@ def cinema_detail(request, cinema_slug):
     halls = cinema.prefetched_halls
 
     context = {
+        'seo_block': cinema.seo_block,
         'cinema': cinema,
         'main_picture': main_picture,
         'logo_picture': logo_picture,
@@ -136,6 +137,7 @@ def hall_detail(request, hall_id):
     hall_sessions = Sessions.objects.filter(hall_id=hall.id, date__gte=today).select_related('movie').order_by('date', 'time_session')
 
     context = {
+        'seo_block': hall.seo_block,
         'hall': hall,
         'main_picture': main_picture,
         'hall_sessions': hall_sessions,
@@ -226,8 +228,17 @@ def hall_list(request):
     context = {'hall_list': hall_list}
     return render(request, 'hall/hall_list.html', context)
 
+@login_required
+
+
+
+
 
 def buy_ticket_view(request, session_id):
+    """
+    Відображає сторінку покупки квитків для конкретного сеансу.
+    Надає схему залу з актуальними статусами місць.
+    """
     session = get_object_or_404(
         Sessions.objects.select_related('cinema', 'hall_id', 'movie')
         .prefetch_related(
@@ -242,95 +253,106 @@ def buy_ticket_view(request, session_id):
     hall = session.hall_id
     movie = session.movie
 
+    # Отримуємо головне зображення залу або перше доступне
     hall_picture = None
     if hall.gallery:
-        main_hall_picture = hall.gallery.pictures.filter(image_type="main_picture").first()
-        hall_picture = main_hall_picture if main_hall_picture else hall.gallery.pictures.first()
+        hall_picture = hall.gallery.pictures.filter(image_type="main_picture").first() or \
+                       hall.gallery.pictures.first()
 
+    # Отримуємо головне зображення фільму або перше доступне
     movie_picture = None
     if movie.gallery:
-        main_movie_picture = movie.gallery.pictures.filter(image_type="main_picture").first()
-        movie_picture = main_movie_picture if main_movie_picture else movie.gallery.pictures.first()
+        movie_picture = movie.gallery.pictures.filter(image_type="main_picture").first() or \
+                        movie.gallery.pictures.first()
 
-    hall_seats = Seats.objects.filter(halls=session.hall_id).order_by('number_row', 'seat')
+    # Отримуємо всі місця для конкретного залу, відсортовані за рядом та номером місця
+    hall_seats = Seats.objects.filter(halls=hall).order_by('number_row', 'seat')
 
-    booked_seat_ids = Tickets.objects.filter(session=session).values_list('seat__id', flat=True)
+    # Отримуємо ID всіх місць, які вже зайняті (продані або заброньовані) на цей сеанс
+    # Оскільки модель Tickets не має поля 'status', ми просто знаємо, що місце зайняте.
+    occupied_seat_ids = Tickets.objects.filter(session=session).values_list('seat__id', flat=True)
+    occupied_seat_ids = list(occupied_seat_ids)  # Перетворюємо на список для швидкого пошуку
 
-    user_booked_seat_ids = []
-    user_tickets_for_session = []
+    # Отримуємо ID місць, які належать поточному авторизованому користувачеві
+    user_tickets_seat_ids = []
     if request.user.is_authenticated:
-        user_tickets_for_session = Tickets.objects.filter(session=session, profile=request.user).select_related('seat').order_by('seat__number_row', 'seat__seat')
-        user_booked_seat_ids = [ticket.seat.id for ticket in user_tickets_for_session]
+        user_tickets_seat_ids = Tickets.objects.filter(
+            session=session,
+            profile=request.user
+        ).values_list('seat__id', flat=True)
+        user_tickets_seat_ids = list(user_tickets_seat_ids)
 
-
+    # Структура для зберігання даних про місця, організованих за рядами
     seat_data_map = {}
     max_row = 0
-    max_seat_in_row = {}
+    max_seat_in_row = {}  # Для відстеження максимального номера місця в кожному ряду
 
+    # Обробка кожного місця в залі
     for seat in hall_seats:
-        if seat.number_row > max_row:
-            max_row = seat.number_row
+        max_row = max(max_row, seat.number_row)
+        max_seat_in_row[seat.number_row] = max(max_seat_in_row.get(seat.number_row, 0), seat.seat)
 
-        if seat.number_row not in max_seat_in_row:
-            max_seat_in_row[seat.number_row] = 0
-        if seat.seat > max_seat_in_row[seat.number_row]:
-            max_seat_in_row[seat.number_row] = seat.seat
+        current_display_status = seat.status  # Беремо базовий статус місця з моделі Seats
 
-        current_status = seat.status
+        is_user_ticket_for_session = (seat.id in user_tickets_seat_ids)
+        is_occupied_by_any_ticket = (seat.id in occupied_seat_ids)
 
-        if seat.id in booked_seat_ids:
-            current_status = "S"
+        # Логіка визначення статусу місця для відображення на схемі:
+        if is_user_ticket_for_session:
+            # Якщо місце належить поточному користувачеві, воно завжди позначається як 'U' (квиток користувача)
+            current_display_status = "U"
+        elif is_occupied_by_any_ticket:
+            # Якщо місце зайняте будь-яким квитком (але не поточним користувачем)
+            # Тут обмеження: оскільки Tickets не має status, ми не знаємо, чи це 'S' чи 'b'.
+            # Якщо базовий status у Seats був 'F' (вільний), але місце зайняте,
+            # ми примусово встановлюємо його як 'S' (продано/зайнято).
+            if current_display_status == 'F':
+                current_display_status = 'S'  # За замовчуванням вважаємо "проданим/зайнятим"
+            # Якщо current_display_status вже 'S', 'b' або 'N' (і місце зайняте), залишаємо його як є.
+        # В іншому випадку (місце не зайняте), current_display_status залишається таким, як у Seats.status (тобто 'F' або 'N').
 
-        is_user_booked = False
-        if seat.id in user_booked_seat_ids:
-            is_user_booked = True
-            current_status = "U"
-
-        if seat.number_row not in seat_data_map:
-            seat_data_map[seat.number_row] = {}
-
-        seat_data_map[seat.number_row][seat.seat] = {
+        # Додаємо дані про місце до структури
+        seat_data_map.setdefault(seat.number_row, {})[seat.seat] = {
             'id': seat.id,
-            'status': current_status,
+            'status': current_display_status,  # 'U', 'S', 'b', 'F', або 'N'
             'is_vip': seat.is_vip,
-            'price': float(session.price),
+            'price': float(seat.price or session.price),  # Використовуємо ціну місця, або ціну сеансу
             'row_number': seat.number_row,
             'seat_number': seat.seat,
-            'is_user_booked': is_user_booked
         }
 
+    # Перетворюємо карту місць на впорядкований список рядів для фронтенду
     ordered_seat_rows = []
-    for r in sorted(seat_data_map.keys()):
+    for row in sorted(seat_data_map.keys()):
         row_seats = []
-        for s in range(1, max_seat_in_row.get(r, 0) + 1):
-            if s in seat_data_map.get(r, {}):
-                row_seats.append(seat_data_map[r][s])
-            else:
-                row_seats.append({
-                    'id': None,
-                    'status': 'N',
-                    'is_vip': False,
-                    'price': 0.0,
-                    'row_number': r,
-                    'seat_number': s,
-                    'is_user_booked': False
-                })
-        ordered_seat_rows.append({'row_number': r, 'seats': row_seats})
+        # Заповнюємо місця в ряду, враховуючи пропущені номери місць (як "недоступні")
+        for seat_num in range(1, max_seat_in_row[row] + 1):
+            row_seats.append(seat_data_map[row].get(seat_num, {
+                'id': None,
+                'status': 'N',
+                'is_vip': False,
+                'price': 0.0,
+                'row_number': row,
+                'seat_number': seat_num,
+            }))
+        ordered_seat_rows.append({'row_number': row, 'seats': row_seats})
 
+    # Підготовка контексту для шаблону
     context = {
         'session': session,
         'cinema_title': session.cinema.title,
         'hall_title': hall.title,
-        'session_time': session.time_session,
-        'session_date': session.date,
+        # Corrected: Use session.time_session for time and session.date for date
+        'session_time': session.time_session.strftime('%H:%M') if session.time_session else None,  # Format time
+        'session_date': session.date.strftime('%Y-%m-%d') if session.date else None,  # Format date
         'movie_title': movie.title,
-        'session_price': float(session.price) if session.price is not None else 0.0,
+        'session_price': float(session.price),
         'hall_picture': hall_picture.image.url if hall_picture and hall_picture.image else None,
         'movie_picture': movie_picture.image.url if movie_picture and movie_picture.image else None,
+        # JSON-дані про статус місць для JavaScript
         'seat_rows_current_status_json': json.dumps(ordered_seat_rows),
-        'session_price': session.price,
-        'user_tickets': user_tickets_for_session,
-        'user_tickets_seat_ids': user_booked_seat_ids,
+        # JSON-дані про місця поточного користувача для JavaScript (для класу 'user-ticket')
+        'user_tickets_seat_ids': json.dumps(user_tickets_seat_ids),
     }
 
     return render(request, 'core/buy_ticket/buy_ticket.html', context)
@@ -388,5 +410,63 @@ def process_ticket_purchase(request, session_id):
             return HttpResponseRedirect(redirect_url)
         else:
             return HttpResponseRedirect(redirect_url)
+
+    return HttpResponseRedirect(reverse('buy_ticket', args=[session_id]))
+
+@login_required
+def process_ticket_books(request, session_id):
+    if request.method == 'POST':
+        session = get_object_or_404(Sessions, pk=session_id)
+        selected_seat_ids_json = request.POST.get('selected_seats')
+
+        redirect_url = request.META.get('HTTP_REFERER') or reverse('buy_ticket', args=[session_id])
+
+        if not selected_seat_ids_json:
+            return HttpResponseRedirect(redirect_url)
+
+        selected_seat_ids = json.loads(selected_seat_ids_json)
+
+        if not selected_seat_ids:
+            return HttpResponseRedirect(redirect_url)
+
+        failed_seats_info = []
+        purchased_tickets_count = 0
+
+        for seat_id in selected_seat_ids:
+            try:
+                seat = get_object_or_404(Seats, pk=seat_id)
+
+                # Перевірка, чи місце вже зайняте
+                if Tickets.objects.filter(session=session, seat=seat).exists() or seat.status == 'S':
+                    failed_seats_info.append(f"Ряд {seat.number_row}, Місце {seat.seat} вже зайнято.")
+                    continue
+
+                # Створення квитка
+                Tickets.objects.create(
+                    session=session,
+                    movie=session.movie,
+                    seat=seat,
+                    profile=request.user,
+                    halls=session.hall_id
+                )
+
+                # Оновлення статусу місця
+                seat.status = 'b'
+                seat.save(update_fields=['status'])
+
+                purchased_tickets_count += 1
+
+                # WebSocket оновлення
+                channel_layer = get_channel_layer()
+                async_to_sync(channel_layer.group_send)(
+                    f"session_{session_id}",
+                    {
+                        'type': 'update_seats'
+                    }
+                )
+            except Exception as e:
+                failed_seats_info.append(f"Помилка при створенні квитка для місця ID {seat_id}: {e}")
+
+        return HttpResponseRedirect(redirect_url)
 
     return HttpResponseRedirect(reverse('buy_ticket', args=[session_id]))

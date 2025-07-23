@@ -1,6 +1,10 @@
 {% extends 'main/index1.html' %}
 {% load static %}
-
+{% block seo_meta %}
+    <title>{{ hall.seo_block.title_seo|default:hall.title }}  </title>
+    <meta name="keywords" content="{{hall.seo_block.seo_keywords|default:'' }}{% if hall.seo_block.seo_keywords %},{% endif %}">
+    <meta name="description" content="{{ hall.seo_block.seo_description|default:'' }}.">
+{% endblock %}
 {% block content %}
 <title>Деталі залу: {{ hall.title }}</title>
 

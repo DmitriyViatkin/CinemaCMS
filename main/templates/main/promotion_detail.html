@@ -3,42 +3,43 @@
 {% extends 'main/index1.html' %}
 {% load static %}
 {% load i18n %}
-
+{% block seo_meta %}
+    <title>{{ promotion.seo_block.title_seo|default:promotion.title }}  </title>
+    <meta name="keywords" content="{{promotion.seo_block.seo_keywords|default:'' }}{% if promotion.seo_block.seo_keywords %},{% endif %}">
+    <meta name="description" content="{{ promotion.seo_block.seo_description|default:'' }}.">
+{% endblock %}
 {% block content %}
 <title>{{ promotion.title }} - {% translate "Акция" %}</title>
 
 <style>
-    /* ... (Ваши существующие стили для .video-responsive, .promotion-main-image, .promotion-content, .promotion-layout-container, .promotion-image-wrapper, .promotion-text-content и медиа-запросы) ... */
 
-    /* НОВЫЕ СТИЛИ: Применяем темный фон и светлый текст только к блоку с изображением/текстом */
     .promotion-layout-container {
-        background-color: #1a1a1a; /* Черный фон для этого блока */
-        color: #f0f0f0; /* Светлый текст по умолчанию для этого блока */
-        padding: 30px; /* Добавим внутренние отступы для красоты */
-        border-radius: 10px; /* Скругленные углы для блока */
-        box-shadow: 0 5px 15px rgba(0,0,0,0.5); /* Более выраженная тень для выделения */
+        background-color: #1a1a1a;
+        color: #f0f0f0;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.5); /
 
-        display: flex; /* Делаем контейнер Flex-контейнером */
+        display: flex;
         flex-wrap: wrap;
         align-items: flex-start;
         gap: 30px;
         max-width: 1000px;
         margin: 20px auto;
-        /* padding: 0 15px; /* Убираем, так как теперь есть padding выше */
+
     }
 
-    /* Убедитесь, что заголовки и параграфы внутри этого блока тоже белые */
     .promotion-layout-container h1,
     .promotion-layout-container h2,
     .promotion-layout-container h3,
     .promotion-layout-container h4,
     .promotion-layout-container h5,
     .promotion-layout-container h6 {
-        color: #ffffff; /* Чисто белый для заголовков в этом блоке */
+        color: #ffffff;
     }
 
     .promotion-layout-container p {
-        color: #e0e0e0; /* Светлый серый для параграфов в этом блоке */
+        color: #e0e0e0;
     }
 
     /* Если есть muted текст внутри этого блока */
