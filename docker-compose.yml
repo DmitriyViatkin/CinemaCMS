@@ -1,55 +1,36 @@
 services:
   web:
-    build: .
-    # запускаємо через Uvicorn з ASGI
-    command: uvicorn cinewave.asgi:application --host 0.0.0.0
-    volumes:
-      - .:/app
-      - ./static_collected:/app/static_collected
-      - ./media:/app/media
+    build:
+      context: /root/CinemaCMS
+      dockerfile: Dockerfile
+    command:
+      - uvicorn
+      - cinewave.asgi:application
+      - --host
+      - 0.0.0.0
     env_file:
       - .env.development
     depends_on:
       - db
-      - redis  # нова залежність для Channels
+      - redis
     networks:
       - app-network
-
-  db:
-    image: postgres:15
-    restart: always
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB_NAME}
-      POSTGRES_USER: ${POSTGRES_USER_NAME}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_VALUE}
     volumes:
-      - cinema_postgres_data:/var/lib/postgresql/data/
-    networks:
-      - app-network
-
-  redis:
-    image: redis:7
-    restart: always
-    networks:
-      - app-network
-
-  nginx:
-    build: ./nginx
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./static_collected:/app/static_collected:ro
-      - ./media:/app/media:ro
+      - /root/CinemaCMS:/app
+      - /root/CinemaCMS/static_collected:/app/static_collected
+      - /root/CinemaCMS/media:/app/media
+  celery_worker:
+    build:
+      context: /root/CinemaCMS
+      dockerfile: Dockerfile
+    command: celery -A cinewave worker -l info
+    env_file:
+      - .env.development
     depends_on:
+      - db
+      - redis
       - web
     networks:
       - app-network
-
-volumes:
-  cinema_postgres_data:
-
-networks:
-  app-network:
-    driver: bridge
+    volumes:
+      - /root/CinemaCMS:/app
