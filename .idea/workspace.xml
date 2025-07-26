@@ -5,10 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d5e96242-c510-4e82-873f-5343bb181003" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.env.development" beforeDir="false" afterPath="$PROJECT_DIR$/.env.development" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cinewave/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/cinewave/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/movie/templates/movie/movies_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/movie/templates/movie/movies_list.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -247,7 +244,7 @@
       <workItem from="1753521186496" duration="1431000" />
       <workItem from="1753523186020" duration="5748000" />
       <workItem from="1753529756926" duration="1655000" />
-      <workItem from="1753531521272" duration="1740000" />
+      <workItem from="1753531521272" duration="2868000" />
     </task>
     <servers />
   </component>
