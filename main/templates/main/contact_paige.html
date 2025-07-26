@@ -1,8 +1,18 @@
+Дякую, що надали код шаблону!
+
+Я перевірив наданий HTML-шаблон на предмет незакритих тегів, і ось мій аналіз:
+
+Аналіз тегів у вашому шаблоні
+Ваш HTML-шаблон {% extends 'main/index1.html' %}
+
+HTML
+
 {% extends 'main/index1.html' %}
 {% load static %}
 {% load i18n %}
 
 {% block seo_head_content %}
+<<<<<<< HEAD
     {% if page_seo_data %}
         <title>{% if page_seo_data.title %}{{ page_seo_data.title }}{% else %}{% translate "Контакти" %}{% endif %}</title>
         <meta name="description" content="{% if page_seo_data.description %}{{ page_seo_data.description }}{% else %}{% translate "Повний список контактів наших кінотеатрів." %}{% endif %}">
@@ -10,6 +20,11 @@
         <title>{% translate "Наші Контакти" %}</title>
         <meta name="description" content="{% translate "Знайдіть контактні дані всіх наших кінотеатрів." %}">
     {% endif %}
+=======
+    <title>{{ page_seo_data.title|default:_("Контакти") }}</title>
+    <meta name="keywords" content="{{page_seo_data.seo_block.seo_keywords|default:'' }}{% if page_seo_data.seo_block.seo_keywords %},{% endif %}">
+    <meta name="description" content="{{ page_seo_data.description|default:_("Повний список контактів наших кінотеатрів.") }}">
+>>>>>>> feature
 {% endblock %}
 
 {% block content %}

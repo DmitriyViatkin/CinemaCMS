@@ -69,6 +69,7 @@ class Sessions(models.Model):
 class Seats(models.Model):
     STATUS_CHOICES = [
         ("S", _("Куплене")),
+        ("b", _("Заброньоване")),
         ("F", _("Вільне")),
         ("N", _("Не доступно"))
     ]

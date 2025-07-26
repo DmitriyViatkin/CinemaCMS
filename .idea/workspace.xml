@@ -4,11 +4,47 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d5e96242-c510-4e82-873f-5343bb181003" name="Changes" comment="" />
+    <list default="true" id="d5e96242-c510-4e82-873f-5343bb181003" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/core/migrations/0006_alter_seats_status.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/banners/banner.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/banners/banner2.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/banners/banner3.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/CinemaCMS.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/CinemaCMS.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/admins/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/admins/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cinewave/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/cinewave/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/consumers.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/consumers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/date.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/date.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/management/commands/load_initial_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/management/commands/load_initial_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/templates/core/buy_ticket/buy_ticket.html" beforeDir="false" afterPath="$PROJECT_DIR$/core/templates/core/buy_ticket/buy_ticket.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/templates/core/cinema_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/core/templates/core/cinema_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/templates/hall/hall_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/core/templates/hall/hall_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker-compose.override.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.override.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/templates/main/contact_paige.html" beforeDir="false" afterPath="$PROJECT_DIR$/main/templates/main/contact_paige.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/templates/main/index1.html" beforeDir="false" afterPath="$PROJECT_DIR$/main/templates/main/index1.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/templates/main/navbar.html" beforeDir="false" afterPath="$PROJECT_DIR$/main/templates/main/navbar.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/templates/main/paiges_cinema_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/main/templates/main/paiges_cinema_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/templates/main/paiges_news_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/main/templates/main/paiges_news_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/templates/main/promotion_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/main/templates/main/promotion_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/main/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/movie/templates/movie/movie_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/movie/templates/movie/movie_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nginx/nginx.conf" beforeDir="false" afterPath="$PROJECT_DIR$/nginx/nginx.conf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/css/buy_ticket.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/css/buy_ticket.css" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="DjangoConsoleOptions" custom-start-script="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)">
+    <option name="myCustomStartScript" value="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -54,33 +90,34 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_MARK_IGNORED_FILES_AS_EXCLUDED&quot;: &quot;true&quot;,
-    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
-    &quot;Makefile Target.migrate-all.executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;Python.urls.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.OpenDjangoStructureViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/dimas/PycharmProjects/CinemaCMS/core/templates/core&quot;,
-    &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;Docker&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
+    "DefaultHtmlFileTemplate": "HTML File",
+    "Makefile Target.migrate-all.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python.urls.executor": "Run",
+    "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "Merging development",
+    "last_opened_file_path": "/home/dimas/PycharmProjects/CinemaCMS/core/templates/core",
+    "list.type.of.created.stylesheet": "CSS",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;DatabaseDriversLRU&quot;: [
-      &quot;postgresql&quot;
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "postgresql"
     ]
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/core/templates/core" />
@@ -231,6 +268,7 @@
       <workItem from="1753163540499" duration="11193000" />
       <workItem from="1753176349464" duration="4031000" />
       <workItem from="1753180430929" duration="6357000" />
+      <workItem from="1753516600220" duration="527000" />
     </task>
     <servers />
   </component>

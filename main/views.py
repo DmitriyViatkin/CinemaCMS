@@ -5,10 +5,9 @@ from datetime import timedelta
 from movie.models import Movies
 from django.db.models import Prefetch
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.conf import settings
 
-
-
-def contact_paige (request):
+def contact_paige(request):
     banners = Banners.objects.select_related('gallery').prefetch_related(
         Prefetch(
             'gallery__pictures',
@@ -16,7 +15,9 @@ def contact_paige (request):
             to_attr='banner_pictures'
         )
     )
-    contacts = Contact.objects.select_related('gallery', 'seo_block').prefetch_related(
+
+    # Fetch contacts with their related data
+    contacts_queryset = Contact.objects.select_related('gallery', 'seo_block').prefetch_related(
         Prefetch(
             'gallery__pictures',
             queryset=Picture.objects.all(),
@@ -24,43 +25,40 @@ def contact_paige (request):
         )
     ).all()
 
-
     contacts_data = []
 
-    for contact_item in contacts:  # Проходимо по кожному контакту
-        main_picture = None
+    for contact_item in contacts_queryset:  # Проходимо по кожному контакту
+
         logo_picture = None
-        gallery_pictures_list = []
+
 
         if contact_item.gallery and hasattr(contact_item.gallery, 'all_gallery_images'):
             for pic in contact_item.gallery.all_gallery_images:
-                if pic.image_type == 'main_picture':
-                    main_picture = pic
-                elif pic.image_type == 'logo':
+                if  pic.image_type == 'logo':
                     logo_picture = pic
-                elif pic.image_type == 'gallery':
-                    gallery_pictures_list.append(pic)
 
+        current_latitude = contact_item.latitude if hasattr(contact_item, 'latitude') else None
+        current_longitude = contact_item.longitude if hasattr(contact_item, 'longitude') else None
 
         contacts_data.append({
             'contact': contact_item,
-            'main_picture': main_picture,
             'logo_picture': logo_picture,
-            'gallery_pictures_list': gallery_pictures_list,  # Якщо знадобиться вивести галерею
+
+            'latitude': current_latitude,
+            'longitude': current_longitude,
         })
 
     page_seo_data = None
-    if contacts.exists() and contacts.first().seo_block:
-        page_seo_data = contacts.first().seo_block  # This line is correct, it gets a single Block_SEO object
+    if contacts_queryset.exists() and contacts_queryset.first().seo_block:
+        page_seo_data = contacts_queryset.first().seo_block
     else:
-        # This 'else' block doesn't set page_seo_data, so it could remain None
         pass
 
-    print (page_seo_data)
-    context={
+    context = {
        'contacts_data': contacts_data,
        'banners': banners,
         'page_seo_data': page_seo_data,
+        'MAPS_API_KEY': settings.MAPS_API_KEY,
     }
     return render(request, 'main/contact_paige.html', context)
 
@@ -72,14 +70,12 @@ def index(request):
             to_attr='cross_banner_pictures'
         )
     ).first()
-    print(cross_banner_obj)
+
     cross_banner_background_url = None
 
     if cross_banner_obj and cross_banner_obj.gallery and cross_banner_obj.gallery.cross_banner_pictures:
         cross_banner_background_url = cross_banner_obj.gallery.cross_banner_pictures[0].image.url
-        print(f"URL для фонового кросс-баннера: {cross_banner_background_url}")
-    else:
-        print("Кросс-баннер не найден, или у него нет галереи/изображений.")
+
     banners = Banners.objects.select_related('gallery').prefetch_related(
         Prefetch(
             'gallery__pictures',
@@ -88,16 +84,13 @@ def index(request):
         )
     )
 
-
-
-
     for banner in banners:
         if banner.gallery:
             banner.pictures = banner.gallery.banner_pictures
-            print(f"Для банера {banner.id} знайдено {len(banner.pictures)} зображень.")
+
         else:
             banner.pictures = []
-            print(f"Банер {banner.id} не має галереї.")
+
 
     # Фільми, що вже в прокаті
     movies = Movies.objects.filter(
@@ -158,12 +151,12 @@ def paiges_cinema_detail(request, slug):
         PaigesCinema.objects.select_related('gallery', 'seo_block').prefetch_related(
             Prefetch(
                 'gallery__pictures',
-                queryset=Picture.objects.all(), # Вы можете добавить .order_by('order') если у Picture есть поле order
+                queryset=Picture.objects.all(),
                 to_attr='all_related_pictures'
             )
         ),
         seo_block__seo_url=slug,
-        is_active=True # Добавляем фильтр is_active, если он важен
+        is_active=True
     )
 
     main_picture = None
@@ -178,7 +171,8 @@ def paiges_cinema_detail(request, slug):
                 gallery_pictures_list.append(pic) # ИСПРАВЛЕНИЕ: Добавляем картинку в список
 
     return render(request, 'main/paiges_cinema_detail.html', {
-        'page': cinema_page, # Передаем объект PaigesCinema под более ясным именем
+        'seo_block': cinema_page.seo_block,
+        'page': cinema_page,
         'main_picture': main_picture,
         'gallery_pictures': gallery_pictures_list
     })
@@ -228,6 +222,7 @@ def paiges_news_detail(request, slug):
                 gallery_pictures_list.append(pic)
 
     return render(request, 'main/paiges_news_detail.html', {
+        'seo_block':  paige_news.seo_block,
         'paige_news': paige_news,
         'main_picture': main_picture,
         'gallery_pictures_list': list(gallery_pictures_list),
@@ -299,6 +294,7 @@ def promotion_detail(request, slug):
                 gallery_pictures_list.append(pic)
 
     return render(request, 'main/promotion_detail.html', {
+        'seo_block': promotion.seo_block,
         'promotion': promotion,
         'main_picture': main_picture,
         'gallery_pictures_list':list( gallery_pictures_list),

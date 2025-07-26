@@ -5,7 +5,7 @@
 
 
 {% block seo_meta %}
-    <title>{{ movie.seo_block.title_seo|default:movie.title }} - Деталі фільму</title>
+    <title>{{ movie.seo_block.title_seo|default:movie.title }}  </title>
     <meta name="keywords" content="{{ movie.seo_block.seo_keywords|default:'' }}{% if movie.seo_block.seo_keywords %},{% endif %}">
     <meta name="description" content="{{ movie.seo_block.seo_description|default:'' }}.">
 {% endblock %}

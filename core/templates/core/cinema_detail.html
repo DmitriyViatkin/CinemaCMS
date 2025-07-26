@@ -2,7 +2,11 @@
 {% load static %}
 {% load i18n %}
 {% block title %}{{ cinema.title }}{% endblock %}
-
+{% block seo_meta %}
+    <title>{{ cinema.seo_block.title_seo|default:cinema.title }} </title>
+    <meta name="keywords" content="{{ cinema.seo_block.seo_keywords|default:'' }}{% if cinema.seo_block.seo_keywords %},{% endif %}">
+    <meta name="description" content="{{ cinema.seo_block.seo_description|default:'' }}.">
+{% endblock %}
 {% block content %}
 
  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">

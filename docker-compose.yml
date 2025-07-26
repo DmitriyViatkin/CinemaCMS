@@ -1,18 +1,17 @@
-
 services:
   web:
     build: .
-    command: gunicorn cinewave.wsgi:application --bind 0.0.0.0:8000
+    # запускаємо через Uvicorn з ASGI
+    command: uvicorn cinewave.asgi:application --host 0.0.0.0
     volumes:
       - .:/app
       - ./static_collected:/app/static_collected
       - ./media:/app/media
     env_file:
       - .env.development
-    ports:
-      - "8000:8000"
     depends_on:
       - db
+      - redis  # нова залежність для Channels
     networks:
       - app-network
 
@@ -25,6 +24,12 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_VALUE}
     volumes:
       - cinema_postgres_data:/var/lib/postgresql/data/
+    networks:
+      - app-network
+
+  redis:
+    image: redis:7
+    restart: always
     networks:
       - app-network
 

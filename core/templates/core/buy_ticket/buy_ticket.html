@@ -2,52 +2,100 @@
 {% load i18n %}
 {% load static %}
 
-{% block title %}Купити квиток  на сеанс{% endblock %}
+{% block title %}Купити квиток на сеанс{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{% static 'css/buy_ticket.css' %}">
-<style>
-    .svg-seat {
-        transition: fill 0.2s ease, stroke 0.2s ease;
-        cursor: pointer;
-        stroke: #343a40;
-        stroke-width: 1px;
-        fill: #999; /* базовое значение */
-    }
-    .seat.user-ticket {
-        fill: #00FF7F !important; /* темно-зеленый */
-        cursor: default !important;
-        stroke: #00FF7F !important;
-        stroke-width: 1px;
-    }
-    .seat.free {
-        fill: #ffc107 !important; /* желтый */
-    }
-    .seat.occupied {
-        fill: #dc3545 !important; /* красный */
-        cursor: not-allowed !important;
-    }
-    .seat.unavailable {
-        fill: #6c757d !important; /* серый */
-        cursor: default !important;
-    }
-    .seat.selected {
-        fill: #007bff !important; /* синий */
-        stroke: #0056b3;
-        stroke-width: 2px;
-    }
-    .seat.vip {
-        stroke: #ffeb3b;
-        stroke-width: 2px;
-    }
-</style>
 
+<style>
+    #hall-scheme-container {
+    overflow-x: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
+    background-color: #fcfcfc;
+    width: 50%;
+    margin: 0 auto;
+}
+
+/* Легенда */
+.seat-icon {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    vertical-align: middle;
+    margin-right: 5px;
+}
+.seat-icon.free        { background-color: #ffc107; border-color: #e0a800; } /* Жовтий */
+.seat-icon.occupied    { background-color: #dc3545; border-color: #bd2130; }
+.seat-icon.selected    { background-color: #007bff; border-color: #0056b3; }
+.seat-icon.unavailable { background-color: #6c757d; border-color: #5a6268; }
+.seat-icon.booked      { background-color: #8B4513; border-color: #5c3317; } /* Коричневий */
+.seat-icon.vip         { border-color: gold; box-shadow: 0 0 3px gold; }
+
+/* Основні стилі для SVG-місць */
+.seat {
+    transition: fill 0.2s ease-in-out, stroke 0.2s ease-in-out;
+    cursor: pointer;
+    stroke-width: 1px;
+}
+
+/* Стан місць */
+.seat.free {
+    fill: #ffc107;      /* Жовтий */
+    stroke: #e0a800;
+}
+
+.seat.booked {
+    fill: #8B4513;      /* Коричневий */
+    stroke: #5c3317;
+    cursor: not-allowed;
+}
+
+.seat.occupied {
+    fill: #dc3545;      /* Червоний */
+    stroke: #bd2130;
+    cursor: not-allowed;
+}
+
+.seat.selected {
+    fill: #007bff;      /* Синій */
+    stroke: #0056b3;
+    stroke-width: 2px;
+}
+
+.seat.unavailable {
+    fill: #6c757d;      /* Сірий */
+    stroke: #5a6268;
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.seat.vip {
+    stroke: gold;
+    stroke-width: 2px;
+    filter: drop-shadow(0 0 3px gold);
+}
+
+.seat.user-ticket {
+    fill: #00FF7F;      /* Яскраво-зелений */
+    stroke: #00FF7F;
+    cursor: default;
+    stroke-width: 1px;
+}
+
+/* Текст усередині місць */
+.seat-text {
+    pointer-events: none;
+    fill: #fff;
+}
+</style>
 <div class="container mt-4">
-    <h2> {% trans "Покупка билетов на сеанс" %}</h2>
+    <h2>{% trans "Покупка билетов на сеанс" %}</h2>
     <div id="top_baner">
         {% if hall_picture %}
             <div class="hall-scheme-image">
-                <img src="{{ hall_picture }}" alt="Схема зала {{ hall_title }}" style="max-width: 100%; height: auto; margin-top: 20px;">
+                <img src="{{ hall_picture }}" alt="{% trans "Схема зала" %} {{ hall_title }}" style="max-width: 100%; height: auto; margin-top: 20px;">
             </div>
         {% else %}
             <p>{% trans "Схема залу відсутня" %}</p>
@@ -56,14 +104,14 @@
     <div class="d-flex align-items-start">
         <div class="p-3">
             {% if movie_picture %}
-                <img src="{{ movie_picture }}" alt="Постер фильма {{ movie_title }}" class="img-fluid" style="max-width: 200px;">
+                <img src="{{ movie_picture }}" alt="{% trans "Постер фильма" %} {{ movie_title }}" class="img-fluid" style="max-width: 200px;">
             {% else %}
-                <p>{% trans "Зображення вільму відсутне " %}</p>
+                <p>{% trans "Зображення фільму відсутнє" %}</p>
             {% endif %}
         </div>
         <div class="d-flex flex-column flex-grow-1 justify-content-between p-3">
             <div class="card-body d-flex flex-wrap align-items-center gap-3">
-                <p class="mb-0"><strong>{% trans " Фильм:" %}</strong> {{ movie_title }}</p>
+                <p class="mb-0"><strong>{% trans "Фильм:" %}</strong> {{ movie_title }}</p>
                 <p class="mb-0"><strong>{% trans "Цена:" %}</strong> {{ session_price }}</p>
                 <p class="mb-0"><strong>{% trans "Зал:" %}</strong> {{ hall_title }}</p>
                 <p class="mb-0"><strong>{% trans "Дата:" %}</strong> {{ session_date|date:"d M Y" }}</p>
@@ -72,8 +120,8 @@
 
             <div class="d-flex align-items-center justify-content-start">
                 <div class="mb-3 me-4">
-                    <p class="mb-0">{% trans " Обрано місць: <span id="selected-seats-count">0</span></p>
-                    <p class="mb-0">{% trans " Загальна ціна: <span id="total-price">0.00</span> грн</p>
+                    <p class="mb-0">{% trans "Обрано місць:" %} <span id="selected-seats-count">0</span></p>
+                    <p class="mb-0">{% trans "Загальна ціна:" %} <span id="total-price">0.00</span> {% trans "грн"%}</p>
                 </div>
             </div>
         </div>
@@ -85,307 +133,351 @@
         </div>
         <div class="card-body">
             <div id="hall-scheme-container" class="mt-4">
-                <p>{% trans " Загрузка схемы зала..." %}</p>
+                <p>{% trans "Загрузка схемы зала..." %}</p>
             </div>
             <form id="ticket-purchase-form" action="{% url 'process_ticket_purchase' session.id %}" method="post" class="mt-4">
                 {% csrf_token %}
-                <input type="hidden" name="selected_seats" id="selected-seats-input">
+                <input type="hidden" name="selected_seats" id="selected-seats-input-purchase">
                 <button type="submit" class="btn btn-primary" id="purchase-button" disabled>{% trans "Купити квиток" %}</button>
+            </form>
+             <form id="ticket-books-form" action="{% url 'process_books' session.id %}" method="post" class="mt-4">
+                {% csrf_token %}
+                <input type="hidden" name="selected_seats" id="selected-seats-input-books">
+                <button type="submit" class="btn btn-primary" id="books-button" disabled>{% trans "Забронювати квиток" %}</button>
             </form>
         </div>
     </div>
 </div>
 
 <script>
-// Global variables for seat data and user tickets, populated by Django context
-window.USER_TICKETS_SEAT_IDS = {{ user_tickets_seat_ids|default:'[]'|safe }}.map(String);
-window.GLOBAL_CURRENT_SEAT_STATUS_DATA = {{ seat_rows_current_status_json|safe }};
+    // Глобальные переменные для данных о местах и билетах пользователя, заполняются контекстом Django
+    window.USER_TICKETS_SEAT_IDS = {{ user_tickets_seat_ids|default:'[]'|safe }}.map(String);
+    window.GLOBAL_CURRENT_SEAT_STATUS_DATA = {{ seat_rows_current_status_json|safe }};
 
-const sessionId = {{session.id}};
+    const sessionId = {{session.id}};
 
-// Establish WebSocket connection for real-time seat updates
-const socket = new WebSocket(
-    (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host + `/ws/seats/${sessionId}/`
-);
+    // Устанавливаем WebSocket-соединение для обновления статуса мест в реальном времени
+    const socket = new WebSocket(
+        (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host + `/ws/seats/${sessionId}/`
+    );
 
-// Handle incoming WebSocket messages (e.g., seats taken by other users)
-socket.onmessage = function(e) {
-    const data = JSON.parse(e.data);
-    const takenSeats = data.taken_seats;
+    // Обработка входящих WebSocket-сообщений (например, места, занятые другими пользователями)
+    socket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        // Переконайтеся, що бекенд завжди надсилає updated_seats як масив,
+        // навіть якщо він порожній, щоб уникнути подібних помилок у майбутньому.
+        const updatedSeats = data.updated_seats; // Припускаємо, що бекенд тепер надсилає {seat_id: ..., status: ...}
 
-    takenSeats.forEach(seatId => {
-        const seatEl = document.querySelector(`[data-seat-id="${seatId}"]`);
-        if (seatEl) {
-            const seatIdStr = String(seatId);
-            const isUserTicket = window.USER_TICKETS_SEAT_IDS.includes(seatIdStr);
-            const currentSeatPrice = parseFloat(seatEl.dataset.price);
+        // Додаємо перевірку на undefined та Array.isArray() для updatedSeats
+        if (updatedSeats && Array.isArray(updatedSeats)) {
+            updatedSeats.forEach(seatInfo => {
+                const seatId = String(seatInfo.seat_id);
+                const newStatus = seatInfo.status;
 
-            // If the seat was selected by the current user, remove it from their selection
-            if (seatEl.classList.contains('selected')) {
-                selectedSeats = selectedSeats.filter(id => id !== seatIdStr);
-                totalPrice -= currentSeatPrice;
-                updateSelectionDisplay();
-                alert(`Место Ряд ${seatEl.dataset.row}, Место ${seatEl.dataset.seat} только что было куплено другим пользователем и удалено из вашего выбора.`);
-            }
+                const seatEl = document.querySelector(`[data-seat-id="${seatId}"]`);
+                if (seatEl) {
+                    const isUserTicket = window.USER_TICKETS_SEAT_IDS.includes(seatId);
+                    // Ensure currentSeatPrice is parsed correctly from data-price
+                    // The data-price should ideally be set from float(seat.price) in Django view
+                    const currentSeatPrice = parseFloat(seatEl.dataset.price);
 
-            // Remove all existing status classes
-            seatEl.classList.remove('free', 'selected', 'occupied', 'unavailable', 'user-ticket');
-
-            // Apply new status based on whether it's the user's ticket or newly occupied
-            if (isUserTicket) {
-                seatEl.classList.add('user-ticket');
-                seatEl.dataset.status = 'U'; // User's ticket
-                seatEl.style.cursor = 'default';
-            } else {
-                seatEl.classList.add('occupied');
-                seatEl.dataset.status = 'S'; // Sold/Occupied by someone else
-                seatEl.style.cursor = 'not-allowed';
-            }
-
-            // Update the global data structure to reflect the new status
-            window.GLOBAL_CURRENT_SEAT_STATUS_DATA.forEach(row => {
-                row.seats.forEach(seat => {
-                    if (seat.id === parseInt(seatIdStr, 10)) {
-                        seat.status = isUserTicket ? 'U' : 'S';
+                    // Если место было выбрано текущим пользователем и оно стало недоступным
+                    if (seatEl.classList.contains('selected') && (newStatus === 'S' || newStatus === 'b')) {
+                        selectedSeats = selectedSeats.filter(id => id !== seatId);
+                        totalPrice -= currentSeatPrice;
+                        updateSelectionDisplay();
+                        alert(`Место Ряд ${seatEl.dataset.row}, Место ${seatEl.dataset.seat} только что было ${newStatus === 'S' ? 'куплено' : 'забронировано'} другим пользователем и удалено из вашего выбора.`);
                     }
-                });
+
+                    // Удаляем все существующие классы статуса, указывающие на доступность или выбор
+                    seatEl.classList.remove('free', 'selected', 'occupied', 'unavailable', 'user-ticket', 'booked');
+
+                    // Применяем новый статус
+                    if (isUserTicket) {
+                        seatEl.classList.add('user-ticket');
+                        seatEl.dataset.status = 'U'; // Билет пользователя
+                        seatEl.style.cursor = 'default';
+                    } else if (newStatus === 'S') {
+                        seatEl.classList.add('occupied');
+                        seatEl.dataset.status = 'S'; // Продано/Занято кем-то другим
+                        seatEl.style.cursor = 'not-allowed';
+                    } else if (newStatus === 'b') {
+                        seatEl.classList.add('booked'); // Забронировано кем-то другим
+                        seatEl.dataset.status = 'b';
+                        seatEl.style.cursor = 'not-allowed';
+                    } else if (newStatus === 'F') { // Если вдруг место освободилось
+                        seatEl.classList.add('free');
+                        seatEl.dataset.status = 'F';
+                        seatEl.style.cursor = 'pointer';
+                    } else {
+                        seatEl.classList.add('unavailable');
+                        seatEl.dataset.status = 'X'; // Прочий недоступный статус
+                        seatEl.style.cursor = 'default';
+                    }
+
+                    // Обновляем глобальную структуру данных, чтобы отразить новый статус
+                    window.GLOBAL_CURRENT_SEAT_STATUS_DATA.forEach(row => {
+                        row.seats.forEach(seat => {
+                            if (seat.id === parseInt(seatId, 10)) {
+                                seat.status = newStatus;
+                            }
+                        });
+                    });
+                }
             });
+        } else {
+            console.warn("Получені дані WebSocket не містять дійсний масив 'updated_seats':", data);
+        }
+    };
+
+
+    // Обработчики событий WebSocket для статуса соединения
+    socket.onopen = () => console.log("WebSocket connected");
+    socket.onclose = (event) => console.log("WebSocket closed:", event);
+    socket.onerror = (error) => console.error("WebSocket error:", error);
+
+    // После полной загрузки DOM, отрисовываем схему зала
+    document.addEventListener('DOMContentLoaded', function() {
+        const currentSeatStatusData = window.GLOBAL_CURRENT_SEAT_STATUS_DATA;
+        const userTicketsSeatIds = window.USER_TICKETS_SEAT_IDS;
+
+        // Получаем ссылки на элементы DOM
+        const hallSchemeContainer = document.getElementById('hall-scheme-container');
+        const selectedSeatsInputPurchase = document.getElementById('selected-seats-input-purchase');
+        const selectedSeatsInputBooks = document.getElementById('selected-seats-input-books');
+        const selectedSeatsCountSpan = document.getElementById('selected-seats-count');
+        const totalPriceSpan = document.getElementById('total-price');
+        const purchaseButton = document.getElementById('purchase-button');
+        const booksButton = document.getElementById('books-button');
+
+        // Переменные состояния для выбранных мест и общей цены
+        let selectedSeats = [];
+        let totalPrice = 0;
+        // THE FIX IS HERE: Apply floatformat filter to ensure correct number parsing
+        const sessionPricePerSeat = parseFloat("{{ session_price|floatformat:2 }}");
+
+        /**
+         * Отрисовывает схему зала с использованием SVG-элементов.
+         * @param {Array} schemeData - Массив данных, содержащий ряды и места.
+         * @param {string} containerId - ID HTML-элемента, в который нужно отрисовать SVG.
+         */
+        function renderHallScheme(schemeData, containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = ''; // Очищаем предыдущее содержимое
+
+            if (!schemeData || schemeData.length === 0) {
+                container.innerHTML = '<p>Нет данных о рядах и местах для отображения схемы зала.</p>';
+                return;
+            }
+
+            const svgNS = "http://www.w3.org/2000/svg";
+            const svg = document.createElementNS(svgNS, "svg");
+            svg.setAttribute("width", "100%"); // SVG займет 100% ширины своего контейнера
+            svg.style.height = "auto";
+            svg.style.border = "1px solid #ccc";
+            svg.style.backgroundColor = "#f9f9f9";
+
+            // Константы для расположения мест и рядов
+            const seatSize = 40;
+            const seatSpacing = 15;
+            const rowSpacing = 60;
+            const initialY = 50; // Начальная позиция Y для первого ряда
+            const rowLabelOffset = 70; // Место для метки "Ряд N"
+
+            let currentY = initialY;
+            let maxX = 0; // Отслеживает максимальную координату X, достигнутую любым местом, для расчета viewBox
+
+            // Сортируем ряды по номеру для обеспечения правильного порядка отрисовки
+            schemeData.sort((a, b) => a.row_number - b.row_number);
+
+            // Получаем фактическую ширину контейнера для центрирования
+            const containerWidth = container.offsetWidth;
+            // console.log("Значение updatedSeats:", updatedSeats); // ЦЕЙ РЯДОК ВИДАЛЕНО (уже было удалено, оставляю комментарий для ясности)
+            schemeData.forEach(rowData => {
+                const rowNumber = rowData.row_number;
+                const seats = rowData.seats;
+                // Сортируем места в каждом ряду по номеру места
+                seats.sort((a, b) => a.seat_number - b.seat_number);
+
+                const numSeatsInRow = seats.length;
+                // Вычисляем общую ширину, занимаемую местами в текущем ряду
+                const currentRowOccupiedWidth = numSeatsInRow * seatSize + (numSeatsInRow > 0 ? (numSeatsInRow - 1) * seatSpacing : 0);
+
+                // Вычисляем начальную позицию X для текущего ряда, чтобы центрировать его.
+                // Убеждаемся, что всегда есть достаточно места для метки ряда.
+                const actualStartX = Math.max(rowLabelOffset, (containerWidth - currentRowOccupiedWidth) / 2);
+
+                // Создаем и добавляем метку ряда (например, "Ряд 1")
+                const rowLabel = document.createElementNS(svgNS, "text");
+                rowLabel.setAttribute("x", actualStartX - 10); // Позиция слева от первого места
+                rowLabel.setAttribute("y", currentY + seatSize / 2);
+                rowLabel.setAttribute("text-anchor", "end");
+                rowLabel.setAttribute("dominant-baseline", "middle");
+                rowLabel.textContent = `Ряд ${rowNumber}`;
+                rowLabel.style.fontSize = "16px";
+                rowLabel.style.fontWeight = "bold";
+                svg.appendChild(rowLabel);
+
+                let currentX = actualStartX; // Начинаем рисовать места с этой вычисленной позиции X
+
+                seats.forEach(seatData => {
+                    const seatId = seatData.id;
+                    const seatNumber = seatData.seat_number;
+                    const status = seatData.status;
+                    const isVip = seatData.is_vip;
+                    // Используем цену, специфичную для места, или возвращаемся к цене сеанса
+                    // Ensure seatData.price is also handled, as it might also come from Django and need formatting
+                    const seatPrice = parseFloat(seatData.price || sessionPricePerSeat);
+
+                    // Создаем SVG-прямоугольник для места
+                    const seatEl = document.createElementNS(svgNS, "rect");
+                    seatEl.setAttribute("x", currentX);
+                    seatEl.setAttribute("y", currentY);
+                    seatEl.setAttribute("width", seatSize);
+                    seatEl.setAttribute("height", seatSize);
+                    seatEl.setAttribute("rx", 5); // Скругленные углы
+                    seatEl.classList.add('seat', 'svg-seat');
+
+                    const seatIdStr = String(seatId);
+
+                    // Применяем начальные классы статуса на основе данных
+                    if (userTicketsSeatIds.includes(seatIdStr)) {
+                        seatEl.classList.add('user-ticket');
+                        seatEl.dataset.status = 'U'; // Уже купленный билет пользователя
+                        seatEl.style.cursor = 'default';
+                    } else if (status === 'F') {
+                        seatEl.classList.add('free');
+                        seatEl.dataset.status = 'F'; // Свободно/Доступно
+                        seatEl.style.cursor = 'pointer';
+                    } else if (status === 'S') {
+                        seatEl.classList.add('occupied');
+                        seatEl.dataset.status = 'S'; // Продано/Занято другими
+                        seatEl.style.cursor = 'not-allowed';
+                    } else if (status === 'b') { // ДОБАВЛЕНО: Обработка забронированных мест
+                        seatEl.classList.add('booked');
+                        seatEl.dataset.status = 'b'; // Забронировано кем-то
+                        seatEl.style.cursor = 'not-allowed';
+                    } else {
+                        seatEl.classList.add('unavailable');
+                        seatEl.dataset.status = 'X'; // Прочий недоступный статус
+                        seatEl.style.cursor = 'default';
+                    }
+
+                    // Добавляем класс VIP, если применимо
+                    if (isVip) seatEl.classList.add('vip');
+
+                    // Сохраняем данные о месте в dataset для легкого доступа
+                    seatEl.dataset.seatId = seatId;
+                    seatEl.dataset.row = rowNumber;
+                    seatEl.dataset.seat = seatNumber;
+                    seatEl.dataset.price = seatPrice;
+
+                    // Добавляем слушатель события клика для выбора места
+                    seatEl.addEventListener('click', () => {
+                        const currentSeatIdStr = String(seatEl.dataset.seatId);
+                        const currentStatus = seatEl.dataset.status;
+
+                        // Разрешаем выбор только если место свободно и не куплено пользователем
+                        if (currentStatus === 'F' && !userTicketsSeatIds.includes(currentSeatIdStr)) {
+                            if (selectedSeats.includes(currentSeatIdStr)) {
+                                // Снять выделение с места
+                                seatEl.classList.remove('selected');
+                                selectedSeats = selectedSeats.filter(id => id !== currentSeatIdStr);
+                                totalPrice -= seatPrice;
+                            } else {
+                                // Выбрать место
+                                seatEl.classList.add('selected');
+                                selectedSeats.push(currentSeatIdStr);
+                                totalPrice += seatPrice;
+                            }
+                            updateSelectionDisplay(); // Обновить отображение выбранных мест и общей цены в UI
+                        } else {
+                            console.log(`Место Ряд ${rowNumber}, Место ${seatNumber} недоступно для выбора. Статус: ${currentStatus}`);
+                        }
+                    });
+
+                    // Создаем и добавляем текст номера места
+                    const seatText = document.createElementNS(svgNS, "text");
+                    seatText.setAttribute("x", currentX + seatSize / 2);
+                    seatText.setAttribute("y", currentY + seatSize / 2);
+                    seatText.setAttribute("text-anchor", "middle");
+                    seatText.setAttribute("dominant-baseline", "middle");
+                    seatText.style.fontSize = "12px";
+                    seatText.style.fill = "#fff";
+                    seatText.style.pointerEvents = "none"; // Разрешаем кликам проходить сквозь к rect
+                    seatText.textContent = seatNumber;
+
+                    // Добавляем всплывающую подсказку для деталей места при наведении
+                    const tooltip = document.createElementNS(svgNS, "title");
+                    tooltip.textContent = `Ряд: ${rowNumber}, Место: ${seatNumber}\nЦена: ${seatPrice.toFixed(2)} грн`;
+                    seatEl.appendChild(tooltip);
+
+                    // Добавляем элементы места в SVG
+                    svg.appendChild(seatEl);
+                    svg.appendChild(seatText);
+
+                    currentX += seatSize + seatSpacing; // Перемещаем X для следующего места
+                });
+
+                // Обновляем maxX, чтобы viewBox SVG учитывал все ряды
+                const rowTotalWidth = actualStartX + currentRowOccupiedWidth;
+                if (rowTotalWidth > maxX) maxX = rowTotalWidth;
+
+                currentY += seatSize + rowSpacing; // Перемещаем Y для следующего ряда
+            });
+
+            // Вычисляем окончательные размеры SVG для viewBox
+            const finalWidth = maxX + rowLabelOffset; // Добавляем небольшой отступ справа
+            const finalHeight = currentY + initialY;
+            svg.setAttribute("viewBox", `0 0 ${finalWidth} ${finalHeight}`);
+            svg.setAttribute("height", finalHeight); // Устанавливаем фиксированную высоту на основе содержимого
+            // Ширина уже установлена на 100% через атрибут style выше
+
+            container.appendChild(svg); // Добавляем полный SVG в контейнер
+        }
+
+        /**
+         * Обновляет отображение количества выбранных мест, общей цены и состояния кнопок покупки/бронирования.
+         */
+         function updateSelectionDisplay() {
+            selectedSeatsCountSpan.textContent = selectedSeats.length;
+            totalPriceSpan.textContent = totalPrice.toFixed(2);
+            selectedSeatsInputPurchase.value = JSON.stringify(selectedSeats); // Обновляем скрытый input для формы покупки
+            selectedSeatsInputBooks.value = JSON.stringify(selectedSeats); // Обновляем скрытый input для формы бронирования
+
+            // Отключаем кнопки, если не выбрано ни одно место
+            purchaseButton.disabled = selectedSeats.length === 0;
+            booksButton.disabled = selectedSeats.length === 0;
+
+            // Обновляем визуальное состояние свободных мест (выбрано/снято выделение)
+            document.querySelectorAll('.seat.svg-seat').forEach(seatElement => {
+                const seatId = String(seatElement.dataset.seatId);
+                const currentStatus = seatElement.dataset.status;
+
+                // Изменяем только те места, которые в данный момент 'free' и не являются билетом пользователя
+                if (currentStatus === 'F' && !userTicketsSeatIds.includes(seatId)) {
+                    if (selectedSeats.includes(seatId)) {
+                        // Выбрано: добавляем класс 'selected'
+                        seatElement.classList.add('selected');
+                        // Важно: убедитесь, что 'selected' переопределяет 'free' в вашем CSS.
+                        // Класс 'free' можно не удалять здесь, если 'selected' имеет более высокий приоритет.
+                    } else {
+                        // Не выбрано: удаляем класс 'selected' и убеждаемся, что 'free' присутствует.
+                        seatElement.classList.remove('selected');
+                        seatElement.classList.add('free'); // Это гарантирует, что он будет желтым
+                    }
+                }
+            });
+        }
+
+        // Изначальный вызов для отрисовки схемы зала, если данные доступны
+        if (currentSeatStatusData && currentSeatStatusData.length > 0) {
+            renderHallScheme(currentSeatStatusData, 'hall-scheme-container');
+            updateSelectionDisplay(); // Убеждаемся, что начальное отображение корректно
+        } else {
+            hallSchemeContainer.innerHTML = '<p>Нет данных о местах для отображения схемы зала.</p>';
         }
     });
-};
-
-// WebSocket event listeners for connection status
-socket.onopen = () => console.log("WebSocket connected");
-socket.onclose = () => console.log("WebSocket closed");
-socket.onerror = e => console.error("WebSocket error:", e);
-
-// Once the DOM is fully loaded, render the hall scheme
-document.addEventListener('DOMContentLoaded', function() {
-    const currentSeatStatusData = window.GLOBAL_CURRENT_SEAT_STATUS_DATA;
-    const userTicketsSeatIds = window.USER_TICKETS_SEAT_IDS;
-
-    // Get references to DOM elements
-    const hallSchemeContainer = document.getElementById('hall-scheme-container');
-    const selectedSeatsInput = document.getElementById('selected-seats-input');
-    const selectedSeatsCountSpan = document.getElementById('selected-seats-count');
-    const totalPriceSpan = document.getElementById('total-price');
-    const purchaseButton = document.getElementById('purchase-button');
-
-    // State variables for selected seats and total price
-    let selectedSeats = [];
-    let totalPrice = 0;
-    const sessionPricePerSeat = parseFloat("{{ session_price }}"); // Get default session price
-
-    /**
-     * Renders the hall scheme using SVG elements.
-     * @param {Array} schemeData - Data array containing rows and seats.
-     * @param {string} containerId - The ID of the HTML element to render the SVG into.
-     */
-    function renderHallScheme(schemeData, containerId) {
-        const container = document.getElementById(containerId);
-        container.innerHTML = ''; // Clear previous content
-
-        if (!schemeData || schemeData.length === 0) {
-            container.innerHTML = '<p>Нет данных о рядах и местах для отображения схемы зала.</p>';
-            return;
-        }
-
-        const svgNS = "http://www.w3.org/2000/svg";
-        const svg = document.createElementNS(svgNS, "svg");
-        svg.setAttribute("width", "100%"); // SVG will take 100% width of its container
-        svg.style.height = "auto";
-        svg.style.border = "1px solid #ccc";
-        svg.style.backgroundColor = "#f9f9f9";
-
-        // Constants for seat and row layout
-        const seatSize = 40;
-        const seatSpacing = 15;
-        const rowSpacing = 60;
-        const initialY = 50; // Starting Y position for the first row
-        const rowLabelOffset = 70; // Space for the "Ряд N" label
-
-        let currentY = initialY;
-        let maxX = 0; // Tracks the maximum X coordinate reached by any seat, for viewBox calculation
-
-        // Sort rows by number to ensure correct rendering order
-        schemeData.sort((a, b) => a.row_number - b.row_number);
-
-        // Get the actual width of the container to calculate centering
-        const containerWidth = container.offsetWidth;
-
-        schemeData.forEach(rowData => {
-            const rowNumber = rowData.row_number;
-            const seats = rowData.seats;
-            // Sort seats within each row by seat number
-            seats.sort((a, b) => a.seat_number - b.seat_number);
-
-            const numSeatsInRow = seats.length;
-            // Calculate the total width occupied by seats in the current row
-            const currentRowOccupiedWidth = numSeatsInRow * seatSize + (numSeatsInRow > 0 ? (numSeatsInRow - 1) * seatSpacing : 0);
-
-            // Calculate the starting X position for the current row to center it.
-            // Ensure there's always enough space for the row label.
-            const actualStartX = Math.max(rowLabelOffset, (containerWidth - currentRowOccupiedWidth) / 2);
-
-            // Create and append the row label (e.g., "Ряд 1")
-            const rowLabel = document.createElementNS(svgNS, "text");
-            rowLabel.setAttribute("x", actualStartX - 10); // Position to the left of the first seat
-            rowLabel.setAttribute("y", currentY + seatSize / 2);
-            rowLabel.setAttribute("text-anchor", "end");
-            rowLabel.setAttribute("dominant-baseline", "middle");
-            rowLabel.textContent = `Ряд ${rowNumber}`;
-            rowLabel.style.fontSize = "16px";
-            rowLabel.style.fontWeight = "bold";
-            svg.appendChild(rowLabel);
-
-            let currentX = actualStartX; // Start drawing seats from this calculated X position
-
-            seats.forEach(seatData => {
-                const seatId = seatData.id;
-                const seatNumber = seatData.seat_number;
-                const status = seatData.status;
-                const isVip = seatData.is_vip;
-                // Use seat-specific price or fall back to session price
-                const seatPrice = parseFloat(seatData.price || sessionPricePerSeat);
-
-                // Create the SVG rectangle for the seat
-                const seatEl = document.createElementNS(svgNS, "rect");
-                seatEl.setAttribute("x", currentX);
-                seatEl.setAttribute("y", currentY);
-                seatEl.setAttribute("width", seatSize);
-                seatEl.setAttribute("height", seatSize);
-                seatEl.setAttribute("rx", 5); // Rounded corners
-                seatEl.classList.add('seat', 'svg-seat');
-
-                const seatIdStr = String(seatId);
-
-                // Apply initial status classes based on data
-                if (userTicketsSeatIds.includes(seatIdStr)) {
-                    seatEl.classList.add('user-ticket');
-                    seatEl.dataset.status = 'U'; // User's already bought ticket
-                    seatEl.style.cursor = 'default';
-                } else if (status === 'F') {
-                    seatEl.classList.add('free');
-                    seatEl.dataset.status = 'F'; // Free/Available
-                    seatEl.style.cursor = 'pointer';
-                } else if (status === 'S') {
-                    seatEl.classList.add('occupied');
-                    seatEl.dataset.status = 'S'; // Sold/Occupied by others
-                    seatEl.style.cursor = 'not-allowed';
-                } else {
-                    seatEl.classList.add('unavailable');
-                    seatEl.dataset.status = 'X'; // Other unavailable status
-                    seatEl.style.cursor = 'default';
-                }
-
-                // Add VIP class if applicable
-                if (isVip) seatEl.classList.add('vip');
-
-                // Store seat data in dataset for easy access
-                seatEl.dataset.seatId = seatId;
-                seatEl.dataset.row = rowNumber;
-                seatEl.dataset.seat = seatNumber;
-                seatEl.dataset.price = seatPrice;
-
-                // Add click event listener for seat selection
-                seatEl.addEventListener('click', () => {
-                    const currentSeatIdStr = String(seatEl.dataset.seatId);
-                    const currentStatus = seatEl.dataset.status;
-
-                    // Allow selection only if the seat is free and not already bought by the user
-                    if (currentStatus === 'F' && !userTicketsSeatIds.includes(currentSeatIdStr)) {
-                        if (selectedSeats.includes(currentSeatIdStr)) {
-                            // Deselect seat
-                            seatEl.classList.remove('selected');
-                            selectedSeats = selectedSeats.filter(id => id !== currentSeatIdStr);
-                            totalPrice -= seatPrice;
-                        } else {
-                            // Select seat
-                            seatEl.classList.add('selected');
-                            selectedSeats.push(currentSeatIdStr);
-                            totalPrice += seatPrice;
-                        }
-                        updateSelectionDisplay(); // Update UI display of selected seats and total price
-                    } else {
-                        console.log(`Место Ряд ${rowNumber}, Место ${seatNumber} недоступно для выбора. Статус: ${currentStatus}`);
-                    }
-                });
-
-                // Create and append the seat number text
-                const seatText = document.createElementNS(svgNS, "text");
-                seatText.setAttribute("x", currentX + seatSize / 2);
-                seatText.setAttribute("y", currentY + seatSize / 2);
-                seatText.setAttribute("text-anchor", "middle");
-                seatText.setAttribute("dominant-baseline", "middle");
-                seatText.style.fontSize = "12px";
-                seatText.style.fill = "#fff";
-                seatText.style.pointerEvents = "none"; // Allow clicks to pass through to the rect
-                seatText.textContent = seatNumber;
-
-                // Add a tooltip for seat details on hover
-                const tooltip = document.createElementNS(svgNS, "title");
-                tooltip.textContent = `Ряд: ${rowNumber}, Место: ${seatNumber}\nЦена: ${seatPrice.toFixed(2)} грн`;
-                seatEl.appendChild(tooltip);
-
-                // Append seat elements to SVG
-                svg.appendChild(seatEl);
-                svg.appendChild(seatText);
-
-                currentX += seatSize + seatSpacing; // Move X for the next seat
-            });
-
-            // Update maxX to ensure the SVG's viewBox accommodates all rows
-            const rowTotalWidth = actualStartX + currentRowOccupiedWidth;
-            if (rowTotalWidth > maxX) maxX = rowTotalWidth;
-
-            currentY += seatSize + rowSpacing; // Move Y for the next row
-        });
-
-        // Calculate final SVG dimensions for the viewBox
-        const finalWidth = maxX + rowLabelOffset; // Add some padding on the right
-        const finalHeight = currentY + initialY;
-        svg.setAttribute("viewBox", `0 0 ${finalWidth} ${finalHeight}`);
-        svg.setAttribute("height", finalHeight); // Set a fixed height based on content
-        // Width is already set to 100% via style attribute above
-
-        container.appendChild(svg); // Add the complete SVG to the container
-    }
-
-    /**
-     * Updates the display of selected seats count, total price, and purchase button state.
-     */
-    function updateSelectionDisplay() {
-        selectedSeatsCountSpan.textContent = selectedSeats.length;
-        totalPriceSpan.textContent = totalPrice.toFixed(2);
-        selectedSeatsInput.value = JSON.stringify(selectedSeats); // Update hidden input for form submission
-
-        purchaseButton.disabled = selectedSeats.length === 0; // Disable button if no seats are selected
-
-        // Update visual state of free seats (selected/deselected)
-        document.querySelectorAll('.seat.svg-seat').forEach(seatElement => {
-            const seatId = String(seatElement.dataset.seatId);
-            const currentStatus = seatElement.dataset.status;
-
-            if (currentStatus === 'F') { // Only modify free seats
-                if (selectedSeats.includes(seatId)) {
-                    seatElement.classList.add('selected');
-                    seatElement.classList.remove('free');
-                } else {
-                    seatElement.classList.remove('selected');
-                    seatElement.classList.add('free');
-                }
-            }
-        });
-    }
-
-    // Initial call to render the hall scheme if data is available
-    if (currentSeatStatusData && currentSeatStatusData.length > 0) {
-        renderHallScheme(currentSeatStatusData, 'hall-scheme-container');
-        updateSelectionDisplay(); // Ensure initial display is correct
-    } else {
-        hallSchemeContainer.innerHTML = '<p>Нет данных о местах для отображения схемы зала.</p>';
-    }
-});
 </script>
 
 {% endblock %}

@@ -1,10 +1,10 @@
 from django.conf import settings
 from django.core.management.base import BaseCommand
-from datetime import datetime
 
+from datetime import timedelta, datetime
 from django.core.files import File
 import os
-from main.models import Block_SEO, Gallery, Picture, PaigesCinema, Contact
+from main.models import Block_SEO, Gallery, Picture, PaigesCinema, Contact, Banners,Cross_Banner, News
 from movie.models import Movies
 from core.models import Cinemas, Halls, Sessions, Seats, Tickets
 
@@ -20,8 +20,9 @@ from core.date import (
     picture_data_pages_list,
     contact_data_list,  # Убедитесь, что contact_data_list определен в core.date
     picture_data_contact_list,
-    seo_block_contact_data_list  # Убедитесь, что seo_block_contact_data_list определен в core.date
-)
+    seo_block_contact_data_list ,
+    picture_data_banners_list, picture_data_news_list , banner_news_list,
+cross_banner_list, picture_data_ross_banner_list)
 
 
 class Command(BaseCommand):
@@ -36,7 +37,7 @@ class Command(BaseCommand):
                 seo_block_cinema_data_list +
                 seo_block_movies_data_list +
                 seo_block_pages_data_list +
-                seo_block_contact_data_list  # <-- ДОБАВЛЕНО: Включаем SEO-блоки для контактов здесь
+                seo_block_contact_data_list
         )
         for seo_data in all_seo_data_lists:
             # Ищем по seo_url, так как это уникальное поле
@@ -380,11 +381,127 @@ class Command(BaseCommand):
             else:
                 self.stdout.write(self.style.WARNING(f"  No picture data found for Contact '{contact_obj.title}'."))
 
+        self.stdout.write(self.style.SUCCESS("\n== Creating gallery for banners and adding pictures... =="))
+
+        # Галерея для звичайних банерів
+        banner_gallery = Gallery.objects.create()
+
+        pictures_for_banners = picture_data_banners_list.get('Галерея для нових банерів')
+
+        if pictures_for_banners:
+            for pic_data in pictures_for_banners:
+                image_path = pic_data['image_path'].lstrip('/')  # Убираем начальный слэш
+                image_type = pic_data['image_type']
+                full_path = self._get_static_file_path(image_path)
+
+                if not full_path:
+                    self.stdout.write(self.style.ERROR(f"      Not found: {image_path}. Skipping."))
+                    continue
+
+                with open(full_path, 'rb') as f:
+                    picture_obj, created_pic = Picture.objects.get_or_create(
+                        gallery=banner_gallery,
+                        image_type=image_type,
+                        defaults={'image': File(f, name=os.path.basename(image_path))}
+                    )
+
+                if created_pic:
+                    self.stdout.write(self.style.SUCCESS(f"      Added: {image_path}"))
+                else:
+                    self.stdout.write(self.style.WARNING(f"      Already exists: {image_path}. Skipping."))
+        else:
+            self.stdout.write(self.style.WARNING("    No pictures found for this gallery."))
+
+        # === Галерея для новин ===
+        self.stdout.write(self.style.SUCCESS("\n== Creating gallery for news banners and adding pictures... =="))
+
+        news_gallery = Gallery.objects.create()
+
+        pictures_for_news = picture_data_news_list.get('Галерея для нових банерів')
+
+        if pictures_for_news:
+            for i, pic_data in enumerate(pictures_for_news):
+                image_path = pic_data['image_path'].lstrip('/')
+                image_type = pic_data['image_type']
+                full_path = self._get_static_file_path(image_path)
+
+                if not full_path:
+                    self.stdout.write(self.style.ERROR(f"      Not found: {image_path}. Skipping."))
+                    continue
+
+                with open(full_path, 'rb') as f:
+                    picture_obj, created_pic = Picture.objects.get_or_create(
+                        gallery=news_gallery,
+                        image_type=image_type,
+                        defaults={'image': File(f, name=os.path.basename(image_path))}
+                    )
+
+                if created_pic:
+                    self.stdout.write(self.style.SUCCESS(f"      Added: {image_path}"))
+                else:
+                    self.stdout.write(self.style.WARNING(f"      Already exists: {image_path}. Skipping."))
+
+                if i < len(banner_news_list):
+                    banner_data = banner_news_list[i]
+                    News.objects.create(
+                        gallery=news_gallery,
+
+                        url=banner_data['url'],
+                        scroll_speed=timedelta(seconds=banner_data['scroll_speed']),
+                        is_active=banner_data['is_active']
+                    )
+                    self.stdout.write(self.style.SUCCESS(
+                        f"      Created News with URL '{banner_data['url']}' and scroll speed {banner_data['scroll_speed']}."))
+
+        else:
+            self.stdout.write(self.style.WARNING("    No pictures found for news gallery."))
+
+        # === Галерея для cross banners ===
+        self.stdout.write(self.style.SUCCESS("\n== Creating gallery for cross banners and adding pictures... =="))
+
+        cross_gallery = Gallery.objects.create()
+
+        pictures_for_cross = picture_data_ross_banner_list.get('Галерея для нових банерів')
+
+        if pictures_for_cross:
+            for i, pic_data in enumerate(pictures_for_cross):
+                image_path = pic_data['image_path'].lstrip('/')
+                image_type = pic_data['image_type']
+                full_path = self._get_static_file_path(image_path)
+
+                if not full_path:
+                    self.stdout.write(self.style.ERROR(f"      Not found: {image_path}. Skipping."))
+                    continue
+
+                with open(full_path, 'rb') as f:
+                    picture_obj, created = Picture.objects.get_or_create(
+                        gallery=cross_gallery,
+                        image_type=image_type,
+                        defaults={'image': File(f, name=os.path.basename(image_path))}
+                    )
+
+                if created:
+                    self.stdout.write(self.style.SUCCESS(f"      Added: {image_path}"))
+                else:
+                    self.stdout.write(self.style.WARNING(f"      Already exists: {image_path}. Skipping."))
+
+                if i < len(cross_banner_list):
+                    banner_data = cross_banner_list[i]
+                    Cross_Banner.objects.create(
+                        gallery=cross_gallery,
+
+                        type=banner_data['type']
+                    )
+                    self.stdout.write(self.style.SUCCESS(
+                        f"      Created Cross_Banner with type '{banner_data['type']}'."))
+
+        else:
+            self.stdout.write(self.style.WARNING("    No pictures found for cross banner gallery."))
+
         self.stdout.write(self.style.SUCCESS("=== load_initial_data completed ==="))
 
     def _get_static_file_path(self, image_path: str):
-        # Эта функция должна быть вложена в Command или быть отдельным вспомогательным методом,
-        # который имеет доступ к settings
+
         from django.conf import settings
         import os
 
@@ -393,3 +510,4 @@ class Command(BaseCommand):
             if os.path.exists(full_path):
                 return full_path
         return None
+

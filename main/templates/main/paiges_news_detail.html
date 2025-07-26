@@ -3,14 +3,16 @@
 {% extends 'main/index1.html' %}
 {% load static %}
 {% load i18n %}
-
+{% block seo_meta %}
+    <title>{{ paige_news.seo_block.title_seo|default:paige_news.title }}  </title>
+    <meta name="keywords" content="{{paige_news.seo_block.seo_keywords|default:'' }}{% if paige_news.seo_block.seo_keywords %},{% endif %}">
+    <meta name="description" content="{{ paige_news.seo_block.seo_description|default:'' }}.">
+{% endblock %}
 {% block content %}
 <title>{{ paige_news.title }} - {% translate "Новость" %}</title>
 
 <style>
-    /* ... (Ваши существующие стили для .video-responsive, .promotion-main-image, .promotion-content, .promotion-layout-container, .promotion-image-wrapper, .promotion-text-content и медиа-запросы) ... */
 
-    /* НОВЫЕ СТИЛИ: Применяем темный фон и светлый текст только к блоку с изображением/текстом */
     .promotion-layout-container {
         background-color: #1a1a1a; /* Черный фон для этого блока */
         color: #f0f0f0; /* Светлый текст по умолчанию для этого блока, теперь будет переопределен для детей */
@@ -26,31 +28,31 @@
         margin: 20px auto;
     }
 
-    /* Убедитесь, что заголовки и параграфы внутри этого блока теперь красные */
+
     .promotion-layout-container h1,
     .promotion-layout-container h2,
     .promotion-layout-container h3,
     .promotion-layout-container h4,
     .promotion-layout-container h5,
     .promotion-layout-container h6 {
-        color: #ffffff; /* Чисто красный для заголовков в этом блоке */
+        color: #ffffff;
     }
 
     .promotion-layout-container p {
-        color: #ffffff; /* Более светлый красный для параграфов в этом блоке */
+        color: #ffffff;
     }
 
-    /* Если есть muted текст внутри этого блока */
+
     .promotion-layout-container .text-muted {
-        color: #ff6666 !important; /* Светлее красный для muted текста */
+        color: #ff6666 !important;
     }
 
-    /* Ссылки внутри этого блока */
+
     .promotion-layout-container a {
-        color: #ff9999; /* Очень светлый красный для ссылок, чтобы был виден */
+        color: #ff9999;
     }
 
-    /* Изменения в макете изображений и текста */
+
     .promotion-image-wrapper {
         flex: 0 0 40%;
         max-width: 400px;
@@ -61,7 +63,7 @@
         width: 100%;
         height: auto;
         border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.3); /* Тень для изображения */
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
     }
 
     .promotion-text-content {
@@ -69,13 +71,13 @@
         min-width: 300px;
     }
 
-    /* Адаптивность для маленьких экранов */
+
     @media (max-width: 768px) {
         .promotion-layout-container {
             flex-direction: column;
             align-items: center;
             gap: 15px;
-            padding: 20px; /* Немного уменьшим отступы на мобильных */
+            padding: 20px;
         }
 
         .promotion-image-wrapper {
@@ -94,7 +96,7 @@
     }
 
 
-    /* Убедитесь, что .video-responsive имеет max-width и margin: auto для центрирования */
+
     .video-responsive {
         overflow: hidden;
         padding-bottom:43%;
@@ -114,7 +116,7 @@
         position: absolute;
     }
 
-    /* Остальные стили для галереи и баннера могут оставаться без изменений */
+
     .img-fluid.rounded.shadow-sm {
         box-shadow: 0 4px 8px rgba(0,0,0,0.3) !important;
     }

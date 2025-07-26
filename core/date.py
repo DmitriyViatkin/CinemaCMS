@@ -7,13 +7,13 @@ cinema_data_list = [
         "title_uk": "Кинотеатр Планета Кино",
         "description": "дуже великий екран;\r\nсистема кругової поляризації REAL3D;\r\nзвук DOLBY DIGITAL SURROUND-EX;\r\nкомфортна відстань між рядами крісел;\r\nсистема обігріву і кондиціонування повітря;\r\nсучасні ергономічні крісла;\r\nможливість оплати квитків онлайн;\r\nрепертуар світових прем’єр.",
         "description_ru": "дуже великий екран;\r\nсистема кругової поляризации REAL3D;\r\nзвук DOLBY DIGITAL SURROUND-EX;\r\nкомфортна відстань між рядами крісел;\r\nсистема обігріву і кондиціонування повітря;\r\nсучасні ергономічні крісла;\r\nможливість оплати квитків онлайн;\r\nрепертуар світових прем’єр.",
-        "description_uk": "", # Виправлено з 'null' на ""
+        "description_uk": "очень большой экран; система круговой поляризации REAL3D; звук DOLBY DIGITAL SURROUND-EX; комфортное расстояние между рядами кресел; система обогрева и кондиционирования воздуха; современные эргономические кресла; онлайн возможность оплаты; премьер.",
         "conditions": "дуже великий екран;\r\nсистема кругової поляризації REAL3D;\r\nзвук DOLBY DIGITAL SURROUND-EX;\r\nкомфортна відстань між рядами крісел;\r\nсистема обігріву і кондиціонування повітря;\r\nсучасні ергономічні крісла;\r\nможливість оплати квитків онлайн;\r\nрепертуар світових прем’єр.",
-        "conditions_ru": "дуже великий екран;\r\nсистема кругової поляризации REAL3D;\r\nзвук DOLBY DIGITAL SURROUND-EX;\r\nкомфортна відстань між рядами крісел;\r\nсистема обігріву і кондиціонування повітря;\r\nсучасні ергономічні крісла;\r\nможливість оплати квитків онлайн;\r\nрепертуар світових прем’єр.",
-        "conditions_uk": "", # Виправлено з 'null' на ""
+        "conditions_ru": "очень большой экран; система круговой поляризации REAL3D; звук DOLBY DIGITAL SURROUND-EX; комфортное расстояние между рядами кресел; система обогрева и кондиционирования воздуха; современные эргономические кресла; онлайн возможность оплаты; премьер.",
+        "conditions_uk": "дуже великий екран;\r\nсистема кругової поляризации REAL3D;\r\nзвук DOLBY DIGITAL SURROUND-EX;\r\nкомфортна відстань між рядами крісел;\r\nсистема обігріву і кондиціонування повітря;\r\nсучасні ергономічні крісла;\r\nможливість оплати квитків онлайн;\r\nрепертуар світових прем’єр.",
         "city": "Запорожье",
         "city_ru": "Запорожье",
-        "city_uk": "", # Виправлено з 'null' на ""
+        "city_uk": "",
         "date": "2025-05-11"
     },
     {
@@ -69,7 +69,7 @@ seo_block_cinema_data_list = [
     }
 ]
 
-# Видалено gallery=[], оскільки воно не використовується тут
+
 
 picture_data_movies_list = {
     "Барби": [
@@ -172,8 +172,7 @@ seo_block_pages_data_list = [
     {"title_seo": "Страница Реклама в кинотеатре SEO", "seo_url": "advertisement-seo", "seo_keywords": "реклама, кинотеатр, баннер", "seo_description": "Информация о рекламе в кинотеатре."},
     {"title_seo": "Страница Детская комната SEO", "seo_url": "kids-room-seo", "seo_keywords": "детская комната, кино, развлечения", "seo_description": "SEO описание детской комнаты."},
     {"title_seo": "Страница VIP-зал кинотеатра SEO", "seo_url": "vip-hall-seo", "seo_keywords": "vip зал, комфорт, премиум", "seo_description": "SEO описание VIP-зала."},
-    # SEO-блок для контактов тепер буде оброблятися окремо в seo_block_contact_data_list
-    # {"title_seo": "Страница Контакты SEO", "seo_url": "contacts-seo", "seo_keywords": "контакты, адрес, телефон", "seo_description": "Контактная информация кинотеатра."},
+
 ]
 
 # Данные для модели PaigesCinema (включая "Реклама", "Детская комната", "VIP-зал", "Кафе", "О нас", "Контакты")
@@ -193,7 +192,7 @@ paiges_cinema_data_list = [
         "title": "Кафе",
         "title_ru": "Кафе",
         "title_uk": "Кафе",
-        "seo_block_title_seo": "Страница Кафе SEO",
+        "seo_block_title_seo": "kafe-bar",
         "description": "Наше уютное кафе предлагает широкий ассортимент закусок, напитков и десертов, чтобы ваш кинопросмотр был еще приятнее.",
         "description_ru": "Наше уютное кафе предлагает широкий ассортимент закусок, напитков и десертов, чтобы ваш кинопросмотр был еще приятнее.",
         "description_uk": "Наше затишне кафе пропонує широкий асортимент закусок, напоїв та десертів, щоб ваш кіноперегляд був ще приємнішим.",
@@ -204,7 +203,7 @@ paiges_cinema_data_list = [
         "title": "Реклама",
         "title_ru": "Реклама",
         "title_uk": "Реклама",
-        "seo_block_title_seo": "Страница Реклама в кинотеатре SEO",
+        "seo_block_title_seo": "promotion_22",
         "description": "Мы предлагаем различные варианты размещения рекламы в наших кинотеатрах. От баннеров до видеороликов перед сеансами.",
         "description_ru": "Мы предлагаем различные варианты размещения рекламы в наших кинотеатрах. От баннеров до видеороликов перед сеансами.",
         "description_uk": "Ми пропонуємо різні варіанти розміщення реклами у наших кінотеатрах. Від банерів до відеороликів перед сеансами.",
@@ -215,7 +214,7 @@ paiges_cinema_data_list = [
         "title": "Детская комната",
         "title_ru": "Детская комната",
         "title_uk": "Дитяча кімната",
-        "seo_block_title_seo": "Страница Детская комната SEO",
+        "seo_block_title_seo": "chaild_room",
         "description": "Ваши дети могут весело провести время в нашей современной детской комнате под присмотром опытных аниматоров, пока вы наслаждаетесь фильмом.",
         "description_ru": "Ваши дети могут весело провести время в нашей современной детской комнате под присмотром опытных аниматоров, пока вы наслаждаетесь фильмом.",
         "description_uk": "Ваші діти можуть весело провести час у нашій сучасній дитячій кімнаті під наглядом досвідчених аніматорів, поки ви насолоджуєтеся фільмом.",
@@ -226,7 +225,7 @@ paiges_cinema_data_list = [
         "title": "VIP-зал",
         "title_ru": "VIP-зал",
         "title_uk": "VIP-зал",
-        "seo_block_title_seo": "Страница VIP-зал кинотеатра SEO",
+        "seo_block_title_seo": "VIP",
         "description": "Погрузитесь в мир кино с максимальным комфортом в нашем VIP-зале. Удобные кресла, индивидуальное обслуживание и эксклюзивное меню.",
         "description_ru": "Погрузитесь в мир кино с максимальным комфортом в нашем VIP-зале. Удобные кресла, индивидуальное обслуживание и эксклюзивное меню.",
         "description_uk": "Пориньте у світ кіно з максимальним комфортом у нашому VIP-залі. Зручні крісла, індивідуальне обслуговування та ексклюзивне меню.",
@@ -237,7 +236,7 @@ paiges_cinema_data_list = [
         "title": "Контакты",
         "title_ru": "Контакты",
         "title_uk": "Контакти",
-        "seo_block_title_seo": "Страница Контакты SEO", # Це відповідає title_seo в seo_block_contact_data_list
+        "seo_block_title_seo": "contact_paige",
         "description": "Свяжитесь с нами по телефону, электронной почте или посетите наш кинотеатр по адресу: [Ваш адрес].",
         "description_ru": "Свяжитесь с нами по телефону, электронной почте или посетите наш кинотеатр по адресу: [Ваш адрес].",
         "description_uk": "Зв'яжіться з нами за телефоном, електронною поштою або відвідайте наш кінотеатр за адресою: [Ваша адреса].",
@@ -337,3 +336,108 @@ picture_data_contact_list = {
         },
     ],
 }
+
+banner_data_list = [
+    {
+
+        "url": "https://youtu.be/_fLRWSxlO3I?si=7VBpMQG-RKyTkIxd",
+        "text": "Літні прем’єри вже в кінотеатрах CineWave!",
+        "scroll_speed": 50,
+        "is_active": True
+    },
+    {
+
+        "url": "https://youtu.be/_fLRWSxlO3I?si=7VBpMQG-RKyTkIxd",
+        "text": "Купуйте квитки онлайн без черг",
+        "scroll_speed": 30,
+        "is_active": True
+    },
+    {
+
+        "url": "https://youtu.be/_fLRWSxlO3I?si=7VBpMQG-RKyTkIxd",
+        "text": "Знижки для студентів та пенсіонерів – дізнайтесь більше!",
+        "scroll_speed": 40,
+        "is_active": True
+    },
+    {
+
+        "url": "",
+        "text": "CineWave – простір сучасного кіно",
+        "scroll_speed": 60,
+        "is_active": False
+    }
+]
+picture_data_banners_list = {
+    "Галерея для нових банерів": [
+        {
+            "image_path": "banners/banner.png",
+            "image_type": "main_picture"
+        },
+        {
+            "image_path": "banners/banner2.png",
+            "image_type": "main_picture"
+        },
+        {
+            "image_path": "banners/banner3.png",
+            "image_type": "gallery"
+        },
+
+    ]
+}
+banner_news_list = [
+    {
+
+        "url": "https://youtu.be/_fLRWSxlO3I?si=7VBpMQG-RKyTkIxd",
+
+        "scroll_speed": 50,
+        "is_active": True
+    },
+    {
+
+        "url": "https://youtu.be/_fLRWSxlO3I?si=7VBpMQG-RKyTkIxd",
+
+        "scroll_speed": 30,
+        "is_active": True
+    },
+    {
+
+        "url": "https://youtu.be/_fLRWSxlO3I?si=7VBpMQG-RKyTkIxd",
+
+        "scroll_speed": 40,
+        "is_active": True
+    },
+    {
+
+        "url": "https://youtu.be/_fLRWSxlO3I?si=7VBpMQG-RKyTkIxd",
+
+        "scroll_speed": 60,
+        "is_active": False
+    }
+]
+picture_data_news_list = {
+    "Галерея для нових банерів": [
+        {
+            "image_path": "banners/banner.png",  #
+            "image_type": "main_picture"
+        },
+        {
+            "image_path": "/banners/banner2.png",
+            "image_type": "main_picture"
+        },
+        {
+            "image_path": "banners/banner3.png",
+            "image_type": "main_picture"
+        },
+        # Додай більше за потребою...
+    ]
+}
+cross_banner_list = [
+    {"type": "photo_background"}
+]
+picture_data_ross_banner_list = {
+    "Галерея для нових банерів": [
+        {
+            "image_path": "banners/banner.png",  #
+            "image_type": "main_picture"
+        },
+    ]}
