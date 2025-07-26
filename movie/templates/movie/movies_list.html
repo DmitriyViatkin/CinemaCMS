@@ -1,14 +1,19 @@
 {% extends 'main/index1.html' %}
 
-{% block title %}Список кинотеатров{% endblock %}
+{% block title %}Список кинотеатрів{% endblock %}
 
 {% block content %}
+
   <h1 class="mb-4">Список фільмів</h1>
 
-  <div class="cards-grid-container" >
+  <div class="cards-grid-container">
+
     {% for movie in movies %}
-          {% include 'movie/movie_card.html' with movie=movie %}
+      {% include 'movie/movie_card.html' with movie=movie %}
     {% endfor %}
+
+  </div> <!-- 👈 Добавлено закрытие блока -->
+
   <div class="pagination mt-4 text-center">
     <span class="step-links">
       {% if movies.has_previous %}
@@ -26,14 +31,15 @@
       {% endif %}
     </span>
   </div>
-<style>
-   .cards-grid-container {
-     max-width: 80%; /* Or any width you prefer, e.g., 960px, 1400px */
-    margin: 0 auto;
-    display: grid;
 
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 30px; /
-}
-</style>
+  <style>
+    .cards-grid-container {
+      max-width: 80%;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px; /* space between cards */
+    }
+  </style>
+
 {% endblock %}
