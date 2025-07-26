@@ -1,4 +1,11 @@
-.PHONY: help install run migrate makemigrations colectstatic test clean
+PHONY: help install run migrate makemigrations collectstatic test clean \
+        createsuperuser shell run-port migrate-all deploy \
+        docker-build docker-up docker-up-foreground docker-down docker-exec \
+        docker-migrate docker-makemigrations docker-test docker-shell \
+        docker-logs docker-rm-containers docker-rm-images \
+        docker-createsuperuser docker-load-initial-data docker-collectstatic \
+        docker-start docker-celery-worker docker-celery-beat docker-celery-restart \
+        docker-redis-up
 
 #Переменные
 PYTHON = python3
@@ -101,7 +108,7 @@ docker-createsuperuser:
 	@echo "Суперпользователь создан (или процесс запущен) в контейнере."
 
 
-# Пример: make docker-load-initial-data FIXTURE="my_app/fixtures/initial_data.json"
+
 docker-load-initial-data:
 	@echo "Загружаем начальные данные из фиксатуры $(FIXTURE) в контейнере..."
 	$(DOCKER_COMPOSE) exec web $(PYTHON) manage.py load_initial_data $(FIXTURE)
@@ -111,10 +118,34 @@ docker-collectstatic:
 	$(DOCKER_COMPOSE) exec web $(PYTHON) manage.py collectstatic --noinput
 	@echo "Статические файлы собраны в контейнере."
 
-doker-start:docker-makemigrations  docker-migrate docker-createsuperuser docker-load-initial-data docker-collectstatic
+doker-start :docker-makemigrations  docker-migrate docker-createsuperuser docker-load-initial-data docker-collectstatic
 	@echo "Миграции созданы в контейнере."
 
 docker-rm-containers:
 	@echo "Удаляем все остановленные Docker-контейнеры..."
 	docker rm $(shell docker ps -aq) || true
 	@echo "Остановленные Docker-контейнеры удалены."
+
+
+# --- Celery Commands ---
+docker-celery-worker:
+	@echo "Запускаем Celery worker в фоновом режиме..."
+	$(DOCKER_COMPOSE) up -d celery_worker
+	@echo "Celery worker запущен."
+
+docker-celery-beat:
+	@echo "Запускаем Celery Beat в фоновом режиме..."
+	$(DOCKER_COMPOSE) up -d celery_beat
+	@echo "Celery Beat запущен."
+
+docker-celery-restart:
+	@echo "Перезапускаем Celery worker и Beat..."
+	$(DOCKER_COMPOSE) restart celery_worker celery_beat
+	@echo "Celery worker и Beat перезапущены."
+
+
+### Redis Commands
+docker-redis-up: # <-- Новая цель
+	@echo "Запускаем Redis в фоновом режиме..."
+	$(DOCKER_COMPOSE) up -d redis
+	@echo "Redis запущен."

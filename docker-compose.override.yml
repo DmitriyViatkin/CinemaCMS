@@ -1,9 +1,27 @@
-
-
 services:
   web:
     volumes:
       - ./media:/app/media
+
+  redis:
+    image: redis:7-alpine
+    restart: always
+    networks:
+      - app-network
+
+  celery_worker:
+    build: .
+    command: celery -A cinewave worker -l info
+    volumes:
+      - .:/app
+    env_file:
+      - .env.development
+    depends_on:
+      - db
+      - redis
+      - web
+    networks:
+      - app-network
 
   nginx:
     volumes:
