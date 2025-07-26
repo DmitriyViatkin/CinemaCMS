@@ -91,41 +91,43 @@
 }
 </style>
 <div class="container mt-4">
-    <h2>{% trans "Покупка билетов на сеанс" %}</h2>
-    <div id="top_baner">
-        {% if hall_picture %}
-            <div class="hall-scheme-image">
-                <img src="{{ hall_picture }}" alt="{% trans "Схема зала" %} {{ hall_title }}" style="max-width: 100%; height: auto; margin-top: 20px;">
-            </div>
+   <h2>{% trans "Покупка билетов на сеанс" %}</h2>
+<div id="top_baner">
+    {% if hall_picture %}
+        <div class="hall-scheme-image">
+            <img src="{{ hall_picture }}" alt="{% trans "Схема зала" %} {{ hall_title }}" style="max-width: 100%; height: auto; margin-top: 20px;">
+        </div>
+    {% else %}
+        <p>{% trans "Схема залу відсутня" %}</p>
+    {% endif %}
+</div>
+<div class="d-flex align-items-start">
+    <div class="p-3">
+        {% if movie_picture %}
+            <img src="{{ movie_picture }}" alt="{% trans "Постер фильма" %} {{ movie_title }}" class="img-fluid" style="max-width: 200px;">
         {% else %}
-            <p>{% trans "Схема залу відсутня" %}</p>
+            <p>{% trans "Зображення фільму відсутнє" %}</p>
         {% endif %}
     </div>
-    <div class="d-flex align-items-start">
-        <div class="p-3">
-            {% if movie_picture %}
-                <img src="{{ movie_picture }}" alt="{% trans "Постер фильма" %} {{ movie_title }}" class="img-fluid" style="max-width: 200px;">
-            {% else %}
-                <p>{% trans "Зображення фільму відсутнє" %}</p>
-            {% endif %}
+    <div class="d-flex flex-column flex-grow-1 justify-content-between p-3">
+        <div class="card-body d-flex flex-wrap align-items-center gap-3">
+            <p class="mb-0"><strong>{% trans "Фильм:" %}</strong> {{ movie_title }}</p>
+            <p class="mb-0"><strong>{% trans "Цена:" %}</strong> {{ session_price }}</p>
+            <p class="mb-0"><strong>{% trans "Зал:" %}</strong> {{ hall_title }}</p>
+            {# REMOVED |date filter #}
+            <p class="mb-0"><strong>{% trans "Дата:" %}</strong> {{ session_date }}</p>
+            {# REMOVED |time filter #}
+            <p class="mb-0"><strong>{% trans "Время:" %}</strong> {{ session_time }}</p>
         </div>
-        <div class="d-flex flex-column flex-grow-1 justify-content-between p-3">
-            <div class="card-body d-flex flex-wrap align-items-center gap-3">
-                <p class="mb-0"><strong>{% trans "Фильм:" %}</strong> {{ movie_title }}</p>
-                <p class="mb-0"><strong>{% trans "Цена:" %}</strong> {{ session_price }}</p>
-                <p class="mb-0"><strong>{% trans "Зал:" %}</strong> {{ hall_title }}</p>
-                <p class="mb-0"><strong>{% trans "Дата:" %}</strong> {{ session_date|date:"d M Y" }}</p>
-                <p class="mb-0"><strong>{% trans "Время:" %}</strong> {{ session_time|time:"H:i" }}</p>
-            </div>
 
-            <div class="d-flex align-items-center justify-content-start">
-                <div class="mb-3 me-4">
-                    <p class="mb-0">{% trans "Обрано місць:" %} <span id="selected-seats-count">0</span></p>
-                    <p class="mb-0">{% trans "Загальна ціна:" %} <span id="total-price">0.00</span> {% trans "грн"%}</p>
-                </div>
+        <div class="d-flex align-items-center justify-content-start">
+            <div class="mb-3 me-4">
+                <p class="mb-0">{% trans "Обрано місць:" %} <span id="selected-seats-count">0</span></p>
+                <p class="mb-0">{% trans "Загальна ціна:" %} <span id="total-price">0.00</span> {% trans "грн"%}</p>
             </div>
         </div>
     </div>
+</div>
 
     <div class="card mb-4">
         <div class="card-header">
