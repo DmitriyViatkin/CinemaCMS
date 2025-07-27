@@ -31,7 +31,9 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG')
 
-ALLOWED_HOSTS = []
+allowed_hosts_string = os.getenv('ALLOWED_HOSTS', '')
+# Разделяем строку по запятым, обрезаем пробелы и фильтруем пустые значения
+ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_string.split(',') if host.strip()]
 
 
 # Application definition
