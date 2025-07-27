@@ -183,7 +183,7 @@ def session_list(request, cinema=None, hall=None):
 
     grouped_sessions = defaultdict(list)
     for session in sessions.order_by('date'):
-        day_name = session.date.strftime('%A')
+        day_name = date_format(session.date, 'l', use_l10n=True)
         date_str = session.date.strftime('%d.%m.%Y')
         grouped_sessions[(day_name.capitalize(), date_str)].append(session)
 
@@ -229,10 +229,6 @@ def hall_list(request):
     return render(request, 'hall/hall_list.html', context)
 
 @login_required
-
-
-
-
 
 def buy_ticket_view(request, session_id):
     """
