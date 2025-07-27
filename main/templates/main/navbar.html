@@ -37,10 +37,10 @@
           <a class="nav-link" href="{% url 'main:promotions_list' %}">{% trans "Акції" %}</a>
         </li>
           {% if user.is_staff %}
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'admins' %}">{% trans "Незабаром" %}</a>
-            </li>
-            {% endif %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'admins' %}">Admins</a>
+        </li>
+      {% endif %}
 
         <!-- Дропдаун -->
         <li class="nav-item dropdown">
