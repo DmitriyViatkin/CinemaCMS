@@ -52,21 +52,25 @@
     </aside>
   </div>
 
+<!-- jQuery -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
-<script src="{% static 'admins/plugins/jquery-ui/jquery-ui.min.js'%}"></script>
+<!-- jQuery UI (вибери або локальний, або CDN, але тільки один) -->
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 
+<!-- Обов'язково одразу після jQuery UI -->
 <script>
-  $.widget.bridge('uibutton', $.ui.button)
+  $.widget.bridge('uibutton', $.ui.button);
 </script>
 
-<script src="{% static 'admins/plugins/bootstrap/js/bootstrap.bundle.min.js'%}"></script>
+<!-- Bootstrap -->
+<script src="{% static 'admins/plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 
+<!-- DataTables -->
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
-
-
-<script src="{% static 'admins/dist/js/adminlte.js'%}"></script>
+<!-- AdminLTE -->
+<script src="{% static 'admins/dist/js/adminlte.js' %}"></script>
 
 {% block extra_js %}{% endblock %}
 
