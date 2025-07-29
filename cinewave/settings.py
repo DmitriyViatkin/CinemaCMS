@@ -185,11 +185,11 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 #MEDIA_ROOT = '/app/media'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.mailersend.net' # Изменено на хост MailerSend
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True # MailerSend использует STARTTLS на порту 587
-EMAIL_HOST_USER = os.getenv('MAILERSEND_SMTP_USERNAME') # Используйте новое имя переменной для ясности
-EMAIL_HOST_PASSWORD = os.getenv('MAILERSEND_SMTP_PASSWORD') # Используйте новое имя переменной для ясности
+EMAIL_HOST = 'smtp.mailersend.net'
+EMAIL_PORT = 2525
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.getenv('MAILERSEND_SMTP_USERNAME')
+EMAIL_HOST_PASSWORD = os.getenv('MAILERSEND_SMTP_PASSWORD')
 DEFAULT_FROM_EMAIL = os.getenv('MAILERSEND_FROM_EMAIL')
 
 CELERY_BROKER_URL = 'redis://redis:6379/0'
