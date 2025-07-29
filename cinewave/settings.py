@@ -185,12 +185,12 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 #MEDIA_ROOT = '/app/media'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp-relay.brevo.com'
+EMAIL_HOST = 'smtp.mailersend.net' # Изменено на хост MailerSend
 EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')         # буде 936bc3001@smtp-brevo.com
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD') # API ключ з Brevo
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
+EMAIL_USE_TLS = True # MailerSend использует STARTTLS на порту 587
+EMAIL_HOST_USER = os.getenv('MAILERSEND_SMTP_USERNAME') # Используйте новое имя переменной для ясности
+EMAIL_HOST_PASSWORD = os.getenv('MAILERSEND_SMTP_PASSWORD') # Используйте новое имя переменной для ясности
+DEFAULT_FROM_EMAIL = os.getenv('MAILERSEND_FROM_EMAIL')
 
 CELERY_BROKER_URL = 'redis://redis:6379/0'
 CELERY_RESULT_BACKEND = 'django-db'
