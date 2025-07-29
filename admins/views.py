@@ -297,9 +297,10 @@ def index(request):
 
 @staff_member_required
 def new_contacts(request):
-    seo_instance = Block_SEO.objects.filter(id=1).first()
+    seo_instance = Block_SEO.objects.filter(title_seo="contact_paige").first()
     if not seo_instance:
-        seo_instance = Block_SEO.objects.create(title="Контакты SEO", description="SEO описание для страницы контактов")
+        seo_instance = Block_SEO.objects.create(title_seo ="Контакты SEO", seo_description ="SEO описание для страницы контактов")
+    queryset = Contact.objects.filter(seo_block=seo_instance).order_by('id')
 
     if request.method == 'POST':
         block_seo_form = BlockSEOForm(request.POST, instance=seo_instance)
