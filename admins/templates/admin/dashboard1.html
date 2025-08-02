@@ -1,0 +1,118 @@
+{# dashboard.html #}
+{% load static %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-info">
+                    <div class="inner">
+                        <h3>{{ ticket_count }}</h3>
+                        <p>Проданих квитків</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-bag"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-success">
+                    <div class="inner">
+                        <h3>53<sup style="font-size: 20px">%</sup></h3>
+                        <p>Bounce Rate</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-stats-bars"></i>
+                    </div>
+                    <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-warning">
+                    <div class="inner">
+                        <h3>{{ user_count }}</h3>
+                        <p>Зареєстрованих користувачів</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-person-add"></i>
+                    </div>
+                    <a href="{% url 'users' %}" class="small-box-footer">Детальніше <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-danger">
+                    <div class="inner">
+                        <h3>{{ movie_count }}</h3>
+                        <p>Фільмів</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-pie-graph"></i>
+                    </div>
+                    <a href="{% url 'movie_list' %}" class="small-box-footer">Детальніше <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            </div>
+        <div class="row">
+            <section class="col-lg-7 connectedSortable">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-chart-pie mr-1"></i>
+                            Продажі квитків
+                        </h3>
+                    </div>
+
+                    <div class="card-body">
+                        {% include 'admin/statistic/sales.html' %}
+                        {% include 'admin/statistic/graf.html' %}
+                    </div>
+                </div>
+                </section>
+            <section class="col-lg-5 connectedSortable">
+                </section>
+        </div>
+        </div></section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const labels = {{ chart_days|safe }};
+        const cinemaSales = {{ cinema_sales|safe }};
+
+        const colors = ['#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1'];
+
+        const datasets = Object.entries(cinemaSales).map(([cinema, data], index) => {
+            return {
+                label: cinema,
+                data: data,
+                borderColor: colors[index % colors.length],
+                fill: false,
+                tension: 0.3
+            };
+        });
+
+        new Chart(document.getElementById('line-chart'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Продажі квитків по кінотеатрах за останні 30 днів'
+                    }
+                }
+            }
+        });
+    });
+</script>

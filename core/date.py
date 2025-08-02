@@ -260,8 +260,8 @@ picture_data_pages_list = {
 }
 
 seo_block_contact_data_list = [
-    {"title_seo": "Страница Контакты SEO", # Виправлено: додано "SEO" для відповідності
-     "seo_url": "contacts-seo",
+    {"title_seo": "contact_paige", # Виправлено: додано "SEO" для відповідності
+     "seo_url": "contact_paige",
      "seo_keywords": "контакты кинотеатр, адрес кинотеатра, телефоны кинотеатра, кинотеатры в Украине",
      "seo_description": "Контактная информация, адреса и телефоны всех кинотеатров нашей сети в Украине."
     }
@@ -269,7 +269,7 @@ seo_block_contact_data_list = [
 
 contact_data_list = [
     {
-        "seo_block": "Страница Контакты SEO", # Виправлено для відповідності title_seo
+        "seo_block": "contact_paige", # Виправлено для відповідності title_seo
         "title": "Кинотеатр Планета Кино",
         "address": "ул. Европейская, 10, Днепр",
         "latitude": 48.4647,
@@ -277,7 +277,7 @@ contact_data_list = [
         "phone_number": "+380000000001"
     },
     {
-        "seo_block": "Страница Контакты SEO", # Виправлено для відповідності title_seo
+        "seo_block": "contact_paige", # Виправлено для відповідності title_seo
         "title": "Кинотеатр Мультиплекс",
         "address": "пр. Степана Бандеры, 34В, Запорожье ",
         "latitude": 47.823162274049835,
@@ -285,7 +285,7 @@ contact_data_list = [
         "phone_number": "+38000000002"
     },
     {
-        "seo_block": "Страница Контакты SEO", # Виправлено для відповідності title_seo
+        "seo_block": "contact_paige", # Виправлено для відповідності title_seo
         "title": "Кинотеатр Оскар",
         "address": "пр. Соборный, 145, Киев",
         "latitude": 50.439626,
