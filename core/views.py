@@ -18,9 +18,16 @@ from asgiref.sync import async_to_sync
 from datetime import date, datetime
 from django.utils import timezone
 from datetime import date
+from django.utils.formats import date_format
 
 
 
+
+import locale
+try:
+    locale.setlocale(locale.LC_TIME, 'uk_UA.UTF-8')
+except locale.Error:
+    pass
 
 
 def cinema_list(request):
@@ -96,7 +103,7 @@ def cinema_detail(request, cinema_slug):
         'gallery_pictures_list': list(gallery_pictures_list )
     }
     return render(request, 'core/cinema_detail.html', context)
-
+#
 def hall_detail(request, hall_id):
     today = date.today()
 
@@ -114,6 +121,9 @@ def hall_detail(request, hall_id):
 
     main_picture = None
     gallery_pictures_list = []
+    # logo_picture was declared but never initialized if image_type == 'logo' not found
+    # and was not in context. Keeping it out as it looks like debug/incomplete code.
+    logo_picture = None
 
     if hall.gallery and hasattr(hall.gallery, 'all_gallery_images'):
         for pic in hall.gallery.all_gallery_images:
@@ -132,15 +142,14 @@ def hall_detail(request, hall_id):
         'main_picture': main_picture,
         'hall_sessions': hall_sessions,
         'gallery_pictures_list': gallery_pictures_list,
+        'logo_picture': logo_picture, # Included for consistency if it's always desired
     }
 
     return render(request, 'hall/hall_detail.html', context)
 
 
 
-locale.setlocale(locale.LC_TIME, 'uk_UA.UTF-8')
 def session_list(request, cinema=None, hall=None):
-    # --- Отримуємо GET-параметри ---
     date_filter = request.GET.get('date')
     cinema_filter = request.GET.get('cinema')
     hall_filter = request.GET.get('hall')
@@ -150,10 +159,8 @@ def session_list(request, cinema=None, hall=None):
     is_3d = request.GET.get('is_3d') == '1'
     is_imax = request.GET.get('is_imax') == '1'
 
-    # --- Базовий queryset ---
     sessions = Sessions.objects.select_related('hall_id__cinema', 'movie').filter(date__gte=date.today())
 
-    # --- Основна фільтрація ---
     if date_filter:
         sessions = sessions.filter(date=date_filter)
     if cinema_filter:
@@ -163,7 +170,6 @@ def session_list(request, cinema=None, hall=None):
     if movie_id_filter:
         sessions = sessions.filter(movie__id=movie_id_filter)
 
-    # --- Фільтр формату фільму ---
     format_filter = Q()
     if is_2d:
         format_filter &= Q(movie__is_2d=True)
@@ -175,30 +181,22 @@ def session_list(request, cinema=None, hall=None):
     if format_filter:
         sessions = sessions.filter(format_filter)
 
-    # --- Групування вже після фільтрації ---
     grouped_sessions = defaultdict(list)
     for session in sessions.order_by('date'):
-        day_name = session.date.strftime('%A')
+        day_name = date_format(session.date, 'l', use_l10n=True)
         date_str = session.date.strftime('%d.%m.%Y')
         grouped_sessions[(day_name.capitalize(), date_str)].append(session)
 
-        # --- Фильтрация залов на основе выбранного кинотеатра ---
-        # Получаем все кинотеатры для первого выпадающего списка
     all_cinemas = Cinemas.objects.all()
 
-    # Получаем залы. Если кинотеатр выбран, фильтруем залы по этому кинотеатру.
-    # В противном случае, получаем пустой QuerySet для залов.
     if cinema_filter:
         try:
-            # Фильтруем залы по ID выбранного кинотеатра
             halls_for_dropdown = Halls.objects.filter(cinema__id=cinema_filter).order_by('title')
         except ValueError:
-            halls_for_dropdown = Halls.objects.none()  # Если cinema_filter не является действительным ID
+            halls_for_dropdown = Halls.objects.none()
     else:
-
         halls_for_dropdown = Halls.objects.none()
 
-    # --- Контекст ---
     context = {
         'grouped_sessions': dict(grouped_sessions),
         'cinemas': Cinemas.objects.all(),
@@ -215,8 +213,6 @@ def session_list(request, cinema=None, hall=None):
         },
     }
     return render(request, 'core/session_2.html', context)
-
-
 def hall_list(request):
     hall_list = Halls.objects.all()
 
@@ -233,12 +229,6 @@ def hall_list(request):
     return render(request, 'hall/hall_list.html', context)
 
 @login_required
-
-
-
-
-
-
 
 def buy_ticket_view(request, session_id):
     """
@@ -279,15 +269,6 @@ def buy_ticket_view(request, session_id):
     occupied_seat_ids = Tickets.objects.filter(session=session).values_list('seat__id', flat=True)
     occupied_seat_ids = list(occupied_seat_ids)  # Перетворюємо на список для швидкого пошуку
 
-<<<<<<< HEAD
-    user_booked_seat_ids = []
-    user_tickets_for_session = [] #
-    if request.user.is_authenticated:
-        # Получаем объекты билетов, а не только ID, чтобы иметь доступ к информации о месте
-        user_tickets_for_session = Tickets.objects.filter(session=session, profile=request.user).select_related('seat').order_by('seat__number_row', 'seat__seat')
-        user_booked_seat_ids = [ticket.seat.id for ticket in user_tickets_for_session]
-
-=======
     # Отримуємо ID місць, які належать поточному авторизованому користувачеві
     user_tickets_seat_ids = []
     if request.user.is_authenticated:
@@ -296,7 +277,6 @@ def buy_ticket_view(request, session_id):
             profile=request.user
         ).values_list('seat__id', flat=True)
         user_tickets_seat_ids = list(user_tickets_seat_ids)
->>>>>>> feature
 
     # Структура для зберігання даних про місця, організованих за рядами
     seat_data_map = {}
@@ -327,20 +307,8 @@ def buy_ticket_view(request, session_id):
             # Якщо current_display_status вже 'S', 'b' або 'N' (і місце зайняте), залишаємо його як є.
         # В іншому випадку (місце не зайняте), current_display_status залишається таким, як у Seats.status (тобто 'F' або 'N').
 
-<<<<<<< HEAD
-        is_user_booked = False
-        if seat.id in user_booked_seat_ids:
-            is_user_booked = True
-            current_status = "U" # 'U' для "User's Ticket"
-
-        if seat.number_row not in seat_data_map:
-            seat_data_map[seat.number_row] = {}
-
-        seat_data_map[seat.number_row][seat.seat] = {
-=======
         # Додаємо дані про місце до структури
         seat_data_map.setdefault(seat.number_row, {})[seat.seat] = {
->>>>>>> feature
             'id': seat.id,
             'status': current_display_status,  # 'U', 'S', 'b', 'F', або 'N'
             'is_vip': seat.is_vip,
@@ -379,14 +347,8 @@ def buy_ticket_view(request, session_id):
         'movie_picture': movie_picture.image.url if movie_picture and movie_picture.image else None,
         # JSON-дані про статус місць для JavaScript
         'seat_rows_current_status_json': json.dumps(ordered_seat_rows),
-<<<<<<< HEAD
-        'session_price': session.price,
-        'user_tickets': user_tickets_for_session, # <-- ВОТ ЗДЕСЬ МЫ ПЕРЕДАЕМ!
-        'user_tickets_seat_ids': user_booked_seat_ids,  # <-- ЭТОТ СПИСОК С ID МЕСТ ПОЛЬЗОВАТЕЛЯ
-=======
         # JSON-дані про місця поточного користувача для JavaScript (для класу 'user-ticket')
         'user_tickets_seat_ids': json.dumps(user_tickets_seat_ids),
->>>>>>> feature
     }
 
     return render(request, 'core/buy_ticket/buy_ticket.html', context)
@@ -397,20 +359,16 @@ def process_ticket_purchase(request, session_id):
         session = get_object_or_404(Sessions, pk=session_id)
         selected_seat_ids_json = request.POST.get('selected_seats')
 
-
         redirect_url = request.META.get('HTTP_REFERER')
         if not redirect_url:
-
             redirect_url = reverse('buy_ticket', args=[session_id])
 
         if not selected_seat_ids_json:
-
             return HttpResponseRedirect(redirect_url)
 
         selected_seat_ids = json.loads(selected_seat_ids_json)
 
         if not selected_seat_ids:
-
             return HttpResponseRedirect(redirect_url)
 
         failed_seats_info = []
@@ -420,12 +378,9 @@ def process_ticket_purchase(request, session_id):
             try:
                 seat = get_object_or_404(Seats, pk=seat_id)
 
-
                 if Tickets.objects.filter(session=session, seat=seat).exists():
                     failed_seats_info.append(f"Ряд {seat.number_row}, Место {seat.seat} уже занято.")
-
                     continue
-
 
                 ticket = Tickets.objects.create(
                     session=session,
@@ -444,22 +399,14 @@ def process_ticket_purchase(request, session_id):
                 )
             except Exception as e:
                 failed_seats_info.append(f"Ошибка при создании билета для места ID {seat_id}: {e}")
-                print(f"Ошибка при обработке места {seat_id}: {e}")
-
 
         if purchased_tickets_count > 0:
-
             if failed_seats_info:
-
                 pass
             return HttpResponseRedirect(redirect_url)
         else:
-
-            print(f"Не удалось купить билеты для выбранных мест: {failed_seats_info}")
             return HttpResponseRedirect(redirect_url)
 
-<<<<<<< HEAD
-=======
     return HttpResponseRedirect(reverse('buy_ticket', args=[session_id]))
 
 @login_required
@@ -517,6 +464,5 @@ def process_ticket_books(request, session_id):
                 failed_seats_info.append(f"Помилка при створенні квитка для місця ID {seat_id}: {e}")
 
         return HttpResponseRedirect(redirect_url)
->>>>>>> feature
 
     return HttpResponseRedirect(reverse('buy_ticket', args=[session_id]))

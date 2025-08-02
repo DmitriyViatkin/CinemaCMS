@@ -31,7 +31,9 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG')
 
-ALLOWED_HOSTS = []
+allowed_hosts_string = os.getenv('ALLOWED_HOSTS', '')
+# Разделяем строку по запятым, обрезаем пробелы и фильтруем пустые значения
+ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_string.split(',') if host.strip()]
 
 
 # Application definition
@@ -175,20 +177,20 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
 STATIC_URL = '/static/'
-#STATIC_ROOT = '/app/static_collected'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = '/app/static_collected'
+#STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 #MEDIA_ROOT = '/app/media'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
+EMAIL_HOST = 'smtp.mailersend.net'
+EMAIL_PORT = 2525
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
+EMAIL_HOST_USER = os.getenv('MAILERSEND_SMTP_USERNAME')
+EMAIL_HOST_PASSWORD = os.getenv('MAILERSEND_SMTP_PASSWORD')
+DEFAULT_FROM_EMAIL = os.getenv('MAILERSEND_FROM_EMAIL')
 
 CELERY_BROKER_URL = 'redis://redis:6379/0'
 CELERY_RESULT_BACKEND = 'django-db'
