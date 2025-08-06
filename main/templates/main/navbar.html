@@ -43,21 +43,40 @@
       {% endif %}
 
         <!-- Дропдаун -->
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Про CineWave
-          </a>
-          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-             <li><a class="dropdown-item" href="{% url 'main:paiges_cinema_detail' slug='main' %}"> Главная"   </a></li>
-            <li><a class="dropdown-item" href="{% url 'main:paiges_news_list' %}"> {% trans "Новини"  %}</a></li>
-            <li><a class="dropdown-item" href="{% url 'main:paiges_cinema_detail' slug='kafe-bar' %}">{% trans "Кафе-Бар" %}</a></li>
-            <li><a class="dropdown-item" href="{% url 'main:paiges_cinema_detail' slug='promotion_22' %}">{% trans "Реклама"%}</a></li>
-            <li><a class="dropdown-item" href="{% url 'main:paiges_cinema_detail' slug='VIP' %}">VIP зал</a></li>
+          <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown"
+                 aria-expanded="false">
+                  Про CineWave
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                  <li>
+                      <a class="dropdown-item" href="{% url 'main:paiges_cinema_detail' slug='main' %}">
+                          Главная
+                      </a>
+                  </li>
+                  <li>
+                      <a class="dropdown-item" href="{% url 'main:paiges_news_list' %}">
+                          {% trans "Новини" %}
+                      </a>
+                  </li>
 
-            <li><a class="dropdown-item" href="{% url 'main:paiges_cinema_detail' slug='chaild_room' %}">{% trans "Дитяча кімната" %}</a></li>
-            <li><a class="dropdown-item" href="{% url 'main:contact_paige' %}">{% trans "Контакти" %}</a></li>
-          </ul>
-        </li>
+                  {% for page in active_pages %}
+                  {% if page.seo_block.seo_url %}
+                  <li>
+                      <a class="dropdown-item" href="{% url 'main:paiges_cinema_detail' slug=page.seo_block.seo_url %}">
+                          {{ page.title }}
+                      </a>
+                  </li>
+                  {% endif %}
+                  {% endfor %}
+
+                  <li>
+                      <a class="dropdown-item" href="{% url 'main:contact_paige' %}">
+                          {% trans "Контакти" %}
+                      </a>
+                  </li>
+              </ul>
+          </li>
 
       </ul>
       <li>
