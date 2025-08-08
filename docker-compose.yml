@@ -8,7 +8,7 @@ services:
       - ./static_collected:/app/static_collected
       - ./media:/app/media
     env_file:
-      - .env.development
+      - .env
     depends_on:
       - db
       - redis  # нова залежність для Channels
