@@ -8,6 +8,8 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.conf import settings
 
 def contact_paige(request):
+    active_pages = PaigesCinema.objects.filter(is_active=True).select_related('seo_block').exclude(seo_block__seo_url='').order_by('id')
+
     banners = Banners.objects.select_related('gallery').prefetch_related(
         Prefetch(
             'gallery__pictures',
@@ -59,10 +61,13 @@ def contact_paige(request):
        'banners': banners,
         'page_seo_data': page_seo_data,
         'MAPS_API_KEY': settings.MAPS_API_KEY,
+        'active_pages': active_pages
     }
     return render(request, 'main/contact_paige.html', context)
 
 def index(request):
+    active_pages = PaigesCinema.objects.filter(is_active=True).select_related('seo_block').exclude(seo_block__seo_url='').order_by('id')
+
     cross_banner_obj = Cross_Banner.objects.select_related('gallery').prefetch_related(
         Prefetch(
             'gallery__pictures',
@@ -139,13 +144,12 @@ def index(request):
         'movies': movies,
         'coming_soon': coming_soon,
         'scroll_interval': 5000,
-        'news': news
+        'news': news,'active_pages': active_pages
     })
 
 
 def paiges_cinema_detail(request, slug):
-
-
+    active_pages = PaigesCinema.objects.filter(is_active=True).select_related('seo_block').exclude(seo_block__seo_url='').order_by('id')
 
     cinema_page = get_object_or_404(
         PaigesCinema.objects.select_related('gallery', 'seo_block').prefetch_related(
@@ -170,7 +174,7 @@ def paiges_cinema_detail(request, slug):
             elif pic.image_type == 'gallery':
                 gallery_pictures_list.append(pic) # ИСПРАВЛЕНИЕ: Добавляем картинку в список
 
-    return render(request, 'main/paiges_cinema_detail.html', {
+    return render(request, 'main/paiges_cinema_detail.html', {'active_pages': active_pages,
         'seo_block': cinema_page.seo_block,
         'page': cinema_page,
         'main_picture': main_picture,
@@ -178,6 +182,8 @@ def paiges_cinema_detail(request, slug):
     })
 
 def paiges_news_list(request):
+    active_pages = PaigesCinema.objects.filter(is_active=True).select_related('seo_block').exclude(seo_block__seo_url='').order_by('id')
+
     banners = Banners.objects.select_related('gallery').prefetch_related(
         Prefetch(
             'gallery__pictures',
@@ -191,13 +197,13 @@ def paiges_news_list(request):
 
     for item in news:
         item.main_picture = item.gallery.pictures.first() if item.gallery else None
-    return render(request, 'main/paiges_news_list.html', {'banners': banners,'news': news})
+    return render(request, 'main/paiges_news_list.html', {'banners': banners,'news': news,
+                  'active_pages': active_pages})
 
 
 
 def paiges_news_detail(request, slug):
-
-
+    active_pages = PaigesCinema.objects.filter(is_active=True).exclude(slug='').order_by('id')
     all_gallery_pictures_prefetch = Prefetch(
         'gallery__pictures',
         queryset=Picture.objects.all(),
@@ -226,9 +232,11 @@ def paiges_news_detail(request, slug):
         'paige_news': paige_news,
         'main_picture': main_picture,
         'gallery_pictures_list': list(gallery_pictures_list),
+        'active_pages': active_pages
     })
 
 def promotions_list(request):
+    active_pages = PaigesCinema.objects.filter(is_active=True).exclude(slug='').order_by('id')
     banners = Banners.objects.select_related('gallery').prefetch_related(
         Prefetch(
             'gallery__pictures',
@@ -263,12 +271,12 @@ def promotions_list(request):
         promotions = paginator.page(paginator.num_pages)
     print(banners)
 
-    return render(request, 'main/action.html', {'banners': banners,'promotions': promotions})
+    return render(request, 'main/action.html', {'active_pages': active_pages,'banners': banners,'promotions': promotions})
 
 
 
 def promotion_detail(request, slug):
-
+    active_pages = PaigesCinema.objects.filter(is_active=True).exclude(slug='').order_by('id')
     all_gallery_pictures_prefetch = Prefetch(
         'gallery__pictures',
         queryset=Picture.objects.all(),
@@ -298,5 +306,5 @@ def promotion_detail(request, slug):
         'promotion': promotion,
         'main_picture': main_picture,
         'gallery_pictures_list':list( gallery_pictures_list),
-
+        'active_pages': active_pages
     })
