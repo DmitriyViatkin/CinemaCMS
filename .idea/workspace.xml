@@ -43,12 +43,12 @@
     &quot;assignee&quot;: &quot;DmitriyViatkin&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "git@github.com:/DmitriyViatkin/CinemaCMS.git",
-    "accountId": "bdc2492b-d3d5-4012-8956-8461be56cc67"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;git@github.com:/DmitriyViatkin/CinemaCMS.git&quot;,
+    &quot;accountId&quot;: &quot;bdc2492b-d3d5-4012-8956-8461be56cc67&quot;
   }
-}]]></component>
+}</component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
   &quot;associatedIndex&quot;: 3
